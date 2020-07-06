@@ -2,6 +2,7 @@
 # plastic-packaging-tax-registration
 
 This is a placeholder README.md for a new repository
+(More information will be available soon)
 
 ### License
 
