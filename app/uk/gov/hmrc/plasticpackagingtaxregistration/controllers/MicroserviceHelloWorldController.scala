@@ -24,10 +24,12 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import scala.concurrent.Future
 
 @Singleton()
-class MicroserviceHelloWorldController @Inject()(appConfig: AppConfig, cc: ControllerComponents)
+class MicroserviceHelloWorldController @Inject() (appConfig: AppConfig, cc: ControllerComponents)
     extends BackendController(cc) {
 
-  def hello(): Action[AnyContent] = Action.async { implicit request =>
-    Future.successful(Ok("Hello world"))
-  }
+  def hello(): Action[AnyContent] =
+    Action.async { implicit request =>
+      Future.successful(Ok("Hello world"))
+    }
+
 }
