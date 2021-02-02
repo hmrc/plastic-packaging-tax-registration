@@ -1,3 +1,5 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.plasticpackagingtaxregistration.controllers.MicroserviceHelloWorldController.hello
+POST        /registrations                 uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.create()
+PUT         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.update(id)
+GET         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.get(id)

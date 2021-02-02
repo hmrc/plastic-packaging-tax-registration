@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.config
+package uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import play.api.http.{ContentTypeOf, ContentTypes, Writeable}
+import play.api.libs.json.Writes
 
-@Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
+trait JSONResponses {
 
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
+  implicit def writable[T](implicit writes: Writes[T]): Writeable[T] = {
+    implicit val contentType: ContentTypeOf[T] = ContentTypeOf[T](Some(ContentTypes.JSON))
+    Writeable(Writeable.writeableOf_JsValue.transform.compose(writes.writes))
+  }
 
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
 }
