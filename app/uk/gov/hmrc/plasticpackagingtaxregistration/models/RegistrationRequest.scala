@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.config
+package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+case class RegistrationRequest(incorpJourneyId: Option[String]) {
 
-@Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
+  def toRegistration(providerId: String): Registration =
+    Registration(id = providerId, incorpJourneyId = this.incorpJourneyId)
 
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
+}
 
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
+object RegistrationRequest {
+
+  import play.api.libs.json._
+
+  implicit val format: OFormat[RegistrationRequest] = Json.format[RegistrationRequest]
 }

@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.config
+package uk.gov.hmrc.plasticpackagingtaxregistration.repositories
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import reactivemongo.api.FailoverStrategy
 
-@Singleton
-class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
+import scala.concurrent.duration._
 
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
+object RepositorySettings {
 
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
+  private val initialDelay                       = 500.milliseconds
+  private val retriesAmount                      = 5
+  private val delayFactorEquation: Int => Double = (attemptNumber: Int) => 1 + attemptNumber * 0.5
+
+  val failoverStrategy =
+    FailoverStrategy(initialDelay = initialDelay, retries = retriesAmount, delayFactor = delayFactorEquation)
+
 }
