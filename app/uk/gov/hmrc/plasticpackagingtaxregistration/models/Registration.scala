@@ -16,7 +16,11 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-case class Registration(id: String, incorpJourneyId: Option[String])
+case class Registration(
+  id: String,
+  incorpJourneyId: Option[String],
+  liabilityDetails: LiabilityDetails = LiabilityDetails()
+)
 
 object Registration {
 
