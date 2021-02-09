@@ -39,10 +39,11 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
     parse.json.validate { json =>
       json.validate[T] match {
         case JsSuccess(value, _) => Right(value)
-        case JsError(_) =>
-          val payload = Json.toJson(ErrorResponse(BAD_REQUEST, "Bad Request"))
-          logger.warn(s"Bad Request [$payload]")
-          Left(BadRequest(payload))
+        case JsError(error) =>
+          val errorResponse = Json.toJson(ErrorResponse(BAD_REQUEST, "Bad Request"))
+          logger.warn(s"Bad Request [$errorResponse]")
+          logger.warn(s"Errors: [$error]")
+          Left(BadRequest(errorResponse))
       }
     }
 

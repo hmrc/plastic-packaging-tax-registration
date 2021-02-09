@@ -16,19 +16,22 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-case class RegistrationRequest(
-  incorpJourneyId: Option[String],
-  liabilityDetails: LiabilityDetails = LiabilityDetails()
-) {
+import play.api.libs.json.{Json, OFormat}
 
-  def toRegistration(providerId: String): Registration =
-    Registration(id = providerId, incorpJourneyId = this.incorpJourneyId, liabilityDetails = this.liabilityDetails)
+case class LiabilityWeight(totalKg: Option[Long])
 
+object LiabilityWeight {
+  implicit val liabilityWeightFormat = Json.format[LiabilityWeight]
 }
 
-object RegistrationRequest {
+case class Date(day: Option[Int], month: Option[Int], year: Option[Int])
 
-  import play.api.libs.json._
+object Date {
+  implicit val dateFormat = Json.format[Date]
+}
 
-  implicit val format: OFormat[RegistrationRequest] = Json.format[RegistrationRequest]
+case class LiabilityDetails(weight: Option[LiabilityWeight] = None, startDate: Option[Date] = None)
+
+object LiabilityDetails {
+  implicit val format: OFormat[LiabilityDetails] = Json.format[LiabilityDetails]
 }
