@@ -18,28 +18,31 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import java.util.UUID
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{LiabilityDetails, PrimaryContactDetails, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  LiabilityDetails,
+  PrimaryContactDetails,
+  Registration,
+  RegistrationRequest
+}
 
 //noinspection ScalaStyle
-trait RegistrationBuilder {
+trait RegistrationRequestBuilder {
 
-  private type RegistrationModifier = Registration => Registration
+  private type RegistrationModifier = RegistrationRequest => RegistrationRequest
 
-  def aRegistration(modifiers: RegistrationModifier*): Registration =
+  def aRegistrationRequest(modifiers: RegistrationModifier*): RegistrationRequest =
     modifiers.foldLeft(modelWithDefaults)((current, modifier) => modifier(current))
 
-  private def modelWithDefaults: Registration =
-    Registration(id = "id", incorpJourneyId = Some(UUID.randomUUID().toString))
+  private def modelWithDefaults: RegistrationRequest =
+    RegistrationRequest(incorpJourneyId = Some("f368e653-790a-4a95-af62-4132f0ffd433"))
 
-  def withId(id: String): RegistrationModifier = _.copy(id = id)
-
-  def withIncorpJourneyId(incorpJourneyId: String): RegistrationModifier =
+  def withIncorpJourneyIdRequest(incorpJourneyId: String): RegistrationModifier =
     _.copy(incorpJourneyId = Some(incorpJourneyId))
 
-  def withPrimaryContactDetails(primaryContactDetails: PrimaryContactDetails): RegistrationModifier =
+  def withPrimaryContactDetailsRequest(primaryContactDetails: PrimaryContactDetails): RegistrationModifier =
     _.copy(primaryContactDetails = primaryContactDetails)
 
-  def withLiabilityDetails(liabilityDetails: LiabilityDetails): RegistrationModifier =
+  def withLiabilityDetailsRequest(liabilityDetails: LiabilityDetails): RegistrationModifier =
     _.copy(liabilityDetails = liabilityDetails)
 
 }

@@ -24,7 +24,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import play.api.inject.guice.GuiceApplicationBuilder
 import reactivemongo.api.ReadConcern
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address, FullName, PrimaryContactDetails, Registration}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -65,7 +65,18 @@ class RegistrationRepositoryItSpec
 
   "Update" should {
     "update the registration" in {
-      val registration = aRegistration()
+      val registration = aRegistration(
+        withPrimaryContactDetails(
+          PrimaryContactDetails(Some(FullName(firstName = Some("FirstName"), lastName = Some("LastName"))),
+                                role = Some("CEO"),
+                                email = Some("test@test.com"),
+                                phoneNumber = Some("1234567890"),
+                                address = Some(
+                                  Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+                                )
+          )
+        )
+      )
       givenARegistrationExists(registration)
 
       repository.update(registration).futureValue mustBe Some(registration)
