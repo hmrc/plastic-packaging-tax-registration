@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class FullName(firstName: Option[String], lastName: Option[String])
+case class FullName(firstName: String, lastName: String)
 
 object FullName {
   implicit val format: OFormat[FullName] = Json.format[FullName]
