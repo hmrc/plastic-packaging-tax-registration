@@ -29,22 +29,22 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsObject, Json}
 import play.api.libs.json.Json.toJson
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CREATED, UNAUTHORIZED, contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Registration, RegistrationRequest}
+import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{RegistrationBuilder, RegistrationRequestBuilder}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address, FullName, PrimaryContactDetails, Registration}
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 
 import scala.concurrent.Future
 
 class RegistrationControllerSpec
     extends AnyWordSpec with GuiceOneAppPerSuite with AuthTestSupport with BeforeAndAfterEach with ScalaFutures
-    with Matchers with RegistrationBuilder {
+    with Matchers with RegistrationBuilder with RegistrationRequestBuilder {
 
   SharedMetricRegistries.clear()
 
@@ -150,8 +150,30 @@ class RegistrationControllerSpec
     "return 200" when {
       "request is valid" in {
         withAuthorizedUser()
-        val request      = aRegistrationRequest()
-        val registration = aRegistration(withIncorpJourneyId("f368e653-790a-4a95-af62-4132f0ffd433"))
+        val primaryContactDetailsRequest = withPrimaryContactDetailsRequest(
+          PrimaryContactDetails(Some(FullName(firstName = Some("FirstName"), lastName = Some("LastName"))),
+                                role = Some("CEO"),
+                                email = Some("test@test.com"),
+                                phoneNumber = Some("1234567890"),
+                                address = Some(
+                                  Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+                                )
+          )
+        )
+        val request = aRegistrationRequest(primaryContactDetailsRequest)
+
+        val primaryContactDetails = withPrimaryContactDetails(
+          PrimaryContactDetails(Some(FullName(firstName = Some("FirstName"), lastName = Some("LastName"))),
+                                role = Some("CEO"),
+                                email = Some("test@test.com"),
+                                phoneNumber = Some("1234567890"),
+                                address = Some(
+                                  Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+                                )
+          )
+        )
+        val registration =
+          aRegistration(withIncorpJourneyId("f368e653-790a-4a95-af62-4132f0ffd433"), primaryContactDetails)
         given(registrationRepository.findByRegistrationId(anyString())).willReturn(
           Future.successful(Some(registration))
         )
@@ -164,6 +186,7 @@ class RegistrationControllerSpec
         val updatedRegistration = theUpdatedRegistration
         updatedRegistration.id mustBe utr
         updatedRegistration.incorpJourneyId mustBe Some("f368e653-790a-4a95-af62-4132f0ffd433")
+        updatedRegistration.primaryContactDetails mustBe request.primaryContactDetails
       }
     }
 
@@ -207,8 +230,6 @@ class RegistrationControllerSpec
       }
     }
   }
-
-  def aRegistrationRequest() = RegistrationRequest(incorpJourneyId = Some("f368e653-790a-4a95-af62-4132f0ffd433"))
 
   def theCreatedRegistration: Registration = {
     val captor: ArgumentCaptor[Registration] = ArgumentCaptor.forClass(classOf[Registration])

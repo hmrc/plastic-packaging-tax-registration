@@ -16,16 +16,29 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-case class Registration(
-  id: String,
-  incorpJourneyId: Option[String],
-  liabilityDetails: LiabilityDetails = LiabilityDetails(),
-  primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails()
+import play.api.libs.json.{Json, OFormat}
+
+case class Address(
+  addressLine1: String,
+  addressLine2: Option[String] = None,
+  addressLine3: Option[String] = None,
+  townOrCity: String,
+  postCode: String,
+  country: String = "GB"
 )
 
-object Registration {
+object Address {
+  implicit val format: OFormat[Address] = Json.format[Address]
+}
 
-  import play.api.libs.json._
+case class PrimaryContactDetails(
+  fullName: Option[FullName] = None,
+  role: Option[String] = None,
+  email: Option[String] = None,
+  phoneNumber: Option[String] = None,
+  address: Option[Address] = None
+)
 
-  implicit val format: OFormat[Registration] = Json.format[Registration]
+object PrimaryContactDetails {
+  implicit val format: OFormat[PrimaryContactDetails] = Json.format[PrimaryContactDetails]
 }
