@@ -151,7 +151,7 @@ class RegistrationControllerSpec
       "request is valid" in {
         withAuthorizedUser()
         val primaryContactDetailsRequest = withPrimaryContactDetailsRequest(
-          PrimaryContactDetails(Some(FullName(firstName = Some("FirstName"), lastName = Some("LastName"))),
+          PrimaryContactDetails(Some(FullName(firstName = "FirstName", lastName = "LastName")),
                                 role = Some("CEO"),
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
@@ -163,7 +163,7 @@ class RegistrationControllerSpec
         val request = aRegistrationRequest(primaryContactDetailsRequest)
 
         val primaryContactDetails = withPrimaryContactDetails(
-          PrimaryContactDetails(Some(FullName(firstName = Some("FirstName"), lastName = Some("LastName"))),
+          PrimaryContactDetails(Some(FullName(firstName = "FirstName", lastName = "LastName")),
                                 role = Some("CEO"),
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
