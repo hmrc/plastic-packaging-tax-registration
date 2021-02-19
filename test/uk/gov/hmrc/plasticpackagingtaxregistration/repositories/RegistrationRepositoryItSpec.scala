@@ -68,7 +68,7 @@ class RegistrationRepositoryItSpec
       val registration = aRegistration(
         withPrimaryContactDetails(
           PrimaryContactDetails(Some(FullName(firstName = "FirstName", lastName = "LastName")),
-                                role = Some("CEO"),
+                                jobTitle = Some("CEO"),
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
                                 address = Some(

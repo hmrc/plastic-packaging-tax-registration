@@ -33,7 +33,7 @@ object Address {
 
 case class PrimaryContactDetails(
   fullName: Option[FullName] = None,
-  role: Option[String] = None,
+  jobTitle: Option[String] = None,
   email: Option[String] = None,
   phoneNumber: Option[String] = None,
   address: Option[Address] = None
