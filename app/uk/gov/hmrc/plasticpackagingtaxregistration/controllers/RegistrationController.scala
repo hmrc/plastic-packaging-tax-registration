@@ -38,7 +38,7 @@ class RegistrationController @Inject() (
   private val logger = Logger(this.getClass)
 
   def get(id: String): Action[AnyContent] =
-    authenticator.authorisedAction(parse.default) { implicit request =>
+    authenticator.authorisedAction(parse.default) { _ =>
       registrationRepository.findByRegistrationId(id).map {
         case Some(registration) => Ok(registration)
         case None               => NotFound
