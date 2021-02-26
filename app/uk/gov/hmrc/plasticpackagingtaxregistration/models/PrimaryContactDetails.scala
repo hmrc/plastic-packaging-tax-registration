@@ -19,12 +19,14 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 import play.api.libs.json.{Json, OFormat}
 
 case class Address(
+  businessName: Option[String] = None,
   addressLine1: String,
   addressLine2: Option[String] = None,
   addressLine3: Option[String] = None,
   townOrCity: String,
+  county: Option[String] = None,
   postCode: String,
-  country: String = "GB"
+  country: Option[String] = Some("GB")
 )
 
 object Address {

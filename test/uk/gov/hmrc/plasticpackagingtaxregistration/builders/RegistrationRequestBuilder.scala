@@ -16,14 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
-import java.util.UUID
-
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  LiabilityDetails,
-  PrimaryContactDetails,
-  Registration,
-  RegistrationRequest
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{LiabilityDetails, PrimaryContactDetails, RegistrationRequest}
 
 //noinspection ScalaStyle
 trait RegistrationRequestBuilder {
