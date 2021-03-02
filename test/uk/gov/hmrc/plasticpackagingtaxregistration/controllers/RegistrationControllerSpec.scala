@@ -122,13 +122,13 @@ class RegistrationControllerSpec
     "return 404" when {
       "id is not found" in {
         withAuthorizedUser()
-        given(registrationRepository.findByRegistrationId(anyString())).willReturn(Future.successful(None))
+        given(registrationRepository.findByRegistrationId(utr)).willReturn(Future.successful(None))
 
         val result: Future[Result] = route(app, get).get
 
         status(result) must be(NOT_FOUND)
         contentAsString(result) mustBe empty
-        verify(registrationRepository).findByRegistrationId(refEq(utr))
+        verify(registrationRepository).findByRegistrationId(utr)
       }
     }
 
