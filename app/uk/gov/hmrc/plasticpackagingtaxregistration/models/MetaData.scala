@@ -16,17 +16,10 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-case class Registration(
-  id: String,
-  incorpJourneyId: Option[String],
-  liabilityDetails: LiabilityDetails = LiabilityDetails(),
-  primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
-  metaData: MetaData = MetaData()
-)
+import play.api.libs.json.{Json, OFormat}
 
-object Registration {
+case class MetaData(hasReviewedRegistration: Boolean = false)
 
-  import play.api.libs.json._
-
-  implicit val format: OFormat[Registration] = Json.format[Registration]
+object MetaData {
+  implicit val format: OFormat[MetaData] = Json.format[MetaData]
 }
