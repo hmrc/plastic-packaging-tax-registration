@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class MetaData(hasReviewedRegistration: Boolean = false)
+case class MetaData(registrationReviewed: Boolean = false, registrationCompleted: Boolean = false)
 
 object MetaData {
   implicit val format: OFormat[MetaData] = Json.format[MetaData]
