@@ -23,6 +23,10 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator.{
+  pptEnrolmentIdentifierName,
+  pptEnrolmentKey
+}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
@@ -63,7 +67,7 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
     hc: HeaderCarrier,
     request: Request[A]
   ): Future[Either[ErrorResponse, AuthorizedRequest[A]]] =
-    authorised(Enrolment("HMRC-CUS-ORG")).retrieve(allEnrolments) { enrolments =>
+    authorised(Enrolment(pptEnrolmentKey)).retrieve(allEnrolments) { enrolments =>
       hasEnrolment(enrolments) match {
         case Some(utr) => Future.successful(Right(AuthorizedRequest(utr.value, request)))
         case _ =>
@@ -83,9 +87,14 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
 
   private def hasEnrolment(allEnrolments: Enrolments): Option[EnrolmentIdentifier] =
     allEnrolments
-      .getEnrolment("HMRC-CUS-ORG")
-      .flatMap(_.getIdentifier("UTR"))
+      .getEnrolment(pptEnrolmentKey)
+      .flatMap(_.getIdentifier(pptEnrolmentIdentifierName))
 
+}
+
+object Authenticator {
+  val pptEnrolmentKey            = "HMRC-PPT-ORG"
+  val pptEnrolmentIdentifierName = "UTR"
 }
 
 case class AuthorizedRequest[A](pptId: String, request: Request[A]) extends WrappedRequest[A](request)
