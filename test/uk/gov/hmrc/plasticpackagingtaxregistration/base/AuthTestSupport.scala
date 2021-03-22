@@ -25,6 +25,10 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name}
+import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator.{
+  pptEnrolmentIdentifierName,
+  pptEnrolmentKey
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.SignedInUser
 
 import scala.concurrent.Future
@@ -34,7 +38,7 @@ trait AuthTestSupport extends MockitoSugar {
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
   lazy val mockLogger: Logger               = mock[Logger]
 
-  val enrolment: Predicate = Enrolment("HMRC-CUS-ORG")
+  val enrolment: Predicate = Enrolment(pptEnrolmentKey)
   val utr                  = "222222222"
 
   def withAuthorizedUser(user: SignedInUser = newUser(utr, "external1")): Unit =
@@ -49,7 +53,7 @@ trait AuthTestSupport extends MockitoSugar {
     new ArgumentMatcher[Predicate] {
 
       override def matches(p: Predicate): Boolean =
-        p == enrolment && user.enrolments.getEnrolment("HMRC-CUS-ORG").isDefined
+        p == enrolment && user.enrolments.getEnrolment(pptEnrolmentKey).isDefined
 
     }
 
@@ -74,7 +78,11 @@ trait AuthTestSupport extends MockitoSugar {
                  Enrolments(
                    Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "111111111")), "Activated", None),
                        Enrolment("IR-CT", List(EnrolmentIdentifier("UTR", "222222222")), "Activated", None),
-                       Enrolment("HMRC-CUS-ORG", List(EnrolmentIdentifier("UTR", utr)), "Activated", None)
+                       Enrolment(pptEnrolmentKey,
+                                 List(EnrolmentIdentifier(pptEnrolmentIdentifierName, utr)),
+                                 "Activated",
+                                 None
+                       )
                    )
                  )
     )
