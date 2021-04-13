@@ -75,7 +75,8 @@ class RegistrationRepositoryItSpec
                                   Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
                                 )
           )
-        )
+        ),
+        withBusinessAddress(Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode"))
       )
       givenARegistrationExists(registration)
 
@@ -101,7 +102,9 @@ class RegistrationRepositoryItSpec
   "Find by ID" should {
     "return the persisted registration" when {
       "one exists with ID" in {
-        val registration = aRegistration()
+        val registration = aRegistration(
+          withBusinessAddress(Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode"))
+        )
         givenARegistrationExists(registration)
 
         repository.findByRegistrationId(registration.id).futureValue mustBe Some(registration)
