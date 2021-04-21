@@ -43,7 +43,7 @@ class RegistrationRepository @Inject() (mc: ReactiveMongoComponent, metrics: Met
   override def indexes: Seq[Index] = Seq(Index(Seq("id" -> IndexType.Ascending), Some("idIdx"), unique = true))
 
   def findByRegistrationId(id: String): Future[Option[Registration]] = {
-    val findStopwatch = newMongoDBTimer("mongo.registration.find").time()
+    val findStopwatch = newMongoDBTimer("ppt.registration.mongo.find").time()
     super.find("id" -> id).map(_.headOption).andThen {
       case _ => findStopwatch.stop()
     }
@@ -53,7 +53,7 @@ class RegistrationRepository @Inject() (mc: ReactiveMongoComponent, metrics: Met
     super.insert(registration).map(_ => registration)
 
   def update(registration: Registration): Future[Option[Registration]] = {
-    val updateStopwatch = newMongoDBTimer("mongo.registration.update").time()
+    val updateStopwatch = newMongoDBTimer("ppt.registration.mongo.update").time()
     super
       .findAndUpdate(Json.obj("id" -> registration.id),
                      Json.toJson(registration).as[JsObject],

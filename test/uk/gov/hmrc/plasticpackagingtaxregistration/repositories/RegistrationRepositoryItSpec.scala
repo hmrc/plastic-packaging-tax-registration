@@ -83,7 +83,7 @@ class RegistrationRepositoryItSpec
       repository.update(registration).futureValue mustBe Some(registration)
 
       // this indicates that a timer has started and has been stopped
-      getTimer("mongo.registration.update").getCount mustBe 1
+      getTimer("ppt.registration.mongo.update").getCount mustBe 1
 
       collectionSize mustBe 1
     }
@@ -95,7 +95,7 @@ class RegistrationRepositoryItSpec
 
       collectionSize mustBe 0
 
-      getTimer("mongo.registration.update").getCount mustBe 1
+      getTimer("ppt.registration.mongo.update").getCount mustBe 1
     }
   }
 
@@ -110,7 +110,7 @@ class RegistrationRepositoryItSpec
         repository.findByRegistrationId(registration.id).futureValue mustBe Some(registration)
 
         // this indicates that a timer has started and has been stopped
-        getTimer("mongo.registration.find").getCount mustBe 1
+        getTimer("ppt.registration.mongo.find").getCount mustBe 1
       }
     }
 
@@ -122,7 +122,7 @@ class RegistrationRepositoryItSpec
 
         repository.findByRegistrationId("non-existing-id").futureValue mustBe None
 
-        getTimer("mongo.registration.find").getCount mustBe 1
+        getTimer("ppt.registration.mongo.find").getCount mustBe 1
       }
     }
   }
