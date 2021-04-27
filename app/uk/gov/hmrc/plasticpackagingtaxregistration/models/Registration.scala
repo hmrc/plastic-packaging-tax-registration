@@ -21,7 +21,7 @@ case class Registration(
   incorpJourneyId: Option[String],
   liabilityDetails: LiabilityDetails = LiabilityDetails(),
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
-  businessRegisteredAddress: Option[Address] = None,
+  organisationDetails: OrganisationDetails = OrganisationDetails(),
   metaData: MetaData = MetaData()
 )
 

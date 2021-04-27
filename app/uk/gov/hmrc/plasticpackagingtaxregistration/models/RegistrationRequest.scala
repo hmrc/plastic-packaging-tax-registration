@@ -20,7 +20,7 @@ case class RegistrationRequest(
   incorpJourneyId: Option[String],
   liabilityDetails: LiabilityDetails = LiabilityDetails(),
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
-  businessRegisteredAddress: Option[Address] = None,
+  organisationDetails: OrganisationDetails = OrganisationDetails(),
   metaData: MetaData = MetaData()
 ) {
 
@@ -29,7 +29,7 @@ case class RegistrationRequest(
                  incorpJourneyId = this.incorpJourneyId,
                  liabilityDetails = this.liabilityDetails,
                  primaryContactDetails = this.primaryContactDetails,
-                 businessRegisteredAddress = this.businessRegisteredAddress,
+                 organisationDetails = this.organisationDetails,
                  metaData = this.metaData
     )
 

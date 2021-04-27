@@ -24,7 +24,14 @@ import org.scalatest.wordspec.AnyWordSpec
 import play.api.inject.guice.GuiceApplicationBuilder
 import reactivemongo.api.ReadConcern
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address, FullName, PrimaryContactDetails, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  Address,
+  FullName,
+  OrgType,
+  OrganisationDetails,
+  PrimaryContactDetails,
+  Registration
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -76,7 +83,13 @@ class RegistrationRepositoryItSpec
                                 )
           )
         ),
-        withBusinessAddress(Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode"))
+        withOrganisationDetails(
+          OrganisationDetails(isBasedInUk = Some(true),
+                              organisationType = Some(OrgType.UK_COMPANY),
+                              businessRegisteredAddress =
+                                Some(Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode"))
+          )
+        )
       )
       givenARegistrationExists(registration)
 
@@ -103,7 +116,14 @@ class RegistrationRepositoryItSpec
     "return the persisted registration" when {
       "one exists with ID" in {
         val registration = aRegistration(
-          withBusinessAddress(Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode"))
+          withOrganisationDetails(
+            OrganisationDetails(isBasedInUk = Some(true),
+                                organisationType = Some(OrgType.UK_COMPANY),
+                                businessRegisteredAddress = Some(
+                                  Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+                                )
+            )
+          )
         )
         givenARegistrationExists(registration)
 

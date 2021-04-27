@@ -18,8 +18,8 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import java.util.UUID
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  Address,
   LiabilityDetails,
+  OrganisationDetails,
   PrimaryContactDetails,
   Registration
 }
@@ -46,7 +46,7 @@ trait RegistrationBuilder {
   def withLiabilityDetails(liabilityDetails: LiabilityDetails): RegistrationModifier =
     _.copy(liabilityDetails = liabilityDetails)
 
-  def withBusinessAddress(address: Address): RegistrationModifier =
-    _.copy(businessRegisteredAddress = Some(address))
+  def withOrganisationDetails(organisationDetails: OrganisationDetails): RegistrationModifier =
+    _.copy(organisationDetails = organisationDetails)
 
 }
