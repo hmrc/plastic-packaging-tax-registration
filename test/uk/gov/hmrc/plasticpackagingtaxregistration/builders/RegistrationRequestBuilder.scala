@@ -19,6 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   LiabilityDetails,
   MetaData,
+  OrganisationDetails,
   PrimaryContactDetails,
   RegistrationRequest
 }
@@ -45,5 +46,8 @@ trait RegistrationRequestBuilder {
 
   def withMetaDataRequest(metaData: MetaData): RegistrationModifier =
     _.copy(metaData = metaData)
+
+  def withOrganisationDetailsRequest(organisationDetails: OrganisationDetails): RegistrationModifier =
+    _.copy(organisationDetails = organisationDetails)
 
 }

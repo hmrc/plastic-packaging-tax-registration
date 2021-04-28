@@ -37,7 +37,14 @@ import play.api.test.Helpers.{CREATED, UNAUTHORIZED, contentAsJson, route, statu
 import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{RegistrationBuilder, RegistrationRequestBuilder}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address, FullName, PrimaryContactDetails, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  Address,
+  FullName,
+  OrgType,
+  OrganisationDetails,
+  PrimaryContactDetails,
+  Registration
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 
 import scala.concurrent.Future
@@ -160,7 +167,20 @@ class RegistrationControllerSpec
                                 )
           )
         )
-        val request = aRegistrationRequest(primaryContactDetailsRequest)
+        val request = aRegistrationRequest(primaryContactDetailsRequest,
+                                           withOrganisationDetailsRequest(
+                                             OrganisationDetails(isBasedInUk = Some(true),
+                                                                 organisationType = Some(OrgType.UK_COMPANY),
+                                                                 businessRegisteredAddress =
+                                                                   Some(
+                                                                     Address(addressLine1 = "addressLine1",
+                                                                             townOrCity = "Town",
+                                                                             postCode = "PostCode"
+                                                                     )
+                                                                   )
+                                             )
+                                           )
+        )
 
         val primaryContactDetails = withPrimaryContactDetails(
           PrimaryContactDetails(Some(FullName(firstName = "FirstName", lastName = "LastName")),
@@ -187,6 +207,7 @@ class RegistrationControllerSpec
         updatedRegistration.id mustBe utr
         updatedRegistration.incorpJourneyId mustBe Some("f368e653-790a-4a95-af62-4132f0ffd433")
         updatedRegistration.primaryContactDetails mustBe request.primaryContactDetails
+        updatedRegistration.organisationDetails mustBe request.organisationDetails
       }
     }
 
