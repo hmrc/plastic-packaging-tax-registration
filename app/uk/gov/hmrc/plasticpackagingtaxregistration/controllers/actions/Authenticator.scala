@@ -68,7 +68,7 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
     request: Request[A]
   ): Future[Either[ErrorResponse, AuthorizedRequest[A]]] =
     authorised(Enrolment(pptEnrolmentKey)).retrieve(allEnrolments) { enrolments =>
-      hasEnrolment(enrolments) match {
+      hasEnrolment(enrolments, pptEnrolmentIdentifierName) match {
         case Some(utr) => Future.successful(Right(AuthorizedRequest(utr.value, request)))
         case _ =>
           val msg = "Unauthorised access. User without PPT Id."
@@ -85,10 +85,11 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
         Left(ErrorResponse(INTERNAL_SERVER_ERROR, msg))
     }
 
-  private def hasEnrolment(allEnrolments: Enrolments): Option[EnrolmentIdentifier] =
-    allEnrolments
-      .getEnrolment(pptEnrolmentKey)
-      .flatMap(_.getIdentifier(pptEnrolmentIdentifierName))
+  private def hasEnrolment(enrolments: Enrolments, identifier: String): Option[EnrolmentIdentifier] =
+    enrolments.enrolments
+      .filter(_.key == pptEnrolmentKey)
+      .flatMap(_.identifiers)
+      .find(_.key == identifier)
 
 }
 
