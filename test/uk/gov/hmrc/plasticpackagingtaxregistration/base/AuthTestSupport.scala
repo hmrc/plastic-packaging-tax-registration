@@ -41,50 +41,54 @@ trait AuthTestSupport extends MockitoSugar {
   val enrolment: Predicate = Enrolment(pptEnrolmentKey)
   val utr                  = "222222222"
 
-  def withAuthorizedUser(user: SignedInUser = newUser(utr, "external1")): Unit =
+  def withAuthorizedUser(user: SignedInUser = newUser(Some(pptEnrolment(utr)))): Unit =
     when(
-      mockAuthConnector.authorise(ArgumentMatchers.argThat(cdsEnrollmentMatcher(user)),
+      mockAuthConnector.authorise(ArgumentMatchers.argThat(pptEnrollmentMatcher(user)),
                                   ArgumentMatchers.eq(allEnrolments)
       )(any(), any())
     )
       .thenReturn(Future.successful(user.enrolments))
 
-  def cdsEnrollmentMatcher(user: SignedInUser): ArgumentMatcher[Predicate] =
-    new ArgumentMatcher[Predicate] {
+  def withUserWithEnrolments(user: SignedInUser) =
+    when(
+      mockAuthConnector.authorise(ArgumentMatchers.argThat((_: Predicate) => true), ArgumentMatchers.eq(allEnrolments))(
+        any(),
+        any()
+      )
+    )
+      .thenReturn(Future.successful(user.enrolments))
 
-      override def matches(p: Predicate): Boolean =
-        p == enrolment && user.enrolments.getEnrolment(pptEnrolmentKey).isDefined
-
-    }
+  def pptEnrollmentMatcher(user: SignedInUser): ArgumentMatcher[Predicate] =
+    (p: Predicate) => p == enrolment && user.enrolments.getEnrolment(pptEnrolmentKey).isDefined
 
   def withUnauthorizedUser(error: Throwable): Unit =
     when(mockAuthConnector.authorise(any(), any())(any(), any())).thenReturn(Future.failed(error))
 
-  def userWithoutProviderId(user: SignedInUser = newUser("", externalId = "external1")): Unit =
+  def userWithoutProviderId(user: SignedInUser = newUser(Some(pptEnrolment("")))): Unit =
     when(
-      mockAuthConnector.authorise(ArgumentMatchers.argThat(cdsEnrollmentMatcher(user)),
+      mockAuthConnector.authorise(ArgumentMatchers.argThat(pptEnrollmentMatcher(user)),
                                   ArgumentMatchers.eq(allEnrolments)
       )(any(), any())
     )
       .thenReturn(Future.successful(Enrolments(Set())))
 
-  def newUser(utr: String, externalId: String): SignedInUser =
+  def newUser(enrolments: Option[Enrolments] = Some(pptEnrolment("123"))): SignedInUser =
     SignedInUser(Credentials("123123123", "Plastic Limited"),
                  Name(Some("Aldo"), Some("Rain")),
                  Some("amina@hmrc.co.uk"),
-                 externalId,
+                 "123",
                  Some("Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"),
                  Some(AffinityGroup.Organisation),
-                 Enrolments(
-                   Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "111111111")), "Activated", None),
-                       Enrolment("IR-CT", List(EnrolmentIdentifier("UTR", "222222222")), "Activated", None),
-                       Enrolment(pptEnrolmentKey,
-                                 List(EnrolmentIdentifier(pptEnrolmentIdentifierName, utr)),
-                                 "Activated",
-                                 None
-                       )
-                   )
-                 )
+                 enrolments.getOrElse(Enrolments(Set()))
     )
+
+  def pptEnrolment(pptEnrolmentId: String) =
+    newEnrolments(newEnrolment(pptEnrolmentKey, pptEnrolmentIdentifierName, pptEnrolmentId))
+
+  def newEnrolments(enrolment: Enrolment*): Enrolments =
+    Enrolments(enrolment.toSet)
+
+  def newEnrolment(key: String, identifierName: String, identifierValue: String): Enrolment =
+    Enrolment(key).withIdentifier(identifierName, identifierValue)
 
 }

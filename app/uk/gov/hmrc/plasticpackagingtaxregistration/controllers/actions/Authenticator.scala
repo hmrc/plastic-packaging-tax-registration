@@ -63,7 +63,7 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
       }
     }
 
-  private def authorisedWithPptId[A](implicit
+  def authorisedWithPptId[A](implicit
     hc: HeaderCarrier,
     request: Request[A]
   ): Future[Either[ErrorResponse, AuthorizedRequest[A]]] =
