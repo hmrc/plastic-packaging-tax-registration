@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
-import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc._
@@ -26,6 +25,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegistrationRequest
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

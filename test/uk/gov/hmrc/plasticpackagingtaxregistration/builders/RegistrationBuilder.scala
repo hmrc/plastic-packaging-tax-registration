@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
-import java.util.UUID
+import org.joda.time.DateTime
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   LiabilityDetails,
   OrganisationDetails,
   PrimaryContactDetails,
   Registration
 }
+
+import java.util.UUID
 
 //noinspection ScalaStyle
 trait RegistrationBuilder {
@@ -36,6 +38,8 @@ trait RegistrationBuilder {
     Registration(id = "id", incorpJourneyId = Some(UUID.randomUUID().toString))
 
   def withId(id: String): RegistrationModifier = _.copy(id = id)
+
+  def withTimestamp(dateTime: DateTime): RegistrationModifier = _.copy(lastModifiedDateTime = Some(dateTime))
 
   def withIncorpJourneyId(incorpJourneyId: String): RegistrationModifier =
     _.copy(incorpJourneyId = Some(incorpJourneyId))

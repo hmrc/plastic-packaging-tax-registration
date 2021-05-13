@@ -16,18 +16,32 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
+import org.joda.time.{DateTime, DateTimeZone}
+import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.Timestamped
+
 case class Registration(
   id: String,
   incorpJourneyId: Option[String],
   liabilityDetails: LiabilityDetails = LiabilityDetails(),
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
   organisationDetails: OrganisationDetails = OrganisationDetails(),
-  metaData: MetaData = MetaData()
-)
+  metaData: MetaData = MetaData(),
+  override val lastModifiedDateTime: Option[DateTime] = None
+) extends Timestamped {
+  def updateLastModified(): Registration = this.copy(lastModifiedDateTime = Some(DateTime.now(DateTimeZone.UTC)))
+}
 
 object Registration {
 
   import play.api.libs.json._
+
+  implicit val dateFormatDefault: Format[DateTime] = new Format[DateTime] {
+
+    override def reads(json: JsValue): JsResult[DateTime] =
+      JodaReads.DefaultJodaDateTimeReads.reads(json)
+
+    override def writes(o: DateTime): JsValue = JodaWrites.JodaDateTimeNumberWrites.writes(o)
+  }
 
   implicit val format: OFormat[Registration] = Json.format[Registration]
 }
