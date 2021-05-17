@@ -71,6 +71,10 @@ trait TTLIndexing[A <: Timestamped, ID] {
     )
     logger.info(s"Updating existing index $TtlIndex, command: ${BSONDocument.pretty(command)}")
     runner.apply(collection.db, runner.rawCommand(command)).one(ReadPreference.primaryPreferred)
+      .map { response =>
+        logger.info(s"Updated index $TtlIndex, response: ${BSONDocument.pretty(response)}")
+        response
+      }
   }
 
   def getExpireAfterSecondsOptionOf(idx: Index): Long =
