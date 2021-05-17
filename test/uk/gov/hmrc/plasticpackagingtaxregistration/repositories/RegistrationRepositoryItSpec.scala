@@ -17,27 +17,28 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.repositories
 
 import com.codahale.metrics.{MetricFilter, SharedMetricRegistries, Timer}
+import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
+import org.scalatest.time.{Seconds, Span}
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.DefaultAwaitTimeout
+import play.api.test.Helpers.await
 import reactivemongo.api.ReadConcern
+import reactivemongo.api.indexes.Index
+import reactivemongo.bson.BSONLong
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  Address,
-  FullName,
-  OrgType,
-  OrganisationDetails,
-  PrimaryContactDetails,
-  Registration
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
+import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationRepositoryItSpec
     extends AnyWordSpec with Matchers with ScalaFutures with BeforeAndAfterEach with IntegrationPatience
-    with RegistrationBuilder {
+    with RegistrationBuilder with DefaultAwaitTimeout {
 
   private val injector = {
     SharedMetricRegistries.clear()
@@ -61,12 +62,57 @@ class RegistrationRepositoryItSpec
   private def givenARegistrationExists(registrations: Registration*): Unit =
     repository.collection.insert(ordered = true).many(registrations).futureValue
 
+  "MongoRepository" should {
+    "update existing index on first use" in {
+      ensureExpiryTtlOnIndex(injector.instanceOf[AppConfig].dbTimeToLiveInSeconds)
+
+      val repository = new GuiceApplicationBuilder().configure(
+        Map("mongodb.timeToLiveInSeconds" -> 33)
+      ).build().injector.instanceOf[RegistrationRepository]
+      await(repository.create(aRegistration()))
+
+      ensureExpiryTtlOnIndex(33)
+    }
+
+    "create new ttl index when none exist" in {
+      await(this.repository.collection.indexesManager.dropAll())
+
+      val repository = new GuiceApplicationBuilder().configure(
+        Map("mongodb.timeToLiveInSeconds" -> 99)
+      ).build().injector.instanceOf[RegistrationRepository]
+      await(repository.create(aRegistration()))
+
+      ensureExpiryTtlOnIndex(99)
+    }
+
+    def ensureExpiryTtlOnIndex(ttlSeconds: Int): Unit =
+      eventually(timeout(Span(5, Seconds))) {
+        {
+          val indexes   = await(repository.collection.indexesManager.list())
+          val expiryTtl = indexes.find(index => index.eventualName == "ttlIndex").map(getExpireAfterSecondsOptionOf)
+          expiryTtl.get mustBe ttlSeconds
+        }
+      }
+
+    def getExpireAfterSecondsOptionOf(idx: Index): Long =
+      idx.options.getAs[BSONLong]("expireAfterSeconds").getOrElse(BSONLong(0)).as[Long]
+  }
+
   "Create" should {
     "persist the registration" in {
       val registration = aRegistration()
       repository.create(registration).futureValue mustBe registration
 
       collectionSize mustBe 1
+    }
+
+    "update lastModifiedDateTime field" in {
+      val registration = aRegistration()
+
+      await(repository.create(registration))
+      val newRegistration = await(repository.findByRegistrationId(registration.id))
+
+      newRegistration.get.lastModifiedDateTime must not be None
     }
   }
 
@@ -93,7 +139,14 @@ class RegistrationRepositoryItSpec
       )
       givenARegistrationExists(registration)
 
-      repository.update(registration).futureValue mustBe Some(registration)
+      val updatedRegistration = await(repository.update(registration)).get
+
+      updatedRegistration.id mustBe registration.id
+      updatedRegistration.incorpJourneyId mustBe registration.incorpJourneyId
+      updatedRegistration.liabilityDetails mustBe registration.liabilityDetails
+      updatedRegistration.primaryContactDetails mustBe registration.primaryContactDetails
+      updatedRegistration.organisationDetails mustBe registration.organisationDetails
+      updatedRegistration.metaData mustBe registration.metaData
 
       // this indicates that a timer has started and has been stopped
       getTimer("ppt.registration.mongo.update").getCount mustBe 1
@@ -101,8 +154,19 @@ class RegistrationRepositoryItSpec
       collectionSize mustBe 1
     }
 
-    "do nothing for missing registration" in {
+    "update lastModifiedDateTime on each registration update" in {
       val registration = aRegistration()
+      await(repository.create(registration))
+      val initialLastModifiedDateTime =
+        await(repository.findByRegistrationId(registration.id)).get.lastModifiedDateTime.get
+
+      val updatedRegistration = repository.update(registration).futureValue.get
+
+      updatedRegistration.lastModifiedDateTime.get.isAfter(initialLastModifiedDateTime) mustBe true
+    }
+
+    "do nothing for missing registration" in {
+      val registration = aRegistration(withTimestamp(DateTime.now(DateTimeZone.UTC)))
 
       repository.update(registration).futureValue mustBe None
 
