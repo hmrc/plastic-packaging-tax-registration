@@ -17,9 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.repositories
 
 import org.joda.time.DateTime
-import reactivemongo.api.commands.Command
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.api.{BSONSerializationPack, ReadPreference}
 import reactivemongo.bson.{BSONDocument, BSONLong}
 import uk.gov.hmrc.mongo.ReactiveRepository
 
@@ -54,27 +52,22 @@ trait TTLIndexing[A <: Timestamped, ID] {
     } yield result
   }
 
-  def updateTtlIndex(indexes: List[Index])(implicit ec: ExecutionContext): Future[BSONDocument] =
+  def updateTtlIndex(indexes: List[Index])(implicit ec: ExecutionContext): Future[Int] =
     indexes.find(
       index => index.eventualName == TtlIndex && getExpireAfterSecondsOptionOf(index) != expireAfterSeconds
     ) match {
-      case Some(_) => updateExpiryDate
-      case None    => Future.successful(BSONDocument())
+      case Some(index) => dropIndex(index.eventualName)
+      case None        => Future.successful(0)
     }
 
-  def updateExpiryDate(implicit ec: ExecutionContext): Future[BSONDocument] = {
-    val runner = Command.run(BSONSerializationPack, failover = RepositorySettings.failoverStrategy)
-    val command = BSONDocument("collMod" -> collectionName,
-                               "index" -> BSONDocument("keyPattern" -> BSONDocument(LastModifiedDateField -> 1),
-                                                       ExpireAfterSeconds -> expireAfterSeconds
-                               )
-    )
-    logger.info(s"Updating existing index $TtlIndex, command: ${BSONDocument.pretty(command)}")
-    runner.apply(collection.db, runner.rawCommand(command)).one(ReadPreference.primaryPreferred)
-      .map { response =>
-        logger.info(s"Updated index $TtlIndex, response: ${BSONDocument.pretty(response)}")
-        response
-      }
+  // Cannot use collMod command as permission of the db user won't allow it,
+  // dropping index is the only option to update its expiry ttl
+  def dropIndex(name: String)(implicit ec: ExecutionContext): Future[Int] = {
+    logger.info(s"Dropping existing index $name")
+    collection.indexesManager.drop(name).map { response =>
+      logger.info(s"Deleted index $name, the number of indexes dropped: $response")
+      response
+    }
   }
 
   def getExpireAfterSecondsOptionOf(idx: Index): Long =
