@@ -31,8 +31,11 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
         |mongodb.timeToLiveInSeconds=100
         |microservice.services.auth.host=localhostauth
         |microservice.services.auth.port=9988
+        |microservice.services.eis.host=localhost
+        |microservice.services.eis.port=8506
         |microservice.metrics.graphite.host=graphite
         |auditing.enabled=true
+        |eis.environment=test
     """.stripMargin)
 
   private val validServicesConfiguration = Configuration(validAppConfig)
@@ -42,13 +45,24 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
   private def servicesConfig(conf: Configuration) = new ServicesConfig(conf)
 
   "AppConfig" should {
-    "return config as object model when configuration is valid" in {
-      val configService: AppConfig = appConfig(validServicesConfiguration)
+    val configService: AppConfig = appConfig(validServicesConfiguration)
 
+    "return config as object model when configuration is valid" in {
       configService.authBaseUrl mustBe "http://localhostauth:9988"
       configService.auditingEnabled mustBe true
       configService.graphiteHost mustBe "graphite"
       configService.dbTimeToLiveInSeconds mustBe 100
     }
+
+    "have 'subscriptionStatusUrl' defined" in {
+      configService.subscriptionStatusUrl("12345678") must be(
+        "http://localhost:8506/cross-regime/subscription/ZPPT/SAFE/12345678/status"
+      )
+    }
+
+    "have 'eis environment' defined" in {
+      configService.eisEnvironment must be("test")
+    }
+
   }
 }
