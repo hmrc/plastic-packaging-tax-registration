@@ -28,7 +28,10 @@ case class Registration(
   metaData: MetaData = MetaData(),
   override val lastModifiedDateTime: Option[DateTime] = None
 ) extends Timestamped {
-  def updateLastModified(): Registration = this.copy(lastModifiedDateTime = Some(DateTime.now(DateTimeZone.UTC)))
+
+  def updateLastModified(): Registration =
+    this.copy(lastModifiedDateTime = Some(DateTime.now(DateTimeZone.UTC)))
+
 }
 
 object Registration {

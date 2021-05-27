@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.repositories
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import reactivemongo.api.FailoverStrategy
+import play.api.http.{HeaderNames, MimeTypes}
+import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 
-import scala.concurrent.duration._
+trait EISConnector {
+  val appConfig: AppConfig
 
-object RepositorySettings {
+  val headers: Seq[(String, String)] =
+    Seq("Environment" -> appConfig.eisEnvironment, HeaderNames.ACCEPT -> MimeTypes.JSON)
 
-  private val initialDelay                       = 500.milliseconds
-  private val retriesAmount                      = 5
-  private val delayFactorEquation: Int => Double = (attemptNumber: Int) => 1 + attemptNumber * 0.5
-
-  val failoverStrategy =
-    FailoverStrategy(initialDelay = initialDelay,
-                     retries = retriesAmount,
-                     delayFactor = delayFactorEquation
-    )
-
+  val correlationId = "CorrelationId"
 }

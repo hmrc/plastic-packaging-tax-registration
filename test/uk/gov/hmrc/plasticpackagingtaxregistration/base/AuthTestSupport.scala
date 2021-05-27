@@ -51,10 +51,9 @@ trait AuthTestSupport extends MockitoSugar {
 
   def withUserWithEnrolments(user: SignedInUser) =
     when(
-      mockAuthConnector.authorise(ArgumentMatchers.argThat((_: Predicate) => true), ArgumentMatchers.eq(allEnrolments))(
-        any(),
-        any()
-      )
+      mockAuthConnector.authorise(ArgumentMatchers.argThat((_: Predicate) => true),
+                                  ArgumentMatchers.eq(allEnrolments)
+      )(any(), any())
     )
       .thenReturn(Future.successful(user.enrolments))
 

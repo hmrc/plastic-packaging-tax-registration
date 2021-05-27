@@ -32,9 +32,12 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class RegistrationRepository @Inject() (mc: ReactiveMongoComponent, appConfig: AppConfig, metrics: Metrics)(implicit
-  ec: ExecutionContext
-) extends ReactiveRepository[Registration, BSONObjectID](collectionName = "registrations",
+class RegistrationRepository @Inject() (
+  mc: ReactiveMongoComponent,
+  appConfig: AppConfig,
+  metrics: Metrics
+)(implicit ec: ExecutionContext)
+    extends ReactiveRepository[Registration, BSONObjectID](collectionName = "registrations",
                                                            mongo = mc.mongoConnector.db,
                                                            domainFormat = MongoSerialisers.format,
                                                            idFormat = objectIdFormats
@@ -43,9 +46,12 @@ class RegistrationRepository @Inject() (mc: ReactiveMongoComponent, appConfig: A
   override lazy val expireAfterSeconds: Long = appConfig.dbTimeToLiveInSeconds
 
   override lazy val collection: JSONCollection =
-    mongo().collection[JSONCollection](collectionName, failoverStrategy = RepositorySettings.failoverStrategy)
+    mongo().collection[JSONCollection](collectionName,
+                                       failoverStrategy = RepositorySettings.failoverStrategy
+    )
 
-  override def indexes: Seq[Index] = Seq(Index(Seq("id" -> IndexType.Ascending), Some("idIdx"), unique = true))
+  override def indexes: Seq[Index] =
+    Seq(Index(Seq("id" -> IndexType.Ascending), Some("idIdx"), unique = true))
 
   def findByRegistrationId(id: String): Future[Option[Registration]] = {
     val findStopwatch = newMongoDBTimer("ppt.registration.mongo.find").time()
@@ -80,6 +86,9 @@ class RegistrationRepository @Inject() (mc: ReactiveMongoComponent, appConfig: A
 }
 
 object MongoSerialisers {
-  implicit val mongoDateTimeFormat: Format[DateTime] = uk.gov.hmrc.mongo.json.ReactiveMongoFormats.dateTimeFormats
-  implicit val format: Format[Registration]          = Json.format[Registration]
+
+  implicit val mongoDateTimeFormat: Format[DateTime] =
+    uk.gov.hmrc.mongo.json.ReactiveMongoFormats.dateTimeFormats
+
+  implicit val format: Format[Registration] = Json.format[Registration]
 }

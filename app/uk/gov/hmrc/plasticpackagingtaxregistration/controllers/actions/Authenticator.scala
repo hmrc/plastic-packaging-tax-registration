@@ -33,8 +33,8 @@ import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class Authenticator @Inject() (override val authConnector: AuthConnector, cc: ControllerComponents)(implicit
-  ec: ExecutionContext
+class Authenticator @Inject() (override val authConnector: AuthConnector, cc: ControllerComponents)(
+  implicit ec: ExecutionContext
 ) extends BackendController(cc) with AuthorisedFunctions {
 
   private val logger = Logger(this.getClass)
@@ -51,7 +51,9 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
       }
     }
 
-  def authorisedAction[A](bodyParser: BodyParser[A])(body: AuthorizedRequest[A] => Future[Result]): Action[A] =
+  def authorisedAction[A](
+    bodyParser: BodyParser[A]
+  )(body: AuthorizedRequest[A] => Future[Result]): Action[A] =
     Action.async(bodyParser) { implicit request =>
       authorisedWithPptId.flatMap {
         case Right(authorisedRequest) =>
@@ -85,7 +87,10 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
         Left(ErrorResponse(INTERNAL_SERVER_ERROR, msg))
     }
 
-  private def hasEnrolment(enrolments: Enrolments, identifier: String): Option[EnrolmentIdentifier] =
+  private def hasEnrolment(
+    enrolments: Enrolments,
+    identifier: String
+  ): Option[EnrolmentIdentifier] =
     enrolments.enrolments
       .filter(_.key == pptEnrolmentKey)
       .flatMap(_.identifiers)
@@ -98,4 +103,5 @@ object Authenticator {
   val pptEnrolmentIdentifierName = "UTR"
 }
 
-case class AuthorizedRequest[A](pptId: String, request: Request[A]) extends WrappedRequest[A](request)
+case class AuthorizedRequest[A](pptId: String, request: Request[A])
+    extends WrappedRequest[A](request)

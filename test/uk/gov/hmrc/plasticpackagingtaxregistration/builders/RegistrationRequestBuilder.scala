@@ -38,7 +38,9 @@ trait RegistrationRequestBuilder {
   def withIncorpJourneyIdRequest(incorpJourneyId: String): RegistrationModifier =
     _.copy(incorpJourneyId = Some(incorpJourneyId))
 
-  def withPrimaryContactDetailsRequest(primaryContactDetails: PrimaryContactDetails): RegistrationModifier =
+  def withPrimaryContactDetailsRequest(
+    primaryContactDetails: PrimaryContactDetails
+  ): RegistrationModifier =
     _.copy(primaryContactDetails = primaryContactDetails)
 
   def withLiabilityDetailsRequest(liabilityDetails: LiabilityDetails): RegistrationModifier =
@@ -47,7 +49,9 @@ trait RegistrationRequestBuilder {
   def withMetaDataRequest(metaData: MetaData): RegistrationModifier =
     _.copy(metaData = metaData)
 
-  def withOrganisationDetailsRequest(organisationDetails: OrganisationDetails): RegistrationModifier =
+  def withOrganisationDetailsRequest(
+    organisationDetails: OrganisationDetails
+  ): RegistrationModifier =
     _.copy(organisationDetails = organisationDetails)
 
 }

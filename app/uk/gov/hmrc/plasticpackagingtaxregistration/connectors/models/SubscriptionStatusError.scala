@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.repositories
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models
 
-import reactivemongo.api.FailoverStrategy
+import play.api.libs.json.{Json, OFormat}
 
-import scala.concurrent.duration._
+case class SubscriptionStatusError(code: String, reason: String)
 
-object RepositorySettings {
-
-  private val initialDelay                       = 500.milliseconds
-  private val retriesAmount                      = 5
-  private val delayFactorEquation: Int => Double = (attemptNumber: Int) => 1 + attemptNumber * 0.5
-
-  val failoverStrategy =
-    FailoverStrategy(initialDelay = initialDelay,
-                     retries = retriesAmount,
-                     delayFactor = delayFactorEquation
-    )
-
+object SubscriptionStatusError {
+  implicit val format: OFormat[SubscriptionStatusError] = Json.format[SubscriptionStatusError]
 }

@@ -31,7 +31,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val eisEnvironment = config.get[String]("eis.environment")
 
-  def subscriptionStatusUrl(sapNumber: String): String =
-    s"$eisHost/cross-regime/subscription/ZPPT/${sapNumber}/status"
+  def subscriptionStatusUrl(safeNumber: String): String =
+    s"$eisHost/cross-regime/subscription/ZPPT/SAFE/${safeNumber}/status"
 
 }
