@@ -36,7 +36,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CREATED, UNAUTHORIZED, contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{RegistrationBuilder, RegistrationRequestBuilder}
+import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
+  RegistrationBuilder,
+  RegistrationRequestBuilder
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   Address,
   FullName,
@@ -50,13 +53,15 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepo
 import scala.concurrent.Future
 
 class RegistrationControllerSpec
-    extends AnyWordSpec with GuiceOneAppPerSuite with AuthTestSupport with BeforeAndAfterEach with ScalaFutures
-    with Matchers with RegistrationBuilder with RegistrationRequestBuilder {
+    extends AnyWordSpec with GuiceOneAppPerSuite with AuthTestSupport with BeforeAndAfterEach
+    with ScalaFutures with Matchers with RegistrationBuilder with RegistrationRequestBuilder {
 
   SharedMetricRegistries.clear()
 
   override lazy val app: Application = GuiceApplicationBuilder()
-    .overrides(bind[AuthConnector].to(mockAuthConnector), bind[RegistrationRepository].to(registrationRepository))
+    .overrides(bind[AuthConnector].to(mockAuthConnector),
+               bind[RegistrationRepository].to(registrationRepository)
+    )
     .build()
 
   private val registrationRepository: RegistrationRepository = mock[RegistrationRepository]
@@ -75,7 +80,9 @@ class RegistrationControllerSpec
         withAuthorizedUser()
         val request      = aRegistrationRequest()
         val registration = aRegistration()
-        given(registrationRepository.create(any[Registration])).willReturn(Future.successful(registration))
+        given(registrationRepository.create(any[Registration])).willReturn(
+          Future.successful(registration)
+        )
 
         val result: Future[Result] = route(app, post.withJsonBody(toJson(request))).get
 
@@ -101,7 +108,8 @@ class RegistrationControllerSpec
       "unauthorized" in {
         withUnauthorizedUser(InsufficientEnrolments())
 
-        val result: Future[Result] = route(app, post.withJsonBody(toJson(aRegistrationRequest()))).get
+        val result: Future[Result] =
+          route(app, post.withJsonBody(toJson(aRegistrationRequest()))).get
 
         status(result) must be(UNAUTHORIZED)
         verifyNoInteractions(registrationRepository)
@@ -116,7 +124,9 @@ class RegistrationControllerSpec
       "request is valid" in {
         withAuthorizedUser()
         val registration = aRegistration(withId(utr))
-        given(registrationRepository.findByRegistrationId(utr)).willReturn(Future.successful(Some(registration)))
+        given(registrationRepository.findByRegistrationId(utr)).willReturn(
+          Future.successful(Some(registration))
+        )
 
         val result: Future[Result] = route(app, get).get
 
@@ -163,17 +173,22 @@ class RegistrationControllerSpec
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
                                 address = Some(
-                                  Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+                                  Address(addressLine1 = "addressLine1",
+                                          townOrCity = "Town",
+                                          postCode = "PostCode"
+                                  )
                                 )
           )
         )
         val request = aRegistrationRequest(primaryContactDetailsRequest,
                                            withOrganisationDetailsRequest(
                                              OrganisationDetails(isBasedInUk = Some(true),
-                                                                 organisationType = Some(OrgType.UK_COMPANY),
+                                                                 organisationType =
+                                                                   Some(OrgType.UK_COMPANY),
                                                                  businessRegisteredAddress =
                                                                    Some(
-                                                                     Address(addressLine1 = "addressLine1",
+                                                                     Address(addressLine1 =
+                                                                               "addressLine1",
                                                                              townOrCity = "Town",
                                                                              postCode = "PostCode"
                                                                      )
@@ -188,16 +203,23 @@ class RegistrationControllerSpec
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
                                 address = Some(
-                                  Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+                                  Address(addressLine1 = "addressLine1",
+                                          townOrCity = "Town",
+                                          postCode = "PostCode"
+                                  )
                                 )
           )
         )
         val registration =
-          aRegistration(withIncorpJourneyId("f368e653-790a-4a95-af62-4132f0ffd433"), primaryContactDetails)
+          aRegistration(withIncorpJourneyId("f368e653-790a-4a95-af62-4132f0ffd433"),
+                        primaryContactDetails
+          )
         given(registrationRepository.findByRegistrationId(anyString())).willReturn(
           Future.successful(Some(registration))
         )
-        given(registrationRepository.update(any[Registration])).willReturn(Future.successful(Some(registration)))
+        given(registrationRepository.update(any[Registration])).willReturn(
+          Future.successful(Some(registration))
+        )
 
         val result: Future[Result] = route(app, put.withJsonBody(toJson(request))).get
 
@@ -215,7 +237,9 @@ class RegistrationControllerSpec
       "registration is not found - on find" in {
         withAuthorizedUser()
         val request = aRegistrationRequest()
-        given(registrationRepository.findByRegistrationId(anyString())).willReturn(Future.successful(None))
+        given(registrationRepository.findByRegistrationId(anyString())).willReturn(
+          Future.successful(None)
+        )
         given(registrationRepository.update(any[Registration])).willReturn(Future.successful(None))
 
         val result: Future[Result] = route(app, put.withJsonBody(toJson(request))).get
@@ -244,7 +268,8 @@ class RegistrationControllerSpec
       "unauthorized" in {
         withUnauthorizedUser(InsufficientEnrolments())
 
-        val result: Future[Result] = route(app, put.withJsonBody(toJson(aRegistrationRequest()))).get
+        val result: Future[Result] =
+          route(app, put.withJsonBody(toJson(aRegistrationRequest()))).get
 
         status(result) must be(UNAUTHORIZED)
         verifyNoInteractions(registrationRepository)

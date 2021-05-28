@@ -39,12 +39,15 @@ trait RegistrationBuilder {
 
   def withId(id: String): RegistrationModifier = _.copy(id = id)
 
-  def withTimestamp(dateTime: DateTime): RegistrationModifier = _.copy(lastModifiedDateTime = Some(dateTime))
+  def withTimestamp(dateTime: DateTime): RegistrationModifier =
+    _.copy(lastModifiedDateTime = Some(dateTime))
 
   def withIncorpJourneyId(incorpJourneyId: String): RegistrationModifier =
     _.copy(incorpJourneyId = Some(incorpJourneyId))
 
-  def withPrimaryContactDetails(primaryContactDetails: PrimaryContactDetails): RegistrationModifier =
+  def withPrimaryContactDetails(
+    primaryContactDetails: PrimaryContactDetails
+  ): RegistrationModifier =
     _.copy(primaryContactDetails = primaryContactDetails)
 
   def withLiabilityDetails(liabilityDetails: LiabilityDetails): RegistrationModifier =

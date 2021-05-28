@@ -30,19 +30,20 @@ trait Timestamped {
 trait TTLIndexing[A <: Timestamped, ID] {
   self: ReactiveRepository[A, ID] =>
 
-  val expireAfterSeconds: Long
-
   lazy val ttlIndex: Index = Index(key = Seq(LastModifiedDateField -> IndexType.Ascending),
                                    name = Some(TtlIndex),
                                    options = BSONDocument(ExpireAfterSeconds -> expireAfterSeconds)
   )
 
+  val expireAfterSeconds: Long
   private val LastModifiedDateField = "lastModifiedDateTime"
   private val TtlIndex              = "ttlIndex"
   private val ExpireAfterSeconds    = "expireAfterSeconds"
 
   override def ensureIndexes(implicit ec: ExecutionContext): Future[Seq[Boolean]] = {
-    logger.info(s"Creating time to live for entries in ${collection.name} to $expireAfterSeconds seconds")
+    logger.info(
+      s"Creating time to live for entries in ${collection.name} to $expireAfterSeconds seconds"
+    )
     for {
       currentIndexes <- collection.indexesManager.list()
       _              <- updateTtlIndex(currentIndexes)
@@ -54,7 +55,8 @@ trait TTLIndexing[A <: Timestamped, ID] {
 
   def updateTtlIndex(indexes: List[Index])(implicit ec: ExecutionContext): Future[Int] =
     indexes.find(
-      index => index.eventualName == TtlIndex && getExpireAfterSecondsOptionOf(index) != expireAfterSeconds
+      index =>
+        index.eventualName == TtlIndex && getExpireAfterSecondsOptionOf(index) != expireAfterSeconds
     ) match {
       case Some(index) => dropIndex(index.eventualName)
       case None        => Future.successful(0)

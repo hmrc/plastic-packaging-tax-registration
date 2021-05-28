@@ -37,8 +37,8 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationRepositoryItSpec
-    extends AnyWordSpec with Matchers with ScalaFutures with BeforeAndAfterEach with IntegrationPatience
-    with RegistrationBuilder with DefaultAwaitTimeout {
+    extends AnyWordSpec with Matchers with ScalaFutures with BeforeAndAfterEach
+    with IntegrationPatience with RegistrationBuilder with DefaultAwaitTimeout {
 
   private val injector = {
     SharedMetricRegistries.clear()
@@ -55,7 +55,12 @@ class RegistrationRepositoryItSpec
 
   private def collectionSize: Int =
     repository.collection
-      .count(selector = None, limit = Some(0), skip = 0, hint = None, readConcern = ReadConcern.Local)
+      .count(selector = None,
+             limit = Some(0),
+             skip = 0,
+             hint = None,
+             readConcern = ReadConcern.Local
+      )
       .futureValue
       .toInt
 
@@ -88,8 +93,10 @@ class RegistrationRepositoryItSpec
     def ensureExpiryTtlOnIndex(ttlSeconds: Int): Unit =
       eventually(timeout(Span(5, Seconds))) {
         {
-          val indexes   = await(repository.collection.indexesManager.list())
-          val expiryTtl = indexes.find(index => index.eventualName == "ttlIndex").map(getExpireAfterSecondsOptionOf)
+          val indexes = await(repository.collection.indexesManager.list())
+          val expiryTtl = indexes.find(index => index.eventualName == "ttlIndex").map(
+            getExpireAfterSecondsOptionOf
+          )
           expiryTtl.get mustBe ttlSeconds
         }
       }
@@ -125,7 +132,10 @@ class RegistrationRepositoryItSpec
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
                                 address = Some(
-                                  Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+                                  Address(addressLine1 = "addressLine1",
+                                          townOrCity = "Town",
+                                          postCode = "PostCode"
+                                  )
                                 )
           )
         ),
@@ -133,7 +143,12 @@ class RegistrationRepositoryItSpec
           OrganisationDetails(isBasedInUk = Some(true),
                               organisationType = Some(OrgType.UK_COMPANY),
                               businessRegisteredAddress =
-                                Some(Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode"))
+                                Some(
+                                  Address(addressLine1 = "addressLine1",
+                                          townOrCity = "Town",
+                                          postCode = "PostCode"
+                                  )
+                                )
           )
         )
       )
@@ -184,7 +199,10 @@ class RegistrationRepositoryItSpec
             OrganisationDetails(isBasedInUk = Some(true),
                                 organisationType = Some(OrgType.UK_COMPANY),
                                 businessRegisteredAddress = Some(
-                                  Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+                                  Address(addressLine1 = "addressLine1",
+                                          townOrCity = "Town",
+                                          postCode = "PostCode"
+                                  )
                                 )
             )
           )

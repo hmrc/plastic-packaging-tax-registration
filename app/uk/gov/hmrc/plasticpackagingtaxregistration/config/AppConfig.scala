@@ -16,17 +16,22 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.config
 
+import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
-import javax.inject.{Inject, Singleton}
 
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
-  val authBaseUrl: String = servicesConfig.baseUrl("auth")
-
+  lazy val eisHost: String     = servicesConfig.baseUrl("eis")
+  val authBaseUrl: String      = servicesConfig.baseUrl("auth")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
   val dbTimeToLiveInSeconds    = config.get[Int]("mongodb.timeToLiveInSeconds")
+
+  val eisEnvironment = config.get[String]("eis.environment")
+
+  def subscriptionStatusUrl(safeNumber: String): String =
+    s"$eisHost/cross-regime/subscription/ZPPT/SAFE/${safeNumber}/status"
+
 }

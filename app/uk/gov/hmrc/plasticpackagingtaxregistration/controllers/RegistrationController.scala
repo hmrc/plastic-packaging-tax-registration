@@ -46,30 +46,32 @@ class RegistrationController @Inject() (
     }
 
   def create(): Action[RegistrationRequest] =
-    authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) { implicit request =>
-      logPayload("Create Registration Request Received", request.body)
-      registrationRepository
-        .create(request.body.toRegistration(request.pptId))
-        .map(logPayload("Create Registration Response", _))
-        .map(registration => Created(registration))
+    authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
+      implicit request =>
+        logPayload("Create Registration Request Received", request.body)
+        registrationRepository
+          .create(request.body.toRegistration(request.pptId))
+          .map(logPayload("Create Registration Response", _))
+          .map(registration => Created(registration))
     }
 
   def update(id: String): Action[RegistrationRequest] =
-    authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) { implicit request =>
-      logPayload("Update Registration Request Received", request.body)
-      registrationRepository.findByRegistrationId(id).flatMap {
-        case Some(_) =>
-          registrationRepository
-            .update(request.body.toRegistration(request.pptId))
-            .map(logPayload("Update Registration Response", _))
-            .map {
-              case Some(registration) => Ok(registration)
-              case None               => NotFound
-            }
-        case None =>
-          logPayload("Update Registration Response", "Not Found")
-          Future.successful(NotFound)
-      }
+    authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
+      implicit request =>
+        logPayload("Update Registration Request Received", request.body)
+        registrationRepository.findByRegistrationId(id).flatMap {
+          case Some(_) =>
+            registrationRepository
+              .update(request.body.toRegistration(request.pptId))
+              .map(logPayload("Update Registration Response", _))
+              .map {
+                case Some(registration) => Ok(registration)
+                case None               => NotFound
+              }
+          case None =>
+            logPayload("Update Registration Response", "Not Found")
+            Future.successful(NotFound)
+        }
     }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {

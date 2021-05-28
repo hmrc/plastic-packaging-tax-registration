@@ -34,8 +34,8 @@ import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 import scala.concurrent.ExecutionContext
 
 class AuthenticatorSpec
-    extends AnyWordSpec with Matchers with MockitoSugar with AuthTestSupport with DefaultAwaitTimeout
-    with EitherValues {
+    extends AnyWordSpec with Matchers with MockitoSugar with AuthTestSupport
+    with DefaultAwaitTimeout with EitherValues {
 
   private val mcc           = stubMessagesControllerComponents()
   private val hc            = HeaderCarrier()
@@ -45,14 +45,18 @@ class AuthenticatorSpec
   "Authenticator" should {
     "return 401 unauthorised " when {
       "missing ppt enrolment key" in {
-        withUserWithEnrolments(newUser(Some(newEnrolments(newEnrolment("rubbishKey", "id1", "val1")))))
+        withUserWithEnrolments(
+          newUser(Some(newEnrolments(newEnrolment("rubbishKey", "id1", "val1"))))
+        )
 
         val result = await(authenticator.authorisedWithPptId(hc, request))
 
         result.left.value.statusCode mustBe 401
       }
       "missing ppt enrolment identifier" in {
-        withUserWithEnrolments(newUser(Some(newEnrolments(newEnrolment(pptEnrolmentKey, "id1", "val1")))))
+        withUserWithEnrolments(
+          newUser(Some(newEnrolments(newEnrolment(pptEnrolmentKey, "id1", "val1"))))
+        )
 
         val result = await(authenticator.authorisedWithPptId(hc, request))
 
@@ -72,7 +76,9 @@ class AuthenticatorSpec
     "return 200" when {
       "ppt enrolments exist" in {
         withUserWithEnrolments(
-          newUser(Some(newEnrolments(newEnrolment(pptEnrolmentKey, pptEnrolmentIdentifierName, "val1"))))
+          newUser(
+            Some(newEnrolments(newEnrolment(pptEnrolmentKey, pptEnrolmentIdentifierName, "val1")))
+          )
         )
 
         val result = await(authenticator.authorisedWithPptId(hc, request))

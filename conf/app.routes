@@ -1,5 +1,11 @@
 # microservice specific routes
 
+
+# Registration/ Transient Data
 POST        /registrations                 uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.create()
 PUT         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.update(id)
 GET         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.get(id)
+
+
+# EIS subscription
+GET         /subscriptions/status/:safeNumber   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.get(safeNumber: String)
