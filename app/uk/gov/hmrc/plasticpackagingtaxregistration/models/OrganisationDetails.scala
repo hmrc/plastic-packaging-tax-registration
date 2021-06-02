@@ -34,7 +34,8 @@ object OrgType extends Enumeration {
 case class OrganisationDetails(
   isBasedInUk: Option[Boolean] = None,
   organisationType: Option[OrgType] = None,
-  businessRegisteredAddress: Option[Address] = None
+  businessRegisteredAddress: Option[Address] = None,
+  safeNumber: Option[String] = None
 )
 
 object OrganisationDetails {
