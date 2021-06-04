@@ -23,8 +23,8 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.await
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.{
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.{
   SubscriptionStatusError,
   SubscriptionStatusResponse
 }

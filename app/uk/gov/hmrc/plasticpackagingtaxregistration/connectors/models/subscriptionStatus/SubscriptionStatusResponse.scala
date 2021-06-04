@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.ETMPSubscriptionStatus.SubscriptionStatus
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.ETMPSubscriptionStatus.SubscriptionStatus
 
 case class SubscriptionStatusResponse(
   subscriptionStatus: Option[SubscriptionStatus] = None,

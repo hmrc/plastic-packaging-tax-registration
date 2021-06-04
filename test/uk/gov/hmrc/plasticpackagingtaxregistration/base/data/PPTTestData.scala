@@ -17,7 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
 import play.api.test.FakeRequest
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.{
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.{
   ETMPSubscriptionStatus,
   SubscriptionStatusResponse
 }

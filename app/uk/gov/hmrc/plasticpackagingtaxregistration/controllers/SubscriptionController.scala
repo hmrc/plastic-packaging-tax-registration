@@ -19,7 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.SubscriptionStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController

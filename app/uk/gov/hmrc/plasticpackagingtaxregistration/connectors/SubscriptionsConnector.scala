@@ -23,7 +23,7 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.SubscriptionStatusResponse
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

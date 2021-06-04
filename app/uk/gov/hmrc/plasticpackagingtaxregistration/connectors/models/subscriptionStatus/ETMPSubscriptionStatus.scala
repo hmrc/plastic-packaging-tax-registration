@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus
 
 import play.api.libs.json.{Format, Reads, Writes}
 

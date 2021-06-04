@@ -22,7 +22,7 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.SubscriptionStatusResponse
 
 import scala.concurrent.Future
 
