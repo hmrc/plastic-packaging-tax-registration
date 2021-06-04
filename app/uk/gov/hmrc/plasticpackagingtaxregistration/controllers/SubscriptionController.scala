@@ -16,14 +16,21 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
-import javax.inject.{Inject, Singleton}
+import play.api.Logger
+import play.api.libs.json.{Json, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  Subscription,
+  SubscriptionCreateResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegistrationRequest
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -34,6 +41,8 @@ class SubscriptionController @Inject() (
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
 
+  private val logger = Logger(this.getClass)
+
   def get(safeNumber: String): Action[AnyContent] =
     authenticator.authorisedAction(parse.default) { implicit request =>
       subscriptionsConnector.getSubscriptionStatus(safeNumber).map {
@@ -41,5 +50,21 @@ class SubscriptionController @Inject() (
           Ok(response)
       }
     }
+
+  def submit(safeNumber: String): Action[RegistrationRequest] =
+    authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
+      implicit request =>
+        val subscription = Subscription(request.body.toRegistration(request.pptId))
+        logPayload("Subscription: ", subscription)
+        subscriptionsConnector.submitSubscription(safeNumber, subscription).map {
+          response: SubscriptionCreateResponse =>
+            Ok(response)
+        }
+    }
+
+  private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
+    logger.debug(s"Payload: ${Json.toJson(payload)}")
+    payload
+  }
 
 }

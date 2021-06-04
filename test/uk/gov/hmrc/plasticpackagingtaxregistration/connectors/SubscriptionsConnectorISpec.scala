@@ -16,25 +16,26 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post}
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.test.Helpers.await
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.{
-  SubscriptionStatusError,
-  SubscriptionStatusResponse
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
+
+import java.time.{ZoneOffset, ZonedDateTime}
 
 class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
 
   lazy val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
 
-  private val idType     = "ZPPT"
-  private val safeNumber = "123456"
+  private val pptSubscriptionSubmissionTimer = "ppt.subscription.submission.timer"
+  private val pptSubscriptionStatusTimer     = "ppt.subscription.status.timer"
 
   "Subscription connector" when {
     "requesting a subscription status" should {
@@ -60,7 +61,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         res.subscriptionStatus mustBe Some(NO_FORM_BUNDLE_FOUND)
         res.failures mustBe None
 
-        getTimer("ppt.subscription.status.timer").getCount mustBe 1
+        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
       "handle a 400" in {
@@ -75,7 +76,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         intercept[Exception] {
           await(connector.getSubscriptionStatus(safeNumber))
         }
-        getTimer("ppt.subscription.status.timer").getCount mustBe 1
+        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
       "handle a 404" in {
@@ -91,7 +92,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         intercept[Exception] {
           await(connector.getSubscriptionStatus(safeNumber))
         }
-        getTimer("ppt.subscription.status.timer").getCount mustBe 1
+        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
       "handle a 500" in {
@@ -106,7 +107,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         intercept[Exception] {
           await(connector.getSubscriptionStatus(safeNumber))
         }
-        getTimer("ppt.subscription.status.timer").getCount mustBe 1
+        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
       "handle a 502" in {
@@ -121,7 +122,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         intercept[Exception] {
           await(connector.getSubscriptionStatus(safeNumber))
         }
-        getTimer("ppt.subscription.status.timer").getCount mustBe 1
+        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
       "handle a 503" in {
@@ -136,20 +137,152 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         intercept[Exception] {
           await(connector.getSubscriptionStatus(safeNumber))
         }
-        getTimer("ppt.subscription.status.timer").getCount mustBe 1
+        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
+      }
+    }
+
+    "submitting a subscription" should {
+      "handle a 200" in {
+        val pptReference               = "XDPPT123456789"
+        val subscriptionProcessingDate = ZonedDateTime.now(ZoneOffset.UTC).toString
+        val formBundleNumber           = "1234567890"
+        stubFor(
+          post(s"/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create")
+            .willReturn(
+              aResponse()
+                .withStatus(Status.OK)
+                .withBody(
+                  Json.obj("pptReference"     -> pptReference,
+                           "processingDate"   -> subscriptionProcessingDate,
+                           "formBundleNumber" -> formBundleNumber
+                  ).toString
+                )
+            )
+        )
+
+        val res: SubscriptionCreateResponse =
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+
+        res.pptReference mustBe Some(pptReference)
+        res.formBundleNumber mustBe Some(formBundleNumber)
+        res.processingDate mustBe Some(ZonedDateTime.parse(subscriptionProcessingDate))
+        res.failures mustBe None
+
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "handle a 400" in {
+        val errors =
+          createErrorResponse(code = "INVALID_IDVALUE",
+                              reason =
+                                "Submission has not passed validation. Invalid parameter idValue."
+          )
+
+        stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
+
+        intercept[Exception] {
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        }
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "handle a 409" in {
+        val errors =
+          createErrorResponse(
+            code = "DUPLICATE_SUBMISSION",
+            reason =
+              "The remote endpoint has indicated that duplicate submission acknowledgment reference."
+          )
+
+        stubSubscriptionSubmissionFailure(httpStatus = Status.CONFLICT, errors = errors)
+
+        intercept[Exception] {
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        }
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "handle a 422" in {
+        val errors =
+          createErrorResponse(
+            code = "ACTIVE_SUBSCRIPTION_EXISTS",
+            reason =
+              "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
+          )
+
+        stubSubscriptionSubmissionFailure(httpStatus = Status.UNPROCESSABLE_ENTITY, errors = errors)
+
+        intercept[Exception] {
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        }
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "handle a 500" in {
+        val errors =
+          createErrorResponse(code = "NO_DATA_FOUND",
+                              reason =
+                                "Dependent systems are currently not responding."
+          )
+
+        stubSubscriptionSubmissionFailure(httpStatus = Status.INTERNAL_SERVER_ERROR,
+                                          errors = errors
+        )
+
+        intercept[Exception] {
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        }
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "handle a 502" in {
+        val errors =
+          createErrorResponse(code = "BAD_GATEWAY",
+                              reason =
+                                "Dependent systems are currently not responding."
+          )
+
+        stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
+
+        intercept[Exception] {
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        }
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "handle a 503" in {
+        val errors =
+          createErrorResponse(code = "SERVICE_UNAVAILABLE",
+                              reason =
+                                "Dependent systems are currently not responding."
+          )
+
+        stubSubscriptionSubmissionFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
+
+        intercept[Exception] {
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        }
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
     }
   }
 
-  private def createErrorResponse(code: String, reason: String): Seq[SubscriptionStatusError] =
-    Seq(SubscriptionStatusError(code, reason))
+  private def createErrorResponse(code: String, reason: String): Seq[EISError] =
+    Seq(EISError(code, reason))
 
-  private def stubSubscriptionStatusFailure(
-    httpStatus: Int,
-    errors: Seq[SubscriptionStatusError]
-  ): Any =
+  private def stubSubscriptionStatusFailure(httpStatus: Int, errors: Seq[EISError]): Any =
     stubFor(
-      get("/cross-regime/subscription/ZPPT/SAFE/" + safeNumber + "/status")
+      get(s"/cross-regime/subscription/ZPPT/SAFE/${safeNumber}/status")
+        .willReturn(
+          aResponse()
+            .withStatus(httpStatus)
+            .withBody(Json.obj("failures" -> errors).toString)
+        )
+    )
+
+  private def stubSubscriptionSubmissionFailure(httpStatus: Int, errors: Seq[EISError]): Any =
+    stubFor(
+      post(s"/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create")
         .willReturn(
           aResponse()
             .withStatus(httpStatus)

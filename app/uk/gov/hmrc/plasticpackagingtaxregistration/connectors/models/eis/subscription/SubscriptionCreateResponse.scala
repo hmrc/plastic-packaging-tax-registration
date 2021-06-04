@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.ETMPSubscriptionStatus.SubscriptionStatus
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 
-case class SubscriptionStatusResponse(
-  subscriptionStatus: Option[SubscriptionStatus] = None,
-  idType: Option[String] = None,
-  idValue: Option[String] = None,
-  failures: Option[Seq[SubscriptionStatusError]] = None
+import java.time.ZonedDateTime
+
+case class SubscriptionCreateResponse(
+  pptReference: Option[String],
+  processingDate: Option[ZonedDateTime],
+  formBundleNumber: Option[String],
+  failures: Option[Seq[EISError]] = None
 )
 
-object SubscriptionStatusResponse {
-  implicit val format: OFormat[SubscriptionStatusResponse] = Json.format[SubscriptionStatusResponse]
+object SubscriptionCreateResponse {
+
+  implicit val format: OFormat[SubscriptionCreateResponse] =
+    Json.format[SubscriptionCreateResponse]
+
 }

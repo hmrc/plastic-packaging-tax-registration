@@ -16,15 +16,18 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import java.util.UUID
-
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  Subscription,
+  SubscriptionCreateResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
@@ -51,6 +54,28 @@ class SubscriptionsConnector @Inject() (
           throw new Exception(
             s"Subscription Status with Correlation ID [${correlationIdHeader._2}] and " +
               s"Safe ID [${safeNumber}] is currently unavailable due to [${exception.getMessage}]",
+            exception
+          )
+      }
+  }
+
+  def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
+    hc: HeaderCarrier
+  ): Future[SubscriptionCreateResponse] = {
+    val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
+    val correlationIdHeader = correlationId -> UUID.randomUUID().toString
+    httpClient.POST[Subscription, SubscriptionCreateResponse](
+      url = appConfig.subscriptionCreateUrl(safeNumber),
+      body = subscription,
+      headers = headers :+ correlationIdHeader
+    )
+      .andThen { case _ => timer.stop() }
+      .andThen {
+        case Success(response) => response
+        case Failure(exception) =>
+          throw new Exception(
+            s"Subscription submission with Correlation ID [${correlationIdHeader._2}] and " +
+              s"Safe ID [${safeNumber}] is currently experiencing issues due to [${exception.getMessage}]",
             exception
           )
       }

@@ -9,3 +9,4 @@ GET         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregist
 
 # EIS subscription
 GET         /subscriptions/status/:safeNumber   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.get(safeNumber: String)
+POST        /subscriptions/:safeNumber           uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.submit(safeNumber: String)

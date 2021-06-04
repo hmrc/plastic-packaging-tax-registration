@@ -34,4 +34,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def subscriptionStatusUrl(safeNumber: String): String =
     s"$eisHost/cross-regime/subscription/ZPPT/SAFE/${safeNumber}/status"
 
+  def subscriptionCreateUrl(safeNumber: String): String =
+    s"$eisHost/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create"
+
 }

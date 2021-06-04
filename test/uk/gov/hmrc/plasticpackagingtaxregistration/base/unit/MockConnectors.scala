@@ -22,7 +22,8 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.subscriptionStatus.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
 import scala.concurrent.Future
 
@@ -42,10 +43,23 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
     when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any()))
       .thenThrow(ex)
 
+  protected def mockGetSubscriptionSubmitFailure(
+    ex: Exception
+  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+    when(mockSubscriptionsConnector.submitSubscription(any(), any())(any()))
+      .thenThrow(ex)
+
   protected def mockGetSubscriptionStatus(
     subscription: SubscriptionStatusResponse
   ): OngoingStubbing[Future[SubscriptionStatusResponse]] =
     when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any())).thenReturn(
+      Future.successful(subscription)
+    )
+
+  protected def mockGetSubscriptionCreate(
+    subscription: SubscriptionCreateResponse
+  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+    when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
       Future.successful(subscription)
     )
 
