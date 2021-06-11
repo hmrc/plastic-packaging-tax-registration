@@ -16,12 +16,19 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json}
 
-case class FullName(firstName: String, lastName: String) {
-  def fullName = s"$firstName $lastName"
-}
+case class SoleTraderIncorporationDetails(
+  firstName: String,
+  lastName: String,
+  dateOfBirth: String,
+  nino: String,
+  override val registration: IncorporationRegistrationDetails
+) extends RegistrationDetails
 
-object FullName {
-  implicit val format: OFormat[FullName] = Json.format[FullName]
+object SoleTraderIncorporationDetails {
+
+  implicit val format: Format[SoleTraderIncorporationDetails] =
+    Json.format[SoleTraderIncorporationDetails]
+
 }

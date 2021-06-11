@@ -24,11 +24,14 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.ExecutionContext
 
-class ConnectorISpec extends WiremockTestServer with GuiceOneAppPerSuite with DefaultAwaitTimeout {
+class ConnectorISpec
+    extends WiremockTestServer with GuiceOneAppPerSuite with DefaultAwaitTimeout
+    with SubscriptionTestData {
   protected val httpClient: DefaultHttpClient = app.injector.instanceOf[DefaultHttpClient]
   protected val metrics: Metrics              = app.injector.instanceOf[Metrics]
 

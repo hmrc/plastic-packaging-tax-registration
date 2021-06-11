@@ -28,13 +28,16 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.PPTTestData
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
+  RegistrationTestData,
+  SubscriptionTestData
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 
 trait ControllerSpec
     extends AnyWordSpecLike with MockitoSugar with Matchers with GuiceOneAppPerSuite
     with AuthTestSupport with BeforeAndAfterEach with DefaultAwaitTimeout with MockConnectors
-    with PPTTestData {
+    with RegistrationTestData with SubscriptionTestData {
 
   SharedMetricRegistries.clear()
 

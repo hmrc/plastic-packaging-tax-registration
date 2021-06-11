@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class SubscriptionStatusError(code: String, reason: String)
+case class IncorporationRegistrationDetails(
+  registrationStatus: String,
+  registeredBusinessPartnerId: Option[String]
+)
 
-object SubscriptionStatusError {
-  implicit val format: OFormat[SubscriptionStatusError] = Json.format[SubscriptionStatusError]
+object IncorporationRegistrationDetails {
+
+  implicit val format: OFormat[IncorporationRegistrationDetails] =
+    Json.format[IncorporationRegistrationDetails]
+
 }

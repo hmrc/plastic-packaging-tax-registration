@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus
 
 import play.api.libs.json.{Json, OFormat}
+import ETMPSubscriptionStatus.SubscriptionStatus
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 
-case class FullName(firstName: String, lastName: String) {
-  def fullName = s"$firstName $lastName"
-}
+case class SubscriptionStatusResponse(
+  subscriptionStatus: Option[SubscriptionStatus] = None,
+  idType: Option[String] = None,
+  idValue: Option[String] = None,
+  failures: Option[Seq[EISError]] = None
+)
 
-object FullName {
-  implicit val format: OFormat[FullName] = Json.format[FullName]
+object SubscriptionStatusResponse {
+  implicit val format: OFormat[SubscriptionStatusResponse] = Json.format[SubscriptionStatusResponse]
 }

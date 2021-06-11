@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
 
-case class FullName(firstName: String, lastName: String) {
-  def fullName = s"$firstName $lastName"
-}
+case class OrganisationDetails(organisationType: Option[String] = None, organisationName: String)
 
-object FullName {
-  implicit val format: OFormat[FullName] = Json.format[FullName]
+object OrganisationDetails {
+  implicit val format: OFormat[OrganisationDetails] = Json.format[OrganisationDetails]
 }

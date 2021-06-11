@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Reads, Writes}
 
-case class FullName(firstName: String, lastName: String) {
-  def fullName = s"$firstName $lastName"
-}
+object CustomerType extends Enumeration {
+  type CustomerType = Value
+  val Individual: Value   = Value
+  val Organisation: Value = Value
 
-object FullName {
-  implicit val format: OFormat[FullName] = Json.format[FullName]
+  implicit val format: Format[CustomerType] =
+    Format(Reads.enumNameReads(CustomerType), Writes.enumNameWrites)
+
 }

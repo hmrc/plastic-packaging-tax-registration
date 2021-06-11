@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
+import play.api.libs.json._
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
 
 object OrgType extends Enumeration {
@@ -35,7 +35,9 @@ case class OrganisationDetails(
   isBasedInUk: Option[Boolean] = None,
   organisationType: Option[OrgType] = None,
   businessRegisteredAddress: Option[Address] = None,
-  safeNumber: Option[String] = None
+  safeNumber: Option[String] = None,
+  soleTraderDetails: Option[SoleTraderIncorporationDetails] = None,
+  incorporationDetails: Option[IncorporationDetails] = None
 )
 
 object OrganisationDetails {

@@ -60,6 +60,12 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
       )
     }
 
+    "have 'subscriptionCreateUrl' defined" in {
+      configService.subscriptionCreateUrl("12345678") must be(
+        "http://localhost:8506/plastic-packaging-tax/subscriptions/PPT/SAFEID/12345678/create"
+      )
+    }
+
     "have 'eis environment' defined" in {
       configService.eisEnvironment must be("test")
     }
