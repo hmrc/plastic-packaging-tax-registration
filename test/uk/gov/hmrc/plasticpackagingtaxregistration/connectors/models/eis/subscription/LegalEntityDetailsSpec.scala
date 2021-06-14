@@ -55,9 +55,9 @@ class LegalEntityDetailsSpec
         )
 
         legalEntityDetails.customerIdentification1 mustBe pptIndividualDetails.soleTraderDetails.get.nino
-        legalEntityDetails.customerIdentification2 mustBe Some(
-          pptIndividualDetails.soleTraderDetails.get.dateOfBirth
-        )
+        legalEntityDetails.customerIdentification2 mustBe
+          pptIndividualDetails.soleTraderDetails.get.sautr
+
         legalEntityDetails.customerDetails.customerType mustBe CustomerType.Individual
 
         legalEntityDetails.customerDetails.organisationDetails mustBe None

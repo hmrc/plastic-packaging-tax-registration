@@ -44,7 +44,7 @@ object LegalEntityDetails {
         pptOrganisationDetails.soleTraderDetails.map { details =>
           LegalEntityDetails(dateOfApplication = getDateOfApplication,
                              customerIdentification1 = details.nino,
-                             customerIdentification2 = Some(details.dateOfBirth),
+                             customerIdentification2 = details.sautr,
                              customerDetails = CustomerDetails(pptOrganisationDetails)
           )
         }.getOrElse(throw new Exception("Individual details are required"))
