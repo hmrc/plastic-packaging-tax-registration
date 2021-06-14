@@ -149,9 +149,7 @@ class SubscriptionSpec
       DateTimeFormatter.ofPattern("yyyy-MM-dd")
     )
     subscription.legalEntityDetails.customerIdentification1 mustBe pptIndividualDetails.soleTraderDetails.get.nino
-    subscription.legalEntityDetails.customerIdentification2 mustBe Some(
-      pptIndividualDetails.soleTraderDetails.get.dateOfBirth
-    )
+    subscription.legalEntityDetails.customerIdentification2 mustBe pptIndividualDetails.soleTraderDetails.get.sautr
     subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Individual
 
     subscription.legalEntityDetails.customerDetails.organisationDetails mustBe None

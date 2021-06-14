@@ -28,7 +28,7 @@ trait RegistrationTestData {
             postCode = "PostCode"
     )
 
-  private val incorporationRegistrationDetails: IncorporationRegistrationDetails =
+  protected val incorporationRegistrationDetails: IncorporationRegistrationDetails =
     IncorporationRegistrationDetails(registrationStatus = "REGISTERED",
                                      registeredBusinessPartnerId = Some("1234567890")
     )
@@ -66,6 +66,7 @@ trait RegistrationTestData {
                                      lastName = "User",
                                      dateOfBirth = "1978-01-01",
                                      nino = "567890123",
+                                     Some("123456789"),
                                      registration = incorporationRegistrationDetails
       )
     )

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
-import com.github.nscala_time.time.Imports.LocalDate
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupSubscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Date, LiabilityWeight, Registration}
