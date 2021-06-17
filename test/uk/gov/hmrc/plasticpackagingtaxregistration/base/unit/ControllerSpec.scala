@@ -33,6 +33,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
   SubscriptionTestData
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
+import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 
 trait ControllerSpec
     extends AnyWordSpecLike with MockitoSugar with Matchers with GuiceOneAppPerSuite
@@ -41,9 +42,12 @@ trait ControllerSpec
 
   SharedMetricRegistries.clear()
 
+  protected val mockRepository: RegistrationRepository = mock[RegistrationRepository]
+
   override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[AuthConnector].to(mockAuthConnector),
-               bind[SubscriptionsConnector].to(mockSubscriptionsConnector)
+               bind[SubscriptionsConnector].to(mockSubscriptionsConnector),
+               bind[RegistrationRepository].to(mockRepository)
     )
     .build()
 

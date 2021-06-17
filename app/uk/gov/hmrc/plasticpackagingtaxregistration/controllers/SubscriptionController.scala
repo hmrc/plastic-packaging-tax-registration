@@ -28,6 +28,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegistrationRequest
+import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -37,6 +38,7 @@ import scala.concurrent.ExecutionContext
 class SubscriptionController @Inject() (
   subscriptionsConnector: SubscriptionsConnector,
   authenticator: Authenticator,
+  repository: RegistrationRepository,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
@@ -58,6 +60,10 @@ class SubscriptionController @Inject() (
         logPayload("Subscription: ", subscription)
         subscriptionsConnector.submitSubscription(safeNumber, subscription).map {
           response: SubscriptionCreateResponse =>
+            {
+              if (response.isSuccess)
+                repository.delete(request.pptId)
+            }
             Ok(response)
         }
     }
