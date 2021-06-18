@@ -77,10 +77,10 @@ class RegistrationRepository @Inject() (
       }
   }
 
-  def delete(registration: Registration): Future[Unit] =
+  def delete(pptId: String): Future[Unit] =
     super
-      .remove("id" -> registration.id)
-      .map(_ => Unit)
+      .remove("id" -> pptId)
+      .map(r => if (!r.ok) logger.error(s"Failed to delete registration id: $pptId"))
 
   private def newMongoDBTimer(name: String): Timer = metrics.defaultRegistry.timer(name)
 }

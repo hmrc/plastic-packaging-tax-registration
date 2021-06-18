@@ -26,7 +26,15 @@ case class SubscriptionCreateResponse(
   processingDate: Option[ZonedDateTime],
   formBundleNumber: Option[String],
   failures: Option[Seq[EISError]] = None
-)
+) {
+
+  def isSuccess: Boolean =
+    this.failures match {
+      case Some(errors) => errors.isEmpty
+      case None         => true
+    }
+
+}
 
 object SubscriptionCreateResponse {
 

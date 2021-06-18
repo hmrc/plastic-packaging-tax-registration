@@ -18,6 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
   ETMPSubscriptionStatus,
@@ -50,6 +51,13 @@ trait SubscriptionTestData {
     SubscriptionCreateResponse(pptReference = Some("XMPPT123456789"),
                                processingDate = Some(now(UTC)),
                                formBundleNumber = Some("123456789")
+    )
+
+  protected val subscriptionCreateFailureResponse: SubscriptionCreateResponse =
+    SubscriptionCreateResponse(failures = Some(Seq(EISError(code = "123", reason = "error"))),
+                               pptReference = Some("XMPPT123456789"),
+                               formBundleNumber = Some("123456789"),
+                               processingDate = Some(now(UTC))
     )
 
   protected val ukLimitedCompaySubscription: Subscription = Subscription(

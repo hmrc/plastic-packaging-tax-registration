@@ -234,7 +234,7 @@ class RegistrationRepositoryItSpec
       val registration = aRegistration()
       givenARegistrationExists(registration)
 
-      repository.delete(registration).futureValue
+      repository.delete(registration.id).futureValue
 
       collectionSize mustBe 0
     }
@@ -246,7 +246,7 @@ class RegistrationRepositoryItSpec
         val registration3 = aRegistration(withId("id2"))
         givenARegistrationExists(registration2, registration3)
 
-        repository.delete(registration1).futureValue
+        repository.delete(registration1.id).futureValue
 
         collectionSize mustBe 2
       }

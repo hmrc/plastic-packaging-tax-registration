@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
-import org.mockito.ArgumentMatchers
+import org.mockito.{ArgumentMatchers, Mockito}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.`given`
 import org.mockito.Mockito.{verify, verifyNoInteractions}
@@ -41,8 +41,10 @@ import scala.concurrent.Future
 class SubscriptionControllerSpec
     extends ControllerSpec with RegistrationBuilder with RegistrationRequestBuilder {
 
-  override def beforeEach(): Unit =
+  override def beforeEach(): Unit = {
+    Mockito.reset(mockRepository)
     super.beforeEach()
+  }
 
   "GET /subscriptions/status/:id " should {
     "return 200" when {
@@ -90,9 +92,10 @@ class SubscriptionControllerSpec
                                        withMetaDataRequest(MetaData(true, true))
     )
 
-    "return 200" when {
+    "return 200 and delete registration" when {
       "request is valid" in {
-        withAuthorizedUser()
+        val utr = "999"
+        withAuthorizedUser(user = newUser(Some(pptEnrolment(utr))))
 
         given(
           mockSubscriptionsConnector.submitSubscription(any[String], any[Subscription])(any())
@@ -107,6 +110,27 @@ class SubscriptionControllerSpec
         response.pptReference mustBe subscriptionCreateResponse.pptReference
         response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
         response.processingDate mustBe subscriptionCreateResponse.processingDate
+        verify(mockRepository).delete(utr)
+      }
+    }
+
+    "return 200 and not delete registration" when {
+      "submission fails" in {
+        val utr = "999"
+        withAuthorizedUser(user = newUser(Some(pptEnrolment(utr))))
+
+        given(
+          mockSubscriptionsConnector.submitSubscription(any[String], any[Subscription])(any())
+        ).willReturn(Future.successful(subscriptionCreateFailureResponse))
+
+        val result: Future[Result] =
+          route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
+
+        status(result) must be(OK)
+        val response = contentAsJson(result).as[SubscriptionCreateResponse]
+
+        response.failures.get.isEmpty mustBe false
+        verifyNoInteractions(mockRepository)
       }
     }
 
