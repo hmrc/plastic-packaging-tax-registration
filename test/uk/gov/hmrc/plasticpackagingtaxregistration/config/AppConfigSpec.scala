@@ -33,6 +33,7 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
         |microservice.services.auth.port=9988
         |microservice.services.eis.host=localhost
         |microservice.services.eis.port=8506
+        |microservice.services.eis.bearerToken=test123456
         |microservice.metrics.graphite.host=graphite
         |auditing.enabled=true
         |eis.environment=test
