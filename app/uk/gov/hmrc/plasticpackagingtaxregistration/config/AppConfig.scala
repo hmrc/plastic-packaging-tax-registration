@@ -37,5 +37,5 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def subscriptionCreateUrl(safeNumber: String): String =
     s"$eisHost/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create"
 
-  val bearerToken: String = config.get[String]("microservice.services.eis.bearerToken")
+  val bearerToken: String = s"Bearer ${config.get[String]("microservice.services.eis.bearerToken")}"
 }
