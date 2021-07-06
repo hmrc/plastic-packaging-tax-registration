@@ -17,7 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
 import play.api.Logger
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
@@ -29,6 +29,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authentic
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegistrationRequest
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
+import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -39,6 +40,7 @@ class SubscriptionController @Inject() (
   subscriptionsConnector: SubscriptionsConnector,
   authenticator: Authenticator,
   repository: RegistrationRepository,
+  nonRepudiationService: NonRepudiationService,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
@@ -57,19 +59,31 @@ class SubscriptionController @Inject() (
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
         val subscription = Subscription(request.body.toRegistration(request.pptId))
-        logPayload("Subscription: ", subscription)
+        logPayload("PPT Subscription: ", subscription)
         subscriptionsConnector.submitSubscription(safeNumber, subscription).map {
           response: SubscriptionCreateResponse =>
-            {
-              if (response.isSuccess)
-                repository.delete(request.pptId)
+            if (response.isSuccess) {
+              nonRepudiationService.submitNonRepudiation(subscription.toString,
+                                                         response.processingDate.getOrElse(
+                                                           throw new Exception(
+                                                             "PPT Subscription Error - Expected 'Processing Date' not found"
+                                                           )
+                                                         ),
+                                                         response.pptReference.getOrElse(
+                                                           throw new Exception(
+                                                             "PPT Subscription Error - Expected 'PPT Reference' not found"
+                                                           )
+                                                         ),
+                                                         request.headers.toSimpleMap
+              )
+              repository.delete(request.pptId)
             }
             Ok(response)
         }
     }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
-    logger.debug(s"Payload: ${Json.toJson(payload)}")
+    logger.debug(s"$prefix payload: ${Json.toJson(payload)}")
     payload
   }
 

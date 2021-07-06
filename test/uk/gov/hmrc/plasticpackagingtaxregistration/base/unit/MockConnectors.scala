@@ -21,20 +21,25 @@ import org.mockito.Mockito.{reset, when}
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  NonRepudiationConnector,
+  SubscriptionsConnector
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
 
 import scala.concurrent.Future
 
 trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
   self: Suite =>
 
-  protected val mockSubscriptionsConnector: SubscriptionsConnector = mock[SubscriptionsConnector]
+  protected val mockSubscriptionsConnector: SubscriptionsConnector   = mock[SubscriptionsConnector]
+  protected val mockNonRepudiationConnector: NonRepudiationConnector = mock[NonRepudiationConnector]
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockSubscriptionsConnector)
+    reset(mockSubscriptionsConnector, mockNonRepudiationConnector)
   }
 
   protected def mockGetSubscriptionStatusFailure(
@@ -62,5 +67,18 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
       Future.successful(subscription)
     )
+
+  protected def mockNonRepudiationSubmission(
+    response: NonRepudiationSubmissionAccepted
+  ): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
+    when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any())).thenReturn(
+      Future.successful(response)
+    )
+
+  protected def mockNonRepudiationSubmissionFailure(
+    ex: Exception
+  ): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
+    when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any()))
+      .thenThrow(ex)
 
 }

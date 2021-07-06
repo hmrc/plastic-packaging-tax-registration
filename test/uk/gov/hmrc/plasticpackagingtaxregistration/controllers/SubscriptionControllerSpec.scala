@@ -35,7 +35,9 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   SubscriptionCreateResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.MetaData
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
 
+import java.util.UUID
 import scala.concurrent.Future
 
 class SubscriptionControllerSpec
@@ -51,6 +53,7 @@ class SubscriptionControllerSpec
       "request is valid" in {
         withAuthorizedUser()
         mockGetSubscriptionStatus(subscriptionStatusResponse)
+        mockNonRepudiationSubmission(NonRepudiationSubmissionAccepted(UUID.randomUUID().toString))
 
         val result: Future[Result] = route(app, subscriptionStatusResponse_HttpGet).get
 

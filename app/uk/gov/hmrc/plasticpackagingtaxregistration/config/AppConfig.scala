@@ -24,6 +24,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
   lazy val eisHost: String     = servicesConfig.baseUrl("eis")
+  lazy val nrsHost: String     = servicesConfig.baseUrl("nrs")
   val authBaseUrl: String      = servicesConfig.baseUrl("auth")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
@@ -38,4 +39,10 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     s"$eisHost/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create"
 
   val bearerToken: String = s"Bearer ${config.get[String]("microservice.services.eis.bearerToken")}"
+
+  lazy val nonRepudiationSubmissionUrl: String = s"${nrsHost}/submission"
+
+  lazy val nonRepudiationApiKey: String =
+    servicesConfig.getString("microservice.services.nrs.api-key")
+
 }
