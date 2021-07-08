@@ -47,17 +47,15 @@ trait SubscriptionTestData {
                                idValue = Some("X00000123456789")
     )
 
-  protected val subscriptionCreateResponse: SubscriptionCreateResponse =
-    SubscriptionCreateResponse(pptReference = Some("XMPPT123456789"),
-                               processingDate = Some(now(UTC)),
-                               formBundleNumber = Some("123456789")
+  protected val subscriptionCreateResponse: SubscriptionCreateSuccessfulResponse =
+    SubscriptionCreateSuccessfulResponse(pptReference = "XMPPT123456789",
+                                         processingDate = now(UTC),
+                                         formBundleNumber = "123456789"
     )
 
-  protected val subscriptionCreateFailureResponse: SubscriptionCreateResponse =
-    SubscriptionCreateResponse(failures = Some(Seq(EISError(code = "123", reason = "error"))),
-                               pptReference = Some("XMPPT123456789"),
-                               formBundleNumber = Some("123456789"),
-                               processingDate = Some(now(UTC))
+  protected val subscriptionCreateFailureResponse: SubscriptionCreateFailureResponse =
+    SubscriptionCreateFailureResponse(failures =
+      Some(Seq(EISError(code = "123", reason = "error")))
     )
 
   protected val ukLimitedCompaySubscription: Subscription = Subscription(

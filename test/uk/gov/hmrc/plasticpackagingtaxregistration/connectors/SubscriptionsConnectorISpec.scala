@@ -24,7 +24,7 @@ import play.api.test.Helpers.await
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
@@ -160,13 +160,14 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
             )
         )
 
-        val res: SubscriptionCreateResponse =
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        val res: SubscriptionCreateSuccessfulResponse =
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription)).asInstanceOf[
+            SubscriptionCreateSuccessfulResponse
+          ]
 
-        res.pptReference mustBe Some(pptReference)
-        res.formBundleNumber mustBe Some(formBundleNumber)
-        res.processingDate mustBe Some(ZonedDateTime.parse(subscriptionProcessingDate))
-        res.failures mustBe None
+        res.pptReference mustBe pptReference
+        res.formBundleNumber mustBe formBundleNumber
+        res.processingDate mustBe ZonedDateTime.parse(subscriptionProcessingDate)
 
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }

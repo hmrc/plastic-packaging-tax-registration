@@ -22,7 +22,8 @@ import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
-  SubscriptionCreateResponse
+  SubscriptionCreateFailureResponse,
+  SubscriptionCreateSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
@@ -61,24 +62,15 @@ class SubscriptionController @Inject() (
         val subscription = Subscription(request.body.toRegistration(request.pptId))
         logPayload("PPT Subscription: ", subscription)
         subscriptionsConnector.submitSubscription(safeNumber, subscription).map {
-          response: SubscriptionCreateResponse =>
-            if (response.isSuccess) {
-              nonRepudiationService.submitNonRepudiation(subscription.toString,
-                                                         response.processingDate.getOrElse(
-                                                           throw new Exception(
-                                                             "PPT Subscription Error - Expected 'Processing Date' not found"
-                                                           )
-                                                         ),
-                                                         response.pptReference.getOrElse(
-                                                           throw new Exception(
-                                                             "PPT Subscription Error - Expected 'PPT Reference' not found"
-                                                           )
-                                                         ),
-                                                         request.headers.toSimpleMap
-              )
-              repository.delete(request.pptId)
-            }
+          case response @ SubscriptionCreateSuccessfulResponse(pptReference, processingDate, _) =>
+            nonRepudiationService.submitNonRepudiation(subscription.toString,
+                                                       processingDate,
+                                                       pptReference,
+                                                       request.headers.toSimpleMap
+            )
+            repository.delete(request.pptId)
             Ok(response)
+          case response @ SubscriptionCreateFailureResponse(_) => Ok(response)
         }
     }
 

@@ -32,7 +32,8 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
-  SubscriptionCreateResponse
+  SubscriptionCreateFailureResponse,
+  SubscriptionCreateSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.MetaData
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
@@ -108,8 +109,7 @@ class SubscriptionControllerSpec
           route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
         status(result) must be(OK)
-        val response = contentAsJson(result).as[SubscriptionCreateResponse]
-        response.failures mustBe None
+        val response = contentAsJson(result).as[SubscriptionCreateSuccessfulResponse]
         response.pptReference mustBe subscriptionCreateResponse.pptReference
         response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
         response.processingDate mustBe subscriptionCreateResponse.processingDate
@@ -130,7 +130,7 @@ class SubscriptionControllerSpec
           route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
         status(result) must be(OK)
-        val response = contentAsJson(result).as[SubscriptionCreateResponse]
+        val response = contentAsJson(result).as[SubscriptionCreateFailureResponse]
 
         response.failures.get.isEmpty mustBe false
         verifyNoInteractions(mockRepository)

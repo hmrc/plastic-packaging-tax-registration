@@ -17,7 +17,6 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs
 
 import org.joda.time.LocalDate
-import play.api.mvc.Request
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve._
@@ -50,7 +49,7 @@ case class NonRepudiationService @Inject() (
     submissionTimestamp: ZonedDateTime,
     pptReference: String,
     userHeaders: Map[String, String]
-  )(implicit hc: HeaderCarrier, request: Request[_]): Future[NonRepudiationSubmissionAccepted] =
+  )(implicit hc: HeaderCarrier): Future[NonRepudiationSubmissionAccepted] =
     for {
       identityData <- retrieveIdentityData()
       payloadChecksum = MessageDigest.getInstance("SHA-256")

@@ -18,8 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs
 
 import play.api.libs.json._
 
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
+import java.time.ZonedDateTime
 
 case class NonRepudiationMetadata(
   businessId: String,
@@ -35,19 +34,4 @@ case class NonRepudiationMetadata(
 
 object NonRepudiationMetadata {
   implicit val format: OFormat[NonRepudiationMetadata] = Json.format[NonRepudiationMetadata]
-
-  implicit object LocalDateTimeFormat extends Format[LocalDateTime] {
-
-    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter
-      .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-      .withZone(ZoneId.of("UTC"))
-
-    override def writes(localDateTime: LocalDateTime): JsValue =
-      JsString(localDateTime.format(dateTimeFormatter))
-
-    override def reads(json: JsValue): JsResult[LocalDateTime] =
-      json.validate[String].map(LocalDateTime.parse(_, dateTimeFormatter))
-
-  }
-
 }
