@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
-import org.mockito.{ArgumentMatchers, Mockito}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.`given`
 import org.mockito.Mockito.{verify, verifyNoInteractions}
+import org.mockito.{ArgumentMatchers, Mockito}
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
@@ -93,7 +93,8 @@ class SubscriptionControllerSpec
     val request = aRegistrationRequest(withLiabilityDetailsRequest(pptLiabilityDetails),
                                        withOrganisationDetailsRequest(pptOrganisationDetails),
                                        withPrimaryContactDetailsRequest(pptPrimaryContactDetails),
-                                       withMetaDataRequest(MetaData(true, true))
+                                       withMetaDataRequest(MetaData(true, true)),
+                                       withUserHeaders(Map("testHeaderKey" -> "testHeaderValue"))
     )
 
     "return 200 and delete registration" when {

@@ -26,10 +26,10 @@ import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 
 object AuthTestData {
 
-  lazy val testAffinityGroup: AffinityGroup = AffinityGroup.Organisation
-  lazy val testProviderId: String           = "testProviderID"
-  lazy val testProviderType: String         = "GovernmentGateway"
-  lazy val testCredentials: Credentials     = Credentials(testProviderId, testProviderType)
+  val testAffinityGroup: AffinityGroup = AffinityGroup.Organisation
+  val testProviderId: String           = "testProviderID"
+  val testProviderType: String         = "GovernmentGateway"
+  val testCredentials: Credentials     = Credentials(testProviderId, testProviderType)
   val testInternalid                        = "INT-123-456-789"
   val testExternalId                        = "testExternalId"
   val testAgentCode                         = "testAgentCode"

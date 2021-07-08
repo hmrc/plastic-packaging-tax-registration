@@ -21,7 +21,8 @@ case class RegistrationRequest(
   liabilityDetails: LiabilityDetails = LiabilityDetails(),
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
   organisationDetails: OrganisationDetails = OrganisationDetails(),
-  metaData: MetaData = MetaData()
+  metaData: MetaData = MetaData(),
+  userHeaders: Option[Map[String, String]] = None
 ) {
 
   def toRegistration(providerId: String): Registration =

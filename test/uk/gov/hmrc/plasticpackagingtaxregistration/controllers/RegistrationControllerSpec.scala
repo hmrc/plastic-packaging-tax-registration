@@ -40,14 +40,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  Address,
-  FullName,
-  OrgType,
-  OrganisationDetails,
-  PrimaryContactDetails,
-  Registration
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 
 import scala.concurrent.Future
@@ -194,6 +187,9 @@ class RegistrationControllerSpec
                                                                      )
                                                                    )
                                              )
+                                           ),
+                                           withUserHeaders(
+                                             Map("testHeaderKey" -> "testHeaderValue")
                                            )
         )
 

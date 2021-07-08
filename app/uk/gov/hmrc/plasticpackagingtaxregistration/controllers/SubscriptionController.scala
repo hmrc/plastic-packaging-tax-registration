@@ -66,7 +66,7 @@ class SubscriptionController @Inject() (
             nonRepudiationService.submitNonRepudiation(subscription.toString,
                                                        processingDate,
                                                        pptReference,
-                                                       request.headers.toSimpleMap
+                                                       request.body.userHeaders.getOrElse(Map.empty)
             )
             repository.delete(request.pptId)
             Ok(response)
