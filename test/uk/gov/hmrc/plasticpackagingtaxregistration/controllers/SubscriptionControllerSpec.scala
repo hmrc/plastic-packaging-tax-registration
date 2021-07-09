@@ -93,8 +93,10 @@ class SubscriptionControllerSpec
     val request = aRegistrationRequest(withLiabilityDetailsRequest(pptLiabilityDetails),
                                        withOrganisationDetailsRequest(pptOrganisationDetails),
                                        withPrimaryContactDetailsRequest(pptPrimaryContactDetails),
-                                       withMetaDataRequest(MetaData(true, true)),
-                                       withUserHeaders(Map("testHeaderKey" -> "testHeaderValue"))
+                                       withMetaDataRequest(
+                                         MetaData(registrationReviewed, registrationCompleted)
+                                       ),
+                                       withUserHeaders(pptUserHeaders)
     )
 
     "return 200 and delete registration" when {

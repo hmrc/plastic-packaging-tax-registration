@@ -29,14 +29,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.AuthTestData.{
-  testAuthRetrievals,
-  testAuthToken,
-  testDateTime,
-  testNonRepudiationIdentityData,
-  testPPTReference,
-  testUserHeaders
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.NrsTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.MockConnectors
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationBuilder,
@@ -53,9 +46,9 @@ import java.util.Base64
 import scala.concurrent.{ExecutionContext, Future}
 
 class NonRepudiationServiceSpec
-    extends AnyWordSpec with GuiceOneAppPerSuite with AuthTestSupport with BeforeAndAfterEach
-    with ScalaFutures with Matchers with MockConnectors with RegistrationBuilder
-    with RegistrationRequestBuilder {
+    extends AnyWordSpec with GuiceOneAppPerSuite with AuthTestSupport with NrsTestData
+    with BeforeAndAfterEach with ScalaFutures with Matchers with MockConnectors
+    with RegistrationBuilder with RegistrationRequestBuilder {
 
   protected implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 

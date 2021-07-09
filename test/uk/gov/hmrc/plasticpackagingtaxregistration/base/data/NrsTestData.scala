@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
+import org.joda.time
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
@@ -24,18 +25,18 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationSe
 
 import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 
-object AuthTestData {
+trait NrsTestData {
 
-  val testAffinityGroup: AffinityGroup = AffinityGroup.Organisation
-  val testProviderId: String           = "testProviderID"
-  val testProviderType: String         = "GovernmentGateway"
-  val testCredentials: Credentials     = Credentials(testProviderId, testProviderType)
-  val testInternalid                        = "INT-123-456-789"
-  val testExternalId                        = "testExternalId"
-  val testAgentCode                         = "testAgentCode"
-  val testConfidenceLevel: ConfidenceLevel  = ConfidenceLevel.L200
-  val testSautr                             = "testSautr"
-  val testNino                              = "NB686868C"
+  val testAffinityGroup: AffinityGroup     = AffinityGroup.Organisation
+  val testProviderId: String               = "testProviderID"
+  val testProviderType: String             = "GovernmentGateway"
+  val testCredentials: Credentials         = Credentials(testProviderId, testProviderType)
+  val testInternalid                       = "INT-123-456-789"
+  val testExternalId                       = "testExternalId"
+  val testAgentCode                        = "testAgentCode"
+  val testConfidenceLevel: ConfidenceLevel = ConfidenceLevel.L200
+  val testSautr                            = "testSautr"
+  val testNino                             = "NB686868C"
 
   val testDate: LocalDate         = LocalDate.of(2017, 1, 1)
   val testDateTime: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)
@@ -44,25 +45,31 @@ object AuthTestData {
     uk.gov.hmrc.auth.core.retrieve.Name(Some("testFirstName"), Some("testLastName"))
 
   val testAuthDateOfBirth: org.joda.time.LocalDate = org.joda.time.LocalDate.now()
-  val testEmail                                    = "testEmail"
-  val testPPTReference                             = "XMPPT123456789"
-  val testAuthToken                                = "testAuthToken"
-  val testUserHeaders                              = Map("testKey" -> "testValue")
+  val testEmail: String                            = "testEmail"
+  val testPPTReference: String                     = "XMPPT123456789"
+  val testAuthToken: String                        = "testAuthToken"
+  val testUserHeaders: Map[String, String]         = Map("testKey" -> "testValue")
+  val testSearchKeys: Map[String, String]          = Map("pptReference" -> testPPTReference)
 
-  val testAgentInformation =
+  val testAgentInformation: AgentInformation =
     AgentInformation(Some("testAgentId"), Some("testAgentCode"), Some("testAgentFriendlyName"))
 
-  val testGroupIdentifier = "testGroupIdentifier"
-  val testCredentialRole  = User
-  val testMdtpInformation = MdtpInformation("testDeviceId", "testSessionId")
-  val testItmpName        = ItmpName(Some("testGivenName"), Some("testMiddleName"), Some("testFamilyName"))
-  val testItmpDateOfBirth = org.joda.time.LocalDate.now()
+  val testGroupIdentifier                  = "testGroupIdentifier"
+  val testCredentialRole: User.type        = User
+  val testMdtpInformation: MdtpInformation = MdtpInformation("testDeviceId", "testSessionId")
 
-  val testItmpAddress =
+  val testItmpName: ItmpName =
+    ItmpName(Some("testGivenName"), Some("testMiddleName"), Some("testFamilyName"))
+
+  val testItmpDateOfBirth: time.LocalDate = org.joda.time.LocalDate.now()
+
+  val testItmpAddress: ItmpAddress =
     ItmpAddress(Some("testLine1"), None, None, None, None, Some("testPostcode"), None, None)
 
-  val testCredentialStrength = CredentialStrength.strong
-  val testLoginTimes         = LoginTimes(org.joda.time.DateTime.now(), Some(org.joda.time.DateTime.now()))
+  val testCredentialStrength: String = CredentialStrength.strong
+
+  val testLoginTimes: LoginTimes =
+    LoginTimes(org.joda.time.DateTime.now(), Some(org.joda.time.DateTime.now()))
 
   val testNonRepudiationIdentityData: IdentityData = IdentityData(Some(testInternalid),
                                                                   Some(testExternalId),

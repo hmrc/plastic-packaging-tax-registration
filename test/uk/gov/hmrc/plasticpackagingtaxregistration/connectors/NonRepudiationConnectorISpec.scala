@@ -22,12 +22,7 @@ import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status.ACCEPTED
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.Helpers.await
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.AuthTestData.{
-  testAuthToken,
-  testDateTime,
-  testNonRepudiationIdentityData,
-  testPPTReference
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.NrsTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.{AuthTestSupport, Injector}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
@@ -36,7 +31,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
 }
 
 class NonRepudiationConnectorISpec
-    extends ConnectorISpec with Injector with AuthTestSupport with ScalaFutures {
+    extends ConnectorISpec with Injector with AuthTestSupport with NrsTestData with ScalaFutures {
   lazy val config                             = Map("microservice.services.nrs.api-key" -> testNonRepudiationApiKey)
   lazy val connector: NonRepudiationConnector = app.injector.instanceOf[NonRepudiationConnector]
   val testNonRepudiationApiKey                = "test-key"
