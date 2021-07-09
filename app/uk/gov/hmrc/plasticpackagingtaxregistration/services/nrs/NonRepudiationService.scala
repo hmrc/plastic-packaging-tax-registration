@@ -52,13 +52,8 @@ case class NonRepudiationService @Inject() (
   )(implicit hc: HeaderCarrier): Future[NonRepudiationSubmissionAccepted] =
     for {
       identityData <- retrieveIdentityData()
-      payloadChecksum = MessageDigest.getInstance("SHA-256")
-        .digest(payloadString.getBytes(StandardCharsets.UTF_8))
-        .map("%02x".format(_)).mkString
-      userAuthToken = hc.authorization match {
-        case Some(Authorization(authToken)) => authToken
-        case _                              => throw new InternalServerException("No auth token available for NRS")
-      }
+      payloadChecksum = retrievePayloadChecksum(payloadString)
+      userAuthToken   = retrieveUserAuthToken(hc)
       nonRepudiationMetadata = NonRepudiationMetadata("ppt",
                                                       "ppt-subscription",
                                                       "application/json",
@@ -69,18 +64,35 @@ case class NonRepudiationService @Inject() (
                                                       userHeaders,
                                                       Map("pptReference" -> pptReference)
       )
-      encodedPayloadString = Base64.getEncoder.encodeToString(
-        payloadString.getBytes(StandardCharsets.UTF_8)
+      encodedPayloadString = encodePayload(payloadString)
+      nonRepudiationSubmissionResponse <- retrieveNonRepudiationResponse(nonRepudiationMetadata,
+                                                                         encodedPayloadString
       )
-      nonRepudiationSubmissionResponse <- nonRepudiationConnector.submitNonRepudiation(
-        encodedPayloadString,
-        nonRepudiationMetadata
-      ).map {
-        case response @ NonRepudiationSubmissionAccepted(_) => response
-      }.recoverWith {
-        case exception: HttpException => Future.failed(exception)
-      }
     } yield nonRepudiationSubmissionResponse
+
+  private def encodePayload(payloadString: String) =
+    Base64.getEncoder.encodeToString(payloadString.getBytes(StandardCharsets.UTF_8))
+
+  private def retrieveNonRepudiationResponse(
+    nonRepudiationMetadata: NonRepudiationMetadata,
+    encodedPayloadString: String
+  )(implicit hc: HeaderCarrier): Future[NonRepudiationSubmissionAccepted] =
+    nonRepudiationConnector.submitNonRepudiation(encodedPayloadString, nonRepudiationMetadata).map {
+      case response @ NonRepudiationSubmissionAccepted(_) => response
+    }.recoverWith {
+      case exception: HttpException => Future.failed(exception)
+    }
+
+  private def retrieveUserAuthToken(hc: HeaderCarrier) =
+    hc.authorization match {
+      case Some(Authorization(authToken)) => authToken
+      case _                              => throw new InternalServerException("No auth token available for NRS")
+    }
+
+  private def retrievePayloadChecksum(payloadString: String) =
+    MessageDigest.getInstance("SHA-256")
+      .digest(payloadString.getBytes(StandardCharsets.UTF_8))
+      .map("%02x".format(_)).mkString
 
   private def retrieveIdentityData()(implicit headerCarrier: HeaderCarrier): Future[IdentityData] =
     authConnector.authorise(EmptyPredicate, nonRepudiationIdentityRetrievals).map {
