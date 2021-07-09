@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.unit
 
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   SubscriptionCreateResponse,
   SubscriptionCreateSuccessfulResponse
@@ -30,7 +32,10 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
   NonRepudiationConnector,
   SubscriptionsConnector
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
+  NonRepudiationMetadata,
+  NonRepudiationSubmissionAccepted
+}
 
 import scala.concurrent.Future
 
@@ -77,6 +82,17 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
     when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any())).thenReturn(
       Future.successful(response)
     )
+
+  protected def mockNonRepudiationSubmission(
+    testEncodedPayload: String,
+    expectedMetadata: NonRepudiationMetadata,
+    response: NonRepudiationSubmissionAccepted
+  )(implicit hc: HeaderCarrier): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
+    when(
+      mockNonRepudiationConnector.submitNonRepudiation(ArgumentMatchers.eq(testEncodedPayload),
+                                                       ArgumentMatchers.eq(expectedMetadata)
+      )(ArgumentMatchers.eq(hc))
+    ).thenReturn(Future.successful(response))
 
   protected def mockNonRepudiationSubmissionFailure(
     ex: Exception

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
+import com.kenshoo.play.metrics.Metrics
 import play.api.http.Status.ACCEPTED
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{
@@ -35,30 +36,34 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class NonRepudiationConnector @Inject() (httpClient: HttpClient, config: AppConfig)(implicit
-  ec: ExecutionContext
-) extends HttpReadsHttpResponse {
+class NonRepudiationConnector @Inject() (
+  httpClient: HttpClient,
+  config: AppConfig,
+  metrics: Metrics
+)(implicit ec: ExecutionContext)
+    extends HttpReadsHttpResponse {
 
   def submitNonRepudiation(
     encodedPayloadString: String,
     nonRepudiationMetadata: NonRepudiationMetadata
   )(implicit hc: HeaderCarrier): Future[NonRepudiationSubmissionAccepted] = {
+    val timer    = metrics.defaultRegistry.timer("ppt.nrs.submission.timer").time()
     val jsonBody = Json.obj("payload" -> encodedPayloadString, "metadata" -> nonRepudiationMetadata)
-
     httpClient.POST[JsObject, HttpResponse](url = config.nonRepudiationSubmissionUrl,
                                             body = jsonBody,
                                             headers =
                                               Seq("X-API-Key" -> config.nonRepudiationApiKey)
-    ).map {
-      response =>
-        response.status match {
-          case ACCEPTED =>
-            val submissionId = (response.json \ "nrSubmissionId").as[String]
-            NonRepudiationSubmissionAccepted(submissionId)
-          case _ =>
-            throw new HttpException(response.body, response.status)
-        }
-    }
+    ).andThen { case _ => timer.stop() }
+      .map {
+        response =>
+          response.status match {
+            case ACCEPTED =>
+              val submissionId = (response.json \ "nrSubmissionId").as[String]
+              NonRepudiationSubmissionAccepted(submissionId)
+            case _ =>
+              throw new HttpException(response.body, response.status)
+          }
+      }
   }
 
 }

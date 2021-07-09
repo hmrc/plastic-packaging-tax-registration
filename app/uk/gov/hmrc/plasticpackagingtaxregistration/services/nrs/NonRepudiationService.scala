@@ -40,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 case class NonRepudiationService @Inject() (
   nonRepudiationConnector: NonRepudiationConnector,
-  val authConnector: AuthConnector
+  authConnector: AuthConnector
 )(implicit ec: ExecutionContext)
     extends AuthorisedFunctions {
 
@@ -70,7 +70,7 @@ case class NonRepudiationService @Inject() (
       )
     } yield nonRepudiationSubmissionResponse
 
-  private def encodePayload(payloadString: String) =
+  private def encodePayload(payloadString: String): String =
     Base64.getEncoder.encodeToString(payloadString.getBytes(StandardCharsets.UTF_8))
 
   private def retrieveNonRepudiationResponse(
@@ -83,13 +83,13 @@ case class NonRepudiationService @Inject() (
       case exception: HttpException => Future.failed(exception)
     }
 
-  private def retrieveUserAuthToken(hc: HeaderCarrier) =
+  private def retrieveUserAuthToken(hc: HeaderCarrier): String =
     hc.authorization match {
       case Some(Authorization(authToken)) => authToken
       case _                              => throw new InternalServerException("No auth token available for NRS")
     }
 
-  private def retrievePayloadChecksum(payloadString: String) =
+  private def retrievePayloadChecksum(payloadString: String): String =
     MessageDigest.getInstance("SHA-256")
       .digest(payloadString.getBytes(StandardCharsets.UTF_8))
       .map("%02x".format(_)).mkString

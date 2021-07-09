@@ -17,12 +17,12 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
 import play.api.Logger
+import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
-  SubscriptionCreateFailureResponse,
   SubscriptionCreateSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
@@ -59,23 +59,23 @@ class SubscriptionController @Inject() (
   def submit(safeNumber: String): Action[RegistrationRequest] =
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
-        val subscription = Subscription(request.body.toRegistration(request.pptId))
-        logPayload("PPT Subscription: ", subscription)
-        subscriptionsConnector.submitSubscription(safeNumber, subscription).map {
+        val pptSubscription = request.body.toRegistration(request.pptId)
+        val eisSubscription = Subscription(pptSubscription)
+        logPayload("PPT Subscription: ", eisSubscription)
+        subscriptionsConnector.submitSubscription(safeNumber, eisSubscription).map {
           case response @ SubscriptionCreateSuccessfulResponse(pptReference, processingDate, _) =>
-            nonRepudiationService.submitNonRepudiation(subscription.toString,
+            nonRepudiationService.submitNonRepudiation(toJson(pptSubscription).toString,
                                                        processingDate,
                                                        pptReference,
                                                        request.body.userHeaders.getOrElse(Map.empty)
             )
             repository.delete(request.pptId)
             Ok(response)
-          case response @ SubscriptionCreateFailureResponse(_) => Ok(response)
         }
     }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
-    logger.debug(s"$prefix payload: ${Json.toJson(payload)}")
+    logger.debug(s"$prefix payload: ${toJson(payload)}")
     payload
   }
 

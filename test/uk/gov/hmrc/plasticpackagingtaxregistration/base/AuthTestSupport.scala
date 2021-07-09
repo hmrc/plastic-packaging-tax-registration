@@ -18,20 +18,23 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.base
 
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.mockito.stubbing.OngoingStubbing
 import org.mockito.{ArgumentMatcher, ArgumentMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Logger
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.Predicate
+import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrieval}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator.{
   pptEnrolmentIdentifierName,
   pptEnrolmentKey
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.SignedInUser
+import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService.NonRepudiationIdentityRetrievals
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthTestSupport extends MockitoSugar {
 
@@ -49,6 +52,9 @@ trait AuthTestSupport extends MockitoSugar {
     )
       .thenReturn(Future.successful(user.enrolments))
 
+  def pptEnrollmentMatcher(user: SignedInUser): ArgumentMatcher[Predicate] =
+    (p: Predicate) => p == enrolment && user.enrolments.getEnrolment(pptEnrolmentKey).isDefined
+
   def withUserWithEnrolments(user: SignedInUser) =
     when(
       mockAuthConnector.authorise(ArgumentMatchers.argThat((_: Predicate) => true),
@@ -56,9 +62,6 @@ trait AuthTestSupport extends MockitoSugar {
       )(any(), any())
     )
       .thenReturn(Future.successful(user.enrolments))
-
-  def pptEnrollmentMatcher(user: SignedInUser): ArgumentMatcher[Predicate] =
-    (p: Predicate) => p == enrolment && user.enrolments.getEnrolment(pptEnrolmentKey).isDefined
 
   def withUnauthorizedUser(error: Throwable): Unit =
     when(mockAuthConnector.authorise(any(), any())(any(), any())).thenReturn(Future.failed(error))
@@ -89,5 +92,18 @@ trait AuthTestSupport extends MockitoSugar {
 
   def newEnrolment(key: String, identifierName: String, identifierValue: String): Enrolment =
     Enrolment(key).withIdentifier(identifierName, identifierValue)
+
+  def mockAuthorization(
+    nrsIdentityRetrievals: Retrieval[NonRepudiationIdentityRetrievals],
+    authRetrievalsResponse: NonRepudiationIdentityRetrievals
+  )(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): OngoingStubbing[Future[NonRepudiationIdentityRetrievals]] =
+    when(
+      mockAuthConnector.authorise(ArgumentMatchers.eq(EmptyPredicate),
+                                  ArgumentMatchers.eq(nrsIdentityRetrievals)
+      )(ArgumentMatchers.eq(hc), ArgumentMatchers.eq(ec))
+    ).thenReturn(Future.successful(authRetrievalsResponse))
 
 }

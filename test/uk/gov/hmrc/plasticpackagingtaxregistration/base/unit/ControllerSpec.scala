@@ -27,28 +27,43 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
+  NrsTestData,
   RegistrationTestData,
   SubscriptionTestData
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  NonRepudiationConnector,
+  SubscriptionsConnector
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
+import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
+
+import scala.concurrent.ExecutionContext
 
 trait ControllerSpec
     extends AnyWordSpecLike with MockitoSugar with Matchers with GuiceOneAppPerSuite
     with AuthTestSupport with BeforeAndAfterEach with DefaultAwaitTimeout with MockConnectors
-    with RegistrationTestData with SubscriptionTestData {
+    with RegistrationTestData with SubscriptionTestData with NrsTestData {
 
   SharedMetricRegistries.clear()
+  protected implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  protected val mockRepository: RegistrationRepository = mock[RegistrationRepository]
+  protected implicit val hc: HeaderCarrier =
+    HeaderCarrier(authorization = Some(Authorization(testAuthToken)))
 
   override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[AuthConnector].to(mockAuthConnector),
                bind[SubscriptionsConnector].to(mockSubscriptionsConnector),
-               bind[RegistrationRepository].to(mockRepository)
+               bind[NonRepudiationConnector].to(mockNonRepudiationConnector),
+               bind[RegistrationRepository].to(mockRepository),
+               bind[NonRepudiationService].to(mockNonRepudiationService)
     )
     .build()
+
+  protected val mockNonRepudiationService: NonRepudiationService = mock[NonRepudiationService]
+  protected val mockRepository: RegistrationRepository           = mock[RegistrationRepository]
 
 }

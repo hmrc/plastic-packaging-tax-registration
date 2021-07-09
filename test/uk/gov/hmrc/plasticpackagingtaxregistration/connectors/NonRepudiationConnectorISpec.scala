@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, _}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.ScalaFutures
-import play.api.http.Status.ACCEPTED
+import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR}
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.Helpers.await
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.NrsTestData
@@ -32,52 +32,77 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
 
 class NonRepudiationConnectorISpec
     extends ConnectorISpec with Injector with AuthTestSupport with NrsTestData with ScalaFutures {
-  lazy val config                             = Map("microservice.services.nrs.api-key" -> testNonRepudiationApiKey)
-  lazy val connector: NonRepudiationConnector = app.injector.instanceOf[NonRepudiationConnector]
-  val testNonRepudiationApiKey                = "test-key"
+  lazy val config                               = Map("microservice.services.nrs.api-key" -> testNonRepudiationApiKey)
+  lazy val connector: NonRepudiationConnector   = app.injector.instanceOf[NonRepudiationConnector]
+  private implicit val testNonRepudiationApiKey = "test-key"
+
+  private val pptNrsSubmissionTimer = "ppt.nrs.submission.timer"
 
   "submitNonRepudiation" should {
+    val testEncodedPayload  = "testEncodedPayload"
+    val testPayloadChecksum = "testPayloadChecksum"
+    val headerData          = Map("testHeaderKey" -> "testHeaderValue")
+
+    val testNonRepudiationMetadata = NonRepudiationMetadata(businessId = "vrs",
+                                                            notableEvent = "vat-registration",
+                                                            payloadContentType =
+                                                              "application/json",
+                                                            payloadSha256Checksum =
+                                                              testPayloadChecksum,
+                                                            userSubmissionTimestamp =
+                                                              testDateTime,
+                                                            identityData =
+                                                              testNonRepudiationIdentityData,
+                                                            userAuthToken = testAuthToken,
+                                                            headerData = headerData,
+                                                            searchKeys =
+                                                              Map("postCode" -> testPPTReference)
+    )
+
+    val expectedRequestJson: JsObject =
+      Json.obj("payload" -> testEncodedPayload, "metadata" -> testNonRepudiationMetadata)
+
     "return a success" in {
-      val testEncodedPayload  = "testEncodedPayload"
-      val testPayloadChecksum = "testPayloadChecksum"
-      val headerData          = Map("testHeaderKey" -> "testHeaderValue")
-
-      val testNonRepudiationMetadata = NonRepudiationMetadata(businessId = "vrs",
-                                                              notableEvent = "vat-registration",
-                                                              payloadContentType =
-                                                                "application/json",
-                                                              payloadSha256Checksum =
-                                                                testPayloadChecksum,
-                                                              userSubmissionTimestamp =
-                                                                testDateTime,
-                                                              identityData =
-                                                                testNonRepudiationIdentityData,
-                                                              userAuthToken = testAuthToken,
-                                                              headerData = headerData,
-                                                              searchKeys =
-                                                                Map("postCode" -> testPPTReference)
-      )
-
-      val expectedRequestJson: JsObject =
-        Json.obj("payload" -> testEncodedPayload, "metadata" -> testNonRepudiationMetadata)
-
       val testNonRepudiationSubmissionId = "testNonRepudiationSubmissionId"
-      stubNonRepudiationSubmission(expectedRequestJson, testNonRepudiationApiKey)(
-        ACCEPTED,
-        Json.obj("nrSubmissionId" -> testNonRepudiationSubmissionId)
+      stubNonRepudiationSubmission(ACCEPTED,
+                                   expectedRequestJson,
+                                   Json.obj("nrSubmissionId" -> testNonRepudiationSubmissionId)
       )
 
       val res = connector.submitNonRepudiation(testEncodedPayload, testNonRepudiationMetadata)
 
       await(res) mustBe NonRepudiationSubmissionAccepted(testNonRepudiationSubmissionId)
-
+      getTimer(pptNrsSubmissionTimer).getCount mustBe 1
     }
+
+    "handle a NRS exception" in {
+      stubNonRepudiationSubmissionFailure(INTERNAL_SERVER_ERROR, expectedRequestJson)
+
+      intercept[Exception] {
+        await(connector.submitNonRepudiation(testEncodedPayload, testNonRepudiationMetadata))
+      }
+      getTimer(pptNrsSubmissionTimer).getCount mustBe 1
+    }
+
   }
 
-  private def stubNonRepudiationSubmission(
-    requestJson: JsValue,
+  private def stubNonRepudiationSubmission(status: Int, request: JsValue, response: JsObject)(
+    implicit apiKey: String
+  ): StubMapping =
+    stubFor(
+      post(urlMatching(s"/submission"))
+        .withRequestBody(equalToJson(request.toString()))
+        .withHeader("X-API-Key", equalTo(apiKey))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+            .withBody(response.toString())
+        )
+    )
+
+  private def stubNonRepudiationSubmissionFailure(status: Int, requestJson: JsValue)(implicit
     apiKey: String
-  )(status: Int, body: JsObject): StubMapping =
+  ): StubMapping =
     stubFor(
       post(urlMatching(s"/submission"))
         .withRequestBody(equalToJson(requestJson.toString()))
@@ -85,7 +110,6 @@ class NonRepudiationConnectorISpec
         .willReturn(
           aResponse()
             .withStatus(status)
-            .withBody(body.toString())
         )
     )
 

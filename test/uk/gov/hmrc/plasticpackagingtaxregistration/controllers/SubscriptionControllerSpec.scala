@@ -17,27 +17,24 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.BDDMockito.`given`
-import org.mockito.Mockito.{verify, verifyNoInteractions}
+import org.mockito.Mockito.{verify, verifyNoInteractions, when}
 import org.mockito.{ArgumentMatchers, Mockito}
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  Subscription,
-  SubscriptionCreateFailureResponse,
-  SubscriptionCreateSuccessfulResponse
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.MetaData
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
 
+import java.time.ZonedDateTime
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -45,7 +42,7 @@ class SubscriptionControllerSpec
     extends ControllerSpec with RegistrationBuilder with RegistrationRequestBuilder {
 
   override def beforeEach(): Unit = {
-    Mockito.reset(mockRepository)
+    Mockito.reset(mockRepository, mockNonRepudiationService)
     super.beforeEach()
   }
 
@@ -99,14 +96,15 @@ class SubscriptionControllerSpec
                                        withUserHeaders(pptUserHeaders)
     )
 
-    "return 200 and delete registration" when {
-      "request is valid" in {
-        val utr = "999"
+    "return 200 make NRS submission and delete transient registration" when {
+      "EIS/IF subscription is successful" in {
+        val utr            = "999"
+        val nrSubmissionId = "nrSubmissionId"
         withAuthorizedUser(user = newUser(Some(pptEnrolment(utr))))
-
-        given(
-          mockSubscriptionsConnector.submitSubscription(any[String], any[Subscription])(any())
-        ).willReturn(Future.successful(subscriptionCreateResponse))
+        mockGetSubscriptionCreate(subscriptionCreateResponse)
+        when(
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+        ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
 
         val result: Future[Result] =
           route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
@@ -117,26 +115,12 @@ class SubscriptionControllerSpec
         response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
         response.processingDate mustBe subscriptionCreateResponse.processingDate
         verify(mockRepository).delete(utr)
-      }
-    }
-
-    "return 200 and not delete registration" when {
-      "submission fails" in {
-        val utr = "999"
-        withAuthorizedUser(user = newUser(Some(pptEnrolment(utr))))
-
-        given(
-          mockSubscriptionsConnector.submitSubscription(any[String], any[Subscription])(any())
-        ).willReturn(Future.successful(subscriptionCreateFailureResponse))
-
-        val result: Future[Result] =
-          route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
-
-        status(result) must be(OK)
-        val response = contentAsJson(result).as[SubscriptionCreateFailureResponse]
-
-        response.failures.get.isEmpty mustBe false
-        verifyNoInteractions(mockRepository)
+        verify(mockNonRepudiationService).submitNonRepudiation(
+          ArgumentMatchers.contains(request.incorpJourneyId.get),
+          any[ZonedDateTime],
+          ArgumentMatchers.eq(subscriptionCreateResponse.pptReference),
+          ArgumentMatchers.eq(pptUserHeaders)
+        )(any[HeaderCarrier])
       }
     }
 
@@ -168,7 +152,7 @@ class SubscriptionControllerSpec
     "return 500" when {
       "EIS/IF subscription call returns an exception" in {
         withAuthorizedUser()
-        mockGetSubscriptionSubmitFailure((new RuntimeException("error")))
+        mockGetSubscriptionSubmitFailure(new RuntimeException("error"))
         intercept[Exception] {
           val result: Future[Result] =
             route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
