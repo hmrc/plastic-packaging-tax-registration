@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
+package uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs
 
-trait SubscriptionCreateResponse
+import play.api.libs.json.{Json, OFormat}
+
+case class NonRepudiationSubmissionAccepted(submissionId: String)
+
+object NonRepudiationSubmissionAccepted {
+  implicit val format: OFormat[NonRepudiationMetadata] = Json.format[NonRepudiationMetadata]
+}

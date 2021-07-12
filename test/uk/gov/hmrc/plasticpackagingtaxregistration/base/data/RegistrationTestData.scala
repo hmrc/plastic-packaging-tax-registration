@@ -77,4 +77,9 @@ trait RegistrationTestData {
     startDate = Some(Date(day = Some(6), month = Some(4), year = Some(2022)))
   )
 
+  protected val registrationReviewed: Boolean  = true
+  protected val registrationCompleted: Boolean = true
+
+  protected val pptUserHeaders: Map[String, String] = Map("testHeaderKey" -> "testHeaderValue")
+
 }

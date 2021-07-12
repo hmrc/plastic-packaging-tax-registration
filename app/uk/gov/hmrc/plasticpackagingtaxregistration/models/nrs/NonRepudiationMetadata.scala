@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
+package uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs
 
-trait SubscriptionCreateResponse
+import play.api.libs.json._
+
+import java.time.ZonedDateTime
+
+case class NonRepudiationMetadata(
+  businessId: String,
+  notableEvent: String,
+  payloadContentType: String,
+  payloadSha256Checksum: String,
+  userSubmissionTimestamp: ZonedDateTime,
+  identityData: IdentityData,
+  userAuthToken: String,
+  headerData: Map[String, String],
+  searchKeys: Map[String, String]
+)
+
+object NonRepudiationMetadata {
+  implicit val format: OFormat[NonRepudiationMetadata] = Json.format[NonRepudiationMetadata]
+}

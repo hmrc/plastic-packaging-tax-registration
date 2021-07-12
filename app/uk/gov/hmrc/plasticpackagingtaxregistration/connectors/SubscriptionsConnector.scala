@@ -22,7 +22,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
-  SubscriptionCreateResponse
+  SubscriptionCreateResponse,
+  SubscriptionCreateSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
@@ -64,7 +65,7 @@ class SubscriptionsConnector @Inject() (
   ): Future[SubscriptionCreateResponse] = {
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationId -> UUID.randomUUID().toString
-    httpClient.POST[Subscription, SubscriptionCreateResponse](
+    httpClient.POST[Subscription, SubscriptionCreateSuccessfulResponse](
       url = appConfig.subscriptionCreateUrl(safeNumber),
       body = subscription,
       headers = headers :+ correlationIdHeader

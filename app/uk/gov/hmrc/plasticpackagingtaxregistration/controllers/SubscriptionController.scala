@@ -17,18 +17,20 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
 import play.api.Logger
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json.toJson
+import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
-  SubscriptionCreateResponse
+  SubscriptionCreateSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegistrationRequest
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
+import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -39,6 +41,7 @@ class SubscriptionController @Inject() (
   subscriptionsConnector: SubscriptionsConnector,
   authenticator: Authenticator,
   repository: RegistrationRepository,
+  nonRepudiationService: NonRepudiationService,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
@@ -56,20 +59,23 @@ class SubscriptionController @Inject() (
   def submit(safeNumber: String): Action[RegistrationRequest] =
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
-        val subscription = Subscription(request.body.toRegistration(request.pptId))
-        logPayload("Subscription: ", subscription)
-        subscriptionsConnector.submitSubscription(safeNumber, subscription).map {
-          response: SubscriptionCreateResponse =>
-            {
-              if (response.isSuccess)
-                repository.delete(request.pptId)
-            }
+        val pptSubscription = request.body.toRegistration(request.pptId)
+        val eisSubscription = Subscription(pptSubscription)
+        logPayload("PPT Subscription: ", eisSubscription)
+        subscriptionsConnector.submitSubscription(safeNumber, eisSubscription).map {
+          case response @ SubscriptionCreateSuccessfulResponse(pptReference, processingDate, _) =>
+            nonRepudiationService.submitNonRepudiation(toJson(pptSubscription).toString,
+                                                       processingDate,
+                                                       pptReference,
+                                                       request.body.userHeaders.getOrElse(Map.empty)
+            )
+            repository.delete(request.pptId)
             Ok(response)
         }
     }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
-    logger.debug(s"Payload: ${Json.toJson(payload)}")
+    logger.debug(s"$prefix payload: ${toJson(payload)}")
     payload
   }
 

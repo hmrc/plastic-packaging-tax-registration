@@ -34,6 +34,9 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
         |microservice.services.eis.host=localhost
         |microservice.services.eis.port=8506
         |microservice.services.eis.bearerToken=test123456
+        |microservice.services.nrs.host=localhost
+        |microservice.services.nrs.port=8506
+        |microservice.services.nrs.api-key=test-key
         |microservice.metrics.graphite.host=graphite
         |auditing.enabled=true
         |eis.environment=test
@@ -67,8 +70,16 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
       )
     }
 
+    "have 'nonRepudiationSubmissionUrl' defined" in {
+      configService.nonRepudiationSubmissionUrl must be("http://localhost:8506/submission")
+    }
+
     "have 'eis environment' defined" in {
       configService.eisEnvironment must be("test")
+    }
+
+    "have 'NSR ApiKey' defined" in {
+      configService.nonRepudiationApiKey must be("test-key")
     }
 
   }

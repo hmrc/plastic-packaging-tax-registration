@@ -16,4 +16,15 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
-trait SubscriptionCreateResponse
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
+
+case class SubscriptionCreateFailureResponse(failures: Option[Seq[EISError]] = None)
+    extends SubscriptionCreateResponse
+
+object SubscriptionCreateFailureResponse {
+
+  implicit val format: OFormat[SubscriptionCreateFailureResponse] =
+    Json.format[SubscriptionCreateFailureResponse]
+
+}
