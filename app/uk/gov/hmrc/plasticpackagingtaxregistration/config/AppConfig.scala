@@ -20,6 +20,8 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import scala.concurrent.duration.FiniteDuration
+
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
@@ -45,4 +47,5 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   lazy val nonRepudiationApiKey: String =
     servicesConfig.getString("microservice.services.nrs.api-key")
 
+  val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
 }
