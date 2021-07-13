@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
+import akka.actor.ActorSystem
+import com.codahale.metrics.Timer
 import com.kenshoo.play.metrics.Metrics
 import play.api.http.Status.ACCEPTED
 import play.api.libs.json.{JsObject, Json}
@@ -31,17 +33,20 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
   NonRepudiationMetadata,
   NonRepudiationSubmissionAccepted
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.util.Retry
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Try}
 
 @Singleton
 class NonRepudiationConnector @Inject() (
   httpClient: HttpClient,
-  config: AppConfig,
-  metrics: Metrics
+  val config: AppConfig,
+  metrics: Metrics,
+  override val actorSystem: ActorSystem
 )(implicit ec: ExecutionContext)
-    extends HttpReadsHttpResponse {
+    extends HttpReadsHttpResponse with Retry {
 
   def submitNonRepudiation(
     encodedPayloadString: String,
@@ -49,6 +54,15 @@ class NonRepudiationConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[NonRepudiationSubmissionAccepted] = {
     val timer    = metrics.defaultRegistry.timer("ppt.nrs.submission.timer").time()
     val jsonBody = Json.obj("payload" -> encodedPayloadString, "metadata" -> nonRepudiationMetadata)
+
+    retry(config.nrsRetries: _*)(shouldRetry, reasonForRetrying[NonRepudiationSubmissionAccepted]) {
+      submit(timer, jsonBody)
+    }
+  }
+
+  private def submit(timer: Timer.Context, jsonBody: JsObject)(implicit
+    hc: HeaderCarrier
+  ): Future[NonRepudiationSubmissionAccepted] =
     httpClient.POST[JsObject, HttpResponse](url = config.nonRepudiationSubmissionUrl,
                                             body = jsonBody,
                                             headers =
@@ -64,6 +78,17 @@ class NonRepudiationConnector @Inject() (
               throw new HttpException(response.body, response.status)
           }
       }
-  }
+
+  private def shouldRetry[A](response: Try[A]): Boolean =
+    response match {
+      case Failure(e) if e.asInstanceOf[HttpException].responseCode == 500 => true
+      // TODO: are there any other failure scenarios in which we would want to retry?
+      case _ => false
+    }
+
+  private def reasonForRetrying[A](response: Try[A]): String =
+    response match {
+      case _ => "Non Repudiation Service submission failed"
+    }
 
 }

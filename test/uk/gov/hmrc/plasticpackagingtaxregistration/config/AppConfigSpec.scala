@@ -23,6 +23,9 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.FiniteDuration
+
 class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
   private val validAppConfig: Config =
@@ -40,6 +43,7 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
         |microservice.metrics.graphite.host=graphite
         |auditing.enabled=true
         |eis.environment=test
+        |nrs.retries=["1s", "2s", "4s"]
     """.stripMargin)
 
   private val validServicesConfiguration = Configuration(validAppConfig)
@@ -80,6 +84,15 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
     "have 'NSR ApiKey' defined" in {
       configService.nonRepudiationApiKey must be("test-key")
+    }
+
+    "have 'nrs retries' defined" in {
+      configService.nrsRetries must be(
+        Seq(FiniteDuration(1, TimeUnit.SECONDS),
+            FiniteDuration(2, TimeUnit.SECONDS),
+            FiniteDuration(4, TimeUnit.SECONDS)
+        )
+      )
     }
 
   }
