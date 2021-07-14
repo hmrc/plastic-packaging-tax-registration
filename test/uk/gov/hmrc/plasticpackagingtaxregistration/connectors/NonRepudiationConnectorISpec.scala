@@ -32,9 +32,9 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
 
 class NonRepudiationConnectorISpec
     extends ConnectorISpec with Injector with AuthTestSupport with NrsTestData with ScalaFutures {
-  lazy val config                               = Map("microservice.services.nrs.api-key" -> testNonRepudiationApiKey)
-  lazy val connector: NonRepudiationConnector   = app.injector.instanceOf[NonRepudiationConnector]
-  private implicit val testNonRepudiationApiKey = "test-key"
+  lazy val config                                       = Map("microservice.services.nrs.api-key" -> testNonRepudiationApiKey)
+  lazy val connector: NonRepudiationConnector           = app.injector.instanceOf[NonRepudiationConnector]
+  private implicit val testNonRepudiationApiKey: String = "test-key"
 
   private val pptNrsSubmissionTimer = "ppt.nrs.submission.timer"
 
@@ -75,13 +75,29 @@ class NonRepudiationConnectorISpec
       getTimer(pptNrsSubmissionTimer).getCount mustBe 1
     }
 
-    "handle a NRS exception" in {
-      stubNonRepudiationSubmissionFailure(INTERNAL_SERVER_ERROR, expectedRequestJson)
+    "throw an exception" when {
+      "nrs service fails" in {
+        stubNonRepudiationSubmissionFailure(INTERNAL_SERVER_ERROR, expectedRequestJson)
 
-      intercept[Exception] {
-        await(connector.submitNonRepudiation(testEncodedPayload, testNonRepudiationMetadata))
+        intercept[Exception] {
+          await(connector.submitNonRepudiation(testEncodedPayload, testNonRepudiationMetadata))
+        }
+        getTimer(pptNrsSubmissionTimer).getCount mustBe 4 // We have 3 retries configured
       }
-      getTimer(pptNrsSubmissionTimer).getCount mustBe 1
+    }
+
+    "retry" when {
+      "nrs submission fails on first attempt" in {
+        val expectedSubmissionId = "nrs-submission-id"
+        expectNRSToFailOnceAndThenSucceed(INTERNAL_SERVER_ERROR,
+                                          ACCEPTED,
+                                          expectedRequestJson,
+                                          Json.obj("nrSubmissionId" -> expectedSubmissionId)
+        )
+
+        await(connector.submitNonRepudiation(testEncodedPayload, testNonRepudiationMetadata))
+          .submissionId must be(expectedSubmissionId)
+      }
     }
 
   }
@@ -112,5 +128,39 @@ class NonRepudiationConnectorISpec
             .withStatus(status)
         )
     )
+
+  private def expectNRSToFailOnceAndThenSucceed(
+    failStatus: Int,
+    successStatus: Int,
+    request: JsValue,
+    response: JsObject
+  )(implicit apiKey: String): StubMapping = {
+    val scenario = "Retry Scenario"
+    stubFor(
+      post(urlMatching(s"/submission"))
+        .withRequestBody(equalToJson(request.toString()))
+        .withHeader("X-API-Key", equalTo(apiKey))
+        .inScenario(scenario)
+        .whenScenarioStateIs("Started")
+        .willReturn(
+          aResponse()
+            .withStatus(failStatus)
+        )
+        .willSetStateTo("One Failure")
+    )
+
+    stubFor(
+      post(urlMatching(s"/submission"))
+        .withRequestBody(equalToJson(request.toString()))
+        .withHeader("X-API-Key", equalTo(apiKey))
+        .inScenario(scenario)
+        .whenScenarioStateIs("One Failure")
+        .willReturn(
+          aResponse()
+            .withStatus(successStatus)
+            .withBody(response.toString())
+        )
+    )
+  }
 
 }
