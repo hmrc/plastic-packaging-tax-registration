@@ -37,7 +37,8 @@ case class PrimaryContactDetails(
   email: Option[String] = None,
   phoneNumber: Option[String] = None,
   useRegisteredAddress: Option[Boolean] = None,
-  address: Option[Address] = None
+  address: Option[Address] = None,
+  journeyId: Option[String] = None
 )
 
 object PrimaryContactDetails {
