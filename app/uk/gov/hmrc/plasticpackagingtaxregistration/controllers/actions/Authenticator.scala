@@ -16,20 +16,16 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions
 
-import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator.{
-  pptEnrolmentIdentifierName,
-  pptEnrolmentKey
-}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -55,7 +51,7 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
     bodyParser: BodyParser[A]
   )(body: AuthorizedRequest[A] => Future[Result]): Action[A] =
     Action.async(bodyParser) { implicit request =>
-      authorisedWithPptId.flatMap {
+      authorisedWithInternalId.flatMap {
         case Right(authorisedRequest) =>
           logger.info(s"Authorised request for ${authorisedRequest.pptId}")
           body(authorisedRequest)
@@ -65,18 +61,16 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
       }
     }
 
-  def authorisedWithPptId[A](implicit
+  def authorisedWithInternalId[A](implicit
     hc: HeaderCarrier,
     request: Request[A]
   ): Future[Either[ErrorResponse, AuthorizedRequest[A]]] =
-    authorised(Enrolment(pptEnrolmentKey)).retrieve(allEnrolments) { enrolments =>
-      hasEnrolment(enrolments, pptEnrolmentIdentifierName) match {
-        case Some(utr) => Future.successful(Right(AuthorizedRequest(utr.value, request)))
-        case _ =>
-          val msg = "Unauthorised access. User without PPT Id."
-          logger.error(msg)
-          Future.successful(Left(ErrorResponse(UNAUTHORIZED, msg)))
-      }
+    authorised().retrieve(internalId) {
+      case None =>
+        val msg = "Unauthorised access. User without an HMRC Internal Id."
+        logger.error(msg)
+        Future.successful(Left(ErrorResponse(UNAUTHORIZED, msg)))
+      case Some(id) => Future.successful(Right(AuthorizedRequest(id, request)))
     } recover {
       case error: AuthorisationException =>
         logger.error(s"Unauthorised Exception for ${request.uri} with error ${error.reason}")
@@ -87,20 +81,6 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
         Left(ErrorResponse(INTERNAL_SERVER_ERROR, msg))
     }
 
-  private def hasEnrolment(
-    enrolments: Enrolments,
-    identifier: String
-  ): Option[EnrolmentIdentifier] =
-    enrolments.enrolments
-      .filter(_.key == pptEnrolmentKey)
-      .flatMap(_.identifiers)
-      .find(_.key == identifier)
-
-}
-
-object Authenticator {
-  val pptEnrolmentKey            = "HMRC-PPT-ORG"
-  val pptEnrolmentIdentifierName = "UTR"
 }
 
 case class AuthorizedRequest[A](pptId: String, request: Request[A])

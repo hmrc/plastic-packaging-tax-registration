@@ -20,15 +20,13 @@ import org.scalatest.EitherValues
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, UNAUTHORIZED}
 import play.api.test.Helpers.await
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
+import uk.gov.hmrc.auth.core.InsufficientConfidenceLevel
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator.{
-  pptEnrolmentIdentifierName,
-  pptEnrolmentKey
-}
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.ExecutionContext
@@ -44,76 +42,32 @@ class AuthenticatorSpec
 
   "Authenticator" should {
     "return 401 unauthorised " when {
-      "missing ppt enrolment key" in {
-        withUserWithEnrolments(
-          newUser(Some(newEnrolments(newEnrolment("rubbishKey", "id1", "val1"))))
-        )
+      "if user is not authorised" in {
+        withUnauthorizedUser(InsufficientConfidenceLevel("User not authorised"))
 
-        val result = await(authenticator.authorisedWithPptId(hc, request))
+        val result = await(authenticator.authorisedWithInternalId(hc, request))
 
-        result.left.value.statusCode mustBe 401
+        result.left.value.statusCode mustBe UNAUTHORIZED
       }
-      "missing ppt enrolment identifier" in {
-        withUserWithEnrolments(
-          newUser(Some(newEnrolments(newEnrolment(pptEnrolmentKey, "id1", "val1"))))
-        )
+    }
 
-        val result = await(authenticator.authorisedWithPptId(hc, request))
+    "return 500 " when {
+      "when returning the InternalId results in an exception" in {
+        withUnauthorizedUser(new Exception("Something went wrong"))
 
-        result.left.value.statusCode mustBe 401
-      }
-      "correct ppt enrolment identifier but no ppt enrolment key" in {
-        withUserWithEnrolments(
-          newUser(Some(newEnrolments(newEnrolment("someKey", pptEnrolmentIdentifierName, "val1"))))
-        )
+        val result = await(authenticator.authorisedWithInternalId(hc, request))
 
-        val result = await(authenticator.authorisedWithPptId(hc, request))
-
-        result.left.value.statusCode mustBe 401
+        result.left.value.statusCode mustBe INTERNAL_SERVER_ERROR
       }
     }
 
     "return 200" when {
-      "ppt enrolments exist" in {
-        withUserWithEnrolments(
-          newUser(
-            Some(newEnrolments(newEnrolment(pptEnrolmentKey, pptEnrolmentIdentifierName, "val1")))
-          )
-        )
+      "internalId is available" in {
+        withAuthorizedUser(newUser())
 
-        val result = await(authenticator.authorisedWithPptId(hc, request))
+        val result = await(authenticator.authorisedWithInternalId(hc, request))
 
-        result.value.pptId mustBe "val1"
-      }
-      "ppt enrolments exist among other enrolment keys" in {
-        withUserWithEnrolments(
-          newUser(
-            Some(
-              newEnrolments(newEnrolment(pptEnrolmentKey, pptEnrolmentIdentifierName, "val1"),
-                            newEnrolment("someKey", "someidentifier", "val2")
-              )
-            )
-          )
-        )
-
-        val result = await(authenticator.authorisedWithPptId(hc, request))
-
-        result.value.pptId mustBe "val1"
-      }
-      "multiple enrolment identifiers under same key" in {
-        withUserWithEnrolments(
-          newUser(
-            Some(
-              newEnrolments(newEnrolment(pptEnrolmentKey, pptEnrolmentIdentifierName, "val1"),
-                            newEnrolment(pptEnrolmentKey, "someidentifier", "val2")
-              )
-            )
-          )
-        )
-
-        val result = await(authenticator.authorisedWithPptId(hc, request))
-
-        result.value.pptId mustBe "val1"
+        result.value.pptId mustBe "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
       }
     }
   }

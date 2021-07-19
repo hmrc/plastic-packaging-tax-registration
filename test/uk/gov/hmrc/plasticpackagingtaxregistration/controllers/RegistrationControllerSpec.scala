@@ -81,7 +81,7 @@ class RegistrationControllerSpec
 
         status(result) must be(CREATED)
         contentAsJson(result) mustBe toJson(registration)
-        theCreatedRegistration.id mustBe utr
+        theCreatedRegistration.id mustBe userInternalId
       }
     }
 
@@ -111,13 +111,13 @@ class RegistrationControllerSpec
   }
 
   "GET /:id" should {
-    val get = FakeRequest("GET", "/registrations/" + utr)
+    val get = FakeRequest("GET", "/registrations/" + userInternalId)
 
     "return 200" when {
       "request is valid" in {
         withAuthorizedUser()
-        val registration = aRegistration(withId(utr))
-        given(registrationRepository.findByRegistrationId(utr)).willReturn(
+        val registration = aRegistration(withId(userInternalId))
+        given(registrationRepository.findByRegistrationId(userInternalId)).willReturn(
           Future.successful(Some(registration))
         )
 
@@ -125,20 +125,22 @@ class RegistrationControllerSpec
 
         status(result) must be(OK)
         contentAsJson(result) mustBe toJson(registration)
-        verify(registrationRepository).findByRegistrationId(utr)
+        verify(registrationRepository).findByRegistrationId(userInternalId)
       }
     }
 
     "return 404" when {
       "id is not found" in {
         withAuthorizedUser()
-        given(registrationRepository.findByRegistrationId(utr)).willReturn(Future.successful(None))
+        given(registrationRepository.findByRegistrationId(userInternalId)).willReturn(
+          Future.successful(None)
+        )
 
         val result: Future[Result] = route(app, get).get
 
         status(result) must be(NOT_FOUND)
         contentAsString(result) mustBe empty
-        verify(registrationRepository).findByRegistrationId(utr)
+        verify(registrationRepository).findByRegistrationId(userInternalId)
       }
     }
 
@@ -222,7 +224,7 @@ class RegistrationControllerSpec
         status(result) must be(OK)
         contentAsJson(result) mustBe toJson(registration)
         val updatedRegistration = theUpdatedRegistration
-        updatedRegistration.id mustBe utr
+        updatedRegistration.id mustBe userInternalId
         updatedRegistration.incorpJourneyId mustBe Some("f368e653-790a-4a95-af62-4132f0ffd433")
         updatedRegistration.primaryContactDetails mustBe request.primaryContactDetails
         updatedRegistration.organisationDetails mustBe request.organisationDetails
