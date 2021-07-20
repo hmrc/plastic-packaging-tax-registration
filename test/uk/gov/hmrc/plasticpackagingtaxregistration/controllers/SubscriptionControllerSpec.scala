@@ -98,9 +98,9 @@ class SubscriptionControllerSpec
 
     "return 200 make NRS submission and delete transient registration" when {
       "EIS/IF subscription is successful" in {
-        val utr            = "999"
+        val internalId     = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
         val nrSubmissionId = "nrSubmissionId"
-        withAuthorizedUser(user = newUser(Some(pptEnrolment(utr))))
+        withAuthorizedUser(user = newUser())
         mockGetSubscriptionCreate(subscriptionCreateResponse)
         when(
           mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
@@ -114,7 +114,7 @@ class SubscriptionControllerSpec
         response.pptReference mustBe subscriptionCreateResponse.pptReference
         response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
         response.processingDate mustBe subscriptionCreateResponse.processingDate
-        verify(mockRepository).delete(utr)
+        verify(mockRepository).delete(internalId)
         verify(mockNonRepudiationService).submitNonRepudiation(
           ArgumentMatchers.contains(request.incorpJourneyId.get),
           any[ZonedDateTime],

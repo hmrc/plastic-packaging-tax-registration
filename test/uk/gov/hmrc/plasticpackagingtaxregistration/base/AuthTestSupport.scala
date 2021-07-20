@@ -16,21 +16,17 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base
 
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.mockito.stubbing.OngoingStubbing
-import org.mockito.{ArgumentMatcher, ArgumentMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Logger
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.allEnrolments
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrieval}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator.{
-  pptEnrolmentIdentifierName,
-  pptEnrolmentKey
-}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.SignedInUser
 import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService.NonRepudiationIdentityRetrievals
 
@@ -41,40 +37,16 @@ trait AuthTestSupport extends MockitoSugar {
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
   lazy val mockLogger: Logger               = mock[Logger]
 
-  val enrolment: Predicate = Enrolment(pptEnrolmentKey)
-  val utr                  = "222222222"
+  val userInternalId = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
 
-  def withAuthorizedUser(user: SignedInUser = newUser(Some(pptEnrolment(utr)))): Unit =
-    when(
-      mockAuthConnector.authorise(ArgumentMatchers.argThat(pptEnrollmentMatcher(user)),
-                                  ArgumentMatchers.eq(allEnrolments)
-      )(any(), any())
-    )
-      .thenReturn(Future.successful(user.enrolments))
-
-  def pptEnrollmentMatcher(user: SignedInUser): ArgumentMatcher[Predicate] =
-    (p: Predicate) => p == enrolment && user.enrolments.getEnrolment(pptEnrolmentKey).isDefined
-
-  def withUserWithEnrolments(user: SignedInUser) =
-    when(
-      mockAuthConnector.authorise(ArgumentMatchers.argThat((_: Predicate) => true),
-                                  ArgumentMatchers.eq(allEnrolments)
-      )(any(), any())
-    )
-      .thenReturn(Future.successful(user.enrolments))
+  def withAuthorizedUser(user: SignedInUser = newUser()): Unit =
+    when(mockAuthConnector.authorise(any(), ArgumentMatchers.eq(internalId))(any(), any()))
+      .thenReturn(Future.successful(user.internalId))
 
   def withUnauthorizedUser(error: Throwable): Unit =
     when(mockAuthConnector.authorise(any(), any())(any(), any())).thenReturn(Future.failed(error))
 
-  def userWithoutProviderId(user: SignedInUser = newUser(Some(pptEnrolment("")))): Unit =
-    when(
-      mockAuthConnector.authorise(ArgumentMatchers.argThat(pptEnrollmentMatcher(user)),
-                                  ArgumentMatchers.eq(allEnrolments)
-      )(any(), any())
-    )
-      .thenReturn(Future.successful(Enrolments(Set())))
-
-  def newUser(enrolments: Option[Enrolments] = Some(pptEnrolment("123"))): SignedInUser =
+  def newUser(enrolments: Option[Enrolments] = None): SignedInUser =
     SignedInUser(Credentials("123123123", "Plastic Limited"),
                  Name(Some("Aldo"), Some("Rain")),
                  Some("amina@hmrc.co.uk"),
@@ -83,9 +55,6 @@ trait AuthTestSupport extends MockitoSugar {
                  Some(AffinityGroup.Organisation),
                  enrolments.getOrElse(Enrolments(Set()))
     )
-
-  def pptEnrolment(pptEnrolmentId: String) =
-    newEnrolments(newEnrolment(pptEnrolmentKey, pptEnrolmentIdentifierName, pptEnrolmentId))
 
   def newEnrolments(enrolment: Enrolment*): Enrolments =
     Enrolments(enrolment.toSet)
