@@ -49,7 +49,18 @@ class CustomerDetailsSpec
         customerDetails.individualDetails.get.firstName mustBe pptIndividualDetails.soleTraderDetails.get.firstName
         customerDetails.individualDetails.get.lastName mustBe pptIndividualDetails.soleTraderDetails.get.lastName
         customerDetails.individualDetails.get.middleName mustBe None
+      }
 
+      "subscripting a partnership" in {
+        val customerDetails = CustomerDetails(pptPartnershipDetails)
+        customerDetails.customerType mustBe CustomerType.Organisation
+
+        customerDetails.individualDetails mustBe None
+
+        customerDetails.organisationDetails.get.organisationType mustBe Some(
+          pptPartnershipDetails.organisationType.get.toString
+        )
+        customerDetails.organisationDetails.get.organisationName mustBe "TODO"
       }
     }
 

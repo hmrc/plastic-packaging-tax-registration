@@ -42,15 +42,25 @@ object CustomerDetails {
               Some(IndividualDetails(firstName = details.firstName, lastName = details.lastName))
           )
         }.getOrElse(throw new Exception("Individual details are required"))
+      case Some(OrgType.PARTNERSHIP) =>
+        organisationDetails.partnershipDetails.map { details =>
+          CustomerDetails(customerType = CustomerType.Organisation,
+                          organisationDetails = Some(
+                            OrganisationDetails(organisationType =
+                                                  Some(OrgType.PARTNERSHIP.toString),
+                                                organisationName = "TODO"
+                            )
+                          )
+          )
+        }.getOrElse(throw new Exception("Partnership organisation details are required"))
       case Some(orgType) =>
         organisationDetails.incorporationDetails.map { details =>
-          CustomerDetails(CustomerType.Organisation,
-                          organisationDetails =
-                            Some(
-                              OrganisationDetails(organisationType = Some(orgType.toString),
-                                                  organisationName = details.companyName
-                              )
+          CustomerDetails(customerType = CustomerType.Organisation,
+                          organisationDetails = Some(
+                            OrganisationDetails(organisationType = Some(orgType.toString),
+                                                organisationName = details.companyName
                             )
+                          )
           )
         }.getOrElse(throw new Exception("Incorporation details are required"))
 

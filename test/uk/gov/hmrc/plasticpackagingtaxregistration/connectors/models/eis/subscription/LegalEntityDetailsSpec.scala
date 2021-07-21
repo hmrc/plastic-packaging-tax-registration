@@ -66,6 +66,26 @@ class LegalEntityDetailsSpec
         legalEntityDetails.customerDetails.individualDetails.get.lastName mustBe pptIndividualDetails.soleTraderDetails.get.lastName
         legalEntityDetails.customerDetails.individualDetails.get.middleName mustBe None
       }
+      "subscripting a partnership" in {
+        val legalEntityDetails = LegalEntityDetails(pptPartnershipDetails)
+        legalEntityDetails.dateOfApplication mustBe now(UTC).format(
+          DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        )
+
+        legalEntityDetails.customerIdentification1 mustBe pptPartnershipDetails.partnershipDetails.get.sautr
+        legalEntityDetails.customerIdentification2 mustBe Some(
+          pptPartnershipDetails.partnershipDetails.get.postcode
+        )
+
+        legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
+
+        legalEntityDetails.customerDetails.individualDetails mustBe None
+
+        legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
+          pptPartnershipDetails.organisationType.get.toString
+        )
+        legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe "TODO"
+      }
     }
 
     "throw an exception" when {

@@ -72,6 +72,19 @@ trait RegistrationTestData {
     )
   )
 
+  protected val pptPartnershipDetails: OrganisationDetails = OrganisationDetails(
+    isBasedInUk = Some(true),
+    organisationType = Some(OrgType.PARTNERSHIP),
+    businessRegisteredAddress = Some(pptAddress),
+    safeNumber = Some("1234567890"),
+    partnershipDetails = Some(
+      PartnershipDetails(sautr = "1234567890",
+                         postcode = "AA1 1AA",
+                         registration = incorporationRegistrationDetails
+      )
+    )
+  )
+
   protected val pptLiabilityDetails: LiabilityDetails = LiabilityDetails(
     weight = Some(LiabilityWeight(Some(10000))),
     startDate = Some(Date(day = Some(6), month = Some(4), year = Some(2022)))
