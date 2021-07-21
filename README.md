@@ -5,7 +5,7 @@ This is the Scala microservice responsible for the transient storage of PPT regi
  
 ### How to run the service
 
-These are the steps to the Plastic Packaging Tax digital service, of which this microservice is part of.
+These are the steps to the Plastic Packaging Tax Registrations digital service, of which this microservice is part of.
 
 * Start a MongoDB instance
 
@@ -13,10 +13,7 @@ These are the steps to the Plastic Packaging Tax digital service, of which this 
  
 ```
 # Start the plastic packaging services and dependencies 
-sm --start PLASTIC_PACKAGING_TAX_ALL -f
-
-# start the incorporated Entity Identification Frontend and dependencies
-sm --start INCORPORATED_ENTITY_IDENTIFICATION_ALL
+sm --start INCORPORATED_ENTITY_IDENTIFICATION_ALL PLASTIC_PACKAGING_TAX_ALL EMAIL_VERIFICATION_ALL -r
 
 # confirm all services are running
 sm -s 
