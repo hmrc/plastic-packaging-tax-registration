@@ -69,7 +69,7 @@ class SubscriptionSpec
       }
       "Sole Trader" in {
         val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptIndividualDetails),
+          aRegistration(withOrganisationDetails(pptSoleTraderDetails),
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails)
           )
@@ -148,14 +148,14 @@ class SubscriptionSpec
     subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(
       DateTimeFormatter.ofPattern("yyyy-MM-dd")
     )
-    subscription.legalEntityDetails.customerIdentification1 mustBe pptIndividualDetails.soleTraderDetails.get.nino
-    subscription.legalEntityDetails.customerIdentification2 mustBe pptIndividualDetails.soleTraderDetails.get.sautr
+    subscription.legalEntityDetails.customerIdentification1 mustBe pptSoleTraderDetails.soleTraderDetails.get.nino
+    subscription.legalEntityDetails.customerIdentification2 mustBe pptSoleTraderDetails.soleTraderDetails.get.sautr
     subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Individual
 
     subscription.legalEntityDetails.customerDetails.organisationDetails mustBe None
 
-    subscription.legalEntityDetails.customerDetails.individualDetails.get.firstName mustBe pptIndividualDetails.soleTraderDetails.get.firstName
-    subscription.legalEntityDetails.customerDetails.individualDetails.get.lastName mustBe pptIndividualDetails.soleTraderDetails.get.lastName
+    subscription.legalEntityDetails.customerDetails.individualDetails.get.firstName mustBe pptSoleTraderDetails.soleTraderDetails.get.firstName
+    subscription.legalEntityDetails.customerDetails.individualDetails.get.lastName mustBe pptSoleTraderDetails.soleTraderDetails.get.lastName
     subscription.legalEntityDetails.customerDetails.individualDetails.get.middleName mustBe None
 
   }

@@ -49,21 +49,21 @@ class LegalEntityDetailsSpec
         legalEntityDetails.customerDetails.individualDetails mustBe None
       }
       "subscripting an individual" in {
-        val legalEntityDetails = LegalEntityDetails(pptIndividualDetails)
+        val legalEntityDetails = LegalEntityDetails(pptSoleTraderDetails)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
 
-        legalEntityDetails.customerIdentification1 mustBe pptIndividualDetails.soleTraderDetails.get.nino
+        legalEntityDetails.customerIdentification1 mustBe pptSoleTraderDetails.soleTraderDetails.get.nino
         legalEntityDetails.customerIdentification2 mustBe
-          pptIndividualDetails.soleTraderDetails.get.sautr
+          pptSoleTraderDetails.soleTraderDetails.get.sautr
 
         legalEntityDetails.customerDetails.customerType mustBe CustomerType.Individual
 
         legalEntityDetails.customerDetails.organisationDetails mustBe None
 
-        legalEntityDetails.customerDetails.individualDetails.get.firstName mustBe pptIndividualDetails.soleTraderDetails.get.firstName
-        legalEntityDetails.customerDetails.individualDetails.get.lastName mustBe pptIndividualDetails.soleTraderDetails.get.lastName
+        legalEntityDetails.customerDetails.individualDetails.get.firstName mustBe pptSoleTraderDetails.soleTraderDetails.get.firstName
+        legalEntityDetails.customerDetails.individualDetails.get.lastName mustBe pptSoleTraderDetails.soleTraderDetails.get.lastName
         legalEntityDetails.customerDetails.individualDetails.get.middleName mustBe None
       }
       "subscripting a partnership" in {
@@ -89,15 +89,27 @@ class LegalEntityDetailsSpec
     }
 
     "throw an exception" when {
-      "incorporation details are missing from the organisation" in {
+      "organisation type is 'None'" in {
+        intercept[Exception] {
+          CustomerDetails(pptOrganisationDetails.copy(organisationType = None))
+        }
+      }
+
+      "corporate and incorporation details are missing" in {
         intercept[Exception] {
           LegalEntityDetails(pptOrganisationDetails.copy(incorporationDetails = None))
         }
       }
 
-      "incorporation details are missing from the individual" in {
+      "sole trader and sole trader details are missing" in {
         intercept[Exception] {
-          LegalEntityDetails(pptIndividualDetails.copy(soleTraderDetails = None))
+          LegalEntityDetails(pptSoleTraderDetails.copy(soleTraderDetails = None))
+        }
+      }
+
+      "partnership and partnership details are missing" in {
+        intercept[Exception] {
+          LegalEntityDetails(pptPartnershipDetails.copy(partnershipDetails = None))
         }
       }
     }
