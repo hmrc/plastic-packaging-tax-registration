@@ -56,7 +56,7 @@ trait RegistrationTestData {
     )
   )
 
-  protected val pptIndividualDetails: OrganisationDetails = OrganisationDetails(
+  protected val pptSoleTraderDetails: OrganisationDetails = OrganisationDetails(
     isBasedInUk = Some(true),
     organisationType = Some(OrgType.SOLE_TRADER),
     businessRegisteredAddress = Some(pptAddress),
@@ -68,6 +68,19 @@ trait RegistrationTestData {
                                      nino = "567890123",
                                      Some("123456789"),
                                      registration = incorporationRegistrationDetails
+      )
+    )
+  )
+
+  protected val pptPartnershipDetails: OrganisationDetails = OrganisationDetails(
+    isBasedInUk = Some(true),
+    organisationType = Some(OrgType.PARTNERSHIP),
+    businessRegisteredAddress = Some(pptAddress),
+    safeNumber = Some("1234567890"),
+    partnershipDetails = Some(
+      PartnershipDetails(sautr = "1234567890",
+                         postcode = "AA1 1AA",
+                         registration = incorporationRegistrationDetails
       )
     )
   )

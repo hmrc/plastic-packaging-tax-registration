@@ -41,15 +41,26 @@ class CustomerDetailsSpec
       }
 
       "subscripting an individual" in {
-        val customerDetails = CustomerDetails(pptIndividualDetails)
+        val customerDetails = CustomerDetails(pptSoleTraderDetails)
         customerDetails.customerType mustBe CustomerType.Individual
 
         customerDetails.organisationDetails mustBe None
 
-        customerDetails.individualDetails.get.firstName mustBe pptIndividualDetails.soleTraderDetails.get.firstName
-        customerDetails.individualDetails.get.lastName mustBe pptIndividualDetails.soleTraderDetails.get.lastName
+        customerDetails.individualDetails.get.firstName mustBe pptSoleTraderDetails.soleTraderDetails.get.firstName
+        customerDetails.individualDetails.get.lastName mustBe pptSoleTraderDetails.soleTraderDetails.get.lastName
         customerDetails.individualDetails.get.middleName mustBe None
+      }
 
+      "subscripting a partnership" in {
+        val customerDetails = CustomerDetails(pptPartnershipDetails)
+        customerDetails.customerType mustBe CustomerType.Organisation
+
+        customerDetails.individualDetails mustBe None
+
+        customerDetails.organisationDetails.get.organisationType mustBe Some(
+          pptPartnershipDetails.organisationType.get.toString
+        )
+        customerDetails.organisationDetails.get.organisationName mustBe "TODO"
       }
     }
 
@@ -60,15 +71,21 @@ class CustomerDetailsSpec
         }
       }
 
-      "incorporation details are missing from the organisation" in {
+      "corporate and incorporation details are missing" in {
         intercept[Exception] {
           CustomerDetails(pptOrganisationDetails.copy(incorporationDetails = None))
         }
       }
 
-      "incorporation details are missing from the individual" in {
+      "sole trader and sole trader details are missing" in {
         intercept[Exception] {
-          CustomerDetails(pptIndividualDetails.copy(soleTraderDetails = None))
+          CustomerDetails(pptSoleTraderDetails.copy(soleTraderDetails = None))
+        }
+      }
+
+      "partnership and partnership details are missing" in {
+        intercept[Exception] {
+          CustomerDetails(pptPartnershipDetails.copy(partnershipDetails = None))
         }
       }
     }

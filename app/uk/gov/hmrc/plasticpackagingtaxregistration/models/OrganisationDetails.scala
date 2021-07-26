@@ -37,6 +37,7 @@ case class OrganisationDetails(
   businessRegisteredAddress: Option[Address] = None,
   safeNumber: Option[String] = None,
   soleTraderDetails: Option[SoleTraderIncorporationDetails] = None,
+  partnershipDetails: Option[PartnershipDetails] = None,
   incorporationDetails: Option[IncorporationDetails] = None
 )
 

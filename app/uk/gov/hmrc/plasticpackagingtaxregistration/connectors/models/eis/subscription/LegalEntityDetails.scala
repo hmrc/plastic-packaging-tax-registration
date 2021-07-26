@@ -48,6 +48,14 @@ object LegalEntityDetails {
                              customerDetails = CustomerDetails(pptOrganisationDetails)
           )
         }.getOrElse(throw new Exception("Individual details are required"))
+      case Some(OrgType.PARTNERSHIP) =>
+        pptOrganisationDetails.partnershipDetails.map { details =>
+          LegalEntityDetails(dateOfApplication = getDateOfApplication,
+                             customerIdentification1 = details.sautr,
+                             customerIdentification2 = Some(details.postcode),
+                             customerDetails = CustomerDetails(pptOrganisationDetails)
+          )
+        }.getOrElse(throw new Exception("Partnership details are required"))
       case _ =>
         pptOrganisationDetails.incorporationDetails.map { details =>
           LegalEntityDetails(dateOfApplication = getDateOfApplication,
