@@ -24,13 +24,16 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  SubscriptionCreateWithNrsFailureResponse,
+  SubscriptionCreateWithNrsSuccessfulResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.MetaData
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
 
@@ -96,31 +99,61 @@ class SubscriptionControllerSpec
                                        withUserHeaders(pptUserHeaders)
     )
 
-    "return 200 make NRS submission and delete transient registration" when {
-      "EIS/IF subscription is successful" in {
-        val internalId     = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
-        val nrSubmissionId = "nrSubmissionId"
-        withAuthorizedUser(user = newUser())
-        mockGetSubscriptionCreate(subscriptionCreateResponse)
-        when(
-          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
-        ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
+    "return 200 and delete transient registration" when {
+      "EIS/IF subscription is successful" when {
+        "and NRS submission is successful" in {
+          val internalId     = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
+          val nrSubmissionId = "nrSubmissionId"
+          withAuthorizedUser(user = newUser())
+          mockGetSubscriptionCreate(subscriptionCreateResponse)
+          when(
+            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+          ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
 
-        val result: Future[Result] =
-          route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
+          val result: Future[Result] =
+            route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
-        status(result) must be(OK)
-        val response = contentAsJson(result).as[SubscriptionCreateSuccessfulResponse]
-        response.pptReference mustBe subscriptionCreateResponse.pptReference
-        response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
-        response.processingDate mustBe subscriptionCreateResponse.processingDate
-        verify(mockRepository).delete(internalId)
-        verify(mockNonRepudiationService).submitNonRepudiation(
-          ArgumentMatchers.contains(request.incorpJourneyId.get),
-          any[ZonedDateTime],
-          ArgumentMatchers.eq(subscriptionCreateResponse.pptReference),
-          ArgumentMatchers.eq(pptUserHeaders)
-        )(any[HeaderCarrier])
+          status(result) must be(OK)
+          val response = contentAsJson(result).as[SubscriptionCreateWithNrsSuccessfulResponse]
+          response.pptReference mustBe subscriptionCreateResponse.pptReference
+          response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
+          response.processingDate mustBe subscriptionCreateResponse.processingDate
+          response.nrSubmissionId mustBe nrSubmissionId
+          verify(mockRepository).delete(internalId)
+          verify(mockNonRepudiationService).submitNonRepudiation(
+            ArgumentMatchers.contains(request.incorpJourneyId.get),
+            any[ZonedDateTime],
+            ArgumentMatchers.eq(subscriptionCreateResponse.pptReference),
+            ArgumentMatchers.eq(pptUserHeaders)
+          )(any[HeaderCarrier])
+        }
+        "and NRS submission is not successful" in {
+          val internalId      = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
+          val nrsErrorMessage = "Service unavailable"
+          withAuthorizedUser(user = newUser())
+          mockGetSubscriptionCreate(subscriptionCreateResponse)
+          when(
+            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+          ).thenReturn(Future.failed(new HttpException(nrsErrorMessage, SERVICE_UNAVAILABLE)))
+
+          val result: Future[Result] =
+            route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
+
+          status(result) must be(OK)
+          val response = contentAsJson(result).as[SubscriptionCreateWithNrsFailureResponse]
+          response.pptReference mustBe subscriptionCreateResponse.pptReference
+          response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
+          response.processingDate mustBe subscriptionCreateResponse.processingDate
+          response.nrsFailureReason mustBe nrsErrorMessage
+
+          verify(mockRepository).delete(internalId)
+          verify(mockNonRepudiationService).submitNonRepudiation(
+            ArgumentMatchers.contains(request.incorpJourneyId.get),
+            any[ZonedDateTime],
+            ArgumentMatchers.eq(subscriptionCreateResponse.pptReference),
+            ArgumentMatchers.eq(pptUserHeaders)
+          )(any[HeaderCarrier])
+        }
       }
     }
 
