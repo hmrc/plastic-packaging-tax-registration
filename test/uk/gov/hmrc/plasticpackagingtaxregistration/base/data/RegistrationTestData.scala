@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.GENERAL_PARTNERSHIP
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 trait RegistrationTestData {
@@ -78,9 +79,13 @@ trait RegistrationTestData {
     businessRegisteredAddress = Some(pptAddress),
     safeNumber = Some("1234567890"),
     partnershipDetails = Some(
-      PartnershipDetails(sautr = "1234567890",
-                         postcode = "AA1 1AA",
-                         registration = incorporationRegistrationDetails
+      PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
+                         generalPartnershipDetails = Some(
+                           GeneralPartnershipDetails(sautr = "1234567890",
+                                                     postcode = "AA1 1AA",
+                                                     registration = incorporationRegistrationDetails
+                           )
+                         )
       )
     )
   )

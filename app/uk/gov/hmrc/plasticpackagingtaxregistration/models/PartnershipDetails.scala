@@ -16,17 +16,37 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.PartnershipTypeEnum
+
+object PartnershipTypeEnum extends Enumeration {
+  type PartnershipTypeEnum = Value
+  val GENERAL_PARTNERSHIP: Value           = Value("General partnership")
+  val LIMITED_LIABILITY_PARTNERSHIP: Value = Value("Limited liability partnership")
+  val LIMITED_PARTNERSHIP: Value           = Value("Limited partnership")
+  val SCOTTISH_PARTNERSHIP: Value          = Value("Scottish partnership")
+  val SCOTTISH_LIMITED_PARTNERSHIP: Value  = Value("Scottish limited partnership")
+
+  implicit val format: Format[PartnershipTypeEnum] =
+    Format(Reads.enumNameReads(PartnershipTypeEnum), Writes.enumNameWrites)
+
+}
 
 case class PartnershipDetails(
+  partnershipType: PartnershipTypeEnum,
+  generalPartnershipDetails: Option[GeneralPartnershipDetails] = None
+)
+
+object PartnershipDetails {
+  implicit val format: Format[PartnershipDetails] = Json.format[PartnershipDetails]
+}
+
+case class GeneralPartnershipDetails(
   sautr: String,
   postcode: String,
   override val registration: IncorporationRegistrationDetails
 ) extends RegistrationDetails
 
-object PartnershipDetails {
-
-  implicit val format: Format[PartnershipDetails] =
-    Json.format[PartnershipDetails]
-
+object GeneralPartnershipDetails {
+  implicit val format: OFormat[GeneralPartnershipDetails] = Json.format[GeneralPartnershipDetails]
 }

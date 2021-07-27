@@ -49,13 +49,20 @@ object LegalEntityDetails {
           )
         }.getOrElse(throw new Exception("Individual details are required"))
       case Some(OrgType.PARTNERSHIP) =>
-        pptOrganisationDetails.partnershipDetails.map { details =>
-          LegalEntityDetails(dateOfApplication = getDateOfApplication,
-                             customerIdentification1 = details.sautr,
-                             customerIdentification2 = Some(details.postcode),
-                             customerDetails = CustomerDetails(pptOrganisationDetails)
-          )
-        }.getOrElse(throw new Exception("Partnership details are required"))
+        pptOrganisationDetails.partnershipDetails match {
+          case Some(partnershipDetails) =>
+            partnershipDetails.generalPartnershipDetails match {
+              case Some(generalPartnershipDetails) =>
+                LegalEntityDetails(dateOfApplication = getDateOfApplication,
+                                   customerIdentification1 = generalPartnershipDetails.sautr,
+                                   customerIdentification2 =
+                                     Some(generalPartnershipDetails.postcode),
+                                   customerDetails = CustomerDetails(pptOrganisationDetails)
+                )
+              case _ => throw new IllegalStateException("General partnership details missing")
+            }
+          case _ => throw new IllegalStateException("Partnership details missing")
+        }
       case _ =>
         pptOrganisationDetails.incorporationDetails.map { details =>
           LegalEntityDetails(dateOfApplication = getDateOfApplication,

@@ -72,9 +72,9 @@ class LegalEntityDetailsSpec
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
 
-        legalEntityDetails.customerIdentification1 mustBe pptPartnershipDetails.partnershipDetails.get.sautr
+        legalEntityDetails.customerIdentification1 mustBe pptPartnershipDetails.partnershipDetails.get.generalPartnershipDetails.get.sautr
         legalEntityDetails.customerIdentification2 mustBe Some(
-          pptPartnershipDetails.partnershipDetails.get.postcode
+          pptPartnershipDetails.partnershipDetails.get.generalPartnershipDetails.get.postcode
         )
 
         legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
@@ -110,6 +110,18 @@ class LegalEntityDetailsSpec
       "partnership and partnership details are missing" in {
         intercept[Exception] {
           LegalEntityDetails(pptPartnershipDetails.copy(partnershipDetails = None))
+        }
+      }
+
+      "partnership and partnership general partnership details are missing" in {
+        intercept[Exception] {
+          LegalEntityDetails(
+            pptPartnershipDetails.copy(partnershipDetails =
+              Some(
+                pptPartnershipDetails.partnershipDetails.get.copy(generalPartnershipDetails = None)
+              )
+            )
+          )
         }
       }
     }
