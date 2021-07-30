@@ -51,7 +51,7 @@ class CustomerDetailsSpec
         customerDetails.individualDetails.get.middleName mustBe None
       }
 
-      "subscripting a partnership" in {
+      "subscripting a generalPartnership" in {
         val customerDetails = CustomerDetails(pptPartnershipDetails)
         customerDetails.customerType mustBe CustomerType.Organisation
 
@@ -59,6 +59,18 @@ class CustomerDetailsSpec
 
         customerDetails.organisationDetails.get.organisationType mustBe Some(
           pptPartnershipDetails.organisationType.get.toString
+        )
+        customerDetails.organisationDetails.get.organisationName mustBe "TODO"
+      }
+
+      "subscripting a scottishPartnership" in {
+        val customerDetails = CustomerDetails(pptScottishPartnershipDetails)
+        customerDetails.customerType mustBe CustomerType.Organisation
+
+        customerDetails.individualDetails mustBe None
+
+        customerDetails.organisationDetails.get.organisationType mustBe Some(
+          pptScottishPartnershipDetails.organisationType.get.toString
         )
         customerDetails.organisationDetails.get.organisationName mustBe "TODO"
       }

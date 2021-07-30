@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.GENERAL_PARTNERSHIP
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
+  GENERAL_PARTNERSHIP,
+  SCOTTISH_PARTNERSHIP
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 trait RegistrationTestData {
@@ -84,6 +87,24 @@ trait RegistrationTestData {
                            GeneralPartnershipDetails(sautr = "1234567890",
                                                      postcode = "AA1 1AA",
                                                      registration = incorporationRegistrationDetails
+                           )
+                         )
+      )
+    )
+  )
+
+  protected val pptScottishPartnershipDetails: OrganisationDetails = OrganisationDetails(
+    isBasedInUk = Some(true),
+    organisationType = Some(OrgType.PARTNERSHIP),
+    businessRegisteredAddress = Some(pptAddress),
+    safeNumber = Some("1234567890"),
+    partnershipDetails = Some(
+      PartnershipDetails(partnershipType = SCOTTISH_PARTNERSHIP,
+                         scottishPartnershipDetails = Some(
+                           ScottishPartnershipDetails(sautr = "1234567890",
+                                                      postcode = "AA1 1AA",
+                                                      registration =
+                                                        incorporationRegistrationDetails
                            )
                          )
       )
