@@ -17,6 +17,10 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
+  GENERAL_PARTNERSHIP,
+  SCOTTISH_PARTNERSHIP
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   OrgType,
   OrganisationDetails => PPTOrganisationDetails
@@ -42,38 +46,55 @@ object LegalEntityDetails {
     pptOrganisationDetails.organisationType match {
       case Some(OrgType.SOLE_TRADER) =>
         pptOrganisationDetails.soleTraderDetails.map { details =>
-          LegalEntityDetails(dateOfApplication = getDateOfApplication,
-                             customerIdentification1 = details.nino,
-                             customerIdentification2 = details.sautr,
-                             customerDetails = CustomerDetails(pptOrganisationDetails)
+          updateLegalEntityDetails(customerIdentification1 = details.nino,
+                                   customerIdentification2 = details.sautr,
+                                   pptOrganisationDetails = pptOrganisationDetails
           )
         }.getOrElse(throw new Exception("Individual details are required"))
       case Some(OrgType.PARTNERSHIP) =>
         pptOrganisationDetails.partnershipDetails match {
           case Some(partnershipDetails) =>
-            partnershipDetails.generalPartnershipDetails match {
-              case Some(generalPartnershipDetails) =>
-                LegalEntityDetails(dateOfApplication = getDateOfApplication,
-                                   customerIdentification1 = generalPartnershipDetails.sautr,
-                                   customerIdentification2 =
-                                     Some(generalPartnershipDetails.postcode),
-                                   customerDetails = CustomerDetails(pptOrganisationDetails)
-                )
-              case _ => throw new IllegalStateException("General partnership details missing")
+            partnershipDetails.partnershipType match {
+              case GENERAL_PARTNERSHIP =>
+                partnershipDetails.generalPartnershipDetails.map { details =>
+                  updateLegalEntityDetails(customerIdentification1 = details.sautr,
+                                           customerIdentification2 = Some(details.postcode),
+                                           pptOrganisationDetails = pptOrganisationDetails
+                  )
+                }.getOrElse(throw new Exception("General partnership details are required"))
+              case SCOTTISH_PARTNERSHIP =>
+                partnershipDetails.scottishPartnershipDetails.map { details =>
+                  updateLegalEntityDetails(customerIdentification1 = details.sautr,
+                                           customerIdentification2 = Some(details.postcode),
+                                           pptOrganisationDetails = pptOrganisationDetails
+                  )
+                }.getOrElse(throw new Exception("Scottish partnership details are required"))
+              case _ => throw new IllegalStateException("Unsupported partnership type")
             }
           case _ => throw new IllegalStateException("Partnership details missing")
         }
       case _ =>
         pptOrganisationDetails.incorporationDetails.map { details =>
-          LegalEntityDetails(dateOfApplication = getDateOfApplication,
-                             customerIdentification1 = details.companyNumber,
-                             customerIdentification2 = Some(details.ctutr),
-                             customerDetails = CustomerDetails(pptOrganisationDetails)
+          updateLegalEntityDetails(customerIdentification1 = details.companyNumber,
+                                   customerIdentification2 = Some(details.ctutr),
+                                   pptOrganisationDetails = pptOrganisationDetails
           )
         }.getOrElse(throw new Exception("Incorporation details are required"))
     }
 
   private def getDateOfApplication: String =
     ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
+  private def updateLegalEntityDetails(
+    customerIdentification1: String,
+    customerIdentification2: Option[String],
+    pptOrganisationDetails: PPTOrganisationDetails
+  ): LegalEntityDetails =
+    LegalEntityDetails(dateOfApplication = getDateOfApplication,
+                       customerIdentification1 = customerIdentification1,
+                       customerIdentification2 =
+                         customerIdentification2,
+                       customerDetails = CustomerDetails(pptOrganisationDetails)
+    )
 
 }
