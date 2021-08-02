@@ -100,6 +100,32 @@ class CustomerDetailsSpec
           CustomerDetails(pptPartnershipDetails.copy(partnershipDetails = None))
         }
       }
+
+      "partnership and partnership general partnership details are missing" in {
+        intercept[Exception] {
+          LegalEntityDetails(
+            pptPartnershipDetails.copy(partnershipDetails =
+              Some(
+                pptPartnershipDetails.partnershipDetails.get.copy(generalPartnershipDetails = None)
+              )
+            )
+          )
+        }
+      }
+
+      "partnership and partnership scottish partnership details are missing" in {
+        intercept[Exception] {
+          LegalEntityDetails(
+            pptScottishPartnershipDetails.copy(partnershipDetails =
+              Some(
+                pptScottishPartnershipDetails.partnershipDetails.get.copy(
+                  scottishPartnershipDetails = None
+                )
+              )
+            )
+          )
+        }
+      }
     }
   }
 }

@@ -66,7 +66,7 @@ class LegalEntityDetailsSpec
         legalEntityDetails.customerDetails.individualDetails.get.lastName mustBe pptSoleTraderDetails.soleTraderDetails.get.lastName
         legalEntityDetails.customerDetails.individualDetails.get.middleName mustBe None
       }
-      "subscripting a partnership" in {
+      "subscripting a general partnership" in {
         val legalEntityDetails = LegalEntityDetails(pptPartnershipDetails)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -83,6 +83,26 @@ class LegalEntityDetailsSpec
 
         legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
           pptPartnershipDetails.organisationType.get.toString
+        )
+        legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe "TODO"
+      }
+      "subscripting a scottish partnership" in {
+        val legalEntityDetails = LegalEntityDetails(pptScottishPartnershipDetails)
+        legalEntityDetails.dateOfApplication mustBe now(UTC).format(
+          DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        )
+
+        legalEntityDetails.customerIdentification1 mustBe pptScottishPartnershipDetails.partnershipDetails.get.scottishPartnershipDetails.get.sautr
+        legalEntityDetails.customerIdentification2 mustBe Some(
+          pptScottishPartnershipDetails.partnershipDetails.get.scottishPartnershipDetails.get.postcode
+        )
+
+        legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
+
+        legalEntityDetails.customerDetails.individualDetails mustBe None
+
+        legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
+          pptScottishPartnershipDetails.organisationType.get.toString
         )
         legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe "TODO"
       }
@@ -119,6 +139,20 @@ class LegalEntityDetailsSpec
             pptPartnershipDetails.copy(partnershipDetails =
               Some(
                 pptPartnershipDetails.partnershipDetails.get.copy(generalPartnershipDetails = None)
+              )
+            )
+          )
+        }
+      }
+
+      "partnership and partnership scottish partnership details are missing" in {
+        intercept[Exception] {
+          LegalEntityDetails(
+            pptScottishPartnershipDetails.copy(partnershipDetails =
+              Some(
+                pptScottishPartnershipDetails.partnershipDetails.get.copy(
+                  scottishPartnershipDetails = None
+                )
               )
             )
           )
