@@ -38,7 +38,11 @@ object Date {
   implicit val dateFormat = Json.format[Date]
 }
 
-case class LiabilityDetails(weight: Option[LiabilityWeight] = None, startDate: Option[Date] = None)
+case class LiabilityDetails(
+  weight: Option[LiabilityWeight] = None,
+  startDate: Option[Date] = None,
+  isLiable: Option[Boolean] = None
+)
 
 object LiabilityDetails {
   implicit val format: OFormat[LiabilityDetails] = Json.format[LiabilityDetails]
