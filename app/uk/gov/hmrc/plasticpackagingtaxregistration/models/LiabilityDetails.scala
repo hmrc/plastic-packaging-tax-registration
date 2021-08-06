@@ -41,7 +41,8 @@ object Date {
 case class LiabilityDetails(
   weight: Option[LiabilityWeight] = None,
   startDate: Option[Date] = None,
-  isLiable: Option[Boolean] = None
+  isLiable: Option[Boolean] = None,
+  expectToExceedThresholdWeight: Option[Boolean] = None
 )
 
 object LiabilityDetails {
