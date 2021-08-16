@@ -35,37 +35,23 @@ class SubscriptionSpec
     "build successfully" when {
       "UK Limited Company" in {
         val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptOrganisationDetails),
+          aRegistration(withOrganisationDetails(pptIncorporationDetails),
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails)
           )
         )
-        subscription.groupSubscription mustBe None
-        subscription.declaration.declarationBox1 mustBe true
-        subscription.last12MonthTotalTonnageAmt mustBe Some(10000)
-        subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
-
-        mustHaveValidPrimaryContactDetails(subscription)
-        mustHaveValidLegalEntityDetails(subscription)
-        mustHaveValidBusinessCorrespondenceDetails(subscription)
-        mustHaveValidPrincipalPlaceOfBusinessDetails(subscription)
+        assertCommonDetails(subscription, Some(10000))
+        mustHaveValidIncorporationLegalEntityDetails(subscription)
       }
       "UK Limited Company with no liability weight" in {
         val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptOrganisationDetails),
+          aRegistration(withOrganisationDetails(pptIncorporationDetails),
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
           )
         )
-        subscription.groupSubscription mustBe None
-        subscription.declaration.declarationBox1 mustBe true
-        subscription.last12MonthTotalTonnageAmt mustBe None
-        subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
-
-        mustHaveValidPrimaryContactDetails(subscription)
-        mustHaveValidLegalEntityDetails(subscription)
-        mustHaveValidBusinessCorrespondenceDetails(subscription)
-        mustHaveValidPrincipalPlaceOfBusinessDetails(subscription)
+        assertCommonDetails(subscription, None)
+        mustHaveValidIncorporationLegalEntityDetails(subscription)
       }
       "Sole Trader" in {
         val subscription = Subscription(
@@ -74,15 +60,28 @@ class SubscriptionSpec
                         withLiabilityDetails(pptLiabilityDetails)
           )
         )
-        subscription.groupSubscription mustBe None
-        subscription.declaration.declarationBox1 mustBe true
-        subscription.last12MonthTotalTonnageAmt mustBe Some(10000)
-        subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
-
-        mustHaveValidPrimaryContactDetails(subscription)
+        assertCommonDetails(subscription, Some(10000))
         mustHaveValidIndividualLegalEntityDetails(subscription)
-        mustHaveValidBusinessCorrespondenceDetails(subscription)
-        mustHaveValidPrincipalPlaceOfBusinessDetails(subscription)
+      }
+      "General Partnership" in {
+        val subscription = Subscription(
+          aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
+                        withPrimaryContactDetails(pptPrimaryContactDetails),
+                        withLiabilityDetails(pptLiabilityDetails)
+          )
+        )
+        assertCommonDetails(subscription, Some(10000))
+        mustHaveValidGeneralPartnershipLegalEntityDetails(subscription)
+      }
+      "Scottish Partnership" in {
+        val subscription = Subscription(
+          aRegistration(withOrganisationDetails(pptScottishPartnershipDetails),
+                        withPrimaryContactDetails(pptPrimaryContactDetails),
+                        withLiabilityDetails(pptLiabilityDetails)
+          )
+        )
+        assertCommonDetails(subscription, Some(10000))
+        mustHaveValidScottishPartnershipLegalEntityDetails(subscription)
       }
     }
 
@@ -90,7 +89,7 @@ class SubscriptionSpec
       "no liability start date has been provided" in {
         intercept[Exception] {
           Subscription(
-            aRegistration(withOrganisationDetails(pptOrganisationDetails),
+            aRegistration(withOrganisationDetails(pptIncorporationDetails),
                           withPrimaryContactDetails(pptPrimaryContactDetails),
                           withLiabilityDetails(pptLiabilityDetails.copy(startDate = None))
             )
@@ -98,6 +97,20 @@ class SubscriptionSpec
         }
       }
     }
+  }
+
+  private def assertCommonDetails(
+    subscription: Subscription,
+    expectedPPTWeight: Option[Integer]
+  ) = {
+    subscription.groupSubscription mustBe None
+    subscription.declaration.declarationBox1 mustBe true
+    subscription.last12MonthTotalTonnageAmt mustBe expectedPPTWeight
+    subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
+
+    mustHaveValidPrimaryContactDetails(subscription)
+    mustHaveValidBusinessCorrespondenceDetails(subscription)
+    mustHaveValidPrincipalPlaceOfBusinessDetails(subscription)
   }
 
   private def mustHaveValidPrincipalPlaceOfBusinessDetails(subscription: Subscription) = {
@@ -126,10 +139,10 @@ class SubscriptionSpec
     subscription.businessCorrespondenceDetails.countryCode mustBe pptAddress.country.get
   }
 
-  private def mustHaveValidLegalEntityDetails(subscription: Subscription): Any = {
-    subscription.legalEntityDetails.customerIdentification1 mustBe pptOrganisationDetails.incorporationDetails.get.companyNumber
+  private def mustHaveValidIncorporationLegalEntityDetails(subscription: Subscription): Any = {
+    subscription.legalEntityDetails.customerIdentification1 mustBe pptIncorporationDetails.incorporationDetails.get.companyNumber
     subscription.legalEntityDetails.customerIdentification2 mustBe Some(
-      pptOrganisationDetails.incorporationDetails.get.ctutr
+      pptIncorporationDetails.incorporationDetails.get.ctutr
     )
 
     subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(
@@ -138,9 +151,47 @@ class SubscriptionSpec
 
     subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
     subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
-      pptOrganisationDetails.organisationType.get.toString
+      pptIncorporationDetails.organisationType.get.toString
     )
-    subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptOrganisationDetails.incorporationDetails.get.companyName
+    subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptIncorporationDetails.incorporationDetails.get.companyName
+    subscription.legalEntityDetails.customerDetails.individualDetails mustBe None
+  }
+
+  private def mustHaveValidGeneralPartnershipLegalEntityDetails(subscription: Subscription): Any = {
+    subscription.legalEntityDetails.customerIdentification1 mustBe pptGeneralPartnershipDetails.partnershipDetails.get.generalPartnershipDetails.get.sautr
+    subscription.legalEntityDetails.customerIdentification2 mustBe Some(
+      pptGeneralPartnershipDetails.partnershipDetails.get.generalPartnershipDetails.get.postcode
+    )
+
+    subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(
+      DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    )
+
+    subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
+    subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
+      pptGeneralPartnershipDetails.organisationType.get.toString
+    )
+    subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipName.get
+    subscription.legalEntityDetails.customerDetails.individualDetails mustBe None
+  }
+
+  private def mustHaveValidScottishPartnershipLegalEntityDetails(
+    subscription: Subscription
+  ): Any = {
+    subscription.legalEntityDetails.customerIdentification1 mustBe pptScottishPartnershipDetails.partnershipDetails.get.scottishPartnershipDetails.get.sautr
+    subscription.legalEntityDetails.customerIdentification2 mustBe Some(
+      pptScottishPartnershipDetails.partnershipDetails.get.scottishPartnershipDetails.get.postcode
+    )
+
+    subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(
+      DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    )
+
+    subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
+    subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
+      pptScottishPartnershipDetails.organisationType.get.toString
+    )
+    subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipName.get
     subscription.legalEntityDetails.customerDetails.individualDetails mustBe None
   }
 

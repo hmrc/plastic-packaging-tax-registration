@@ -61,14 +61,18 @@ object LegalEntityDetails {
                                            customerIdentification2 = Some(details.postcode),
                                            pptOrganisationDetails = pptOrganisationDetails
                   )
-                }.getOrElse(throw new Exception("General partnership details are required"))
+                }.getOrElse(
+                  throw new IllegalStateException("General partnership details are required")
+                )
               case SCOTTISH_PARTNERSHIP =>
                 partnershipDetails.scottishPartnershipDetails.map { details =>
                   updateLegalEntityDetails(customerIdentification1 = details.sautr,
                                            customerIdentification2 = Some(details.postcode),
                                            pptOrganisationDetails = pptOrganisationDetails
                   )
-                }.getOrElse(throw new Exception("Scottish partnership details are required"))
+                }.getOrElse(
+                  throw new IllegalStateException("Scottish partnership details are required")
+                )
               case _ => throw new IllegalStateException("Unsupported partnership type")
             }
           case _ => throw new IllegalStateException("Partnership details missing")
@@ -79,7 +83,7 @@ object LegalEntityDetails {
                                    customerIdentification2 = Some(details.ctutr),
                                    pptOrganisationDetails = pptOrganisationDetails
           )
-        }.getOrElse(throw new Exception("Incorporation details are required"))
+        }.getOrElse(throw new IllegalStateException("Incorporation details are required"))
     }
 
   private def getDateOfApplication: String =

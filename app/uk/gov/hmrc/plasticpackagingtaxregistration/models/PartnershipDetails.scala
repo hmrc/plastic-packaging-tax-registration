@@ -34,6 +34,7 @@ object PartnershipTypeEnum extends Enumeration {
 
 case class PartnershipDetails(
   partnershipType: PartnershipTypeEnum,
+  partnershipName: Option[String] = None,
   generalPartnershipDetails: Option[GeneralPartnershipDetails] = None,
   scottishPartnershipDetails: Option[ScottishPartnershipDetails] = None
 )

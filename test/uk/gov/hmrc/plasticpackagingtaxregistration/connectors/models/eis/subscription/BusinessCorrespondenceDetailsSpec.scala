@@ -29,7 +29,7 @@ class BusinessCorrespondenceDetailsSpec
   "BusinessCorrespondenceDetails" should {
     "map from PPT Address " when {
       "all  PPT address fields are available" in {
-        val businessCorrespondenceDetails = BusinessCorrespondenceDetails(pptOrganisationDetails)
+        val businessCorrespondenceDetails = BusinessCorrespondenceDetails(pptIncorporationDetails)
         businessCorrespondenceDetails.addressLine1 mustBe pptAddress.addressLine1
         businessCorrespondenceDetails.addressLine2 mustBe pptAddress.addressLine2.get
         businessCorrespondenceDetails.addressLine3 mustBe pptAddress.addressLine3
@@ -41,7 +41,9 @@ class BusinessCorrespondenceDetailsSpec
 
     "throw exception if PPT Address is not available" in {
       intercept[Exception] {
-        BusinessCorrespondenceDetails(pptOrganisationDetails.copy(businessRegisteredAddress = None))
+        BusinessCorrespondenceDetails(
+          pptIncorporationDetails.copy(businessRegisteredAddress = None)
+        )
       }
     }
 

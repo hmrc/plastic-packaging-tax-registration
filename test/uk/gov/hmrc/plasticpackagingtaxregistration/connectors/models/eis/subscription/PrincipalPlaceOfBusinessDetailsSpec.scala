@@ -28,7 +28,7 @@ class PrincipalPlaceOfBusinessDetailsSpec
     extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData
     with RegistrationBuilder {
   "PrincipalPlaceOfBusinessDetails" should {
-    val registration = aRegistration(withOrganisationDetails(pptOrganisationDetails),
+    val registration = aRegistration(withOrganisationDetails(pptIncorporationDetails),
                                      withPrimaryContactDetails(pptPrimaryContactDetails),
                                      withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
     )
@@ -48,7 +48,7 @@ class PrincipalPlaceOfBusinessDetailsSpec
 
     "throw an exception when address is not available" in {
       val registration = aRegistration(
-        withOrganisationDetails(pptOrganisationDetails.copy(businessRegisteredAddress = None)),
+        withOrganisationDetails(pptIncorporationDetails.copy(businessRegisteredAddress = None)),
         withPrimaryContactDetails(pptPrimaryContactDetails),
         withLiabilityDetails(pptLiabilityDetails)
       )

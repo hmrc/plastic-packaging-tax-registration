@@ -45,7 +45,7 @@ trait RegistrationTestData {
     address = Some(pptAddress)
   )
 
-  protected val pptOrganisationDetails: OrganisationDetails = OrganisationDetails(
+  protected val pptIncorporationDetails: OrganisationDetails = OrganisationDetails(
     isBasedInUk = Some(true),
     organisationType = Some(OrgType.UK_COMPANY),
     businessRegisteredAddress = Some(pptAddress),
@@ -76,15 +76,16 @@ trait RegistrationTestData {
     )
   )
 
-  protected val pptPartnershipDetails: OrganisationDetails = OrganisationDetails(
+  protected val pptGeneralPartnershipDetails: OrganisationDetails = OrganisationDetails(
     isBasedInUk = Some(true),
     organisationType = Some(OrgType.PARTNERSHIP),
     businessRegisteredAddress = Some(pptAddress),
     safeNumber = Some("1234567890"),
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
+                         partnershipName = Some("A general partnership"),
                          generalPartnershipDetails = Some(
-                           GeneralPartnershipDetails(sautr = "1234567890",
+                           GeneralPartnershipDetails(sautr = "7454768902",
                                                      postcode = "AA1 1AA",
                                                      registration = incorporationRegistrationDetails
                            )
@@ -100,9 +101,10 @@ trait RegistrationTestData {
     safeNumber = Some("1234567890"),
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = SCOTTISH_PARTNERSHIP,
+                         partnershipName = Some("A Scottish partnership"),
                          scottishPartnershipDetails = Some(
-                           ScottishPartnershipDetails(sautr = "1234567890",
-                                                      postcode = "AA1 1AA",
+                           ScottishPartnershipDetails(sautr = "1435676545",
+                                                      postcode = "BB1 1BB",
                                                       registration =
                                                         incorporationRegistrationDetails
                            )
