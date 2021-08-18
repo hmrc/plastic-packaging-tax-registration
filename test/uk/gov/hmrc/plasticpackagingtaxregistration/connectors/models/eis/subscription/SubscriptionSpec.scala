@@ -114,16 +114,16 @@ class SubscriptionSpec
   }
 
   private def mustHaveValidPrincipalPlaceOfBusinessDetails(subscription: Subscription) = {
-    subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine1 mustBe pptAddress.addressLine1
-    subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptAddress.addressLine2.get
-    subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine3 mustBe pptAddress.addressLine3
+    subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
+    subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.get
+    subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
     subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine4 mustBe Some(
-      pptAddress.townOrCity
+      pptBusinessAddress.townOrCity
     )
     subscription.principalPlaceOfBusinessDetails.addressDetails.postalCode mustBe Some(
-      pptAddress.postCode
+      pptBusinessAddress.postCode
     )
-    subscription.principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptAddress.country.get
+    subscription.principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptBusinessAddress.country.get
 
     subscription.principalPlaceOfBusinessDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
     subscription.principalPlaceOfBusinessDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
@@ -131,12 +131,16 @@ class SubscriptionSpec
   }
 
   private def mustHaveValidBusinessCorrespondenceDetails(subscription: Subscription) = {
-    subscription.businessCorrespondenceDetails.addressLine1 mustBe pptAddress.addressLine1
-    subscription.businessCorrespondenceDetails.addressLine2 mustBe pptAddress.addressLine2.get
-    subscription.businessCorrespondenceDetails.addressLine3 mustBe pptAddress.addressLine3
-    subscription.businessCorrespondenceDetails.addressLine4 mustBe Some(pptAddress.townOrCity)
-    subscription.businessCorrespondenceDetails.postalCode mustBe Some(pptAddress.postCode)
-    subscription.businessCorrespondenceDetails.countryCode mustBe pptAddress.country.get
+    subscription.businessCorrespondenceDetails.addressLine1 mustBe pptPrimaryContactAddress.addressLine1
+    subscription.businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2.get
+    subscription.businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
+    subscription.businessCorrespondenceDetails.addressLine4 mustBe Some(
+      pptPrimaryContactAddress.townOrCity
+    )
+    subscription.businessCorrespondenceDetails.postalCode mustBe Some(
+      pptPrimaryContactAddress.postCode
+    )
+    subscription.businessCorrespondenceDetails.countryCode mustBe pptPrimaryContactAddress.country.get
   }
 
   private def mustHaveValidIncorporationLegalEntityDetails(subscription: Subscription): Any = {

@@ -52,8 +52,7 @@ object Subscription {
     Subscription(legalEntityDetails = LegalEntityDetails(registration.organisationDetails),
                  principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration),
                  primaryContactDetails = PrimaryContactDetails(registration.primaryContactDetails),
-                 businessCorrespondenceDetails =
-                   BusinessCorrespondenceDetails(registration.organisationDetails),
+                 businessCorrespondenceDetails = BusinessCorrespondenceDetails(registration),
                  declaration = Declaration(true),
                  taxObligationStartDate = registration.liabilityDetails.startDate,
                  last12MonthTotalTonnageAmt = registration.liabilityDetails.weight,
