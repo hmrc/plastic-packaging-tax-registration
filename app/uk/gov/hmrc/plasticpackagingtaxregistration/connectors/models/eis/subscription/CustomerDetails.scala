@@ -46,9 +46,11 @@ object CustomerDetails {
         organisationDetails.partnershipDetails.map { details =>
           CustomerDetails(customerType = CustomerType.Organisation,
                           organisationDetails = Some(
-                            OrganisationDetails(organisationType =
-                                                  Some(OrgType.PARTNERSHIP.toString),
-                                                organisationName = "TODO"
+                            OrganisationDetails(
+                              organisationType =
+                                Some(OrgType.PARTNERSHIP.toString),
+                              // TODO: can we do this? I think partnership names might be optional, especially for general partnerships.
+                              organisationName = details.partnershipName.getOrElse("")
                             )
                           )
           )

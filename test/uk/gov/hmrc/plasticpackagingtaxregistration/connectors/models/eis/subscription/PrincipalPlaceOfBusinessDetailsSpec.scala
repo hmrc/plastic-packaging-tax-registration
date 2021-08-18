@@ -28,18 +28,22 @@ class PrincipalPlaceOfBusinessDetailsSpec
     extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData
     with RegistrationBuilder {
   "PrincipalPlaceOfBusinessDetails" should {
-    val registration = aRegistration(withOrganisationDetails(pptOrganisationDetails),
+    val registration = aRegistration(withOrganisationDetails(pptIncorporationDetails),
                                      withPrimaryContactDetails(pptPrimaryContactDetails),
                                      withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
     )
     "build" in {
       val principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration)
-      principalPlaceOfBusinessDetails.addressDetails.addressLine1 mustBe pptAddress.addressLine1
-      principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptAddress.addressLine2.get
-      principalPlaceOfBusinessDetails.addressDetails.addressLine3 mustBe pptAddress.addressLine3
-      principalPlaceOfBusinessDetails.addressDetails.addressLine4 mustBe Some(pptAddress.townOrCity)
-      principalPlaceOfBusinessDetails.addressDetails.postalCode mustBe Some(pptAddress.postCode)
-      principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptAddress.country.get
+      principalPlaceOfBusinessDetails.addressDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
+      principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.get
+      principalPlaceOfBusinessDetails.addressDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
+      principalPlaceOfBusinessDetails.addressDetails.addressLine4 mustBe Some(
+        pptBusinessAddress.townOrCity
+      )
+      principalPlaceOfBusinessDetails.addressDetails.postalCode mustBe Some(
+        pptBusinessAddress.postCode
+      )
+      principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptBusinessAddress.country.get
 
       principalPlaceOfBusinessDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
       principalPlaceOfBusinessDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
@@ -48,7 +52,7 @@ class PrincipalPlaceOfBusinessDetailsSpec
 
     "throw an exception when address is not available" in {
       val registration = aRegistration(
-        withOrganisationDetails(pptOrganisationDetails.copy(businessRegisteredAddress = None)),
+        withOrganisationDetails(pptIncorporationDetails.copy(businessRegisteredAddress = None)),
         withPrimaryContactDetails(pptPrimaryContactDetails),
         withLiabilityDetails(pptLiabilityDetails)
       )

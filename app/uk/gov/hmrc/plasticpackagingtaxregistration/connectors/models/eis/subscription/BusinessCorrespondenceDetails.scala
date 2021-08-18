@@ -17,9 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  OrganisationDetails => PPTOrganisationDetails
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration
 
 case class BusinessCorrespondenceDetails(
   addressLine1: String,
@@ -35,17 +33,25 @@ object BusinessCorrespondenceDetails {
   implicit val format: OFormat[BusinessCorrespondenceDetails] =
     Json.format[BusinessCorrespondenceDetails]
 
-  def apply(organisationDetails: PPTOrganisationDetails): BusinessCorrespondenceDetails =
-    organisationDetails.businessRegisteredAddress match {
-      case Some(addressDetails) =>
-        BusinessCorrespondenceDetails(addressLine1 = addressDetails.addressLine1,
-                                      addressLine2 = addressDetails.addressLine2.getOrElse(""),
-                                      addressLine3 = addressDetails.addressLine3,
-                                      addressLine4 = Some(addressDetails.townOrCity),
-                                      postalCode = Some(addressDetails.postCode),
-                                      countryCode = "GB"
+  def apply(registration: Registration): BusinessCorrespondenceDetails = {
+    val businessCorrespondenceAddress =
+      if (registration.primaryContactDetails.useRegisteredAddress.getOrElse(false))
+        registration.organisationDetails.businessRegisteredAddress.getOrElse(
+          throw new IllegalStateException((s"The legal entity registered address is required."))
         )
-      case None => throw new Exception(s"The legal entity registered address is required.")
-    }
+      else
+        registration.primaryContactDetails.address.getOrElse(
+          throw new IllegalStateException(s"The primary contact details address is required.")
+        )
+
+    BusinessCorrespondenceDetails(addressLine1 = businessCorrespondenceAddress.addressLine1,
+                                  addressLine2 =
+                                    businessCorrespondenceAddress.addressLine2.getOrElse(""),
+                                  addressLine3 = businessCorrespondenceAddress.addressLine3,
+                                  addressLine4 = Some(businessCorrespondenceAddress.townOrCity),
+                                  postalCode = Some(businessCorrespondenceAddress.postCode),
+                                  countryCode = "GB"
+    )
+  }
 
 }

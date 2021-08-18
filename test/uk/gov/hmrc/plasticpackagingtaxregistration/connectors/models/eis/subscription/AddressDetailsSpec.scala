@@ -40,11 +40,11 @@ class AddressDetailsSpec
       }
 
       "all  PPT address fields are available" in {
-        val addressDetails = AddressDetails(Some(pptAddress))
-        addressDetails.addressLine1 mustBe pptAddress.addressLine1
-        addressDetails.addressLine2 mustBe pptAddress.addressLine2.get
-        addressDetails.addressLine3 mustBe pptAddress.addressLine3
-        addressDetails.addressLine4 mustBe Some(pptAddress.townOrCity)
+        val addressDetails = AddressDetails(Some(pptBusinessAddress))
+        addressDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
+        addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.get
+        addressDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
+        addressDetails.addressLine4 mustBe Some(pptBusinessAddress.townOrCity)
       }
     }
 

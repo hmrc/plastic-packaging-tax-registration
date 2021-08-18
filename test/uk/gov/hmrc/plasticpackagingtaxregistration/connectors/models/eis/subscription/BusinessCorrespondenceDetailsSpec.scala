@@ -22,28 +22,75 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
   RegistrationTestData,
   SubscriptionTestData
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
 
 class BusinessCorrespondenceDetailsSpec
-    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData {
+    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData
+    with RegistrationBuilder {
 
   "BusinessCorrespondenceDetails" should {
-    "map from PPT Address " when {
-      "all  PPT address fields are available" in {
-        val businessCorrespondenceDetails = BusinessCorrespondenceDetails(pptOrganisationDetails)
-        businessCorrespondenceDetails.addressLine1 mustBe pptAddress.addressLine1
-        businessCorrespondenceDetails.addressLine2 mustBe pptAddress.addressLine2.get
-        businessCorrespondenceDetails.addressLine3 mustBe pptAddress.addressLine3
-        businessCorrespondenceDetails.addressLine4 mustBe Some(pptAddress.townOrCity)
-        businessCorrespondenceDetails.postalCode mustBe Some(pptAddress.postCode)
+    "map from registration business entity registered address" when {
+      "primary contact marked as same as registered business entity address" in {
+        val registrationUsingBusinessAddress =
+          aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                        withPrimaryContactDetails(pptPrimaryContactDetailsSharingBusinessAddress),
+                        withLiabilityDetails(pptLiabilityDetails)
+          )
+
+        val businessCorrespondenceDetails =
+          BusinessCorrespondenceDetails(registrationUsingBusinessAddress)
+
+        businessCorrespondenceDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
+        businessCorrespondenceDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.get
+        businessCorrespondenceDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
+        businessCorrespondenceDetails.addressLine4 mustBe Some(pptBusinessAddress.townOrCity)
+        businessCorrespondenceDetails.postalCode mustBe Some(pptBusinessAddress.postCode)
         businessCorrespondenceDetails.countryCode mustBe "GB"
       }
     }
 
-    "throw exception if PPT Address is not available" in {
-      intercept[Exception] {
-        BusinessCorrespondenceDetails(pptOrganisationDetails.copy(businessRegisteredAddress = None))
+    "map from supplied primary contact address" when {
+      "primary contact supplied with discrete primary contact address" in {
+        val registrationWithDifferentPrimaryContractAddress =
+          aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                        withPrimaryContactDetails(pptPrimaryContactDetails),
+                        withLiabilityDetails(pptLiabilityDetails)
+          )
+
+        val businessCorrespondenceDetails =
+          BusinessCorrespondenceDetails(registrationWithDifferentPrimaryContractAddress)
+
+        businessCorrespondenceDetails.addressLine1 mustBe pptPrimaryContactAddress.addressLine1
+        businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2.get
+        businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
+        businessCorrespondenceDetails.addressLine4 mustBe Some(pptPrimaryContactAddress.townOrCity)
+        businessCorrespondenceDetails.postalCode mustBe Some(pptPrimaryContactAddress.postCode)
+        businessCorrespondenceDetails.countryCode mustBe "GB"
       }
     }
 
+    "throw IllegalStateException" when {
+      "registration suggests primary contact address same as business address but no business address provided" in {
+        val registrationWithMissingBusinessAddress =
+          aRegistration(withPrimaryContactDetails(pptPrimaryContactDetailsSharingBusinessAddress),
+                        withOrganisationDetails(
+                          pptIncorporationDetails.copy(businessRegisteredAddress = None)
+                        )
+          )
+
+        intercept[IllegalStateException] {
+          BusinessCorrespondenceDetails(registrationWithMissingBusinessAddress)
+        }
+      }
+
+      "registration suggests discrete primary contact address supplied but it is missing" in {
+        val registrationWithMissingPrimaryContactAddress =
+          aRegistration(withPrimaryContactDetails(pptPrimaryContactDetails.copy(address = None)))
+
+        intercept[IllegalStateException] {
+          BusinessCorrespondenceDetails(registrationWithMissingPrimaryContactAddress)
+        }
+      }
+    }
   }
 }

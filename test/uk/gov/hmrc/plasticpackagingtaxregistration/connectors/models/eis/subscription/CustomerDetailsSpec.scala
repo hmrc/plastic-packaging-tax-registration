@@ -28,14 +28,14 @@ class CustomerDetailsSpec
   "CustomerDetails" should {
     "build successfully" when {
       "subscripting an organisation" in {
-        val customerDetails = CustomerDetails(pptOrganisationDetails)
+        val customerDetails = CustomerDetails(pptIncorporationDetails)
         customerDetails.customerType mustBe CustomerType.Organisation
 
         customerDetails.organisationDetails.get.organisationType mustBe Some(
-          pptOrganisationDetails.organisationType.get.toString
+          pptIncorporationDetails.organisationType.get.toString
         )
         customerDetails.organisationDetails.get.organisationName mustBe
-          pptOrganisationDetails.incorporationDetails.get.companyName
+          pptIncorporationDetails.incorporationDetails.get.companyName
 
         customerDetails.individualDetails mustBe None
       }
@@ -52,15 +52,15 @@ class CustomerDetailsSpec
       }
 
       "subscripting a generalPartnership" in {
-        val customerDetails = CustomerDetails(pptPartnershipDetails)
+        val customerDetails = CustomerDetails(pptGeneralPartnershipDetails)
         customerDetails.customerType mustBe CustomerType.Organisation
 
         customerDetails.individualDetails mustBe None
 
         customerDetails.organisationDetails.get.organisationType mustBe Some(
-          pptPartnershipDetails.organisationType.get.toString
+          pptGeneralPartnershipDetails.organisationType.get.toString
         )
-        customerDetails.organisationDetails.get.organisationName mustBe "TODO"
+        customerDetails.organisationDetails.get.organisationName mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipName.get
       }
 
       "subscripting a scottishPartnership" in {
@@ -72,20 +72,20 @@ class CustomerDetailsSpec
         customerDetails.organisationDetails.get.organisationType mustBe Some(
           pptScottishPartnershipDetails.organisationType.get.toString
         )
-        customerDetails.organisationDetails.get.organisationName mustBe "TODO"
+        customerDetails.organisationDetails.get.organisationName mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipName.get
       }
     }
 
     "throw an exception" when {
       "organisation type is 'None'" in {
         intercept[Exception] {
-          CustomerDetails(pptOrganisationDetails.copy(organisationType = None))
+          CustomerDetails(pptIncorporationDetails.copy(organisationType = None))
         }
       }
 
       "corporate and incorporation details are missing" in {
         intercept[Exception] {
-          CustomerDetails(pptOrganisationDetails.copy(incorporationDetails = None))
+          CustomerDetails(pptIncorporationDetails.copy(incorporationDetails = None))
         }
       }
 
@@ -97,16 +97,18 @@ class CustomerDetailsSpec
 
       "partnership and partnership details are missing" in {
         intercept[Exception] {
-          CustomerDetails(pptPartnershipDetails.copy(partnershipDetails = None))
+          CustomerDetails(pptGeneralPartnershipDetails.copy(partnershipDetails = None))
         }
       }
 
       "partnership and partnership general partnership details are missing" in {
         intercept[Exception] {
           LegalEntityDetails(
-            pptPartnershipDetails.copy(partnershipDetails =
+            pptGeneralPartnershipDetails.copy(partnershipDetails =
               Some(
-                pptPartnershipDetails.partnershipDetails.get.copy(generalPartnershipDetails = None)
+                pptGeneralPartnershipDetails.partnershipDetails.get.copy(generalPartnershipDetails =
+                  None
+                )
               )
             )
           )

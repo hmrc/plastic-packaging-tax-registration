@@ -91,7 +91,7 @@ class SubscriptionControllerSpec
 
   "POST /subscriptions/:safeNumber" should {
     val request = aRegistrationRequest(withLiabilityDetailsRequest(pptLiabilityDetails),
-                                       withOrganisationDetailsRequest(pptOrganisationDetails),
+                                       withOrganisationDetailsRequest(pptIncorporationDetails),
                                        withPrimaryContactDetailsRequest(pptPrimaryContactDetails),
                                        withMetaDataRequest(
                                          MetaData(registrationReviewed, registrationCompleted)

@@ -24,12 +24,20 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 trait RegistrationTestData {
 
-  protected val pptAddress: Address =
-    Address(addressLine1 = "addressLine1",
-            addressLine2 = Some("addressLine2"),
-            addressLine3 = Some("addressLine3"),
-            townOrCity = "Town",
-            postCode = "PostCode"
+  protected val pptBusinessAddress: Address =
+    Address(addressLine1 = "1 Some Street",
+            addressLine2 = Some("Some Place"),
+            addressLine3 = Some("Some Area"),
+            townOrCity = "Leeds",
+            postCode = "LS1 1AA"
+    )
+
+  protected val pptPrimaryContactAddress: Address =
+    Address(addressLine1 = "2 Some Other Street",
+            addressLine2 = Some("Some Other Place"),
+            addressLine3 = Some("Some Other Area"),
+            townOrCity = "Bradford",
+            postCode = "BD1 1AA"
     )
 
   protected val incorporationRegistrationDetails: IncorporationRegistrationDetails =
@@ -42,13 +50,23 @@ trait RegistrationTestData {
     jobTitle = Some("Director"),
     email = Some("some@test"),
     phoneNumber = Some("1234567890"),
-    address = Some(pptAddress)
+    useRegisteredAddress = None,
+    address = Some(pptPrimaryContactAddress)
   )
 
-  protected val pptOrganisationDetails: OrganisationDetails = OrganisationDetails(
+  protected val pptPrimaryContactDetailsSharingBusinessAddress: PrimaryContactDetails =
+    PrimaryContactDetails(fullName = Some(FullName(firstName = "Test", lastName = "User")),
+                          jobTitle = Some("Director"),
+                          email = Some("some@test"),
+                          phoneNumber = Some("1234567890"),
+                          useRegisteredAddress = Some(true),
+                          address = None
+    )
+
+  protected val pptIncorporationDetails: OrganisationDetails = OrganisationDetails(
     isBasedInUk = Some(true),
     organisationType = Some(OrgType.UK_COMPANY),
-    businessRegisteredAddress = Some(pptAddress),
+    businessRegisteredAddress = Some(pptBusinessAddress),
     safeNumber = Some("1234567890"),
     incorporationDetails = Some(
       IncorporationDetails(companyNumber = "1234567890",
@@ -63,7 +81,7 @@ trait RegistrationTestData {
   protected val pptSoleTraderDetails: OrganisationDetails = OrganisationDetails(
     isBasedInUk = Some(true),
     organisationType = Some(OrgType.SOLE_TRADER),
-    businessRegisteredAddress = Some(pptAddress),
+    businessRegisteredAddress = Some(pptBusinessAddress),
     safeNumber = Some("1234567890"),
     soleTraderDetails = Some(
       SoleTraderIncorporationDetails(firstName = "Test",
@@ -76,15 +94,16 @@ trait RegistrationTestData {
     )
   )
 
-  protected val pptPartnershipDetails: OrganisationDetails = OrganisationDetails(
+  protected val pptGeneralPartnershipDetails: OrganisationDetails = OrganisationDetails(
     isBasedInUk = Some(true),
     organisationType = Some(OrgType.PARTNERSHIP),
-    businessRegisteredAddress = Some(pptAddress),
+    businessRegisteredAddress = Some(pptBusinessAddress),
     safeNumber = Some("1234567890"),
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
+                         partnershipName = Some("A general partnership"),
                          generalPartnershipDetails = Some(
-                           GeneralPartnershipDetails(sautr = "1234567890",
+                           GeneralPartnershipDetails(sautr = "7454768902",
                                                      postcode = "AA1 1AA",
                                                      registration = incorporationRegistrationDetails
                            )
@@ -96,13 +115,14 @@ trait RegistrationTestData {
   protected val pptScottishPartnershipDetails: OrganisationDetails = OrganisationDetails(
     isBasedInUk = Some(true),
     organisationType = Some(OrgType.PARTNERSHIP),
-    businessRegisteredAddress = Some(pptAddress),
+    businessRegisteredAddress = Some(pptBusinessAddress),
     safeNumber = Some("1234567890"),
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = SCOTTISH_PARTNERSHIP,
+                         partnershipName = Some("A Scottish partnership"),
                          scottishPartnershipDetails = Some(
-                           ScottishPartnershipDetails(sautr = "1234567890",
-                                                      postcode = "AA1 1AA",
+                           ScottishPartnershipDetails(sautr = "1435676545",
+                                                      postcode = "BB1 1BB",
                                                       registration =
                                                         incorporationRegistrationDetails
                            )
