@@ -19,7 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 
-case class SubscriptionCreateFailureResponse(failures: Option[Seq[EISError]] = None)
+case class SubscriptionCreateFailureResponse(failures: Seq[EISError])
     extends SubscriptionCreateResponse
 
 object SubscriptionCreateFailureResponse {

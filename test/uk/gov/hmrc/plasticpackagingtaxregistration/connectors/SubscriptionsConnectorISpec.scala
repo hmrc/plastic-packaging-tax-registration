@@ -21,6 +21,7 @@ import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.test.Helpers.await
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
@@ -73,9 +74,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.getSubscriptionStatus(safeNumber))
-        }
+        }.statusCode mustBe Status.BAD_REQUEST
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -89,9 +90,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.getSubscriptionStatus(safeNumber))
-        }
+        }.statusCode mustBe Status.NOT_FOUND
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -104,9 +105,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.INTERNAL_SERVER_ERROR, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.getSubscriptionStatus(safeNumber))
-        }
+        }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -119,9 +120,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.getSubscriptionStatus(safeNumber))
-        }
+        }.statusCode mustBe Status.BAD_GATEWAY
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -134,9 +135,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.getSubscriptionStatus(safeNumber))
-        }
+        }.statusCode mustBe Status.SERVICE_UNAVAILABLE
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
     }
@@ -181,9 +182,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }
+        }.statusCode mustBe Status.BAD_REQUEST
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -197,9 +198,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.CONFLICT, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }
+        }.statusCode mustBe Status.CONFLICT
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -213,9 +214,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.UNPROCESSABLE_ENTITY, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }
+        }.statusCode mustBe Status.UNPROCESSABLE_ENTITY
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -230,9 +231,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
                                           errors = errors
         )
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }
+        }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -245,9 +246,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }
+        }.statusCode mustBe Status.BAD_GATEWAY
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -260,10 +261,40 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
 
-        intercept[Exception] {
+        intercept[UpstreamErrorResponse] {
           await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }
+        }.statusCode mustBe Status.SERVICE_UNAVAILABLE
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "return 500 for malformed successful responses" in {
+        stubFor(
+          post(s"/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create")
+            .willReturn(
+              aResponse()
+                .withStatus(Status.OK)
+                .withBody(Json.obj("xxx" -> "xxx").toString)
+            )
+        )
+
+        intercept[UpstreamErrorResponse] {
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
+      }
+
+      "return 500 for malformed failed responses" in {
+        stubFor(
+          post(s"/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create")
+            .willReturn(
+              aResponse()
+                .withStatus(Status.CONFLICT)
+                .withBody(Json.obj("xxx" -> "xxx").toString)
+            )
+        )
+
+        intercept[UpstreamErrorResponse] {
+          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
       }
     }
   }

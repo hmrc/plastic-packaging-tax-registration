@@ -55,7 +55,7 @@ trait SubscriptionTestData {
 
   protected val subscriptionCreateFailureResponse: SubscriptionCreateFailureResponse =
     SubscriptionCreateFailureResponse(failures =
-      Some(Seq(EISError(code = "123", reason = "error")))
+      Seq(EISError(code = "123", reason = "error"))
     )
 
   protected val ukLimitedCompaySubscription: Subscription = Subscription(

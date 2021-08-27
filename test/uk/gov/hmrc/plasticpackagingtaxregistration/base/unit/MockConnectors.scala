@@ -23,10 +23,7 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  SubscriptionCreateResponse,
-  SubscriptionCreateSuccessfulResponse
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
   NonRepudiationConnector,
@@ -58,7 +55,7 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected def mockGetSubscriptionSubmitFailure(
     ex: Exception
-  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+  ): OngoingStubbing[Future[SubscriptionCreateSuccessfulResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any()))
       .thenThrow(ex)
 
@@ -71,7 +68,7 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected def mockGetSubscriptionCreate(
     subscription: SubscriptionCreateSuccessfulResponse
-  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+  ): OngoingStubbing[Future[SubscriptionCreateSuccessfulResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
       Future.successful(subscription)
     )
