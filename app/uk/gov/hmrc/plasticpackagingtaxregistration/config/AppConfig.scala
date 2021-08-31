@@ -25,8 +25,11 @@ import scala.concurrent.duration.FiniteDuration
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
-  lazy val eisHost: String     = servicesConfig.baseUrl("eis")
-  lazy val nrsHost: String     = servicesConfig.baseUrl("nrs")
+  lazy val selfHost: String          = servicesConfig.baseUrl("self")
+  lazy val eisHost: String           = servicesConfig.baseUrl("eis")
+  lazy val nrsHost: String           = servicesConfig.baseUrl("nrs")
+  lazy val taxEnrolmentsHost: String = servicesConfig.baseUrl("tax-enrolments")
+
   val authBaseUrl: String      = servicesConfig.baseUrl("auth")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
   val graphiteHost: String     = config.get[String]("microservice.metrics.graphite.host")
@@ -46,6 +49,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   lazy val nonRepudiationApiKey: String =
     servicesConfig.getString("microservice.services.nrs.api-key")
+
+  def getTaxEnrolmentsSubscriberUrl(pptReference: String) =
+    s"$taxEnrolmentsHost/tax-enrolments/subscriptions/$pptReference/subscriber"
 
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
 }

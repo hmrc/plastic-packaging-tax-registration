@@ -35,6 +35,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
   SubscriptionTestData
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  EnrolmentConnector,
   NonRepudiationConnector,
   SubscriptionsConnector
 }
@@ -59,7 +60,8 @@ trait ControllerSpec
                bind[SubscriptionsConnector].to(mockSubscriptionsConnector),
                bind[NonRepudiationConnector].to(mockNonRepudiationConnector),
                bind[RegistrationRepository].to(mockRepository),
-               bind[NonRepudiationService].to(mockNonRepudiationService)
+               bind[NonRepudiationService].to(mockNonRepudiationService),
+               bind[EnrolmentConnector].to(mockEnrolmentConnector)
     )
     .build()
 

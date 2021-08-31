@@ -53,7 +53,7 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
     Action.async(bodyParser) { implicit request =>
       authorisedWithInternalId.flatMap {
         case Right(authorisedRequest) =>
-          logger.info(s"Authorised request for ${authorisedRequest.pptId}")
+          logger.info(s"Authorised request for ${authorisedRequest.registrationId}")
           body(authorisedRequest)
         case Left(error) =>
           logger.error(s"Problems with Authorisation: ${error.message}")
@@ -83,5 +83,5 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
 
 }
 
-case class AuthorizedRequest[A](pptId: String, request: Request[A])
+case class AuthorizedRequest[A](registrationId: String, request: Request[A])
     extends WrappedRequest[A](request)

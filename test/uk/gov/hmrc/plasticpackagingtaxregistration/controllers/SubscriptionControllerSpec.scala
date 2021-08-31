@@ -30,12 +30,9 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  SubscriptionCreateWithNrsFailureResponse,
-  SubscriptionCreateWithNrsSuccessfulResponse
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.MetaData
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{MetaData, RegistrationRequest}
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -47,27 +44,27 @@ class SubscriptionControllerSpec
   override def beforeEach(): Unit = {
     Mockito.reset(mockRepository, mockNonRepudiationService)
     super.beforeEach()
+
+    when(mockRepository.delete(any())).thenReturn(Future.successful())
   }
 
-  "GET /subscriptions/status/:id " should {
-    "return 200" when {
-      "request is valid" in {
-        withAuthorizedUser()
-        mockGetSubscriptionStatus(subscriptionStatusResponse)
-        mockNonRepudiationSubmission(NonRepudiationSubmissionAccepted(UUID.randomUUID().toString))
+  "Get subscription status" should {
+    "return expected details" in {
+      withAuthorizedUser()
+      mockGetSubscriptionStatus(subscriptionStatusResponse)
+      mockNonRepudiationSubmission(NonRepudiationSubmissionAccepted(UUID.randomUUID().toString))
 
-        val result: Future[Result] = route(app, subscriptionStatusResponse_HttpGet).get
+      val result: Future[Result] = route(app, subscriptionStatusResponse_HttpGet).get
 
-        status(result) must be(OK)
-        contentAsJson(result) mustBe toJson(subscriptionStatusResponse)
-        verify(mockSubscriptionsConnector).getSubscriptionStatus(ArgumentMatchers.eq(safeNumber))(
-          any()
-        )
-      }
+      status(result) must be(OK)
+      contentAsJson(result) mustBe toJson(subscriptionStatusResponse)
+      verify(mockSubscriptionsConnector).getSubscriptionStatus(ArgumentMatchers.eq(safeNumber))(
+        any()
+      )
     }
 
     "return 401" when {
-      "unauthorized" in {
+      "user not authorized" in {
         withUnauthorizedUser(InsufficientEnrolments())
 
         val result: Future[Result] = route(app, subscriptionStatusResponse_HttpGet).get
@@ -77,19 +74,21 @@ class SubscriptionControllerSpec
       }
     }
 
-    "return 500" when {
-      "a failure has occurred at EIS" in {
+    "pass through exceptions" when {
+      "an exception occurs during the subscription call" in {
         withAuthorizedUser()
-        mockGetSubscriptionStatusFailure(new RuntimeException("error"))
+        mockGetSubscriptionStatusFailure(new IllegalStateException("BANG!"))
 
         val result: Future[Result] = route(app, subscriptionStatusResponse_HttpGet).get
 
-        intercept[RuntimeException](status(result))
+        intercept[IllegalStateException] {
+          status(result)
+        }
       }
     }
   }
 
-  "POST /subscriptions/:safeNumber" should {
+  "Create subscription" should {
     val request = aRegistrationRequest(withLiabilityDetailsRequest(pptLiabilityDetails),
                                        withOrganisationDetailsRequest(pptIncorporationDetails),
                                        withPrimaryContactDetailsRequest(pptPrimaryContactDetails),
@@ -99,9 +98,9 @@ class SubscriptionControllerSpec
                                        withUserHeaders(pptUserHeaders)
     )
 
-    "return 200 and delete transient registration" when {
+    "return expected details" when {
       "EIS/IF subscription is successful" when {
-        "and NRS submission is successful" in {
+        "and both NRS submission and enrolment are successful" in {
           val internalId     = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
           val nrSubmissionId = "nrSubmissionId"
           withAuthorizedUser(user = newUser())
@@ -109,16 +108,22 @@ class SubscriptionControllerSpec
           when(
             mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
           ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
+          mockEnrolmentSuccess()
 
           val result: Future[Result] =
             route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
           status(result) must be(OK)
-          val response = contentAsJson(result).as[SubscriptionCreateWithNrsSuccessfulResponse]
+          val response =
+            contentAsJson(result).as[SubscriptionCreateWithEnrolmentAndNrsStatusesResponse]
           response.pptReference mustBe subscriptionCreateResponse.pptReference
           response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
           response.processingDate mustBe subscriptionCreateResponse.processingDate
-          response.nrSubmissionId mustBe nrSubmissionId
+          response.nrsNotifiedSuccessfully mustBe true
+          response.nrsSubmissionId mustBe Some(nrSubmissionId)
+          response.nrsFailureReason mustBe None
+          response.enrolmentInitiatedSuccessfully mustBe true
+
           verify(mockRepository).delete(internalId)
           verify(mockNonRepudiationService).submitNonRepudiation(
             ArgumentMatchers.contains(request.incorpJourneyId.get),
@@ -127,32 +132,15 @@ class SubscriptionControllerSpec
             ArgumentMatchers.eq(pptUserHeaders)
           )(any[HeaderCarrier])
         }
-        "and NRS submission is not successful" in {
-          val internalId      = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
-          val nrsErrorMessage = "Service unavailable"
-          withAuthorizedUser(user = newUser())
-          mockGetSubscriptionCreate(subscriptionCreateResponse)
-          when(
-            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
-          ).thenReturn(Future.failed(new HttpException(nrsErrorMessage, SERVICE_UNAVAILABLE)))
 
-          val result: Future[Result] =
-            route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
+        "but NRS submission fails and enrolment fails with failure response" in {
+          mockEnrolmentFailure()
+          assertExpectedResponseWhenNrsSubmissionAndEnrolmentFail(request)
+        }
 
-          status(result) must be(OK)
-          val response = contentAsJson(result).as[SubscriptionCreateWithNrsFailureResponse]
-          response.pptReference mustBe subscriptionCreateResponse.pptReference
-          response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
-          response.processingDate mustBe subscriptionCreateResponse.processingDate
-          response.nrsFailureReason mustBe nrsErrorMessage
-
-          verify(mockRepository).delete(internalId)
-          verify(mockNonRepudiationService).submitNonRepudiation(
-            ArgumentMatchers.contains(request.incorpJourneyId.get),
-            any[ZonedDateTime],
-            ArgumentMatchers.eq(subscriptionCreateResponse.pptReference),
-            ArgumentMatchers.eq(pptUserHeaders)
-          )(any[HeaderCarrier])
+        "but NRS submission fails and enrolment fails with exception" in {
+          mockEnrolmentFailureException()
+          assertExpectedResponseWhenNrsSubmissionAndEnrolmentFail(request)
         }
       }
     }
@@ -193,6 +181,40 @@ class SubscriptionControllerSpec
         }
       }
     }
+  }
+
+  private def assertExpectedResponseWhenNrsSubmissionAndEnrolmentFail(
+    request: RegistrationRequest
+  ): Unit = {
+    val internalId      = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
+    val nrsErrorMessage = "Service unavailable"
+    withAuthorizedUser(user = newUser())
+    mockGetSubscriptionCreate(subscriptionCreateResponse)
+    when(
+      mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+    ).thenReturn(Future.failed(new HttpException(nrsErrorMessage, SERVICE_UNAVAILABLE)))
+
+    val result: Future[Result] =
+      route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
+
+    status(result) must be(OK)
+    val response =
+      contentAsJson(result).as[SubscriptionCreateWithEnrolmentAndNrsStatusesResponse]
+    response.pptReference mustBe subscriptionCreateResponse.pptReference
+    response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
+    response.processingDate mustBe subscriptionCreateResponse.processingDate
+    response.nrsNotifiedSuccessfully mustBe false
+    response.nrsSubmissionId mustBe None
+    response.nrsFailureReason mustBe Some(nrsErrorMessage)
+    response.enrolmentInitiatedSuccessfully mustBe false
+
+    verify(mockRepository).delete(internalId)
+    verify(mockNonRepudiationService).submitNonRepudiation(
+      ArgumentMatchers.contains(request.incorpJourneyId.get),
+      any[ZonedDateTime],
+      ArgumentMatchers.eq(subscriptionCreateResponse.pptReference),
+      ArgumentMatchers.eq(pptUserHeaders)
+    )(any[HeaderCarrier])
   }
 
 }
