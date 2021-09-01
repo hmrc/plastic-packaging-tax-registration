@@ -17,12 +17,14 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
 import com.kenshoo.play.metrics.Metrics
+import play.api.http.Status
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
-  SubscriptionCreateResponse,
+  SubscriptionCreateFailureResponse,
   SubscriptionCreateSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
@@ -30,7 +32,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Success, Try}
 
 @Singleton
 class SubscriptionsConnector @Inject() (
@@ -41,45 +43,74 @@ class SubscriptionsConnector @Inject() (
     extends EISConnector {
 
   def getSubscriptionStatus(
-    safeNumber: String
+    safeId: String
   )(implicit hc: HeaderCarrier): Future[SubscriptionStatusResponse] = {
+
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationId -> UUID.randomUUID().toString
-    httpClient.GET[SubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeNumber),
+
+    httpClient.GET[SubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
                                                headers = headers :+ correlationIdHeader
     )
       .andThen { case _ => timer.stop() }
-      .andThen {
-        case Success(response) => response
-        case Failure(exception) =>
-          throw new Exception(
-            s"Subscription Status with Correlation ID [${correlationIdHeader._2}] and " +
-              s"Safe ID [${safeNumber}] is currently unavailable due to [${exception.getMessage}]",
-            exception
-          )
-      }
   }
 
   def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
     hc: HeaderCarrier
-  ): Future[SubscriptionCreateResponse] = {
+  ): Future[SubscriptionCreateSuccessfulResponse] = {
+
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationId -> UUID.randomUUID().toString
-    httpClient.POST[Subscription, SubscriptionCreateSuccessfulResponse](
-      url = appConfig.subscriptionCreateUrl(safeNumber),
-      body = subscription,
-      headers = headers :+ correlationIdHeader
+
+    httpClient.POST[Subscription, HttpResponse](url = appConfig.subscriptionCreateUrl(safeNumber),
+                                                body = subscription,
+                                                headers = headers :+ correlationIdHeader
     )
       .andThen { case _ => timer.stop() }
-      .andThen {
-        case Success(response) => response
-        case Failure(exception) =>
-          throw new Exception(
-            s"Subscription submission with Correlation ID [${correlationIdHeader._2}] and " +
-              s"Safe ID [${safeNumber}] is currently experiencing issues due to [${exception.getMessage}]",
-            exception
-          )
+      .map {
+        subscriptionResponse =>
+          if (Status.isSuccessful(subscriptionResponse.status))
+            Try(subscriptionResponse.json.as[SubscriptionCreateSuccessfulResponse]) match {
+              case Success(successfulCreateResponse) => successfulCreateResponse
+              case _ =>
+                throw UpstreamErrorResponse.apply(
+                  buildCreateSubscriptionErrorMessage(correlationIdHeader._2,
+                                                      safeNumber,
+                                                      "successful response in unexpected format"
+                  ),
+                  Status.INTERNAL_SERVER_ERROR
+                )
+            }
+          else
+            Try(subscriptionResponse.json.as[SubscriptionCreateFailureResponse]) match {
+              case Success(failedCreateResponse) =>
+                failedCreateResponse.failures.head match {
+                  case EISError(_, reason) =>
+                    throw UpstreamErrorResponse.apply(
+                      buildCreateSubscriptionErrorMessage(correlationIdHeader._2,
+                                                          safeNumber,
+                                                          reason
+                      ),
+                      subscriptionResponse.status
+                    )
+                }
+              case _ =>
+                throw UpstreamErrorResponse.apply(
+                  buildCreateSubscriptionErrorMessage(correlationIdHeader._2,
+                                                      safeNumber,
+                                                      "failed response in unexpected format"
+                  ),
+                  Status.INTERNAL_SERVER_ERROR
+                )
+            }
       }
   }
+
+  private def buildCreateSubscriptionErrorMessage(
+    correlationId: String,
+    safeId: String,
+    errorMessage: String
+  ) =
+    s"PPT subscription with Correlation ID [$correlationId] and Safe ID [$safeId] failed - $errorMessage"
 
 }

@@ -67,7 +67,7 @@ class AuthenticatorSpec
 
         val result = await(authenticator.authorisedWithInternalId(hc, request))
 
-        result.value.pptId mustBe "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
+        result.value.registrationId mustBe "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
       }
     }
   }

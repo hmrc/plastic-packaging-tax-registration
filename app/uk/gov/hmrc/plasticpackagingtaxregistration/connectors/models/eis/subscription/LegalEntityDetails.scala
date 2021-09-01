@@ -17,6 +17,10 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.CustomerType.{
+  Individual,
+  Organisation
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
@@ -36,7 +40,16 @@ case class LegalEntityDetails(
   customerIdentification2: Option[String] = None,
   customerDetails: CustomerDetails,
   groupSubscriptionFlag: Boolean = false
-)
+) {
+
+  val name: String = customerDetails.customerType match {
+    case Organisation => customerDetails.organisationDetails.get.organisationName
+    case Individual =>
+      val name = customerDetails.individualDetails.get
+      s"${name.firstName} ${name.lastName}"
+  }
+
+}
 
 object LegalEntityDetails {
 

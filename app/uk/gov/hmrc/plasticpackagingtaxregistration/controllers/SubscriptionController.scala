@@ -21,14 +21,17 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
   SubscriptionCreateSuccessfulResponse,
-  SubscriptionCreateWithNrsFailureResponse,
-  SubscriptionCreateWithNrsSuccessfulResponse
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  EnrolmentConnector,
+  SubscriptionsConnector
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{
   Authenticator,
   AuthorizedRequest
@@ -42,6 +45,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class SubscriptionController @Inject() (
@@ -49,6 +53,7 @@ class SubscriptionController @Inject() (
   authenticator: Authenticator,
   repository: RegistrationRepository,
   nonRepudiationService: NonRepudiationService,
+  enrolmentConnector: EnrolmentConnector,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
@@ -63,69 +68,101 @@ class SubscriptionController @Inject() (
       }
     }
 
-  def submit(safeNumber: String): Action[RegistrationRequest] =
+  def submit(safeId: String): Action[RegistrationRequest] =
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
-        val pptSubscription = request.body.toRegistration(request.pptId)
-        val eisSubscription = Subscription(pptSubscription)
-        logPayload("PPT Subscription: ", eisSubscription)
-        subscriptionsConnector.submitSubscription(safeNumber, eisSubscription).flatMap {
-          case eisResponse @ SubscriptionCreateSuccessfulResponse(_, _, _) =>
-            handleNrsRequest(request, pptSubscription, eisResponse)
-              .andThen { case _ => repository.delete(request.pptId) }
+        val pptRegistration = request.body.toRegistration(request.registrationId)
+        val pptSubscription = Subscription(pptRegistration)
+        logPayload("PPT Subscription: ", pptSubscription)
 
-        }
+        subscriptionsConnector.submitSubscription(safeId, pptSubscription)
+          .flatMap {
+            subscriptionResponse =>
+              logger.info(
+                s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name}, " +
+                  s"PPT Reference [${subscriptionResponse.pptReference}]"
+              )
+              for {
+                enrolmentResponse <- enrolUser(subscriptionResponse.pptReference, safeId)
+                nrsResponse       <- notifyNRS(request, pptRegistration, subscriptionResponse)
+                _                 <- deleteRegistration(request.registrationId)
+              } yield Ok(
+                SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
+                  pptReference = subscriptionResponse.pptReference,
+                  processingDate = subscriptionResponse.processingDate,
+                  formBundleNumber = subscriptionResponse.formBundleNumber,
+                  nrsNotifiedSuccessfully = nrsResponse.isSuccess,
+                  nrsSubmissionId =
+                    nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
+                  nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None),
+                  enrolmentInitiatedSuccessfully = enrolmentResponse.isSuccess
+                )
+              )
+          }
+          .recoverWith {
+            case e =>
+              logger.warn(
+                s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name} - ${e.getMessage}"
+              )
+              throw e
+          }
     }
 
-  private def handleNrsRequest(
+  private def deleteRegistration(registrationId: String) =
+    repository.delete(registrationId)
+
+  private def enrolUser(pptReference: String, safeId: String)(implicit
+    hc: HeaderCarrier
+  ): Future[Try[TaxEnrolmentsResponse]] =
+    enrolmentConnector.submitEnrolment(pptReference, safeId)
+      .map {
+        case Right(successfulTaxEnrolment) =>
+          logger.info(
+            s"Successful subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId]"
+          )
+          Success(Right(successfulTaxEnrolment))
+        case Left(failedTaxEnrolment) =>
+          logger.warn(
+            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId] " +
+              s"- error code [${failedTaxEnrolment.status}]"
+          )
+          Failure(new IllegalStateException("Enrolment failed"))
+      }
+      .recover {
+        case e =>
+          logger.warn(
+            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId] " +
+              s"- ${e.getMessage}"
+          )
+          Failure(e)
+      }
+
+  private def notifyNRS(
     request: AuthorizedRequest[RegistrationRequest],
-    pptSubscription: Registration,
-    eisResponse: SubscriptionCreateSuccessfulResponse
-  )(implicit hc: HeaderCarrier): Future[Result] =
-    submitToNrs(request, pptSubscription, eisResponse).map {
-      case NonRepudiationSubmissionAccepted(nrSubmissionId) =>
-        handleNrsSuccess(eisResponse, nrSubmissionId)
-    }.recoverWith {
-      case exception: Exception =>
-        handleNrsFailure(eisResponse, exception)
-    }
-
-  private def submitToNrs(
-    request: AuthorizedRequest[RegistrationRequest],
-    pptSubscription: Registration,
-    eisResponse: SubscriptionCreateSuccessfulResponse
-  )(implicit hc: HeaderCarrier): Future[NonRepudiationSubmissionAccepted] =
-    nonRepudiationService.submitNonRepudiation(toJson(pptSubscription).toString,
-                                               eisResponse.processingDate,
-                                               eisResponse.pptReference,
-                                               request.body.userHeaders.getOrElse(Map.empty)
+    registration: Registration,
+    subscriptionResponse: SubscriptionCreateSuccessfulResponse
+  )(implicit hc: HeaderCarrier): Future[Try[NonRepudiationSubmissionAccepted]] =
+    nonRepudiationService.submitNonRepudiation(payloadString = toJson(registration).toString,
+                                               submissionTimestamp =
+                                                 subscriptionResponse.processingDate,
+                                               pptReference = subscriptionResponse.pptReference,
+                                               userHeaders =
+                                                 request.body.userHeaders.getOrElse(Map.empty)
     )
-
-  private def handleNrsFailure(
-    eisResponse: SubscriptionCreateSuccessfulResponse,
-    exception: Exception
-  ): Future[Result] =
-    Future.successful(
-      Ok(
-        SubscriptionCreateWithNrsFailureResponse(eisResponse.pptReference,
-                                                 eisResponse.processingDate,
-                                                 eisResponse.formBundleNumber,
-                                                 exception.getMessage
-        )
-      )
-    )
-
-  private def handleNrsSuccess(
-    eisResponse: SubscriptionCreateSuccessfulResponse,
-    nrSubmissionId: String
-  ): Result =
-    Ok(
-      SubscriptionCreateWithNrsSuccessfulResponse(eisResponse.pptReference,
-                                                  eisResponse.processingDate,
-                                                  eisResponse.formBundleNumber,
-                                                  nrSubmissionId
-      )
-    )
+      .map {
+        resp =>
+          logger.info(
+            s"Successful NRS submission for PPT Reference [${subscriptionResponse.pptReference}]"
+          )
+          Success(resp)
+      }
+      .recover {
+        case e =>
+          logger.warn(
+            s"Failed NRS submission for PPT Reference [${subscriptionResponse.pptReference}] - ${e.getMessage}"
+          )
+          Failure(e)
+      }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
     logger.debug(s"$prefix payload: ${toJson(payload)}")

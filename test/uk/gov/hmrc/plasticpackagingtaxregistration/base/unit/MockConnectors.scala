@@ -18,17 +18,21 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.base.unit
 
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.BDDMockito.`given`
+import org.mockito.Mockito.{doAnswer, reset, when}
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  SubscriptionCreateResponse,
-  SubscriptionCreateSuccessfulResponse
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.{
+  FailedTaxEnrolment,
+  SuccessfulTaxEnrolment
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  EnrolmentConnector,
   NonRepudiationConnector,
   SubscriptionsConnector
 }
@@ -44,21 +48,19 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected val mockSubscriptionsConnector: SubscriptionsConnector   = mock[SubscriptionsConnector]
   protected val mockNonRepudiationConnector: NonRepudiationConnector = mock[NonRepudiationConnector]
+  protected val mockEnrolmentConnector: EnrolmentConnector           = mock[EnrolmentConnector]
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockSubscriptionsConnector, mockNonRepudiationConnector)
+    reset(mockSubscriptionsConnector, mockNonRepudiationConnector, mockEnrolmentConnector)
   }
 
-  protected def mockGetSubscriptionStatusFailure(
-    ex: Exception
-  ): OngoingStubbing[Future[SubscriptionStatusResponse]] =
-    when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any()))
-      .thenThrow(ex)
+  protected def mockGetSubscriptionStatusFailure(ex: Exception) =
+    when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any())).thenThrow(ex)
 
   protected def mockGetSubscriptionSubmitFailure(
     ex: Exception
-  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+  ): OngoingStubbing[Future[SubscriptionCreateSuccessfulResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any()))
       .thenThrow(ex)
 
@@ -71,7 +73,7 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected def mockGetSubscriptionCreate(
     subscription: SubscriptionCreateSuccessfulResponse
-  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+  ): OngoingStubbing[Future[SubscriptionCreateSuccessfulResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
       Future.successful(subscription)
     )
@@ -99,5 +101,23 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
   ): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
     when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any()))
       .thenThrow(ex)
+
+  protected def mockEnrolmentSuccess()
+    : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
+    when(mockEnrolmentConnector.submitEnrolment(any(), any())(any())).thenReturn(
+      Future.successful(Right(SuccessfulTaxEnrolment))
+    )
+
+  protected def mockEnrolmentFailure()
+    : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
+    when(mockEnrolmentConnector.submitEnrolment(any(), any())(any())).thenReturn(
+      Future.successful(Left(FailedTaxEnrolment(1)))
+    )
+
+  protected def mockEnrolmentFailureException()
+    : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
+    when(mockEnrolmentConnector.submitEnrolment(any(), any())(any())).thenReturn(
+      Future.failed(new IllegalStateException("BANG!"))
+    )
 
 }
