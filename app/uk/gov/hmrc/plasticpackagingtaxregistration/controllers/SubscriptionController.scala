@@ -75,25 +75,37 @@ class SubscriptionController @Inject() (
         val pptSubscription = Subscription(pptRegistration)
         logPayload("PPT Subscription: ", pptSubscription)
 
-        subscriptionsConnector.submitSubscription(safeId, pptSubscription).flatMap {
-          subscriptionResponse =>
-            for {
-              enrolmentResponse <- enrolUser(subscriptionResponse.pptReference, safeId)
-              nrsResponse       <- notifyNRS(request, pptRegistration, subscriptionResponse)
-              _                 <- deleteRegistration(request.registrationId)
-            } yield Ok(
-              SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
-                pptReference = subscriptionResponse.pptReference,
-                processingDate = subscriptionResponse.processingDate,
-                formBundleNumber = subscriptionResponse.formBundleNumber,
-                nrsNotifiedSuccessfully = nrsResponse.isSuccess,
-                nrsSubmissionId =
-                  nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
-                nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None),
-                enrolmentInitiatedSuccessfully = enrolmentResponse.isSuccess
+        subscriptionsConnector.submitSubscription(safeId, pptSubscription)
+          .flatMap {
+            subscriptionResponse =>
+              logger.info(
+                s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name}, " +
+                  s"PPT Reference [${subscriptionResponse.pptReference}]"
               )
-            )
-        }
+              for {
+                enrolmentResponse <- enrolUser(subscriptionResponse.pptReference, safeId)
+                nrsResponse       <- notifyNRS(request, pptRegistration, subscriptionResponse)
+                _                 <- deleteRegistration(request.registrationId)
+              } yield Ok(
+                SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
+                  pptReference = subscriptionResponse.pptReference,
+                  processingDate = subscriptionResponse.processingDate,
+                  formBundleNumber = subscriptionResponse.formBundleNumber,
+                  nrsNotifiedSuccessfully = nrsResponse.isSuccess,
+                  nrsSubmissionId =
+                    nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
+                  nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None),
+                  enrolmentInitiatedSuccessfully = enrolmentResponse.isSuccess
+                )
+              )
+          }
+          .recoverWith {
+            case e =>
+              logger.warn(
+                s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name} - ${e.getMessage}"
+              )
+              throw e
+          }
     }
 
   private def deleteRegistration(registrationId: String) =
@@ -104,11 +116,25 @@ class SubscriptionController @Inject() (
   ): Future[Try[TaxEnrolmentsResponse]] =
     enrolmentConnector.submitEnrolment(pptReference, safeId)
       .map {
-        case Right(successfulTaxEnrolment) => Success(Right(successfulTaxEnrolment))
-        case Left(_)                       => Failure(new IllegalStateException("Enrolment failed"))
+        case Right(successfulTaxEnrolment) =>
+          logger.info(
+            s"Successful subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId]"
+          )
+          Success(Right(successfulTaxEnrolment))
+        case Left(failedTaxEnrolment) =>
+          logger.warn(
+            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId] " +
+              s"- error code [${failedTaxEnrolment.status}]"
+          )
+          Failure(new IllegalStateException("Enrolment failed"))
       }
       .recover {
-        case e => Failure(e)
+        case e =>
+          logger.warn(
+            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId] " +
+              s"- ${e.getMessage}"
+          )
+          Failure(e)
       }
 
   private def notifyNRS(
@@ -124,10 +150,18 @@ class SubscriptionController @Inject() (
                                                  request.body.userHeaders.getOrElse(Map.empty)
     )
       .map {
-        resp => Success(resp)
+        resp =>
+          logger.info(
+            s"Successful NRS submission for PPT Reference [${subscriptionResponse.pptReference}]"
+          )
+          Success(resp)
       }
       .recover {
-        case e => Failure(e)
+        case e =>
+          logger.warn(
+            s"Failed NRS submission for PPT Reference [${subscriptionResponse.pptReference}] - ${e.getMessage}"
+          )
+          Failure(e)
       }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
