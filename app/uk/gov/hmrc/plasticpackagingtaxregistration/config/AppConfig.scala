@@ -41,7 +41,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     s"$eisHost/cross-regime/subscription/ZPPT/SAFE/${safeNumber}/status"
 
   def subscriptionCreateUrl(safeNumber: String): String =
-    s"$eisHost/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create"
+    s"$eisHost/plastic-packaging-tax/subscriptions/PPT/create?idType=SAFEID&idValue=${safeNumber}"
 
   val bearerToken: String = s"Bearer ${config.get[String]("microservice.services.eis.bearerToken")}"
 
