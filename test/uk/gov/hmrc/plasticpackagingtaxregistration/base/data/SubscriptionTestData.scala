@@ -93,7 +93,7 @@ trait SubscriptionTestData {
     taxObligationStartDate = now(UTC).toString,
     last12MonthTotalTonnageAmt = Some(15000),
     declaration = Declaration(declarationBox1 = true),
-    groupPartnershipSubscription = None
+    groupOrPartnershipSubscription = None
   )
 
 }

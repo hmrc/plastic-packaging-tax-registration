@@ -24,7 +24,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   OrganisationDetails
 }
 
-case class GroupPartnershipDetails(
+case class GroupOrPartnershipDetails(
   relationship: String,
   customerIdentification1: String,
   customerIdentification2: Option[String],
@@ -34,6 +34,6 @@ case class GroupPartnershipDetails(
   contactDetails: ContactDetails
 )
 
-object GroupPartnershipDetails {
-  implicit val format: OFormat[GroupPartnershipDetails] = Json.format[GroupPartnershipDetails]
+object GroupOrPartnershipDetails {
+  implicit val format: OFormat[GroupOrPartnershipDetails] = Json.format[GroupOrPartnershipDetails]
 }

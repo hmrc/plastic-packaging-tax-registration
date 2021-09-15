@@ -18,15 +18,15 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import play.api.libs.json.{Json, OFormat}
 
-case class GroupPartnershipSubscription(
+case class GroupOrPartnershipSubscription(
   representativeControl: Boolean,
-  groupPartnershipDetails: GroupPartnershipDetails,
+  groupOrPartnershipDetails: GroupOrPartnershipDetails,
   allMembersControl: Boolean
 )
 
-object GroupPartnershipSubscription {
+object GroupOrPartnershipSubscription {
 
-  implicit val format: OFormat[GroupPartnershipSubscription] =
-    Json.format[GroupPartnershipSubscription]
+  implicit val format: OFormat[GroupOrPartnershipSubscription] =
+    Json.format[GroupOrPartnershipSubscription]
 
 }

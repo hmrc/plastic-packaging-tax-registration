@@ -17,7 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipSubscription
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupOrPartnershipSubscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Date, LiabilityWeight, Registration}
 
 import scala.language.implicitConversions
@@ -30,7 +30,7 @@ case class Subscription(
   declaration: Declaration,
   taxObligationStartDate: String,
   last12MonthTotalTonnageAmt: Option[Long] = None,
-  groupPartnershipSubscription: Option[GroupPartnershipSubscription] = None
+  groupOrPartnershipSubscription: Option[GroupOrPartnershipSubscription] = None
 )
 
 object Subscription {
@@ -56,7 +56,7 @@ object Subscription {
                  declaration = Declaration(true),
                  taxObligationStartDate = registration.liabilityDetails.startDate,
                  last12MonthTotalTonnageAmt = registration.liabilityDetails.weight,
-                 groupPartnershipSubscription = None
+                 groupOrPartnershipSubscription = None
     )
 
 }
