@@ -39,7 +39,8 @@ case class LegalEntityDetails(
   customerIdentification1: String,
   customerIdentification2: Option[String] = None,
   customerDetails: CustomerDetails,
-  groupSubscriptionFlag: Boolean = false
+  groupSubscriptionFlag: Boolean = false,
+  partnershipSubscriptionFlag: Boolean = false
 ) {
 
   val name: String = customerDetails.customerType match {

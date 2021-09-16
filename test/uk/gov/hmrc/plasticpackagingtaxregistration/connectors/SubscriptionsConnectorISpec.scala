@@ -148,7 +148,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         val subscriptionProcessingDate = ZonedDateTime.now(ZoneOffset.UTC).toString
         val formBundleNumber           = "1234567890"
         stubFor(
-          post(s"/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create")
+          post(
+            s"/plastic-packaging-tax/subscriptions/PPT/create?idType=SAFEID&idValue=${safeNumber}"
+          )
             .willReturn(
               aResponse()
                 .withStatus(Status.OK)
@@ -269,7 +271,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
       "return 500 for malformed successful responses" in {
         stubFor(
-          post(s"/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create")
+          post(
+            s"/plastic-packaging-tax/subscriptions/PPT/create?idType=SAFEID&idValue=${safeNumber}"
+          )
             .willReturn(
               aResponse()
                 .withStatus(Status.OK)
@@ -284,7 +288,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
       "return 500 for malformed failed responses" in {
         stubFor(
-          post(s"/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create")
+          post(
+            s"/plastic-packaging-tax/subscriptions/PPT/create?idType=SAFEID&idValue=${safeNumber}"
+          )
             .willReturn(
               aResponse()
                 .withStatus(Status.CONFLICT)
@@ -314,7 +320,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
   private def stubSubscriptionSubmissionFailure(httpStatus: Int, errors: Seq[EISError]): Any =
     stubFor(
-      post(s"/plastic-packaging-tax/subscriptions/PPT/SAFEID/${safeNumber}/create")
+      post(s"/plastic-packaging-tax/subscriptions/PPT/create?idType=SAFEID&idValue=${safeNumber}")
         .willReturn(
           aResponse()
             .withStatus(httpStatus)

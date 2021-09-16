@@ -103,7 +103,7 @@ class SubscriptionSpec
     subscription: Subscription,
     expectedPPTWeight: Option[Integer]
   ) = {
-    subscription.groupSubscription mustBe None
+    subscription.groupOrPartnershipSubscription mustBe None
     subscription.declaration.declarationBox1 mustBe true
     subscription.last12MonthTotalTonnageAmt mustBe expectedPPTWeight
     subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
