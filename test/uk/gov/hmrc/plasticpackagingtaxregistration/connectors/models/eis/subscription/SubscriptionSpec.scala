@@ -216,7 +216,7 @@ class SubscriptionSpec
   }
 
   private def mustHaveValidPrimaryContactDetails(subscription: Subscription) = {
-    subscription.primaryContactDetails.name mustBe pptPrimaryContactDetails.fullName.get.fullName
+    subscription.primaryContactDetails.name mustBe pptPrimaryContactDetails.name.get
     subscription.primaryContactDetails.positionInCompany mustBe pptPrimaryContactDetails.jobTitle.get
     subscription.primaryContactDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
     subscription.primaryContactDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get

@@ -46,7 +46,7 @@ trait RegistrationTestData {
     )
 
   protected val pptPrimaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(
-    fullName = Some(FullName(firstName = "Test", lastName = "User")),
+    name = Some("Test User"),
     jobTitle = Some("Director"),
     email = Some("some@test"),
     phoneNumber = Some("1234567890"),
@@ -55,7 +55,7 @@ trait RegistrationTestData {
   )
 
   protected val pptPrimaryContactDetailsSharingBusinessAddress: PrimaryContactDetails =
-    PrimaryContactDetails(fullName = Some(FullName(firstName = "Test", lastName = "User")),
+    PrimaryContactDetails(name = Some("Test User"),
                           jobTitle = Some("Director"),
                           email = Some("some@test"),
                           phoneNumber = Some("1234567890"),

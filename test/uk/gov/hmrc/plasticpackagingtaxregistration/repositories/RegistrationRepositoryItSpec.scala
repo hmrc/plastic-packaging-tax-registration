@@ -127,7 +127,7 @@ class RegistrationRepositoryItSpec
     "update the registration" in {
       val registration = aRegistration(
         withPrimaryContactDetails(
-          PrimaryContactDetails(Some(FullName(firstName = "FirstName", lastName = "LastName")),
+          PrimaryContactDetails(name = Some("FirstName LastName"),
                                 jobTitle = Some("CEO"),
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
