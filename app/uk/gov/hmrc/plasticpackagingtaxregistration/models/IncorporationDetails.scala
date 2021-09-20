@@ -22,6 +22,7 @@ case class IncorporationDetails(
   companyNumber: String,
   companyName: String,
   ctutr: String,
+  businessVerificationStatus: String,
   companyAddress: IncorporationAddressDetails,
   override val registration: IncorporationRegistrationDetails
 ) extends RegistrationDetails
