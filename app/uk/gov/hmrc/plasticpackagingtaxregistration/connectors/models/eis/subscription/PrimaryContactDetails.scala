@@ -33,9 +33,7 @@ object PrimaryContactDetails {
   def apply(pptPrimaryContactDetails: PPTPrimaryContactDetails): PrimaryContactDetails =
     PrimaryContactDetails(
       name =
-        pptPrimaryContactDetails.fullName.getOrElse(
-          throw new Exception("'Full Name' is required")
-        ).fullName,
+        pptPrimaryContactDetails.name.getOrElse(throw new Exception("'Name' is required")),
       positionInCompany =
         pptPrimaryContactDetails.jobTitle.getOrElse(throw new Exception("'Job Title' is required")),
       contactDetails =

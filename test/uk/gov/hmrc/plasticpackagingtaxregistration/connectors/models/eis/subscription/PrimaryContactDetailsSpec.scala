@@ -29,7 +29,7 @@ class PrimaryContactDetailsSpec
   "PrimaryContactDetails" should {
     "build successfully" in {
       val primaryContactDetails = PrimaryContactDetails(pptPrimaryContactDetails)
-      primaryContactDetails.name mustBe pptPrimaryContactDetails.fullName.get.fullName
+      primaryContactDetails.name mustBe pptPrimaryContactDetails.name.get
       primaryContactDetails.positionInCompany mustBe pptPrimaryContactDetails.jobTitle.get
       primaryContactDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
       primaryContactDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
@@ -39,7 +39,7 @@ class PrimaryContactDetailsSpec
     "throw exception" when {
       "'FullName' is not available" in {
         intercept[Exception] {
-          PrimaryContactDetails(pptPrimaryContactDetails.copy(fullName = None))
+          PrimaryContactDetails(pptPrimaryContactDetails.copy(name = None))
         }
       }
 
