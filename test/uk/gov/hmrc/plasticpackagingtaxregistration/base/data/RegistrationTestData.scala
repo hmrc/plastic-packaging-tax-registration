@@ -72,6 +72,7 @@ trait RegistrationTestData {
       IncorporationDetails(companyNumber = "1234567890",
                            companyName = "Plastic Limited",
                            ctutr = "987654321",
+                           businessVerificationStatus = "PASS",
                            companyAddress = IncorporationAddressDetails(),
                            registration = incorporationRegistrationDetails
       )
