@@ -25,7 +25,11 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  SubscriptionCreateFailureResponse,
+  SubscriptionCreateFailureResponseWithStatusCode,
+  SubscriptionCreateSuccessfulResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
@@ -184,9 +188,19 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }.statusCode mustBe Status.BAD_REQUEST
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+
+        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
+          SubscriptionCreateFailureResponse(
+            List(
+              EISError("INVALID_IDVALUE",
+                       "Submission has not passed validation. Invalid parameter idValue."
+              )
+            )
+          ),
+          400
+        )
+
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -200,9 +214,19 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.CONFLICT, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }.statusCode mustBe Status.CONFLICT
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+
+        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
+          SubscriptionCreateFailureResponse(
+            List(
+              EISError("DUPLICATE_SUBMISSION",
+                       "The remote endpoint has indicated that duplicate submission acknowledgment reference."
+              )
+            )
+          ),
+          409
+        )
+
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -216,9 +240,19 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.UNPROCESSABLE_ENTITY, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }.statusCode mustBe Status.UNPROCESSABLE_ENTITY
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+
+        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
+          SubscriptionCreateFailureResponse(
+            List(
+              EISError("ACTIVE_SUBSCRIPTION_EXISTS",
+                       "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
+              )
+            )
+          ),
+          422
+        )
+
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -233,9 +267,15 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
                                           errors = errors
         )
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+
+        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
+          SubscriptionCreateFailureResponse(
+            List(EISError("NO_DATA_FOUND", "Dependent systems are currently not responding."))
+          ),
+          500
+        )
+
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -248,9 +288,15 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }.statusCode mustBe Status.BAD_GATEWAY
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+
+        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
+          SubscriptionCreateFailureResponse(
+            List(EISError("BAD_GATEWAY", "Dependent systems are currently not responding."))
+          ),
+          502
+        )
+
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
@@ -263,9 +309,15 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
-        }.statusCode mustBe Status.SERVICE_UNAVAILABLE
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+
+        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
+          SubscriptionCreateFailureResponse(
+            List(EISError("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding."))
+          ),
+          503
+        )
+
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 

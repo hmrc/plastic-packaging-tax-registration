@@ -30,7 +30,12 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  SubscriptionCreateFailureResponse,
+  SubscriptionCreateFailureResponseWithStatusCode,
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{MetaData, RegistrationRequest}
 
@@ -180,6 +185,32 @@ class SubscriptionControllerSpec
           status(result)
         }
       }
+    }
+
+    "return underlying status code and error response when we receive an error response from EIS" in {
+      withAuthorizedUser()
+      mockGetSubscriptionSubmitFailure(
+        SubscriptionCreateFailureResponseWithStatusCode(
+          failureResponse = SubscriptionCreateFailureResponse(failures =
+            List(
+              EISError("ACTIVE_SUBSCRIPTION_EXISTS",
+                       "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
+              )
+            )
+          ),
+          422
+        )
+      )
+
+      val rawResp = route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
+
+      status(rawResp) mustBe 422
+      val resp = contentAsJson(rawResp).as[SubscriptionCreateFailureResponse]
+      resp.failures mustBe List(
+        EISError("ACTIVE_SUBSCRIPTION_EXISTS",
+                 "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
+        )
+      )
     }
   }
 

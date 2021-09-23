@@ -23,6 +23,7 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
+  SubscriptionCreateFailureResponseWithStatusCode,
   SubscriptionCreateSuccessfulResponse,
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
 }
@@ -77,34 +78,48 @@ class SubscriptionController @Inject() (
 
         subscriptionsConnector.submitSubscription(safeId, pptSubscription)
           .flatMap {
-            subscriptionResponse =>
+            case subscriptionResponse @ SubscriptionCreateSuccessfulResponse(pptReference, _, _) =>
               logger.info(
                 s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name}, " +
                   s"PPT Reference [${subscriptionResponse.pptReference}]"
               )
               for {
-                enrolmentResponse <- enrolUser(subscriptionResponse.pptReference, safeId)
+                enrolmentResponse <- enrolUser(pptReference, safeId)
                 nrsResponse       <- notifyNRS(request, pptRegistration, subscriptionResponse)
                 _                 <- deleteRegistration(request.registrationId)
               } yield Ok(
-                SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
-                  pptReference = subscriptionResponse.pptReference,
-                  processingDate = subscriptionResponse.processingDate,
-                  formBundleNumber = subscriptionResponse.formBundleNumber,
-                  nrsNotifiedSuccessfully = nrsResponse.isSuccess,
-                  nrsSubmissionId =
-                    nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
-                  nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None),
-                  enrolmentInitiatedSuccessfully = enrolmentResponse.isSuccess
+                SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(pptReference = pptReference,
+                                                                      processingDate =
+                                                                        subscriptionResponse.processingDate,
+                                                                      formBundleNumber =
+                                                                        subscriptionResponse.formBundleNumber,
+                                                                      nrsNotifiedSuccessfully =
+                                                                        nrsResponse.isSuccess,
+                                                                      nrsSubmissionId =
+                                                                        nrsResponse.fold(
+                                                                          _ => None,
+                                                                          nrsResponse =>
+                                                                            Some(
+                                                                              nrsResponse.submissionId
+                                                                            )
+                                                                        ),
+                                                                      nrsFailureReason =
+                                                                        nrsResponse.fold(
+                                                                          e => Some(e.getMessage),
+                                                                          _ => None
+                                                                        ),
+                                                                      enrolmentInitiatedSuccessfully =
+                                                                        enrolmentResponse.isSuccess
                 )
               )
-          }
-          .recoverWith {
-            case e =>
+            case SubscriptionCreateFailureResponseWithStatusCode(failedSubscriptionResponse,
+                                                                 statusCode
+                ) =>
+              val firstError = failedSubscriptionResponse.failures.head
               logger.warn(
-                s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name} - ${e.getMessage}"
+                s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name} - ${firstError.reason}"
               )
-              throw e
+              Future.successful(Status(statusCode)(failedSubscriptionResponse))
           }
     }
 
