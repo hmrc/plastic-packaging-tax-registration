@@ -30,6 +30,8 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   SubscriptionCreateFailureResponseWithStatusCode,
   SubscriptionCreateSuccessfulResponse
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionChannel.ONLINE
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
@@ -46,14 +48,15 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
     "requesting a subscription status" should {
       "handle a 200" in {
         stubFor(
-          get("/cross-regime/subscription/ZPPT/SAFE/" + safeNumber + "/status")
+          get("/cross-regime/subscription/PPT/SAFE/" + safeNumber + "/status")
             .willReturn(
               aResponse()
                 .withStatus(Status.OK)
                 .withBody(
                   Json.obj("subscriptionStatus" -> NO_FORM_BUNDLE_FOUND.toString,
                            "idType"             -> idType,
-                           "idValue"            -> s"XXPPTP${safeNumber}789"
+                           "idValue"            -> s"XXPPTP${safeNumber}789",
+                           "channel"            -> "Online"
                   ).toString
                 )
             )
@@ -64,6 +67,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         res.idType mustBe Some(idType)
         res.idValue mustBe Some("XXPPTP" + safeNumber + "789")
         res.subscriptionStatus mustBe Some(NO_FORM_BUNDLE_FOUND)
+        res.channel mustBe Some(ONLINE)
         res.failures mustBe None
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
@@ -362,7 +366,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
   private def stubSubscriptionStatusFailure(httpStatus: Int, errors: Seq[EISError]): Any =
     stubFor(
-      get(s"/cross-regime/subscription/ZPPT/SAFE/${safeNumber}/status")
+      get(s"/cross-regime/subscription/PPT/SAFE/${safeNumber}/status")
         .willReturn(
           aResponse()
             .withStatus(httpStatus)

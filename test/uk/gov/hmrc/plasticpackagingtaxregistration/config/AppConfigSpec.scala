@@ -64,7 +64,7 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
     "have 'subscriptionStatusUrl' defined" in {
       configService.subscriptionStatusUrl("12345678") must be(
-        "http://localhost:8506/cross-regime/subscription/ZPPT/SAFE/12345678/status"
+        "http://localhost:8506/cross-regime/subscription/PPT/SAFE/12345678/status"
       )
     }
 
