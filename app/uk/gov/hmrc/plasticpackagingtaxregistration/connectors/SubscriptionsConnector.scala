@@ -21,10 +21,11 @@ import play.api.http.Status
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   Subscription,
   SubscriptionCreateFailureResponse,
+  SubscriptionCreateFailureResponseWithStatusCode,
+  SubscriptionCreateResponse,
   SubscriptionCreateSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
@@ -57,7 +58,7 @@ class SubscriptionsConnector @Inject() (
 
   def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
     hc: HeaderCarrier
-  ): Future[SubscriptionCreateSuccessfulResponse] = {
+  ): Future[SubscriptionCreateResponse] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationId -> UUID.randomUUID().toString
@@ -84,16 +85,9 @@ class SubscriptionsConnector @Inject() (
           else
             Try(subscriptionResponse.json.as[SubscriptionCreateFailureResponse]) match {
               case Success(failedCreateResponse) =>
-                failedCreateResponse.failures.head match {
-                  case EISError(_, reason) =>
-                    throw UpstreamErrorResponse.apply(
-                      buildCreateSubscriptionErrorMessage(correlationIdHeader._2,
-                                                          safeNumber,
-                                                          reason
-                      ),
-                      subscriptionResponse.status
-                    )
-                }
+                SubscriptionCreateFailureResponseWithStatusCode(failedCreateResponse,
+                                                                subscriptionResponse.status
+                )
               case _ =>
                 throw UpstreamErrorResponse.apply(
                   buildCreateSubscriptionErrorMessage(correlationIdHeader._2,
