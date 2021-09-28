@@ -41,7 +41,12 @@ object SubscriptionStatusResponse {
       case _                          => UNKNOWN
     }
 
-    SubscriptionStatusResponse(status, etmpResponse.idValue)
+    val pptRef = etmpResponse.idType match {
+      case Some("ZPPT") => etmpResponse.idValue
+      case _            => None
+    }
+
+    SubscriptionStatusResponse(status, pptRef)
   }
 
 }
