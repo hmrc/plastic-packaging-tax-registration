@@ -50,7 +50,7 @@ class SubscriptionControllerSpec
     Mockito.reset(mockRepository, mockNonRepudiationService)
     super.beforeEach()
 
-    when(mockRepository.delete(any())).thenReturn(Future.successful())
+    when(mockRepository.delete(any())).thenReturn(Future.successful(()))
   }
 
   "Get subscription status" should {

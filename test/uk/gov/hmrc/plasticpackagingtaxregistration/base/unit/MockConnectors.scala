@@ -24,7 +24,6 @@ import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  SubscriptionCreateFailureResponse,
   SubscriptionCreateFailureResponseWithStatusCode,
   SubscriptionCreateResponse,
   SubscriptionCreateSuccessfulResponse

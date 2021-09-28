@@ -18,24 +18,13 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import play.api.libs.json.{Format, Reads, Writes}
 
-object ETMPSubscriptionStatus extends Enumeration {
+object SubscriptionStatus extends Enumeration {
   type Status = Value
-  val NO_FORM_BUNDLE_FOUND: Value     = Value
-  val SUCCESSFUL: Value               = Value
-  val REG_FORM_RECEIVED: Value        = Value
-  val SENT_TO_DS: Value               = Value
-  val DS_OUTCOME_IN_PROGRESS: Value   = Value
-  val REJECTED: Value                 = Value
-  val IN_PROCESSING: Value            = Value
-  val CREATE_FAILED: Value            = Value
-  val WITHDRAWAL: Value               = Value
-  val SENT_TO_RCM: Value              = Value
-  val APPROVED_WITH_CONDITIONS: Value = Value
-  val REVOKED: Value                  = Value
-  val DE_REGISTERED: Value            = Value("DE-REGISTERED")
-  val CONTRACT_OBJECT_INACTIVE: Value = Value
+  val SUBSCRIBED: Value     = Value
+  val NOT_SUBSCRIBED: Value = Value
+  val UNKNOWN: Value        = Value
 
   implicit val format: Format[Status] =
-    Format(Reads.enumNameReads(ETMPSubscriptionStatus), Writes.enumNameWrites)
+    Format(Reads.enumNameReads(SubscriptionStatus), Writes.enumNameWrites)
 
 }

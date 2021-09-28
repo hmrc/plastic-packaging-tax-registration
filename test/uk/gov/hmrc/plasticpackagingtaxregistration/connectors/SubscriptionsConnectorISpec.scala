@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
+import java.time.{ZoneOffset, ZonedDateTime}
+
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post}
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
@@ -30,12 +32,12 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   SubscriptionCreateFailureResponseWithStatusCode,
   SubscriptionCreateSuccessfulResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionChannel.ONLINE
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.{
+  NOT_SUBSCRIBED,
+  UNKNOWN
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
-
-import java.time.{ZoneOffset, ZonedDateTime}
 
 class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
 
@@ -64,11 +66,8 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
 
-        res.idType mustBe Some(idType)
-        res.idValue mustBe Some("XXPPTP" + safeNumber + "789")
-        res.subscriptionStatus mustBe Some(NO_FORM_BUNDLE_FOUND)
-        res.channel mustBe Some(ONLINE)
-        res.failures mustBe None
+        res.status mustBe NOT_SUBSCRIBED
+        res.pptReference mustBe Some("XXPPTP" + safeNumber + "789")
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
@@ -82,9 +81,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.getSubscriptionStatus(safeNumber))
-        }.statusCode mustBe Status.BAD_REQUEST
+        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
+        res mustBe SubscriptionStatusResponse(UNKNOWN)
+
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -98,9 +97,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.getSubscriptionStatus(safeNumber))
-        }.statusCode mustBe Status.NOT_FOUND
+        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
+        res mustBe SubscriptionStatusResponse(UNKNOWN)
+
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -113,9 +112,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.INTERNAL_SERVER_ERROR, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.getSubscriptionStatus(safeNumber))
-        }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
+        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
+        res mustBe SubscriptionStatusResponse(UNKNOWN)
+
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -128,9 +127,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.getSubscriptionStatus(safeNumber))
-        }.statusCode mustBe Status.BAD_GATEWAY
+        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
+        res mustBe SubscriptionStatusResponse(UNKNOWN)
+
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -143,9 +142,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionStatusFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
 
-        intercept[UpstreamErrorResponse] {
-          await(connector.getSubscriptionStatus(safeNumber))
-        }.statusCode mustBe Status.SERVICE_UNAVAILABLE
+        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
+        res mustBe SubscriptionStatusResponse(UNKNOWN)
+
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
     }
