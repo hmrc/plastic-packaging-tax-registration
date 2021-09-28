@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json._
@@ -27,7 +28,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   SubscriptionCreateSuccessfulResponse,
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
   EnrolmentConnector,
@@ -44,7 +44,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepo
 import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -63,9 +62,8 @@ class SubscriptionController @Inject() (
 
   def get(safeNumber: String): Action[AnyContent] =
     authenticator.authorisedAction(parse.default) { implicit request =>
-      subscriptionsConnector.getSubscriptionStatus(safeNumber).map {
-        response: SubscriptionStatusResponse =>
-          Ok(response)
+      subscriptionsConnector.getSubscriptionStatus(safeNumber).map { response =>
+        Ok(response)
       }
     }
 

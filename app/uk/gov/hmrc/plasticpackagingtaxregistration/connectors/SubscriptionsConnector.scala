@@ -16,22 +16,22 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
+import java.util.UUID
+
 import com.kenshoo.play.metrics.Metrics
+import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.http.Status
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  Subscription,
-  SubscriptionCreateFailureResponse,
-  SubscriptionCreateFailureResponseWithStatusCode,
-  SubscriptionCreateResponse,
-  SubscriptionCreateSuccessfulResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
+  ETMPSubscriptionStatusResponse,
+  SubscriptionStatus,
+  SubscriptionStatusResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
-import java.util.UUID
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
@@ -43,6 +43,8 @@ class SubscriptionsConnector @Inject() (
 )(implicit ec: ExecutionContext)
     extends EISConnector {
 
+  private val logger = Logger(this.getClass)
+
   def getSubscriptionStatus(
     safeId: String
   )(implicit hc: HeaderCarrier): Future[SubscriptionStatusResponse] = {
@@ -50,9 +52,14 @@ class SubscriptionsConnector @Inject() (
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationId -> UUID.randomUUID().toString
 
-    httpClient.GET[SubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
-                                               headers = headers :+ correlationIdHeader
-    )
+    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
+                                                   headers = headers :+ correlationIdHeader
+    ).map(etmpResponse => SubscriptionStatusResponse.fromETMPResponse(etmpResponse))
+      .recover {
+        case e =>
+          logger.error(s"Get subscription status failed for [$safeId] - ${e.getMessage}")
+          SubscriptionStatusResponse(SubscriptionStatus.UNKNOWN)
+      }
       .andThen { case _ => timer.stop() }
   }
 

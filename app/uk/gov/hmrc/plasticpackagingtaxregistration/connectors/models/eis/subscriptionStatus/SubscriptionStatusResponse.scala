@@ -17,18 +17,36 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus
 
 import play.api.libs.json.{Json, OFormat}
-import ETMPSubscriptionStatus.SubscriptionStatus
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import ETMPSubscriptionChannel.SubscriptionChannel
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.{
+  NO_FORM_BUNDLE_FOUND,
+  SUCCESSFUL
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.{
+  NOT_SUBSCRIBED,
+  SUBSCRIBED,
+  Status,
+  UNKNOWN
+}
 
-case class SubscriptionStatusResponse(
-  subscriptionStatus: Option[SubscriptionStatus] = None,
-  idType: Option[String] = None,
-  idValue: Option[String] = None,
-  channel: Option[SubscriptionChannel] = None,
-  failures: Option[Seq[EISError]] = None
-)
+case class SubscriptionStatusResponse(status: Status, pptReference: Option[String] = None)
 
 object SubscriptionStatusResponse {
   implicit val format: OFormat[SubscriptionStatusResponse] = Json.format[SubscriptionStatusResponse]
+
+  def fromETMPResponse(etmpResponse: ETMPSubscriptionStatusResponse) = {
+
+    val status = etmpResponse.subscriptionStatus match {
+      case Some(NO_FORM_BUNDLE_FOUND) => NOT_SUBSCRIBED
+      case Some(SUCCESSFUL)           => SUBSCRIBED
+      case _                          => UNKNOWN
+    }
+
+    val pptRef = etmpResponse.idType match {
+      case Some("ZPPT") => etmpResponse.idValue
+      case _            => None
+    }
+
+    SubscriptionStatusResponse(status, pptRef)
+  }
+
 }
