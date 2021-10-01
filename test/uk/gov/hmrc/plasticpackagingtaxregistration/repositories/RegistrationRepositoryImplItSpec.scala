@@ -36,7 +36,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RegistrationRepositoryItSpec
+class RegistrationRepositoryImplItSpec
     extends AnyWordSpec with Matchers with ScalaFutures with BeforeAndAfterEach
     with IntegrationPatience with RegistrationBuilder with DefaultAwaitTimeout {
 
@@ -45,7 +45,7 @@ class RegistrationRepositoryItSpec
     GuiceApplicationBuilder().injector()
   }
 
-  private val repository = injector.instanceOf[RegistrationRepository]
+  private val repository = injector.instanceOf[RegistrationRepositoryImpl]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -73,7 +73,7 @@ class RegistrationRepositoryItSpec
 
       val repository = new GuiceApplicationBuilder().configure(
         Map("mongodb.timeToLiveInSeconds" -> 33)
-      ).build().injector.instanceOf[RegistrationRepository]
+      ).build().injector.instanceOf[RegistrationRepositoryImpl]
       await(repository.create(aRegistration()))
 
       ensureExpiryTtlOnIndex(33)
@@ -84,7 +84,7 @@ class RegistrationRepositoryItSpec
 
       val repository = new GuiceApplicationBuilder().configure(
         Map("mongodb.timeToLiveInSeconds" -> 99)
-      ).build().injector.instanceOf[RegistrationRepository]
+      ).build().injector.instanceOf[RegistrationRepositoryImpl]
       await(repository.create(aRegistration()))
 
       ensureExpiryTtlOnIndex(99)
