@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.repositories
 
 import com.codahale.metrics.Timer
+import com.google.inject.ImplementedBy
 import com.kenshoo.play.metrics.Metrics
 import org.joda.time.DateTime
 import play.api.libs.json.{Format, JsObject, Json}
@@ -28,11 +29,19 @@ import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats.objectIdFormats
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration
-
 import javax.inject.Inject
+
 import scala.concurrent.{ExecutionContext, Future}
 
-class RegistrationRepository @Inject() (
+@ImplementedBy(classOf[RegistrationRepositoryImpl])
+trait RegistrationRepository {
+  def findByRegistrationId(id: String): Future[Option[Registration]]
+  def create(registration: Registration): Future[Registration]
+  def update(registration: Registration): Future[Option[Registration]]
+  def delete(pptId: String): Future[Unit]
+}
+
+class RegistrationRepositoryImpl @Inject() (
   mc: ReactiveMongoComponent,
   appConfig: AppConfig,
   metrics: Metrics
@@ -41,7 +50,7 @@ class RegistrationRepository @Inject() (
                                                            mongo = mc.mongoConnector.db,
                                                            domainFormat = MongoSerialisers.format,
                                                            idFormat = objectIdFormats
-    ) with TTLIndexing[Registration, BSONObjectID] {
+    ) with RegistrationRepository with TTLIndexing[Registration, BSONObjectID] {
 
   override lazy val expireAfterSeconds: Long = appConfig.dbTimeToLiveInSeconds
 
