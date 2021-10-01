@@ -23,6 +23,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
   SubscriptionTestData
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.Address
 
 class BusinessCorrespondenceDetailsSpec
     extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData
@@ -62,6 +63,35 @@ class BusinessCorrespondenceDetailsSpec
 
         businessCorrespondenceDetails.addressLine1 mustBe pptPrimaryContactAddress.addressLine1
         businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2.get
+        businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
+        businessCorrespondenceDetails.addressLine4 mustBe Some(pptPrimaryContactAddress.townOrCity)
+        businessCorrespondenceDetails.postalCode mustBe Some(pptPrimaryContactAddress.postCode)
+        businessCorrespondenceDetails.countryCode mustBe "GB"
+      }
+
+      "primary contact supplied with discrete primary contact address with no address line 2 " in {
+        val registrationWithDifferentPrimaryContractAddressWithNoAddressLine2 =
+          aRegistration(
+            withPrimaryContactDetails(
+              pptPrimaryContactDetails.copy(address =
+                Some(
+                  Address(addressLine1 = "2 Some Other Street",
+                          addressLine3 = Some("Some Other Area"),
+                          townOrCity = "Bradford",
+                          postCode = "BD1 1AA"
+                  )
+                )
+              )
+            )
+          )
+
+        val businessCorrespondenceDetails =
+          BusinessCorrespondenceDetails(
+            registrationWithDifferentPrimaryContractAddressWithNoAddressLine2
+          )
+
+        businessCorrespondenceDetails.addressLine1 mustBe pptPrimaryContactAddress.addressLine1
+        businessCorrespondenceDetails.addressLine2 mustBe " "
         businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
         businessCorrespondenceDetails.addressLine4 mustBe Some(pptPrimaryContactAddress.townOrCity)
         businessCorrespondenceDetails.postalCode mustBe Some(pptPrimaryContactAddress.postCode)
