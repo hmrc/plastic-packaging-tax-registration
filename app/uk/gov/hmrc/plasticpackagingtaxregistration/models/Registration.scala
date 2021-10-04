@@ -17,7 +17,6 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.Timestamped
 
 case class Registration(
   id: String,
@@ -26,8 +25,8 @@ case class Registration(
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
   organisationDetails: OrganisationDetails = OrganisationDetails(),
   metaData: MetaData = MetaData(),
-  override val lastModifiedDateTime: Option[DateTime] = None
-) extends Timestamped {
+  lastModifiedDateTime: Option[DateTime] = None
+) {
 
   def updateLastModified(): Registration =
     this.copy(lastModifiedDateTime = Some(DateTime.now(DateTimeZone.UTC)))
