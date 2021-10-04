@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import com.github.nscala_time.time.Imports.LocalDate
+import java.time.LocalDate
+
 import play.api.libs.json.{Json, OFormat}
 
 case class LiabilityWeight(totalKg: Option[Long])
@@ -28,9 +29,7 @@ object LiabilityWeight {
 case class Date(day: Option[Int], month: Option[Int], year: Option[Int]) {
 
   val pretty: String =
-    LocalDate.parse(
-      s"${this.year.getOrElse("")}-${this.month.getOrElse("")}-${this.day.getOrElse("")}"
-    ).toString
+    LocalDate.of(year.getOrElse(0), month.getOrElse(0), day.getOrElse(0)).toString
 
 }
 

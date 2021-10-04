@@ -16,20 +16,22 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.repositories
 
+import java.util.concurrent.TimeUnit
+
 import com.codahale.metrics.Timer
 import com.google.inject.ImplementedBy
 import com.kenshoo.play.metrics.Metrics
+import com.mongodb.client.model.Indexes.ascending
+import javax.inject.Inject
 import org.joda.time.DateTime
-import play.api.libs.json.{Format, JsObject, Json}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.BSONObjectID
-import reactivemongo.play.json.collection.JSONCollection
-import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats.objectIdFormats
+import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import play.api.Logger
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration
-import javax.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,62 +44,75 @@ trait RegistrationRepository {
 }
 
 class RegistrationRepositoryImpl @Inject() (
-  mc: ReactiveMongoComponent,
+  mongoComponent: MongoComponent,
   appConfig: AppConfig,
   metrics: Metrics
 )(implicit ec: ExecutionContext)
-    extends ReactiveRepository[Registration, BSONObjectID](collectionName = "registrations",
-                                                           mongo = mc.mongoConnector.db,
-                                                           domainFormat = MongoSerialisers.format,
-                                                           idFormat = objectIdFormats
-    ) with RegistrationRepository with TTLIndexing[Registration, BSONObjectID] {
+    extends PlayMongoRepository[Registration](collectionName = "registrations",
+                                              mongoComponent = mongoComponent,
+                                              domainFormat = MongoSerialisers.format,
+                                              indexes = Seq(
+                                                IndexModel(
+                                                  ascending("lastModifiedDateTime"),
+                                                  IndexOptions().name("ttlIndex").expireAfter(
+                                                    appConfig.dbTimeToLiveInSeconds,
+                                                    TimeUnit.SECONDS
+                                                  )
+                                                ),
+                                                IndexModel(ascending("id"),
+                                                           IndexOptions().name("idIdx").unique(true)
+                                                )
+                                              ),
+                                              replaceIndexes = true
+    ) with RegistrationRepository {
 
-  override lazy val expireAfterSeconds: Long = appConfig.dbTimeToLiveInSeconds
+  private val logger = Logger(this.getClass)
 
-  override lazy val collection: JSONCollection =
-    mongo().collection[JSONCollection](collectionName,
-                                       failoverStrategy = RepositorySettings.failoverStrategy
-    )
+  private def filter(id: String) =
+    equal("id", Codecs.toBson(id))
 
-  override def indexes: Seq[Index] =
-    Seq(Index(Seq("id" -> IndexType.Ascending), Some("idIdx"), unique = true))
+  private def newMongoDBTimer(name: String): Timer = metrics.defaultRegistry.timer(name)
 
-  def findByRegistrationId(id: String): Future[Option[Registration]] = {
+  override def findByRegistrationId(id: String): Future[Option[Registration]] = {
     val findStopwatch = newMongoDBTimer("ppt.registration.mongo.find").time()
-    super.find("id" -> id).map(_.headOption).andThen {
+    collection.find(filter(id)).headOption().andThen {
       case _ => findStopwatch.stop()
     }
   }
 
-  def create(registration: Registration): Future[Registration] =
-    super.insert(registration.updateLastModified()).map(_ => registration)
-
-  def update(registration: Registration): Future[Option[Registration]] = {
-    val updateStopwatch = newMongoDBTimer("ppt.registration.mongo.update").time()
-    super
-      .findAndUpdate(Json.obj("id" -> registration.id),
-                     Json.toJson(registration.updateLastModified()).as[JsObject],
-                     fetchNewObject = true,
-                     upsert = false
-      )
-      .map(_.value.map(_.as[Registration]))
-      .andThen {
-        case _ => updateStopwatch.stop()
-      }
+  override def create(registration: Registration): Future[Registration] = {
+    val createStopwatch     = newMongoDBTimer("ppt.registration.mongo.create").time()
+    val updatedRegistration = registration.updateLastModified()
+    collection.insertOne(updatedRegistration).toFuture().andThen {
+      case _ => createStopwatch.stop()
+    }.map(_ => updatedRegistration)
   }
 
-  def delete(pptId: String): Future[Unit] =
-    super
-      .remove("id" -> pptId)
-      .map(r => if (!r.ok) logger.error(s"Failed to delete registration id: $pptId"))
+  override def update(registration: Registration): Future[Option[Registration]] = {
+    val updateStopwatch     = newMongoDBTimer("ppt.registration.mongo.update").time()
+    val updatedRegistration = registration.updateLastModified()
+    collection.replaceOne(filter(registration.id), updatedRegistration).toFuture().map(
+      updateResult => if (updateResult.getModifiedCount == 1) Some(updatedRegistration) else None
+    ).andThen {
+      case _ => updateStopwatch.stop()
+    }
+  }
 
-  private def newMongoDBTimer(name: String): Timer = metrics.defaultRegistry.timer(name)
+  override def delete(pptId: String): Future[Unit] = {
+    val deleteStopwatch = newMongoDBTimer("ppt.registration.mongo.delete").time()
+    collection.deleteOne(filter(pptId)).toFuture().andThen {
+      case _ => deleteStopwatch.stop()
+    }.map { result =>
+      if (result.getDeletedCount != 1) logger.error(s"Failed to delete registration id: $pptId")
+    }
+  }
+
 }
 
 object MongoSerialisers {
 
   implicit val mongoDateTimeFormat: Format[DateTime] =
-    uk.gov.hmrc.mongo.json.ReactiveMongoFormats.dateTimeFormats
+    uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats.dateTimeFormat
 
   implicit val format: Format[Registration] = Json.format[Registration]
 }
