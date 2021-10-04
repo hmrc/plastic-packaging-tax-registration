@@ -70,14 +70,11 @@ class RegistrationRepositorySpec
 
         val registration = aRegistration(
           withOrganisationDetails(
-            OrganisationDetails(isBasedInUk = Some(true),
-                                organisationType = Some(OrgType.UK_COMPANY),
-                                businessRegisteredAddress = Some(
-                                  Address(addressLine1 = "addressLine1",
-                                          townOrCity = "Town",
-                                          postCode = "PostCode"
-                                  )
-                                )
+            OrganisationDetails(
+              organisationType = Some(OrgType.UK_COMPANY),
+              businessRegisteredAddress = Some(
+                Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+              )
             )
           )
         )
@@ -159,8 +156,7 @@ class RegistrationRepositorySpec
                                          )
                                        ),
                                        withOrganisationDetails(
-                                         OrganisationDetails(isBasedInUk = Some(true),
-                                                             organisationType =
+                                         OrganisationDetails(organisationType =
                                                                Some(OrgType.UK_COMPANY),
                                                              businessRegisteredAddress =
                                                                Some(

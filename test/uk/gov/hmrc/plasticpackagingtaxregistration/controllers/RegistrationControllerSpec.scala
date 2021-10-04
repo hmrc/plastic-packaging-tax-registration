@@ -177,8 +177,7 @@ class RegistrationControllerSpec
         )
         val request = aRegistrationRequest(primaryContactDetailsRequest,
                                            withOrganisationDetailsRequest(
-                                             OrganisationDetails(isBasedInUk = Some(true),
-                                                                 organisationType =
+                                             OrganisationDetails(organisationType =
                                                                    Some(OrgType.UK_COMPANY),
                                                                  businessRegisteredAddress =
                                                                    Some(
