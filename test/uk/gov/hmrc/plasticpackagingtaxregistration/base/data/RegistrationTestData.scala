@@ -64,7 +64,6 @@ trait RegistrationTestData {
     )
 
   protected val pptIncorporationDetails: OrganisationDetails = OrganisationDetails(
-    isBasedInUk = Some(true),
     organisationType = Some(OrgType.UK_COMPANY),
     businessRegisteredAddress = Some(pptBusinessAddress),
     safeNumber = Some("1234567890"),
@@ -80,7 +79,6 @@ trait RegistrationTestData {
   )
 
   protected val pptSoleTraderDetails: OrganisationDetails = OrganisationDetails(
-    isBasedInUk = Some(true),
     organisationType = Some(OrgType.SOLE_TRADER),
     businessRegisteredAddress = Some(pptBusinessAddress),
     safeNumber = Some("1234567890"),
@@ -96,7 +94,6 @@ trait RegistrationTestData {
   )
 
   protected val pptGeneralPartnershipDetails: OrganisationDetails = OrganisationDetails(
-    isBasedInUk = Some(true),
     organisationType = Some(OrgType.PARTNERSHIP),
     businessRegisteredAddress = Some(pptBusinessAddress),
     safeNumber = Some("1234567890"),
@@ -114,7 +111,6 @@ trait RegistrationTestData {
   )
 
   protected val pptScottishPartnershipDetails: OrganisationDetails = OrganisationDetails(
-    isBasedInUk = Some(true),
     organisationType = Some(OrgType.PARTNERSHIP),
     businessRegisteredAddress = Some(pptBusinessAddress),
     safeNumber = Some("1234567890"),
