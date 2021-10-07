@@ -52,7 +52,12 @@ case class LiabilityDetails(
   startDate: Option[Date] = None,
   isLiable: Option[Boolean] = None,
   expectToExceedThresholdWeight: Option[Boolean] = None
-)
+) {
+
+  def liabilityWeight: Option[Long] =
+    expectedWeight.flatMap(_.totalKg).orElse(weight.flatMap(_.totalKg))
+
+}
 
 object LiabilityDetails {
   implicit val format: OFormat[LiabilityDetails] = Json.format[LiabilityDetails]
