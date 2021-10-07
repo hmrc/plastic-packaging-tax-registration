@@ -26,6 +26,15 @@ object LiabilityWeight {
   implicit val liabilityWeightFormat = Json.format[LiabilityWeight]
 }
 
+case class LiabilityExpectedWeight(
+  expectToExceedThresholdWeight: Option[Boolean],
+  totalKg: Option[Long]
+)
+
+object LiabilityExpectedWeight {
+  implicit val liabilityWeightExpectedFormat = Json.format[LiabilityExpectedWeight]
+}
+
 case class Date(day: Option[Int], month: Option[Int], year: Option[Int]) {
 
   val pretty: String =
@@ -39,6 +48,7 @@ object Date {
 
 case class LiabilityDetails(
   weight: Option[LiabilityWeight] = None,
+  expectedWeight: Option[LiabilityExpectedWeight] = None,
   startDate: Option[Date] = None,
   isLiable: Option[Boolean] = None,
   expectToExceedThresholdWeight: Option[Boolean] = None
