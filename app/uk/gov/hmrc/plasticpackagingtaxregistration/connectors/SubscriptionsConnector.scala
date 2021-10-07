@@ -17,11 +17,11 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
 import java.util.UUID
-
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status
+import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
@@ -54,7 +54,12 @@ class SubscriptionsConnector @Inject() (
 
     httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
                                                    headers = headers :+ correlationIdHeader
-    ).map(etmpResponse => SubscriptionStatusResponse.fromETMPResponse(etmpResponse))
+    ).map { etmpResponse =>
+      logger.debug(
+        s"PPT Subscription status response payload for safeId $safeId ${toJson(etmpResponse)}"
+      )
+      SubscriptionStatusResponse.fromETMPResponse(etmpResponse)
+    }
       .recover {
         case e =>
           logger.error(s"Get subscription status failed for [$safeId] - ${e.getMessage}")

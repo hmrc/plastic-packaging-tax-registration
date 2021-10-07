@@ -63,6 +63,7 @@ class SubscriptionController @Inject() (
   def get(safeNumber: String): Action[AnyContent] =
     authenticator.authorisedAction(parse.default) { implicit request =>
       subscriptionsConnector.getSubscriptionStatus(safeNumber).map { response =>
+        logPayload(s"PPT Subscription status response for safeId $safeNumber ", response)
         Ok(response)
       }
     }
@@ -72,13 +73,13 @@ class SubscriptionController @Inject() (
       implicit request =>
         val pptRegistration = request.body.toRegistration(request.registrationId)
         val pptSubscription = Subscription(pptRegistration)
-        logPayload("PPT Subscription: ", pptSubscription)
+        logPayload(s"PPT Subscription Create request for safeId $safeId ", pptSubscription)
 
         subscriptionsConnector.submitSubscription(safeId, pptSubscription)
           .flatMap {
             case subscriptionResponse @ SubscriptionCreateSuccessfulResponse(pptReference, _, _) =>
               logger.info(
-                s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name}, " +
+                s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name} with safeId $safeId, " +
                   s"PPT Reference [${subscriptionResponse.pptReference}]"
               )
               for {
@@ -114,8 +115,11 @@ class SubscriptionController @Inject() (
                                                                  statusCode
                 ) =>
               val firstError = failedSubscriptionResponse.failures.head
+              logPayload(s"PPT Subscription Create failed response for safeId $safeId ",
+                         failedSubscriptionResponse
+              )
               logger.warn(
-                s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name} - ${firstError.reason}"
+                s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name} with safeId $safeId - ${firstError.reason}"
               )
               Future.successful(Status(statusCode)(failedSubscriptionResponse))
           }
