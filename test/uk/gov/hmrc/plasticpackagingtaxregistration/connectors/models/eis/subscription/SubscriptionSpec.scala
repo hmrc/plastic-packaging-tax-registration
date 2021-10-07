@@ -83,6 +83,15 @@ class SubscriptionSpec
         assertCommonDetails(subscription, Some(10000))
         mustHaveValidScottishPartnershipLegalEntityDetails(subscription)
       }
+      "We have expected plastic packaging weight" in {
+        val subscription = Subscription(
+          aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                        withPrimaryContactDetails(pptPrimaryContactDetails),
+                        withLiabilityDetails(pptLiabilityDetailsWithExpectedWeight)
+          )
+        )
+        assertCommonDetails(subscription, Some(20000))
+      }
     }
 
     "throw an exception" when {
@@ -99,10 +108,7 @@ class SubscriptionSpec
     }
   }
 
-  private def assertCommonDetails(
-    subscription: Subscription,
-    expectedPPTWeight: Option[Integer]
-  ) = {
+  private def assertCommonDetails(subscription: Subscription, expectedPPTWeight: Option[Long]) = {
     subscription.groupOrPartnershipSubscription mustBe None
     subscription.declaration.declarationBox1 mustBe true
     subscription.last12MonthTotalTonnageAmt mustBe expectedPPTWeight

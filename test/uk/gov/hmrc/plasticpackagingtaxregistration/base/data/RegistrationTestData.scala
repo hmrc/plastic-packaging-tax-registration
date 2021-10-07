@@ -133,6 +133,12 @@ trait RegistrationTestData {
     startDate = Some(Date(day = Some(6), month = Some(4), year = Some(2022)))
   )
 
+  protected val pptLiabilityDetailsWithExpectedWeight: LiabilityDetails = LiabilityDetails(
+    weight = None,
+    expectedWeight = Some(LiabilityExpectedWeight(Some(true), Some(20000))),
+    startDate = Some(Date(day = Some(6), month = Some(4), year = Some(2022)))
+  )
+
   protected val registrationReviewed: Boolean  = true
   protected val registrationCompleted: Boolean = true
 

@@ -55,7 +55,7 @@ object Subscription {
                  businessCorrespondenceDetails = BusinessCorrespondenceDetails(registration),
                  declaration = Declaration(true),
                  taxObligationStartDate = registration.liabilityDetails.startDate,
-                 last12MonthTotalTonnageAmt = registration.liabilityDetails.weight,
+                 last12MonthTotalTonnageAmt = registration.liabilityDetails.liabilityWeight,
                  groupOrPartnershipSubscription = None
     )
 
