@@ -53,7 +53,7 @@ trait SubscriptionTestData {
     SubscriptionStatusResponse(status = NOT_SUBSCRIBED, pptReference = Some("ZPPT"))
 
   protected val subscriptionCreateResponse: SubscriptionCreateSuccessfulResponse =
-    SubscriptionCreateSuccessfulResponse(pptReference = "XMPPT123456789",
+    SubscriptionCreateSuccessfulResponse(pptReferenceNumber = "XMPPT123456789",
                                          processingDate = now(UTC),
                                          formBundleNumber = "123456789"
     )
