@@ -40,17 +40,7 @@ class SubscriptionSpec
                         withLiabilityDetails(pptLiabilityDetails)
           )
         )
-        assertCommonDetails(subscription, Some(10000))
-        mustHaveValidIncorporationLegalEntityDetails(subscription)
-      }
-      "UK Limited Company with no liability weight" in {
-        val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptIncorporationDetails),
-                        withPrimaryContactDetails(pptPrimaryContactDetails),
-                        withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
-          )
-        )
-        assertCommonDetails(subscription, None)
+        assertCommonDetails(subscription, 10000)
         mustHaveValidIncorporationLegalEntityDetails(subscription)
       }
       "Sole Trader" in {
@@ -60,7 +50,7 @@ class SubscriptionSpec
                         withLiabilityDetails(pptLiabilityDetails)
           )
         )
-        assertCommonDetails(subscription, Some(10000))
+        assertCommonDetails(subscription, 10000)
         mustHaveValidIndividualLegalEntityDetails(subscription)
       }
       "General Partnership" in {
@@ -70,7 +60,7 @@ class SubscriptionSpec
                         withLiabilityDetails(pptLiabilityDetails)
           )
         )
-        assertCommonDetails(subscription, Some(10000))
+        assertCommonDetails(subscription, 10000)
         mustHaveValidGeneralPartnershipLegalEntityDetails(subscription)
       }
       "Scottish Partnership" in {
@@ -80,7 +70,7 @@ class SubscriptionSpec
                         withLiabilityDetails(pptLiabilityDetails)
           )
         )
-        assertCommonDetails(subscription, Some(10000))
+        assertCommonDetails(subscription, 10000)
         mustHaveValidScottishPartnershipLegalEntityDetails(subscription)
       }
       "We have expected plastic packaging weight" in {
@@ -90,7 +80,7 @@ class SubscriptionSpec
                         withLiabilityDetails(pptLiabilityDetailsWithExpectedWeight)
           )
         )
-        assertCommonDetails(subscription, Some(20000))
+        assertCommonDetails(subscription, 20000)
       }
     }
 
@@ -108,7 +98,7 @@ class SubscriptionSpec
     }
   }
 
-  private def assertCommonDetails(subscription: Subscription, expectedPPTWeight: Option[Long]) = {
+  private def assertCommonDetails(subscription: Subscription, expectedPPTWeight: Long) = {
     subscription.groupOrPartnershipSubscription mustBe None
     subscription.declaration.declarationBox1 mustBe true
     subscription.last12MonthTotalTonnageAmt mustBe expectedPPTWeight
