@@ -121,7 +121,7 @@ class SubscriptionControllerSpec
           status(result) must be(OK)
           val response =
             contentAsJson(result).as[SubscriptionCreateWithEnrolmentAndNrsStatusesResponse]
-          response.pptReference mustBe subscriptionCreateResponse.pptReference
+          response.pptReference mustBe subscriptionCreateResponse.pptReferenceNumber
           response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
           response.processingDate mustBe subscriptionCreateResponse.processingDate
           response.nrsNotifiedSuccessfully mustBe true
@@ -133,7 +133,7 @@ class SubscriptionControllerSpec
           verify(mockNonRepudiationService).submitNonRepudiation(
             ArgumentMatchers.contains(request.incorpJourneyId.get),
             any[ZonedDateTime],
-            ArgumentMatchers.eq(subscriptionCreateResponse.pptReference),
+            ArgumentMatchers.eq(subscriptionCreateResponse.pptReferenceNumber),
             ArgumentMatchers.eq(pptUserHeaders)
           )(any[HeaderCarrier])
         }
@@ -231,7 +231,7 @@ class SubscriptionControllerSpec
     status(result) must be(OK)
     val response =
       contentAsJson(result).as[SubscriptionCreateWithEnrolmentAndNrsStatusesResponse]
-    response.pptReference mustBe subscriptionCreateResponse.pptReference
+    response.pptReference mustBe subscriptionCreateResponse.pptReferenceNumber
     response.formBundleNumber mustBe subscriptionCreateResponse.formBundleNumber
     response.processingDate mustBe subscriptionCreateResponse.processingDate
     response.nrsNotifiedSuccessfully mustBe false
@@ -243,7 +243,7 @@ class SubscriptionControllerSpec
     verify(mockNonRepudiationService).submitNonRepudiation(
       ArgumentMatchers.contains(request.incorpJourneyId.get),
       any[ZonedDateTime],
-      ArgumentMatchers.eq(subscriptionCreateResponse.pptReference),
+      ArgumentMatchers.eq(subscriptionCreateResponse.pptReferenceNumber),
       ArgumentMatchers.eq(pptUserHeaders)
     )(any[HeaderCarrier])
   }

@@ -77,38 +77,33 @@ class SubscriptionController @Inject() (
 
         subscriptionsConnector.submitSubscription(safeId, pptSubscription)
           .flatMap {
-            case subscriptionResponse @ SubscriptionCreateSuccessfulResponse(pptReference, _, _) =>
+            case subscriptionResponse @ SubscriptionCreateSuccessfulResponse(pptReferenceNumber,
+                                                                             _,
+                                                                             _
+                ) =>
               logger.info(
                 s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name} with safeId $safeId, " +
-                  s"PPT Reference [${subscriptionResponse.pptReference}]"
+                  s"PPT Reference [${subscriptionResponse.pptReferenceNumber}]"
               )
               for {
-                enrolmentResponse <- enrolUser(pptReference, safeId)
+                enrolmentResponse <- enrolUser(pptReferenceNumber, safeId)
                 nrsResponse       <- notifyNRS(request, pptRegistration, subscriptionResponse)
                 _                 <- deleteRegistration(request.registrationId)
               } yield Ok(
-                SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(pptReference = pptReference,
-                                                                      processingDate =
-                                                                        subscriptionResponse.processingDate,
-                                                                      formBundleNumber =
-                                                                        subscriptionResponse.formBundleNumber,
-                                                                      nrsNotifiedSuccessfully =
-                                                                        nrsResponse.isSuccess,
-                                                                      nrsSubmissionId =
-                                                                        nrsResponse.fold(
-                                                                          _ => None,
-                                                                          nrsResponse =>
-                                                                            Some(
-                                                                              nrsResponse.submissionId
-                                                                            )
-                                                                        ),
-                                                                      nrsFailureReason =
-                                                                        nrsResponse.fold(
-                                                                          e => Some(e.getMessage),
-                                                                          _ => None
-                                                                        ),
-                                                                      enrolmentInitiatedSuccessfully =
-                                                                        enrolmentResponse.isSuccess
+                SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
+                  pptReference = pptReferenceNumber,
+                  processingDate =
+                    subscriptionResponse.processingDate,
+                  formBundleNumber =
+                    subscriptionResponse.formBundleNumber,
+                  nrsNotifiedSuccessfully =
+                    nrsResponse.isSuccess,
+                  nrsSubmissionId =
+                    nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
+                  nrsFailureReason =
+                    nrsResponse.fold(e => Some(e.getMessage), _ => None),
+                  enrolmentInitiatedSuccessfully =
+                    enrolmentResponse.isSuccess
                 )
               )
             case SubscriptionCreateFailureResponseWithStatusCode(failedSubscriptionResponse,
@@ -162,21 +157,22 @@ class SubscriptionController @Inject() (
     nonRepudiationService.submitNonRepudiation(payloadString = toJson(registration).toString,
                                                submissionTimestamp =
                                                  subscriptionResponse.processingDate,
-                                               pptReference = subscriptionResponse.pptReference,
+                                               pptReference =
+                                                 subscriptionResponse.pptReferenceNumber,
                                                userHeaders =
                                                  request.body.userHeaders.getOrElse(Map.empty)
     )
       .map {
         resp =>
           logger.info(
-            s"Successful NRS submission for PPT Reference [${subscriptionResponse.pptReference}]"
+            s"Successful NRS submission for PPT Reference [${subscriptionResponse.pptReferenceNumber}]"
           )
           Success(resp)
       }
       .recover {
         case e =>
           logger.warn(
-            s"Failed NRS submission for PPT Reference [${subscriptionResponse.pptReference}] - ${e.getMessage}"
+            s"Failed NRS submission for PPT Reference [${subscriptionResponse.pptReferenceNumber}] - ${e.getMessage}"
           )
           Failure(e)
       }

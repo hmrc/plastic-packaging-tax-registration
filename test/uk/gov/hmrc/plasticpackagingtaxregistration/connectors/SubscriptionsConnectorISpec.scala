@@ -162,9 +162,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
               aResponse()
                 .withStatus(Status.OK)
                 .withBody(
-                  Json.obj("pptReference"     -> pptReference,
-                           "processingDate"   -> subscriptionProcessingDate,
-                           "formBundleNumber" -> formBundleNumber
+                  Json.obj("pptReferenceNumber" -> pptReference,
+                           "processingDate"     -> subscriptionProcessingDate,
+                           "formBundleNumber"   -> formBundleNumber
                   ).toString
                 )
             )
@@ -175,7 +175,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
             SubscriptionCreateSuccessfulResponse
           ]
 
-        res.pptReference mustBe pptReference
+        res.pptReferenceNumber mustBe pptReference
         res.formBundleNumber mustBe formBundleNumber
         res.processingDate mustBe ZonedDateTime.parse(subscriptionProcessingDate)
 
