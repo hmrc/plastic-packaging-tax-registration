@@ -70,11 +70,14 @@ class RegistrationRepositorySpec
 
         val registration = aRegistration(
           withOrganisationDetails(
-            OrganisationDetails(
-              organisationType = Some(OrgType.UK_COMPANY),
-              businessRegisteredAddress = Some(
-                Address(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
-              )
+            OrganisationDetails(organisationType = Some(OrgType.UK_COMPANY),
+                                businessRegisteredAddress = Some(
+                                  Address(addressLine1 = "addressLine1",
+                                          addressLine2 = "addressLine2",
+                                          townOrCity = "Town",
+                                          postCode = "PostCode"
+                                  )
+                                )
             )
           )
         )
@@ -149,6 +152,8 @@ class RegistrationRepositorySpec
                                                                address = Some(
                                                                  Address(addressLine1 =
                                                                            "addressLine1",
+                                                                         addressLine2 =
+                                                                           "addressLine2",
                                                                          townOrCity = "Town",
                                                                          postCode = "PostCode"
                                                                  )
@@ -156,16 +161,19 @@ class RegistrationRepositorySpec
                                          )
                                        ),
                                        withOrganisationDetails(
-                                         OrganisationDetails(organisationType =
-                                                               Some(OrgType.UK_COMPANY),
-                                                             businessRegisteredAddress =
-                                                               Some(
-                                                                 Address(addressLine1 =
-                                                                           "addressLine1",
-                                                                         townOrCity = "Town",
-                                                                         postCode = "PostCode"
-                                                                 )
-                                                               )
+                                         OrganisationDetails(
+                                           organisationType =
+                                             Some(OrgType.UK_COMPANY),
+                                           businessRegisteredAddress =
+                                             Some(
+                                               Address(addressLine1 =
+                                                         "addressLine1",
+                                                       addressLine2 =
+                                                         "addressLine2",
+                                                       townOrCity = "Town",
+                                                       postCode = "PostCode"
+                                               )
+                                             )
                                          )
                                        )
       )

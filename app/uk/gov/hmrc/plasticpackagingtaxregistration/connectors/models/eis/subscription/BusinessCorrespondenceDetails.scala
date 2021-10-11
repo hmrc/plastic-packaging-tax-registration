@@ -45,8 +45,7 @@ object BusinessCorrespondenceDetails {
         )
 
     BusinessCorrespondenceDetails(addressLine1 = businessCorrespondenceAddress.addressLine1,
-                                  addressLine2 =
-                                    businessCorrespondenceAddress.addressLine2.getOrElse(" "),
+                                  addressLine2 = businessCorrespondenceAddress.addressLine2,
                                   addressLine3 = businessCorrespondenceAddress.addressLine3,
                                   addressLine4 = Some(businessCorrespondenceAddress.townOrCity),
                                   postalCode = Some(businessCorrespondenceAddress.postCode),
