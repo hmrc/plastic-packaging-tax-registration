@@ -36,7 +36,7 @@ object AddressDetails {
     address match {
       case Some(addressDetails) =>
         AddressDetails(addressLine1 = addressDetails.addressLine1,
-                       addressLine2 = addressDetails.addressLine2.getOrElse(""),
+                       addressLine2 = addressDetails.addressLine2,
                        addressLine3 = addressDetails.addressLine3,
                        addressLine4 = Some(addressDetails.townOrCity),
                        postalCode = Some(addressDetails.postCode),

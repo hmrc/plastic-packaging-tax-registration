@@ -35,7 +35,7 @@ class PrincipalPlaceOfBusinessDetailsSpec
     "build" in {
       val principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration)
       principalPlaceOfBusinessDetails.addressDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
-      principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.get
+      principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2
       principalPlaceOfBusinessDetails.addressDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
       principalPlaceOfBusinessDetails.addressDetails.addressLine4 mustBe Some(
         pptBusinessAddress.townOrCity

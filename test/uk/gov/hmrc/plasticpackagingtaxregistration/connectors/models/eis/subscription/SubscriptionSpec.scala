@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
+import java.time.ZoneOffset.UTC
+import java.time.ZonedDateTime.now
+import java.time.format.DateTimeFormatter
+
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
@@ -23,10 +27,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
   SubscriptionTestData
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-
-import java.time.ZoneOffset.UTC
-import java.time.ZonedDateTime.now
-import java.time.format.DateTimeFormatter
 
 class SubscriptionSpec
     extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData
@@ -121,7 +121,7 @@ class SubscriptionSpec
 
   private def mustHaveValidPrincipalPlaceOfBusinessDetails(subscription: Subscription) = {
     subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
-    subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.get
+    subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2
     subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
     subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine4 mustBe Some(
       pptBusinessAddress.townOrCity
@@ -138,7 +138,7 @@ class SubscriptionSpec
 
   private def mustHaveValidBusinessCorrespondenceDetails(subscription: Subscription) = {
     subscription.businessCorrespondenceDetails.addressLine1 mustBe pptPrimaryContactAddress.addressLine1
-    subscription.businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2.get
+    subscription.businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2
     subscription.businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
     subscription.businessCorrespondenceDetails.addressLine4 mustBe Some(
       pptPrimaryContactAddress.townOrCity

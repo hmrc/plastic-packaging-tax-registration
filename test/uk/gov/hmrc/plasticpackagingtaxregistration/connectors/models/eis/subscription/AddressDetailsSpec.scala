@@ -29,12 +29,16 @@ class AddressDetailsSpec
 
   "AddressDetails" should {
     "map from PPT Address" when {
-      "only 'addressLine1', 'townOrCity' and 'PostCode' are available" in {
+      "only 'addressLine1', 'addressLine2', 'townOrCity' and 'PostCode' are available" in {
         val pptAddress =
-          PPTAddress(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+          PPTAddress(addressLine1 = "addressLine1",
+                     addressLine2 = "addressLine2",
+                     townOrCity = "Town",
+                     postCode = "PostCode"
+          )
         val addressDetails = AddressDetails(Some(pptAddress))
         addressDetails.addressLine1 mustBe pptAddress.addressLine1
-        addressDetails.addressLine2 mustBe ""
+        addressDetails.addressLine2 mustBe pptAddress.addressLine2
         addressDetails.addressLine3 mustBe None
         addressDetails.addressLine4 mustBe Some(pptAddress.townOrCity)
       }
@@ -42,7 +46,7 @@ class AddressDetailsSpec
       "all  PPT address fields are available" in {
         val addressDetails = AddressDetails(Some(pptBusinessAddress))
         addressDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
-        addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.get
+        addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2
         addressDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
         addressDetails.addressLine4 mustBe Some(pptBusinessAddress.townOrCity)
       }

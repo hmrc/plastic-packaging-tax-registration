@@ -26,7 +26,7 @@ trait RegistrationTestData {
 
   protected val pptBusinessAddress: Address =
     Address(addressLine1 = "1 Some Street",
-            addressLine2 = Some("Some Place"),
+            addressLine2 = "Some Place",
             addressLine3 = Some("Some Area"),
             townOrCity = "Leeds",
             postCode = "LS1 1AA"
@@ -34,7 +34,7 @@ trait RegistrationTestData {
 
   protected val pptPrimaryContactAddress: Address =
     Address(addressLine1 = "2 Some Other Street",
-            addressLine2 = Some("Some Other Place"),
+            addressLine2 = "Some Other Place",
             addressLine3 = Some("Some Other Area"),
             townOrCity = "Bradford",
             postCode = "BD1 1AA"
