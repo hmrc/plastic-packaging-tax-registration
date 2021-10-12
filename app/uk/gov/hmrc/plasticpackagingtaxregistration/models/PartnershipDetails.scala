@@ -21,11 +21,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.Pa
 
 object PartnershipTypeEnum extends Enumeration {
   type PartnershipTypeEnum = Value
-  val GENERAL_PARTNERSHIP: Value           = Value("General partnership")
-  val LIMITED_LIABILITY_PARTNERSHIP: Value = Value("Limited liability partnership")
-  val LIMITED_PARTNERSHIP: Value           = Value("Limited partnership")
-  val SCOTTISH_PARTNERSHIP: Value          = Value("Scottish partnership")
-  val SCOTTISH_LIMITED_PARTNERSHIP: Value  = Value("Scottish limited partnership")
+  val GENERAL_PARTNERSHIP: Value           = Value("GeneralPartnership")
+  val LIMITED_LIABILITY_PARTNERSHIP: Value = Value("LimitedLiabilityPartnership")
+  val LIMITED_PARTNERSHIP: Value           = Value("LimitedPartnership")
+  val SCOTTISH_PARTNERSHIP: Value          = Value("ScottishPartnership")
+  val SCOTTISH_LIMITED_PARTNERSHIP: Value  = Value("ScottishLimitedPartnership")
 
   implicit val format: Format[PartnershipTypeEnum] =
     Format(Reads.enumNameReads(PartnershipTypeEnum), Writes.enumNameWrites)

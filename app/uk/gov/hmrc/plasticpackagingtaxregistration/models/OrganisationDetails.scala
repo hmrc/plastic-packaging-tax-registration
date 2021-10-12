@@ -21,11 +21,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
 
 object OrgType extends Enumeration {
   type OrgType = Value
-  val UK_COMPANY: Value                = Value("UK limited or unlimited company")
-  val SOLE_TRADER: Value               = Value("Sole trader")
+  val UK_COMPANY: Value                = Value("UkCompany")
+  val SOLE_TRADER: Value               = Value("SoleTrader")
   val PARTNERSHIP: Value               = Value("Partnership")
-  val CHARITY_OR_NOT_FOR_PROFIT: Value = Value("Charity, Not for Profit, Trust or Society")
-  val OVERSEAS_COMPANY: Value          = Value("Overseas company")
+  val CHARITY_OR_NOT_FOR_PROFIT: Value = Value("RegisteredSociety")
+  val OVERSEAS_COMPANY: Value          = Value("OverseasCompany")
 
   implicit val format: Format[OrgType] =
     Format(Reads.enumNameReads(OrgType), Writes.enumNameWrites)
