@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupOrPartnershipSubscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Date, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Date, LiabilityWeight, Registration}
 
 import scala.language.implicitConversions
 
