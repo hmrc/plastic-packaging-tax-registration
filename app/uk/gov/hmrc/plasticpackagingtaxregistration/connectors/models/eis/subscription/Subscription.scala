@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupOrPartnershipSubscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Date, LiabilityWeight, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Date, Registration}
 
 import scala.language.implicitConversions
 
@@ -35,12 +35,6 @@ case class Subscription(
 
 object Subscription {
   implicit val format: OFormat[Subscription] = Json.format[Subscription]
-
-  implicit def convertLiabilityWeightToLong(weight: Option[LiabilityWeight]): Long =
-    weight match {
-      case Some(liabilityWeight) => liabilityWeight.totalKg.getOrElse(0)
-      case None                  => 0
-    }
 
   implicit def convertDateToString(liabilityDate: Option[Date]): String =
     liabilityDate match {
