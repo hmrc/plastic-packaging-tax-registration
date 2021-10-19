@@ -130,12 +130,12 @@ class SubscriptionController @Inject() (
       .map {
         case Right(successfulTaxEnrolment) =>
           logger.info(
-            s"Successful subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId]"
+            s"Successful subscriber enrolment initiation for PPT Reference [$pptReference], Safe ID [$safeId], FormBundleId [$formBundleId]"
           )
           Success(Right(successfulTaxEnrolment))
         case Left(failedTaxEnrolment) =>
           logger.warn(
-            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId] " +
+            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference], Safe ID [$safeId], FormBundleId [$formBundleId] " +
               s"- error code [${failedTaxEnrolment.status}]"
           )
           Failure(new IllegalStateException("Enrolment failed"))
@@ -143,7 +143,7 @@ class SubscriptionController @Inject() (
       .recover {
         case e =>
           logger.warn(
-            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId] " +
+            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference], Safe ID [$safeId], FormBundleId [$formBundleId] " +
               s"- ${e.getMessage}"
           )
           Failure(e)

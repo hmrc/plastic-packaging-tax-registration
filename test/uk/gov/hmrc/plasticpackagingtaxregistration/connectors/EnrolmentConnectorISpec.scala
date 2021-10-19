@@ -40,6 +40,7 @@ class EnrolmentConnectorISpec extends ConnectorISpec with Injector with ScalaFut
   "Enrolment Connector" should {
     val pptReference = "PPTRef"
     val safeId       = "SafeId"
+    val formBundleId = "63535462345364"
 
     val requestPayload = Json.obj("serviceName" -> PPTServiceName,
                                   "callback" -> s"http://localhost:8502/enrolment/$pptReference",
@@ -47,26 +48,28 @@ class EnrolmentConnectorISpec extends ConnectorISpec with Injector with ScalaFut
     )
 
     "enrol successfully" in {
-      mockSuccessfulEnrolment(pptReference, requestPayload)
+      mockSuccessfulEnrolment(formBundleId, requestPayload)
 
-      val enrolmentResponse = await(enrolmentConnector.submitEnrolment(pptReference, safeId))
+      val enrolmentResponse =
+        await(enrolmentConnector.submitEnrolment(pptReference, safeId, formBundleId))
 
       enrolmentResponse mustBe Right(SuccessfulTaxEnrolment)
       getTimer(EnrolmentConnectorTimerTag).getCount mustBe 1
     }
 
     "report enrolment failures" in {
-      mockFailedEnrolment(pptReference)
+      mockFailedEnrolment(formBundleId)
 
-      val enrolmentResponse = await(enrolmentConnector.submitEnrolment(pptReference, safeId))
+      val enrolmentResponse =
+        await(enrolmentConnector.submitEnrolment(pptReference, safeId, formBundleId))
 
       enrolmentResponse mustBe Left(FailedTaxEnrolment(500))
     }
   }
 
-  private def mockSuccessfulEnrolment(pptReference: String, requestPayload: JsObject): StubMapping =
+  private def mockSuccessfulEnrolment(formBundleId: String, requestPayload: JsObject): StubMapping =
     stubFor(
-      put(urlMatching(s"/tax-enrolments/subscriptions/$pptReference/subscriber"))
+      put(urlMatching(s"/tax-enrolments/subscriptions/$formBundleId/subscriber"))
         .withRequestBody(equalToJson(requestPayload.toString()))
         .willReturn(
           aResponse()
@@ -74,9 +77,9 @@ class EnrolmentConnectorISpec extends ConnectorISpec with Injector with ScalaFut
         )
     )
 
-  private def mockFailedEnrolment(pptReference: String): StubMapping =
+  private def mockFailedEnrolment(formBundleId: String): StubMapping =
     stubFor(
-      put(urlMatching(s"/tax-enrolments/subscriptions/$pptReference/subscriber"))
+      put(urlMatching(s"/tax-enrolments/subscriptions/$formBundleId/subscriber"))
         .willReturn(
           aResponse()
             .withStatus(Status.INTERNAL_SERVER_ERROR)
