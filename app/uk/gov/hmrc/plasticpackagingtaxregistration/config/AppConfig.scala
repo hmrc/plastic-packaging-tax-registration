@@ -50,8 +50,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   lazy val nonRepudiationApiKey: String =
     servicesConfig.getString("microservice.services.nrs.api-key")
 
-  def getTaxEnrolmentsSubscriberUrl(pptReference: String) =
-    s"$taxEnrolmentsHost/tax-enrolments/subscriptions/$pptReference/subscriber"
+  def getTaxEnrolmentsSubscriberUrl(formBundleId: String) =
+    s"$taxEnrolmentsHost/tax-enrolments/subscriptions/$formBundleId/subscriber"
 
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
 }

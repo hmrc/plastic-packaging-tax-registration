@@ -38,7 +38,7 @@ class EnrolmentConnector @Inject() (
 )(implicit ec: ExecutionContext)
     extends HttpReadsHttpResponse {
 
-  def submitEnrolment(pptReference: String, safeId: String)(implicit
+  def submitEnrolment(pptReference: String, safeId: String, formBundleId: String)(implicit
     hc: HeaderCarrier
   ): Future[TaxEnrolmentsResponse] = {
     val timer = metrics.defaultRegistry.timer(EnrolmentConnectorTimerTag).time()
@@ -49,7 +49,7 @@ class EnrolmentConnector @Inject() (
       )
 
     httpClient.PUT[JsObject, TaxEnrolmentsResponse](
-      url = config.getTaxEnrolmentsSubscriberUrl(pptReference),
+      url = config.getTaxEnrolmentsSubscriberUrl(formBundleId),
       body = enrolmentRequestBody
     ).andThen { case _ => timer.stop() }
   }

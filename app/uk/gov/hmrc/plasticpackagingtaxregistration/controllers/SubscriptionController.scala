@@ -79,14 +79,14 @@ class SubscriptionController @Inject() (
           .flatMap {
             case subscriptionResponse @ SubscriptionCreateSuccessfulResponse(pptReferenceNumber,
                                                                              _,
-                                                                             _
+                                                                             formBundleNumber
                 ) =>
               logger.info(
                 s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name} with safeId $safeId, " +
-                  s"PPT Reference [${subscriptionResponse.pptReferenceNumber}]"
+                  s"PPT Reference [$pptReferenceNumber] FormBundleId [$formBundleNumber]"
               )
               for {
-                enrolmentResponse <- enrolUser(pptReferenceNumber, safeId)
+                enrolmentResponse <- enrolUser(pptReferenceNumber, safeId, formBundleNumber)
                 nrsResponse       <- notifyNRS(request, pptRegistration, subscriptionResponse)
                 _                 <- deleteRegistration(request.registrationId)
               } yield Ok(
@@ -123,19 +123,19 @@ class SubscriptionController @Inject() (
   private def deleteRegistration(registrationId: String) =
     repository.delete(registrationId)
 
-  private def enrolUser(pptReference: String, safeId: String)(implicit
+  private def enrolUser(pptReference: String, safeId: String, formBundleId: String)(implicit
     hc: HeaderCarrier
   ): Future[Try[TaxEnrolmentsResponse]] =
-    enrolmentConnector.submitEnrolment(pptReference, safeId)
+    enrolmentConnector.submitEnrolment(pptReference, safeId, formBundleId)
       .map {
         case Right(successfulTaxEnrolment) =>
           logger.info(
-            s"Successful subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId]"
+            s"Successful subscriber enrolment initiation for PPT Reference [$pptReference], Safe ID [$safeId], FormBundleId [$formBundleId]"
           )
           Success(Right(successfulTaxEnrolment))
         case Left(failedTaxEnrolment) =>
           logger.warn(
-            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId] " +
+            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference], Safe ID [$safeId], FormBundleId [$formBundleId] " +
               s"- error code [${failedTaxEnrolment.status}]"
           )
           Failure(new IllegalStateException("Enrolment failed"))
@@ -143,7 +143,7 @@ class SubscriptionController @Inject() (
       .recover {
         case e =>
           logger.warn(
-            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference] and Safe ID [$safeId] " +
+            s"Failed subscriber enrolment initiation for PPT Reference [$pptReference], Safe ID [$safeId], FormBundleId [$formBundleId] " +
               s"- ${e.getMessage}"
           )
           Failure(e)
