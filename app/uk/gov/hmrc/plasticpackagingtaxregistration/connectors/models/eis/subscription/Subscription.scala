@@ -29,18 +29,12 @@ case class Subscription(
   businessCorrespondenceDetails: BusinessCorrespondenceDetails,
   declaration: Declaration,
   taxObligationStartDate: String,
-  last12MonthTotalTonnageAmt: Option[Long] = None,
+  last12MonthTotalTonnageAmt: Long,
   groupOrPartnershipSubscription: Option[GroupOrPartnershipSubscription] = None
 )
 
 object Subscription {
   implicit val format: OFormat[Subscription] = Json.format[Subscription]
-
-  implicit def convertLiabilityWeightToLong(weight: Option[LiabilityWeight]): Option[Long] =
-    weight match {
-      case Some(liabilityWeight) => liabilityWeight.totalKg
-      case None                  => None
-    }
 
   implicit def convertDateToString(liabilityDate: Option[Date]): String =
     liabilityDate match {
@@ -55,7 +49,8 @@ object Subscription {
                  businessCorrespondenceDetails = BusinessCorrespondenceDetails(registration),
                  declaration = Declaration(true),
                  taxObligationStartDate = registration.liabilityDetails.startDate,
-                 last12MonthTotalTonnageAmt = registration.liabilityDetails.liabilityWeight,
+                 last12MonthTotalTonnageAmt =
+                   registration.liabilityDetails.liabilityWeight.getOrElse(0),
                  groupOrPartnershipSubscription = None
     )
 

@@ -111,7 +111,7 @@ class SubscriptionSpec
   private def assertCommonDetails(subscription: Subscription, expectedPPTWeight: Option[Long]) = {
     subscription.groupOrPartnershipSubscription mustBe None
     subscription.declaration.declarationBox1 mustBe true
-    subscription.last12MonthTotalTonnageAmt mustBe expectedPPTWeight
+    subscription.last12MonthTotalTonnageAmt mustBe expectedPPTWeight.getOrElse(0)
     subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
 
     mustHaveValidPrimaryContactDetails(subscription)
