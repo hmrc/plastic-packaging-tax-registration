@@ -114,19 +114,19 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected def mockEnrolmentSuccess()
     : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
-    when(mockEnrolmentConnector.submitEnrolment(any(), any())(any())).thenReturn(
+    when(mockEnrolmentConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.successful(Right(SuccessfulTaxEnrolment))
     )
 
   protected def mockEnrolmentFailure()
     : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
-    when(mockEnrolmentConnector.submitEnrolment(any(), any())(any())).thenReturn(
+    when(mockEnrolmentConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.successful(Left(FailedTaxEnrolment(1)))
     )
 
   protected def mockEnrolmentFailureException()
     : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
-    when(mockEnrolmentConnector.submitEnrolment(any(), any())(any())).thenReturn(
+    when(mockEnrolmentConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.failed(new IllegalStateException("BANG!"))
     )
 

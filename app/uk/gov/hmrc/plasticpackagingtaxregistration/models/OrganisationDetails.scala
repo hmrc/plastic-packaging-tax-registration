@@ -17,15 +17,17 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json._
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.Status
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
 
 object OrgType extends Enumeration {
   type OrgType = Value
-  val UK_COMPANY: Value                = Value("UK limited or unlimited company")
-  val SOLE_TRADER: Value               = Value("Sole trader")
+  val UK_COMPANY: Value                = Value("UkCompany")
+  val SOLE_TRADER: Value               = Value("SoleTrader")
   val PARTNERSHIP: Value               = Value("Partnership")
-  val CHARITY_OR_NOT_FOR_PROFIT: Value = Value("Charity, Not for Profit, Trust or Society")
-  val OVERSEAS_COMPANY: Value          = Value("Overseas company")
+  val REGISTERED_SOCIETY: Value        = Value("RegisteredSociety")
+  val CHARITY_OR_NOT_FOR_PROFIT: Value = Value("CharityOrNotForProfit")
+  val OVERSEAS_COMPANY: Value          = Value("OverseasCompany")
 
   implicit val format: Format[OrgType] =
     Format(Reads.enumNameReads(OrgType), Writes.enumNameWrites)
@@ -38,7 +40,8 @@ case class OrganisationDetails(
   safeNumber: Option[String] = None,
   soleTraderDetails: Option[SoleTraderIncorporationDetails] = None,
   partnershipDetails: Option[PartnershipDetails] = None,
-  incorporationDetails: Option[IncorporationDetails] = None
+  incorporationDetails: Option[IncorporationDetails] = None,
+  subscriptionStatus: Option[Status] = None
 )
 
 object OrganisationDetails {
