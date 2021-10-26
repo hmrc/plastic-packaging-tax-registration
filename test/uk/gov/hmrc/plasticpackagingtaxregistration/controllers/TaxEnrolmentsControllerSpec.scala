@@ -27,12 +27,12 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.EnrolmentStatus
 
-class EnrolmentControllerSpec
+class TaxEnrolmentsControllerSpec
     extends ControllerSpec with RegistrationBuilder with RegistrationRequestBuilder {
 
   "Enrolment Controller" should {
     val pptReference = "PPTRef"
-    val post         = FakeRequest("POST", s"/enrolment/$pptReference")
+    val post         = FakeRequest("POST", s"/tax-enrolments-callback/$pptReference")
 
     "return a 204 status when notified of successful enrolment" in {
       val enrolmentStatus = Json.obj("state" -> EnrolmentStatus.Success.jsonName)

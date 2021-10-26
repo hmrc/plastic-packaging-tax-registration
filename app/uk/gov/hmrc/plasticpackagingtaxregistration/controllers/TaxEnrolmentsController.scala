@@ -34,7 +34,7 @@ class EnrolmentController @Inject() (override val controllerComponents: Controll
 
   private val logger = Logger(this.getClass)
 
-  def enrolled(pptReference: String): Action[JsValue] =
+  def callback(pptReference: String): Action[JsValue] =
     Action.async(parse.json) {
       implicit req =>
         val enrolmentStatus = (req.body \ "state").as[EnrolmentStatus]

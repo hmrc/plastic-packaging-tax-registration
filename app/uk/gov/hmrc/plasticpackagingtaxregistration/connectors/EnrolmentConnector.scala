@@ -55,7 +55,7 @@ class EnrolmentConnector @Inject() (
   }
 
   private def taxEnrolmentsCallbackUrl(pptReference: String): String =
-    s"${config.selfHost}${routes.EnrolmentController.enrolled(pptReference).url}"
+    s"${config.selfHost}${routes.EnrolmentController.callback(pptReference).url}"
 
 }
 
