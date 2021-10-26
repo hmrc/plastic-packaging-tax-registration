@@ -42,10 +42,11 @@ class EnrolmentConnectorISpec extends ConnectorISpec with Injector with ScalaFut
     val safeId       = "SafeId"
     val formBundleId = "63535462345364"
 
-    val requestPayload = Json.obj("serviceName" -> PPTServiceName,
-                                  "callback" -> s"http://localhost:8502/enrolment/$pptReference",
-                                  "etmpId"   -> safeId
-    )
+    val requestPayload =
+      Json.obj("serviceName" -> PPTServiceName,
+               "callback"    -> s"http://localhost:8502/tax-enrolments-callback/$pptReference",
+               "etmpId"      -> safeId
+      )
 
     "enrol successfully" in {
       mockSuccessfulEnrolment(formBundleId, requestPayload)
