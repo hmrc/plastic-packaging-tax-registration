@@ -29,7 +29,7 @@ import scala.concurrent.Future
 case class SubscriptionState(state: String, error: String)
 
 @Singleton
-class EnrolmentController @Inject() (override val controllerComponents: ControllerComponents)
+class TaxEnrolmentsController @Inject() (override val controllerComponents: ControllerComponents)
     extends BackendController(controllerComponents) with JSONResponses {
 
   private val logger = Logger(this.getClass)

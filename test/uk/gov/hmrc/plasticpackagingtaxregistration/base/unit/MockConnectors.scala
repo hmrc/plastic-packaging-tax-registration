@@ -35,9 +35,9 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolme
   SuccessfulTaxEnrolment
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
-  EnrolmentConnector,
   NonRepudiationConnector,
-  SubscriptionsConnector
+  SubscriptionsConnector,
+  TaxEnrolmentsConnector
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
   NonRepudiationMetadata,
@@ -51,7 +51,7 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected val mockSubscriptionsConnector: SubscriptionsConnector   = mock[SubscriptionsConnector]
   protected val mockNonRepudiationConnector: NonRepudiationConnector = mock[NonRepudiationConnector]
-  protected val mockEnrolmentConnector: EnrolmentConnector           = mock[EnrolmentConnector]
+  protected val mockEnrolmentConnector: TaxEnrolmentsConnector       = mock[TaxEnrolmentsConnector]
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()

@@ -20,7 +20,7 @@ import com.kenshoo.play.metrics.Metrics
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReadsHttpResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentConnector.{
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
   EnrolmentConnectorTimerTag,
   PPTServiceName
 }
@@ -31,7 +31,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EnrolmentConnector @Inject() (
+class TaxEnrolmentsConnector @Inject() (
   httpClient: HttpClient,
   val config: AppConfig,
   metrics: Metrics
@@ -55,11 +55,11 @@ class EnrolmentConnector @Inject() (
   }
 
   private def taxEnrolmentsCallbackUrl(pptReference: String): String =
-    s"${config.selfHost}${routes.EnrolmentController.callback(pptReference).url}"
+    s"${config.selfHost}${routes.TaxEnrolmentsController.callback(pptReference).url}"
 
 }
 
-object EnrolmentConnector {
+object TaxEnrolmentsConnector {
   val PPTServiceName             = "HMRC-PPT-ORG"
   val EnrolmentConnectorTimerTag = "ppt.enrolment.timer"
 }

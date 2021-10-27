@@ -30,7 +30,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.EnrolmentStatus
 class TaxEnrolmentsControllerSpec
     extends ControllerSpec with RegistrationBuilder with RegistrationRequestBuilder {
 
-  "Enrolment Controller" should {
+  "Tax Enrolments Controller" should {
     val pptReference = "PPTRef"
     val post         = FakeRequest("POST", s"/tax-enrolments-callback/$pptReference")
 
