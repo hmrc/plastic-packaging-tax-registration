@@ -24,7 +24,7 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.await
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentConnector.{
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
   EnrolmentConnectorTimerTag,
   PPTServiceName
 }
@@ -33,11 +33,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolme
   SuccessfulTaxEnrolment
 }
 
-class EnrolmentConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
+class TaxEnrolmentsConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
 
-  private val enrolmentConnector = app.injector.instanceOf[EnrolmentConnector]
+  private val enrolmentConnector = app.injector.instanceOf[TaxEnrolmentsConnector]
 
-  "Enrolment Connector" should {
+  "Tax Enrolments Connector" should {
     val pptReference = "PPTRef"
     val safeId       = "SafeId"
     val formBundleId = "63535462345364"

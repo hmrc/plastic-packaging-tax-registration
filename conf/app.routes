@@ -7,9 +7,12 @@ PUT         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregist
 GET         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.get(id)
 
 
-# EIS subscription
+# EIS Subscription
 GET         /subscriptions/status/:safeNumber   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.get(safeNumber: String)
 POST        /subscriptions/:safeNumber           uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.submit(safeNumber: String)
 
+# User Enrolment
+POST        /enrolment/:pptReference    uk.gov.hmrc.plasticpackagingtaxregistration.controllers.UserEnrolmentController.enroll(pptReference)
+
 # Tax Enrolment Callback
-POST        /tax-enrolments-callback/:pptReference    uk.gov.hmrc.plasticpackagingtaxregistration.controllers.EnrolmentController.callback(pptReference)
+POST        /tax-enrolments-callback/:pptReference    uk.gov.hmrc.plasticpackagingtaxregistration.controllers.TaxEnrolmentsController.callback(pptReference)

@@ -30,8 +30,8 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
-  EnrolmentConnector,
-  SubscriptionsConnector
+  SubscriptionsConnector,
+  TaxEnrolmentsConnector
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{
   Authenticator,
@@ -53,7 +53,7 @@ class SubscriptionController @Inject() (
   authenticator: Authenticator,
   repository: RegistrationRepository,
   nonRepudiationService: NonRepudiationService,
-  enrolmentConnector: EnrolmentConnector,
+  enrolmentConnector: TaxEnrolmentsConnector,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
