@@ -21,6 +21,7 @@ import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
   EnrolmentFailedCode,
   UserEnrolmentFailedResponse,
@@ -31,12 +32,13 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authentic
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class UserEnrolmentController @Inject() (
   authenticator: Authenticator,
-  override val controllerComponents: ControllerComponents
+  override val controllerComponents: ControllerComponents,
+  enrolmentStoreProxyConnector: EnrolmentStoreProxyConnector
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
 
@@ -45,18 +47,22 @@ class UserEnrolmentController @Inject() (
   def enrol(): Action[UserEnrolmentRequest] =
     authenticator.authorisedAction(authenticator.parsingJson[UserEnrolmentRequest]) {
       implicit request =>
-        val userEnrolment = request.body
-        logPayload("PPT User Enrol request", userEnrolment)
+        val userEnrolmentRequest = request.body
+        logPayload("PPT User Enrol request", userEnrolmentRequest)
 
-        // TODO temporary mocking of result
-        if (userEnrolment.pptReference.endsWith("000"))
-          Future.successful(
-            BadRequest(
-              UserEnrolmentFailedResponse(userEnrolment.pptReference, EnrolmentFailedCode.Failed)
-            )
-          )
-        else
-          Future.successful(Created(UserEnrolmentSuccessResponse(userEnrolment.pptReference)))
+        enrolmentStoreProxyConnector.queryKnownFacts(userEnrolmentRequest).map {
+          knownFacts =>
+            // TODO - perform group checks and make the actual enrolment call
+            if (knownFacts.pptEnrolmentReferences.contains(userEnrolmentRequest.pptReference))
+              Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
+            else
+              BadRequest(
+                UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference,
+                                            EnrolmentFailedCode.VerificationFailed
+                )
+              )
+
+        }
 
     }
 

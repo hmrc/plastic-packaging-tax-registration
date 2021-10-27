@@ -25,10 +25,11 @@ import scala.concurrent.duration.FiniteDuration
 @Singleton
 class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
-  lazy val selfHost: String          = servicesConfig.baseUrl("self")
-  lazy val eisHost: String           = servicesConfig.baseUrl("eis")
-  lazy val nrsHost: String           = servicesConfig.baseUrl("nrs")
-  lazy val taxEnrolmentsHost: String = servicesConfig.baseUrl("tax-enrolments")
+  lazy val selfHost: String                = servicesConfig.baseUrl("self")
+  lazy val eisHost: String                 = servicesConfig.baseUrl("eis")
+  lazy val nrsHost: String                 = servicesConfig.baseUrl("nrs")
+  lazy val taxEnrolmentsHost: String       = servicesConfig.baseUrl("tax-enrolments")
+  lazy val enrolmentStoreProxyHost: String = servicesConfig.baseUrl("enrolment-store-proxy")
 
   val authBaseUrl: String      = servicesConfig.baseUrl("auth")
   val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
@@ -52,6 +53,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   def getTaxEnrolmentsSubscriberUrl(formBundleId: String) =
     s"$taxEnrolmentsHost/tax-enrolments/subscriptions/$formBundleId/subscriber"
+
+  lazy val enrolmentStoreProxyE20Url =
+    s"$enrolmentStoreProxyHost/enrolment-store-proxy/enrolment-store/enrolments"
 
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
 }
