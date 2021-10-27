@@ -54,7 +54,7 @@ class UserEnrolmentController @Inject() (
             BadRequest(UserEnrolmentFailedResponse(pptReference, EnrolmentFailedCode.Failed))
           )
         else
-          Future.successful(Ok(UserEnrolmentSuccessResponse(pptReference)))
+          Future.successful(Created(UserEnrolmentSuccessResponse(pptReference)))
 
     }
 

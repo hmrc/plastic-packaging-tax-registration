@@ -40,7 +40,7 @@ class UserEnrolmentControllerSpec
 
   "User Enrolment Controller" should {
 
-    "return 200" when {
+    "return 201 (Create)" when {
       "enrolment is successful" in {
         withAuthorizedUser()
         val userEnrolment = Json.obj("registrationDate" -> "2021-10-09", "postcode" -> "AB1 2CD")
@@ -48,7 +48,7 @@ class UserEnrolmentControllerSpec
         val result: Future[Result] =
           route(app, post().withJsonBody(toJson(userEnrolment))).get
 
-        status(result) must be(OK)
+        status(result) must be(CREATED)
         contentAsJson(result) mustBe Json.obj("pptReference" -> validPptReference)
       }
     }
