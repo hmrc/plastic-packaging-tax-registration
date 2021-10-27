@@ -35,6 +35,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolme
   SuccessfulTaxEnrolment
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  EnrolmentStoreProxyConnector,
   NonRepudiationConnector,
   SubscriptionsConnector,
   TaxEnrolmentsConnector
@@ -53,9 +54,16 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
   protected val mockNonRepudiationConnector: NonRepudiationConnector = mock[NonRepudiationConnector]
   protected val mockEnrolmentConnector: TaxEnrolmentsConnector       = mock[TaxEnrolmentsConnector]
 
+  protected val mockEnrolmentStoreProxyConnector: EnrolmentStoreProxyConnector =
+    mock[EnrolmentStoreProxyConnector]
+
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockSubscriptionsConnector, mockNonRepudiationConnector, mockEnrolmentConnector)
+    reset(mockSubscriptionsConnector,
+          mockNonRepudiationConnector,
+          mockEnrolmentConnector,
+          mockEnrolmentStoreProxyConnector
+    )
   }
 
   protected def mockGetSubscriptionStatusFailure(ex: Exception) =

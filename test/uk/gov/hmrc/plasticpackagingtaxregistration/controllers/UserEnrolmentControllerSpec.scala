@@ -16,34 +16,40 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import play.api.libs.json.Json
 import play.api.libs.json.Json.toJson
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.UserEnrolmentData
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
-  RegistrationBuilder,
-  RegistrationRequestBuilder
-}
 
 import scala.concurrent.Future
 
-class UserEnrolmentControllerSpec
-    extends ControllerSpec with RegistrationBuilder with RegistrationRequestBuilder {
+class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData {
 
-  val validPptReference   = "XMPPT000123456"
-  val invalidPptReference = "XMPPT000000000"
+  private val unknownPptReference = "XMPPT000000000"
 
-  val post = FakeRequest("POST", "/enrolment")
+  private val post = FakeRequest("POST", "/enrolment")
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+
+    when(mockEnrolmentStoreProxyConnector.queryKnownFacts(any())(any())).thenReturn(
+      Future.successful(queryKnownFactsResponse(knownPptReference))
+    )
+  }
 
   "User Enrolment Controller" should {
 
     "return 201 (Create)" when {
       "enrolment is successful" in {
         withAuthorizedUser()
-        val userEnrolment = Json.obj("pptReference" -> validPptReference,
+
+        val userEnrolment = Json.obj("pptReference" -> knownPptReference,
                                      "registrationDate" -> "2021-10-09",
                                      "postcode"         -> "AB1 2CD"
         )
@@ -52,14 +58,14 @@ class UserEnrolmentControllerSpec
           route(app, post.withJsonBody(toJson(userEnrolment))).get
 
         status(result) must be(CREATED)
-        contentAsJson(result) mustBe Json.obj("pptReference" -> validPptReference)
+        contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference)
       }
     }
 
     "return 400" when {
       "enrolment fails" in {
         withAuthorizedUser()
-        val userEnrolment = Json.obj("pptReference" -> invalidPptReference,
+        val userEnrolment = Json.obj("pptReference" -> unknownPptReference,
                                      "registrationDate" -> "2021-10-09",
                                      "postcode"         -> "AB1 2CD"
         )
@@ -68,7 +74,7 @@ class UserEnrolmentControllerSpec
           route(app, post.withJsonBody(toJson(userEnrolment))).get
 
         status(result) must be(BAD_REQUEST)
-        contentAsJson(result) mustBe Json.obj("pptReference" -> invalidPptReference,
+        contentAsJson(result) mustBe Json.obj("pptReference" -> unknownPptReference,
                                               "failureCode"  -> "Failed"
         )
       }
@@ -89,7 +95,7 @@ class UserEnrolmentControllerSpec
       "unauthorized" in {
         withUnauthorizedUser(InsufficientEnrolments())
 
-        val userEnrolment = Json.obj("pptReference" -> validPptReference,
+        val userEnrolment = Json.obj("pptReference" -> knownPptReference,
                                      "registrationDate" -> "2021-10-09",
                                      "postcode"         -> "AB1 2CD"
         )

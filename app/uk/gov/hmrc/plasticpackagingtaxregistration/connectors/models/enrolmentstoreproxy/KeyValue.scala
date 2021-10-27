@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment
-
-import java.time.LocalDate
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy
 
 import play.api.libs.json.{Json, OFormat}
 
-case class UserEnrolmentRequest(
-  pptReference: String,
-  registrationDate: LocalDate,
-  postcode: Option[String] = None
-)
+case class KeyValue(key: String, value: String)
 
-object UserEnrolmentRequest {
-  implicit val format: OFormat[UserEnrolmentRequest] = Json.format[UserEnrolmentRequest]
+object KeyValue {
+  implicit val format: OFormat[KeyValue] = Json.format[KeyValue]
+
+  val pptServiceName      = "HMRC-PPT-ORG"
+  val registrationDateKey = "PPTRegistrationDate"
+  val postcodeKey         = "BusinessPostCode"
+
+  val etmpPptReferenceKey = "EtmpRegistrationNumber"
 }

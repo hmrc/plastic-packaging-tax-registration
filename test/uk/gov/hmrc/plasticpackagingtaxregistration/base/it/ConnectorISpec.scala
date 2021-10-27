@@ -44,12 +44,13 @@ class ConnectorISpec
   }
 
   def overrideConfig: Map[String, Any] =
-    Map("microservice.services.eis.host"            -> wireHost,
-        "microservice.services.eis.port"            -> wirePort,
-        "microservice.services.nrs.host"            -> wireHost,
-        "microservice.services.nrs.port"            -> wirePort,
-        "microservice.services.tax-enrolments.host" -> wireHost,
-        "microservice.services.tax-enrolments.port" -> wirePort
+    Map("microservice.services.eis.host"                   -> wireHost,
+        "microservice.services.eis.port"                   -> wirePort,
+        "microservice.services.nrs.host"                   -> wireHost,
+        "microservice.services.nrs.port"                   -> wirePort,
+        "microservice.services.tax-enrolments.host"        -> wireHost,
+        "microservice.services.tax-enrolments.port"        -> wirePort,
+        "microservice.services.enrolment-store-proxy.port" -> wirePort
     )
 
   def getTimer(name: String): Timer =
