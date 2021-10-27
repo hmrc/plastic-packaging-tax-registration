@@ -20,8 +20,12 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 
-case class UserEnrolment(registrationDate: LocalDate, postcode: Option[String])
+case class UserEnrolmentRequest(
+  pptReference: String,
+  registrationDate: LocalDate,
+  postcode: Option[String]
+)
 
-object UserEnrolment {
-  implicit val format: OFormat[UserEnrolment] = Json.format[UserEnrolment]
+object UserEnrolmentRequest {
+  implicit val format: OFormat[UserEnrolmentRequest] = Json.format[UserEnrolmentRequest]
 }

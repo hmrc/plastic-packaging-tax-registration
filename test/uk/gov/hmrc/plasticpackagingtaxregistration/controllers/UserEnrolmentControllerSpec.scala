@@ -36,17 +36,20 @@ class UserEnrolmentControllerSpec
   val validPptReference   = "XMPPT000123456"
   val invalidPptReference = "XMPPT000000000"
 
-  def post(pptRef: String = validPptReference) = FakeRequest("POST", s"/enrolment/$pptRef")
+  val post = FakeRequest("POST", "/enrolment")
 
   "User Enrolment Controller" should {
 
     "return 201 (Create)" when {
       "enrolment is successful" in {
         withAuthorizedUser()
-        val userEnrolment = Json.obj("registrationDate" -> "2021-10-09", "postcode" -> "AB1 2CD")
+        val userEnrolment = Json.obj("pptReference" -> validPptReference,
+                                     "registrationDate" -> "2021-10-09",
+                                     "postcode"         -> "AB1 2CD"
+        )
 
         val result: Future[Result] =
-          route(app, post().withJsonBody(toJson(userEnrolment))).get
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
 
         status(result) must be(CREATED)
         contentAsJson(result) mustBe Json.obj("pptReference" -> validPptReference)
@@ -56,10 +59,13 @@ class UserEnrolmentControllerSpec
     "return 400" when {
       "enrolment fails" in {
         withAuthorizedUser()
-        val userEnrolment = Json.obj("registrationDate" -> "2021-10-09", "postcode" -> "AB1 2CD")
+        val userEnrolment = Json.obj("pptReference" -> invalidPptReference,
+                                     "registrationDate" -> "2021-10-09",
+                                     "postcode"         -> "AB1 2CD"
+        )
 
         val result: Future[Result] =
-          route(app, post(invalidPptReference).withJsonBody(toJson(userEnrolment))).get
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("pptReference" -> invalidPptReference,
@@ -72,7 +78,7 @@ class UserEnrolmentControllerSpec
         val userEnrolment = Json.obj("theDate" -> "2021-10-09", "thePostcode" -> "AB1 2CD")
 
         val result: Future[Result] =
-          route(app, post().withJsonBody(toJson(userEnrolment))).get
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("statusCode" -> 400, "message" -> "Bad Request")
@@ -83,10 +89,13 @@ class UserEnrolmentControllerSpec
       "unauthorized" in {
         withUnauthorizedUser(InsufficientEnrolments())
 
-        val userEnrolment = Json.obj("registrationDate" -> "2021-10-09", "postcode" -> "AB1 2CD")
+        val userEnrolment = Json.obj("pptReference" -> validPptReference,
+                                     "registrationDate" -> "2021-10-09",
+                                     "postcode"         -> "AB1 2CD"
+        )
 
         val result: Future[Result] =
-          route(app, post().withJsonBody(toJson(userEnrolment))).get
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
 
         status(result) must be(UNAUTHORIZED)
       }

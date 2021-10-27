@@ -23,8 +23,8 @@ import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
   EnrolmentFailedCode,
-  UserEnrolment,
   UserEnrolmentFailedResponse,
+  UserEnrolmentRequest,
   UserEnrolmentSuccessResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
@@ -42,19 +42,21 @@ class UserEnrolmentController @Inject() (
 
   private val logger = Logger(this.getClass)
 
-  def enroll(pptReference: String): Action[UserEnrolment] =
-    authenticator.authorisedAction(authenticator.parsingJson[UserEnrolment]) {
+  def enrol(): Action[UserEnrolmentRequest] =
+    authenticator.authorisedAction(authenticator.parsingJson[UserEnrolmentRequest]) {
       implicit request =>
         val userEnrolment = request.body
-        logPayload(s"PPT User Enroll request for pptReference $pptReference ", userEnrolment)
+        logPayload("PPT User Enrol request", userEnrolment)
 
         // TODO temporary mocking of result
-        if (pptReference.endsWith("000"))
+        if (userEnrolment.pptReference.endsWith("000"))
           Future.successful(
-            BadRequest(UserEnrolmentFailedResponse(pptReference, EnrolmentFailedCode.Failed))
+            BadRequest(
+              UserEnrolmentFailedResponse(userEnrolment.pptReference, EnrolmentFailedCode.Failed)
+            )
           )
         else
-          Future.successful(Created(UserEnrolmentSuccessResponse(pptReference)))
+          Future.successful(Created(UserEnrolmentSuccessResponse(userEnrolment.pptReference)))
 
     }
 

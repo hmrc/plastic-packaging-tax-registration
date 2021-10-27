@@ -12,7 +12,7 @@ GET         /subscriptions/status/:safeNumber   uk.gov.hmrc.plasticpackagingtaxr
 POST        /subscriptions/:safeNumber           uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.submit(safeNumber: String)
 
 # User Enrolment
-POST        /enrolment/:pptReference    uk.gov.hmrc.plasticpackagingtaxregistration.controllers.UserEnrolmentController.enroll(pptReference)
+POST        /enrolment                         uk.gov.hmrc.plasticpackagingtaxregistration.controllers.UserEnrolmentController.enrol()
 
 # Tax Enrolment Callback
 POST        /tax-enrolments-callback/:pptReference    uk.gov.hmrc.plasticpackagingtaxregistration.controllers.TaxEnrolmentsController.callback(pptReference)
