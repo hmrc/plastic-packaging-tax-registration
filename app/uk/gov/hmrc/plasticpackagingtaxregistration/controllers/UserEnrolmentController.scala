@@ -58,7 +58,7 @@ class UserEnrolmentController @Inject() (
             else
               BadRequest(
                 UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference,
-                                            EnrolmentFailedCode.Failed
+                                            EnrolmentFailedCode.VerificationFailed
                 )
               )
 

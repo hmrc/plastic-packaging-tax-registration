@@ -75,7 +75,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("pptReference" -> unknownPptReference,
-                                              "failureCode"  -> "Failed"
+                                              "failureCode"  -> "VerificationFailed"
         )
       }
 
