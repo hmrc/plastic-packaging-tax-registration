@@ -38,6 +38,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResp
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class UserEnrolmentController @Inject() (
@@ -61,34 +62,41 @@ class UserEnrolmentController @Inject() (
         def successResult() =
           Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
 
-        getVerifiersErrors(userEnrolmentRequest) flatMap {
-          case None =>
-            getGroupsWithEnrolmentErrors(userEnrolmentRequest.pptReference).map {
-              case None             => successResult()
-              case Some(failedCode) => failedResult(failedCode)
+        findEnrolment(userEnrolmentRequest).flatMap {
+          case Success(_) =>
+            getGroupsWithEnrolment(userEnrolmentRequest.pptReference).map { groupIds =>
+              if (groupIds.isEmpty)
+                // TODO: create new assignment using current user group
+                successResult()
+              else
+                // TODO: check whether user in same group
+                failedResult(EnrolmentFailedCode.GroupEnrolled)
             }
-          case Some(failedCode) => Future.successful(failedResult(failedCode))
+          case Failure(e: FindEnrolmentFailure) => Future.successful(failedResult(e.failureCode))
         }
-
     }
 
-  private def getVerifiersErrors(
+  case class FindEnrolmentFailure(failureCode: EnrolmentFailedCode) extends RuntimeException
+
+  private def findEnrolment(
     request: UserEnrolmentRequest
-  )(implicit hc: HeaderCarrier): Future[Option[EnrolmentFailedCode]] =
+  )(implicit hc: HeaderCarrier): Future[Try[Unit]] =
     enrolmentStoreProxyConnector.queryKnownFacts(request).map {
-      case Some(facts) if facts.pptEnrolmentReferences.contains(request.pptReference) => None
-      case Some(_)                                                                    => Some(EnrolmentFailedCode.VerificationFailed)
-      case _                                                                          => Some(EnrolmentFailedCode.VerificationMissing)
+      case Some(facts) if facts.pptEnrolmentReferences.contains(request.pptReference) => Success()
+      case Some(_)                                                                    => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationFailed))
+      case _                                                                          => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationMissing))
     }
 
-  private def getGroupsWithEnrolmentErrors(
+  private def getGroupsWithEnrolment(
     pptReference: String
-  )(implicit request: AuthorizedRequest[_]): Future[Option[EnrolmentFailedCode]] =
+  )(implicit request: AuthorizedRequest[_]): Future[Seq[String]] =
     enrolmentStoreProxyConnector.queryGroupsWithEnrolment(pptReference).map {
-      case Some(groups) =>
-        // TODO - check if user group is in the list returned
-        Some(EnrolmentFailedCode.GroupEnrolled)
-      case _ => None
+      case Some(groupsResponse) =>
+        groupsResponse.principalGroupIds match {
+          case Some(groupIds) => groupIds
+          case None           => Seq()
+        }
+      case None => Seq()
     }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
