@@ -24,10 +24,12 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProx
   GroupsWithEnrolmentsTimerTag,
   KnownFactsTimerTag
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.UserEnrolmentRequest
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
+  EnrolmentKey,
+  UserEnrolmentRequest
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.{
   GroupsWithEnrolmentsResponse,
-  KeyValue,
   QueryKnownFactsRequest,
   QueryKnownFactsResponse
 }
@@ -48,10 +50,8 @@ class EnrolmentStoreProxyConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[Option[GroupsWithEnrolmentsResponse]] = {
     val timer = metrics.defaultRegistry.timer(GroupsWithEnrolmentsTimerTag).time()
 
-    val enrolmentKey = s"${KeyValue.pptServiceName}~${KeyValue.etmpPptReferenceKey}~$pptReference"
-
     httpClient.GET[Option[GroupsWithEnrolmentsResponse]](url =
-      config.enrolmentStoreProxyES1Url(enrolmentKey)
+      config.enrolmentStoreProxyES1Url(EnrolmentKey.create(pptReference))
     ).andThen { case _ => timer.stop() }
   }
 
