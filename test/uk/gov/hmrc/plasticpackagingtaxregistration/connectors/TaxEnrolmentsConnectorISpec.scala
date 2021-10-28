@@ -16,59 +16,105 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, equalToJson, put, urlMatching}
+import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.prop.TableDrivenPropertyChecks
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.await
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
-  EnrolmentConnectorTimerTag,
-  PPTServiceName
+  AssignEnrolmentTimerTag,
+  SubscriberTimerTag
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.KeyValue.{
+  etmpPptReferenceKey,
+  pptServiceName
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.{
   FailedTaxEnrolment,
   SuccessfulTaxEnrolment
 }
 
-class TaxEnrolmentsConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
+class TaxEnrolmentsConnectorISpec
+    extends ConnectorISpec with Injector with ScalaFutures with TableDrivenPropertyChecks {
 
   private val enrolmentConnector = app.injector.instanceOf[TaxEnrolmentsConnector]
 
-  "Tax Enrolments Connector" should {
-    val pptReference = "PPTRef"
-    val safeId       = "SafeId"
-    val formBundleId = "63535462345364"
+  "Tax Enrolments Connector" when {
+    val pptReference = "XMPPT000123456"
 
-    val requestPayload =
-      Json.obj("serviceName" -> PPTServiceName,
-               "callback"    -> s"http://localhost:8502/tax-enrolments-callback/$pptReference",
-               "etmpId"      -> safeId
-      )
+    "enrolling via subscriber call" should {
+      val safeId       = "SafeId"
+      val formBundleId = "63535462345364"
 
-    "enrol successfully" in {
-      mockSuccessfulEnrolment(formBundleId, requestPayload)
+      val requestPayload =
+        Json.obj("serviceName" -> pptServiceName,
+                 "callback"    -> s"http://localhost:8502/tax-enrolments-callback/$pptReference",
+                 "etmpId"      -> safeId
+        )
 
-      val enrolmentResponse =
-        await(enrolmentConnector.submitEnrolment(pptReference, safeId, formBundleId))
+      "succeed when tax-enrolments returns 204 NO CONTENT" in {
+        mockSuccessfulSubscriberEnrolment(formBundleId, requestPayload)
 
-      enrolmentResponse mustBe Right(SuccessfulTaxEnrolment)
-      getTimer(EnrolmentConnectorTimerTag).getCount mustBe 1
+        val enrolmentResponse =
+          await(enrolmentConnector.submitEnrolment(pptReference, safeId, formBundleId))
+
+        enrolmentResponse mustBe Right(SuccessfulTaxEnrolment)
+        getTimer(SubscriberTimerTag).getCount mustBe 1
+      }
+
+      "report enrolment failures" in {
+        mockFailedSubscriberEnrolment(formBundleId)
+
+        val enrolmentResponse =
+          await(enrolmentConnector.submitEnrolment(pptReference, safeId, formBundleId))
+
+        enrolmentResponse mustBe Left(FailedTaxEnrolment(500))
+      }
     }
 
-    "report enrolment failures" in {
-      mockFailedEnrolment(formBundleId)
+    "assigning user to existing enrolment" should {
+      val userId = "user123"
 
-      val enrolmentResponse =
-        await(enrolmentConnector.submitEnrolment(pptReference, safeId, formBundleId))
+      "succeed when tax-enrolments returns a 201 CREATED" in {
+        val enrolmentKey = s"$pptServiceName~$etmpPptReferenceKey~$pptReference"
+        mockSuccessfulUserEnrolmentAssignment(userId, enrolmentKey)
 
-      enrolmentResponse mustBe Left(FailedTaxEnrolment(500))
+        await(enrolmentConnector.assignEnrolmentToUser(userId, pptReference))
+
+        getTimer(AssignEnrolmentTimerTag).getCount mustBe 1
+      }
+
+      "throw UpstreamErrorResponse when tax-enrolments returns something other than 201 CREATED" in {
+        val enrolmentKey = s"$pptServiceName~$etmpPptReferenceKey~$pptReference"
+
+        val failureStatuses = Table("status",
+                                    Status.UNAUTHORIZED,
+                                    Status.NOT_FOUND,
+                                    Status.FORBIDDEN,
+                                    Status.BAD_REQUEST
+        )
+
+        forAll(failureStatuses) { failureStatus =>
+          mockFailedUserEnrolmentAssignment(userId, enrolmentKey, failureStatus)
+
+          intercept[UpstreamErrorResponse] {
+            await(enrolmentConnector.assignEnrolmentToUser(userId, pptReference))
+          }
+        }
+        getTimer(AssignEnrolmentTimerTag).getCount mustBe failureStatuses.size
+      }
     }
   }
 
-  private def mockSuccessfulEnrolment(formBundleId: String, requestPayload: JsObject): StubMapping =
+  private def mockSuccessfulSubscriberEnrolment(
+    formBundleId: String,
+    requestPayload: JsObject
+  ): StubMapping =
     stubFor(
       put(urlMatching(s"/tax-enrolments/subscriptions/$formBundleId/subscriber"))
         .withRequestBody(equalToJson(requestPayload.toString()))
@@ -78,12 +124,30 @@ class TaxEnrolmentsConnectorISpec extends ConnectorISpec with Injector with Scal
         )
     )
 
-  private def mockFailedEnrolment(formBundleId: String): StubMapping =
+  private def mockFailedSubscriberEnrolment(formBundleId: String): StubMapping =
     stubFor(
       put(urlMatching(s"/tax-enrolments/subscriptions/$formBundleId/subscriber"))
         .willReturn(
           aResponse()
             .withStatus(Status.INTERNAL_SERVER_ERROR)
+        )
+    )
+
+  private def mockSuccessfulUserEnrolmentAssignment(userId: String, enrolmentKey: String) =
+    stubFor(
+      post(urlMatching(s"/tax-enrolments/users/$userId/enrolments/$enrolmentKey"))
+        .willReturn(
+          aResponse()
+            .withStatus(Status.CREATED)
+        )
+    )
+
+  private def mockFailedUserEnrolmentAssignment(userId: String, enrolmentKey: String, status: Int) =
+    stubFor(
+      post(urlMatching(s"/tax-enrolments/users/$userId/enrolments/$enrolmentKey"))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
         )
     )
 

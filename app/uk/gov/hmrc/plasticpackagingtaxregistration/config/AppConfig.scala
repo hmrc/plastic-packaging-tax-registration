@@ -54,6 +54,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def getTaxEnrolmentsSubscriberUrl(formBundleId: String) =
     s"$taxEnrolmentsHost/tax-enrolments/subscriptions/$formBundleId/subscriber"
 
+  def getTaxEnrolmentsAssignUserToEnrolmentUrl(userId: String, enrolmentKey: String) =
+    s"$taxEnrolmentsHost/tax-enrolments/users/$userId/enrolments/$enrolmentKey"
+
   lazy val enrolmentStoreProxyE20Url =
     s"$enrolmentStoreProxyHost/enrolment-store-proxy/enrolment-store/enrolments"
 
