@@ -32,16 +32,28 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationSe
 
 import scala.concurrent.{ExecutionContext, Future}
 
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+
 trait AuthTestSupport extends MockitoSugar {
 
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
   lazy val mockLogger: Logger               = mock[Logger]
 
-  val userInternalId = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
+  val userInternalId      = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
+  val userGroupIdentifier = "testGroupId-419b91bc-8f97-4b5e-85ef-d58d4cfd4bb8"
 
-  def withAuthorizedUser(user: SignedInUser = newUser()): Unit =
-    when(mockAuthConnector.authorise(any(), ArgumentMatchers.eq(internalId))(any(), any()))
-      .thenReturn(Future.successful(user.internalId))
+  def withAuthorizedUser(
+    user: SignedInUser = newUser(),
+    userGroup: Option[String] = Some(userGroupIdentifier)
+  ): Unit =
+    when(
+      mockAuthConnector.authorise(any(), ArgumentMatchers.eq(internalId and groupIdentifier))(any(),
+                                                                                              any()
+      )
+    )
+      .thenReturn(Future.successful(new ~(user.internalId, userGroup)))
 
   def withUnauthorizedUser(error: Throwable): Unit =
     when(mockAuthConnector.authorise(any(), any())(any(), any())).thenReturn(Future.failed(error))

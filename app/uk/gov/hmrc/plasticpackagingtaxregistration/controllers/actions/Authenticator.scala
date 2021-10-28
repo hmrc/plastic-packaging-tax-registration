@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions
 
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -51,9 +52,9 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
     bodyParser: BodyParser[A]
   )(body: AuthorizedRequest[A] => Future[Result]): Action[A] =
     Action.async(bodyParser) { implicit request =>
-      authorisedWithInternalId.flatMap {
+      authorisedWithInternalIdAndGroupIdentifier.flatMap {
         case Right(authorisedRequest) =>
-          logger.info(s"Authorised request for ${authorisedRequest.registrationId}")
+          logger.info(s"Authorised request for ${authorisedRequest.userId}")
           body(authorisedRequest)
         case Left(error) =>
           logger.error(s"Problems with Authorisation: ${error.message}")
@@ -61,16 +62,17 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
       }
     }
 
-  def authorisedWithInternalId[A](implicit
+  def authorisedWithInternalIdAndGroupIdentifier[A](implicit
     hc: HeaderCarrier,
     request: Request[A]
   ): Future[Either[ErrorResponse, AuthorizedRequest[A]]] =
-    authorised().retrieve(internalId) {
-      case None =>
-        val msg = "Unauthorised access. User without an HMRC Internal Id."
+    authorised().retrieve(internalId and groupIdentifier) {
+      case Some(internalId) ~ Some(groupIdentifier) =>
+        Future.successful(Right(AuthorizedRequest(internalId, groupIdentifier, request)))
+      case _ =>
+        val msg = "Unauthorised access. User without an HMRC Internal Id and/or Group Identifier"
         logger.error(msg)
         Future.successful(Left(ErrorResponse(UNAUTHORIZED, msg)))
-      case Some(id) => Future.successful(Right(AuthorizedRequest(id, request)))
     } recover {
       case error: AuthorisationException =>
         logger.error(s"Unauthorised Exception for ${request.uri} with error ${error.reason}")
@@ -83,5 +85,5 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
 
 }
 
-case class AuthorizedRequest[A](registrationId: String, request: Request[A])
+case class AuthorizedRequest[A](userId: String, groupId: String, request: Request[A])
     extends WrappedRequest[A](request)

@@ -71,7 +71,7 @@ class SubscriptionController @Inject() (
   def submit(safeId: String): Action[RegistrationRequest] =
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
-        val pptRegistration = request.body.toRegistration(request.registrationId)
+        val pptRegistration = request.body.toRegistration(request.userId)
         val pptSubscription = Subscription(pptRegistration)
         logPayload(s"PPT Subscription Create request for safeId $safeId ", pptSubscription)
 
@@ -88,7 +88,7 @@ class SubscriptionController @Inject() (
               for {
                 enrolmentResponse <- enrolUser(pptReferenceNumber, safeId, formBundleNumber)
                 nrsResponse       <- notifyNRS(request, pptRegistration, subscriptionResponse)
-                _                 <- deleteRegistration(request.registrationId)
+                _                 <- deleteRegistration(request.userId)
               } yield Ok(
                 SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
                   pptReference = pptReferenceNumber,
