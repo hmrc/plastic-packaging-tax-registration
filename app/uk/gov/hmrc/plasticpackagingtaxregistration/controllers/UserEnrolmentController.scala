@@ -22,12 +22,10 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode.EnrolmentFailedCode
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
   EnrolmentFailedCode,
   UserEnrolmentFailedResponse,
   UserEnrolmentRequest,
-  UserEnrolmentResponse,
   UserEnrolmentSuccessResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
@@ -66,7 +64,7 @@ class UserEnrolmentController @Inject() (
           case _ =>
             BadRequest(
               UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference,
-                                          EnrolmentFailedCode.Missing
+                                          EnrolmentFailedCode.VerificationMissing
               )
             )
         }
