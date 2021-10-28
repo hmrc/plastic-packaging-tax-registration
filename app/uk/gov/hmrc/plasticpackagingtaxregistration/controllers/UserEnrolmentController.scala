@@ -61,9 +61,9 @@ class UserEnrolmentController @Inject() (
         def successResult() =
           Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
 
-        checkVerifiers(userEnrolmentRequest) flatMap {
+        getVerifiersErrors(userEnrolmentRequest) flatMap {
           case None =>
-            checkGroupsWithEnrolment(userEnrolmentRequest.pptReference).map {
+            getGroupsWithEnrolmentErrors(userEnrolmentRequest.pptReference).map {
               case None             => successResult()
               case Some(failedCode) => failedResult(failedCode)
             }
@@ -72,7 +72,7 @@ class UserEnrolmentController @Inject() (
 
     }
 
-  private def checkVerifiers(
+  private def getVerifiersErrors(
     request: UserEnrolmentRequest
   )(implicit hc: HeaderCarrier): Future[Option[EnrolmentFailedCode]] =
     enrolmentStoreProxyConnector.queryKnownFacts(request).map {
@@ -81,7 +81,7 @@ class UserEnrolmentController @Inject() (
       case _                                                                          => Some(EnrolmentFailedCode.VerificationMissing)
     }
 
-  private def checkGroupsWithEnrolment(
+  private def getGroupsWithEnrolmentErrors(
     pptReference: String
   )(implicit request: AuthorizedRequest[_]): Future[Option[EnrolmentFailedCode]] =
     enrolmentStoreProxyConnector.queryGroupsWithEnrolment(pptReference).map {
