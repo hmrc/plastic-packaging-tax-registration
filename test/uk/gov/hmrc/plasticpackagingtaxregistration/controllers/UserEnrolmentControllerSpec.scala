@@ -39,7 +39,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
     super.beforeEach()
 
     when(mockEnrolmentStoreProxyConnector.queryKnownFacts(any())(any())).thenReturn(
-      Future.successful(queryKnownFactsResponse(knownPptReference))
+      Future.successful(Some(queryKnownFactsResponse(knownPptReference)))
     )
   }
 
@@ -63,7 +63,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
     }
 
     "return 400" when {
-      "enrolment fails" in {
+      "verification fails" in {
         withAuthorizedUser()
         val userEnrolment = Json.obj("pptReference" -> unknownPptReference,
                                      "registrationDate" -> "2021-10-09",
@@ -76,6 +76,27 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("pptReference" -> unknownPptReference,
                                               "failureCode"  -> "VerificationFailed"
+        )
+      }
+
+      "no known facts returned" in {
+        withAuthorizedUser()
+
+        when(mockEnrolmentStoreProxyConnector.queryKnownFacts(any())(any())).thenReturn(
+          Future.successful(None)
+        )
+
+        val userEnrolment = Json.obj("pptReference" -> unknownPptReference,
+                                     "registrationDate" -> "2021-10-09",
+                                     "postcode"         -> "AB1 2CD"
+        )
+
+        val result: Future[Result] =
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
+
+        status(result) must be(BAD_REQUEST)
+        contentAsJson(result) mustBe Json.obj("pptReference" -> unknownPptReference,
+                                              "failureCode"  -> "VerificationMissing"
         )
       }
 

@@ -44,45 +44,58 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
         UserEnrolmentRequest("XYPPT0000000283", LocalDate.parse("2021-10-01"))
 
       "user supplies all known facts" in {
-        mockSuccessfulKnownFactQuery(enrolmentStoreProxyAllFactsRequest,
-                                     enrolmentStoreProxyResponse
+        mockSuccessfulKnownFactResponse(enrolmentStoreProxyAllFactsRequest,
+                                        enrolmentStoreProxyResponse
         )
 
         val knownFactsResponse =
           await(enrolmentStoreProxyConnector.queryKnownFacts(allFactsUserEnrolmentRequest))
 
-        knownFactsResponse.pptEnrolmentReferences mustBe Seq("XYPPT0000000283")
+        knownFactsResponse.map(_.pptEnrolmentReferences) mustBe Some(Seq("XYPPT0000000283"))
         getTimer(KnownFactsTimerTag).getCount mustBe 1
       }
 
       "user supplies minimal known facts" in {
-        mockSuccessfulKnownFactQuery(enrolmentStoreProxyMinimumFactsRequest,
-                                     enrolmentStoreProxyResponse
+        mockSuccessfulKnownFactResponse(enrolmentStoreProxyMinimumFactsRequest,
+                                        enrolmentStoreProxyResponse
         )
 
         val knownFactsResponse =
           await(enrolmentStoreProxyConnector.queryKnownFacts(minimumFactsUserEnrolmentRequest))
 
-        knownFactsResponse.pptEnrolmentReferences mustBe Seq("XYPPT0000000283")
+        knownFactsResponse.map(_.pptEnrolmentReferences) mustBe Some(Seq("XYPPT0000000283"))
         getTimer(KnownFactsTimerTag).getCount mustBe 1
       }
 
       "enrolment store proxy responds with no enrolments" in {
-        mockSuccessfulKnownFactQuery(enrolmentStoreProxyAllFactsRequest,
-                                     enrolmentStoreProxyEmptyResponse
+        mockSuccessfulKnownFactResponse(enrolmentStoreProxyAllFactsRequest,
+                                        enrolmentStoreProxyEmptyResponse
         )
 
         val knownFactsResponse =
           await(enrolmentStoreProxyConnector.queryKnownFacts(allFactsUserEnrolmentRequest))
 
-        knownFactsResponse.pptEnrolmentReferences mustBe Seq.empty
+        knownFactsResponse.map(_.pptEnrolmentReferences) mustBe Some(Seq.empty)
+        getTimer(KnownFactsTimerTag).getCount mustBe 1
+      }
+
+      "enrolment store proxy responds with no facts" in {
+        mockNoKnownFactsResponse(enrolmentStoreProxyAllFactsRequest)
+
+        val knownFactsResponse =
+          await(enrolmentStoreProxyConnector.queryKnownFacts(allFactsUserEnrolmentRequest))
+
+        knownFactsResponse mustBe None
         getTimer(KnownFactsTimerTag).getCount mustBe 1
       }
     }
 
   }
 
-  private def mockSuccessfulKnownFactQuery(requestJson: String, responseJson: String): StubMapping =
+  private def mockSuccessfulKnownFactResponse(
+    requestJson: String,
+    responseJson: String
+  ): StubMapping =
     stubFor(
       post(urlMatching("/enrolment-store-proxy/enrolment-store/enrolments"))
         .withRequestBody(equalToJson(requestJson))
@@ -90,6 +103,16 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
           aResponse()
             .withStatus(Status.OK)
             .withBody(responseJson)
+        )
+    )
+
+  private def mockNoKnownFactsResponse(requestJson: String): StubMapping =
+    stubFor(
+      post(urlMatching("/enrolment-store-proxy/enrolment-store/enrolments"))
+        .withRequestBody(equalToJson(requestJson))
+        .willReturn(
+          aResponse()
+            .withStatus(Status.NO_CONTENT)
         )
     )
 

@@ -51,9 +51,9 @@ class UserEnrolmentController @Inject() (
         logPayload("PPT User Enrol request", userEnrolmentRequest)
 
         enrolmentStoreProxyConnector.queryKnownFacts(userEnrolmentRequest).map {
-          knownFacts =>
+          case Some(facts) =>
             // TODO - perform group checks and make the actual enrolment call
-            if (knownFacts.pptEnrolmentReferences.contains(userEnrolmentRequest.pptReference))
+            if (facts.pptEnrolmentReferences.contains(userEnrolmentRequest.pptReference))
               Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
             else
               BadRequest(
@@ -61,9 +61,13 @@ class UserEnrolmentController @Inject() (
                                             EnrolmentFailedCode.VerificationFailed
                 )
               )
-
+          case _ =>
+            BadRequest(
+              UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference,
+                                          EnrolmentFailedCode.VerificationMissing
+              )
+            )
         }
-
     }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {

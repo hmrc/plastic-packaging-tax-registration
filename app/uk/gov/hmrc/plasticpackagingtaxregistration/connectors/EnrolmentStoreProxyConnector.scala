@@ -40,10 +40,10 @@ class EnrolmentStoreProxyConnector @Inject() (
   /** ES20 **/
   def queryKnownFacts(
     userEnrolment: UserEnrolmentRequest
-  )(implicit hc: HeaderCarrier): Future[QueryKnownFactsResponse] = {
+  )(implicit hc: HeaderCarrier): Future[Option[QueryKnownFactsResponse]] = {
     val timer = metrics.defaultRegistry.timer(KnownFactsTimerTag).time()
 
-    httpClient.POST[QueryKnownFactsRequest, QueryKnownFactsResponse](
+    httpClient.POST[QueryKnownFactsRequest, Option[QueryKnownFactsResponse]](
       url = config.enrolmentStoreProxyE20Url,
       body = QueryKnownFactsRequest(userEnrolment)
     ).andThen { case _ => timer.stop() }
