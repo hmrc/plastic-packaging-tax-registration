@@ -26,6 +26,7 @@ import play.api.test.Helpers.{contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.UserEnrolmentData
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 
 import scala.concurrent.Future
 
@@ -40,6 +41,10 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
 
     when(mockEnrolmentStoreProxyConnector.queryKnownFacts(any())(any())).thenReturn(
       Future.successful(Some(queryKnownFactsResponse(knownPptReference)))
+    )
+
+    when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
+      Future.successful(None)
     )
   }
 
@@ -97,6 +102,27 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("pptReference" -> unknownPptReference,
                                               "failureCode"  -> "VerificationMissing"
+        )
+      }
+
+      "groups exist with enrolment" in {
+        withAuthorizedUser()
+
+        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
+          Future.successful(Some(GroupsWithEnrolmentsResponse(Some(Seq("some-group-id")), None)))
+        )
+
+        val userEnrolment = Json.obj("pptReference" -> knownPptReference,
+                                     "registrationDate" -> "2021-10-09",
+                                     "postcode"         -> "AB1 2CD"
+        )
+
+        val result: Future[Result] =
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
+
+        status(result) must be(BAD_REQUEST)
+        contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference,
+                                              "failureCode"  -> "GroupEnrolled"
         )
       }
 

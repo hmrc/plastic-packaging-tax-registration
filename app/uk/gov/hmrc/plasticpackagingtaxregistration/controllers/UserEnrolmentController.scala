@@ -21,18 +21,23 @@ import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode.EnrolmentFailedCode
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
   EnrolmentFailedCode,
   UserEnrolmentFailedResponse,
   UserEnrolmentRequest,
   UserEnrolmentSuccessResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
+import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{
+  Authenticator,
+  AuthorizedRequest
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UserEnrolmentController @Inject() (
@@ -50,24 +55,40 @@ class UserEnrolmentController @Inject() (
         val userEnrolmentRequest = request.body
         logPayload("PPT User Enrol request", userEnrolmentRequest)
 
-        enrolmentStoreProxyConnector.queryKnownFacts(userEnrolmentRequest).map {
-          case Some(facts) =>
-            // TODO - perform group checks and make the actual enrolment call
-            if (facts.pptEnrolmentReferences.contains(userEnrolmentRequest.pptReference))
-              Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
-            else
-              BadRequest(
-                UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference,
-                                            EnrolmentFailedCode.VerificationFailed
-                )
-              )
-          case _ =>
-            BadRequest(
-              UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference,
-                                          EnrolmentFailedCode.VerificationMissing
-              )
-            )
+        def failedResult(code: EnrolmentFailedCode) =
+          BadRequest(UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference, code))
+
+        def successResult() =
+          Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
+
+        checkVerifiers(userEnrolmentRequest) flatMap {
+          case None =>
+            checkGroupsWithEnrolment(userEnrolmentRequest.pptReference).map {
+              case None             => successResult()
+              case Some(failedCode) => failedResult(failedCode)
+            }
+          case Some(failedCode) => Future.successful(failedResult(failedCode))
         }
+
+    }
+
+  private def checkVerifiers(
+    request: UserEnrolmentRequest
+  )(implicit hc: HeaderCarrier): Future[Option[EnrolmentFailedCode]] =
+    enrolmentStoreProxyConnector.queryKnownFacts(request).map {
+      case Some(facts) if facts.pptEnrolmentReferences.contains(request.pptReference) => None
+      case Some(_)                                                                    => Some(EnrolmentFailedCode.VerificationFailed)
+      case _                                                                          => Some(EnrolmentFailedCode.VerificationMissing)
+    }
+
+  private def checkGroupsWithEnrolment(
+    pptReference: String
+  )(implicit request: AuthorizedRequest[_]): Future[Option[EnrolmentFailedCode]] =
+    enrolmentStoreProxyConnector.queryGroupsWithEnrolment(pptReference).map {
+      case Some(groups) =>
+        // TODO - check if user group is in the list returned
+        Some(EnrolmentFailedCode.GroupEnrolled)
+      case _ => None
     }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
