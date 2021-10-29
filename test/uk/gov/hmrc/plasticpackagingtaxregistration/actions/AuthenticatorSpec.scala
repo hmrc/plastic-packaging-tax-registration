@@ -69,15 +69,23 @@ class AuthenticatorSpec
 
         result.left.value.statusCode mustBe UNAUTHORIZED
       }
+      "user credentials not available" in {
+        withAuthorizedUser(newUser(), userCredentials = None)
+
+        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier(hc, request))
+
+        result.left.value.statusCode mustBe UNAUTHORIZED
+      }
     }
 
     "return 200" when {
-      "internalId and group identifier is available" in {
+      "internalId, credentials and group identifier is available" in {
         withAuthorizedUser(newUser())
 
         val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier(hc, request))
 
-        result.value.userId mustBe userInternalId
+        result.value.registrationId mustBe userInternalId
+        result.value.userId mustBe userCredentialsId
         result.value.groupId mustBe userGroupIdentifier
       }
     }
