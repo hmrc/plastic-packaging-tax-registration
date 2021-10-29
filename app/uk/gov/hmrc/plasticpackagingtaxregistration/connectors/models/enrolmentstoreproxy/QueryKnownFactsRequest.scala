@@ -16,28 +16,22 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy
 
-import java.time.format.DateTimeFormatter
-
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.UserEnrolmentRequest
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.KeyValue._
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue._
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
+  KnownFacts,
+  UserEnrolmentRequest
+}
 
 case class QueryKnownFactsRequest(service: String, knownFacts: Seq[KeyValue])
 
 object QueryKnownFactsRequest {
   implicit val format: OFormat[QueryKnownFactsRequest] = Json.format[QueryKnownFactsRequest]
 
-  private val registrationDateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-
   def apply(userEnrolment: UserEnrolmentRequest): QueryKnownFactsRequest =
     new QueryKnownFactsRequest(service = pptServiceName,
-                               knownFacts = Seq(
-                                 KeyValue(
-                                   registrationDateKey,
-                                   userEnrolment.registrationDate.format(registrationDateFormatter)
-                                 ),
-                                 KeyValue(postcodeKey, userEnrolment.postcode.getOrElse(""))
-                               ).filterNot(_.value.isEmpty)
+                               knownFacts = KnownFacts.from(userEnrolment)
     )
 
 }

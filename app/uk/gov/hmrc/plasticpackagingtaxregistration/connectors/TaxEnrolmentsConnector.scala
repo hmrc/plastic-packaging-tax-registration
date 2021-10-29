@@ -29,11 +29,17 @@ import uk.gov.hmrc.http.{
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
-  AssignEnrolmentTimerTag,
+  AssignEnrolmentToGroupTimerTag,
+  AssignEnrolmentToUserTimerTag,
   SubscriberTimerTag
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentKey
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.KeyValue.pptServiceName
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue.pptServiceName
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
+  EnrolmentKey,
+  KnownFacts,
+  UserEnrolmentRequest
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.taxenrolments.GroupEnrolment
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.routes
 
@@ -47,9 +53,12 @@ class TaxEnrolmentsConnector @Inject() (
 )(implicit ec: ExecutionContext)
     extends HttpReadsHttpResponse {
 
+  /** Async ROSM "Subscriber" call **/
   def submitEnrolment(pptReference: String, safeId: String, formBundleId: String)(implicit
     hc: HeaderCarrier
   ): Future[TaxEnrolmentsResponse] = {
+    def taxEnrolmentsCallbackUrl(pptReference: String): String =
+      s"${config.selfHost}${routes.TaxEnrolmentsController.callback(pptReference).url}"
     val timer = metrics.defaultRegistry.timer(SubscriberTimerTag).time()
     val enrolmentRequestBody =
       Json.obj("serviceName" -> pptServiceName,
@@ -58,17 +67,19 @@ class TaxEnrolmentsConnector @Inject() (
       )
 
     httpClient.PUT[JsObject, TaxEnrolmentsResponse](
-      url = config.getTaxEnrolmentsSubscriberUrl(formBundleId),
+      url = config.taxEnrolmentsSubscriptionsSubscriberUrl(formBundleId),
       body = enrolmentRequestBody
     ).andThen { case _ => timer.stop() }
   }
 
+  /** ES11 **/
   def assignEnrolmentToUser(userId: String, pptReference: String)(implicit
     hc: HeaderCarrier
   ): Future[Unit] = {
-    val timer = metrics.defaultRegistry.timer(AssignEnrolmentTimerTag).time()
+    val timer = metrics.defaultRegistry.timer(AssignEnrolmentToUserTimerTag).time()
+
     httpClient.POSTEmpty[HttpResponse](url =
-      config.getTaxEnrolmentsAssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference))
+      config.taxEnrolmentsES11AssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference))
     ).map { resp =>
       resp.status match {
         case Status.CREATED => // Do nothing - return without exception
@@ -78,12 +89,37 @@ class TaxEnrolmentsConnector @Inject() (
     }.andThen { case _ => timer.stop() }
   }
 
-  private def taxEnrolmentsCallbackUrl(pptReference: String): String =
-    s"${config.selfHost}${routes.TaxEnrolmentsController.callback(pptReference).url}"
+  /** ES8 **/
+  def assignEnrolmentToGroup(
+    userId: String,
+    groupId: String,
+    userEnrolmentRequest: UserEnrolmentRequest
+  )(implicit hc: HeaderCarrier): Future[Unit] = {
+    val timer = metrics.defaultRegistry.timer(AssignEnrolmentToGroupTimerTag).time()
+
+    val body =
+      GroupEnrolment(userId = userId, verifiers = KnownFacts.from(userEnrolmentRequest))
+
+    httpClient.POST[GroupEnrolment, HttpResponse](
+      url = config.taxEnrolmentsES8AssignUserToGroupUrl(
+        groupId,
+        EnrolmentKey.create(userEnrolmentRequest.pptReference)
+      ),
+      body = body
+    ).map { resp =>
+      resp.status match {
+        case Status.CREATED => // Do nothing - return without exception
+        case otherStatus =>
+          throw UpstreamErrorResponse("Enrolment to group failed", otherStatus)
+      }
+    }.andThen { case _ => timer.stop() }
+
+  }
 
 }
 
 object TaxEnrolmentsConnector {
-  val SubscriberTimerTag      = "ppt.tax-enrolments.subscriber.timer"
-  val AssignEnrolmentTimerTag = "ppt.tax-enrolments.assign-enrolment.timer"
+  val SubscriberTimerTag             = "ppt.tax-enrolments.subscriber.timer"
+  val AssignEnrolmentToUserTimerTag  = "ppt.tax-enrolments.assign-enrolment-user.timer"
+  val AssignEnrolmentToGroupTimerTag = "ppt.tax-enrolments.assign-enrolment-group.timer"
 }

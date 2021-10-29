@@ -21,6 +21,7 @@ import java.time.LocalDate
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.UserEnrolmentData
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
 
 class QueryKnownFactsRequestSpec extends AnyWordSpec with Matchers with UserEnrolmentData {
 

@@ -34,10 +34,11 @@ object UserEnrolmentSuccessResponse {
 
 object EnrolmentFailedCode extends Enumeration {
   type EnrolmentFailedCode = Value
-  val Failed: Value              = Value
-  val VerificationMissing: Value = Value
-  val VerificationFailed: Value  = Value
-  val GroupEnrolled: Value       = Value
+  val Failed: Value               = Value
+  val VerificationMissing: Value  = Value
+  val VerificationFailed: Value   = Value
+  val GroupEnrolled: Value        = Value
+  val GroupEnrolmentFailed: Value = Value
 
   implicit val format: Format[EnrolmentFailedCode] =
     Format(Reads.enumNameReads(EnrolmentFailedCode), Writes.enumNameWrites)

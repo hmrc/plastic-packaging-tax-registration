@@ -22,13 +22,16 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode.EnrolmentFailedCode
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
   EnrolmentFailedCode,
   UserEnrolmentFailedResponse,
   UserEnrolmentRequest,
   UserEnrolmentSuccessResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  EnrolmentStoreProxyConnector,
+  TaxEnrolmentsConnector
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{
   Authenticator,
@@ -44,7 +47,8 @@ import scala.util.{Failure, Success, Try}
 class UserEnrolmentController @Inject() (
   authenticator: Authenticator,
   override val controllerComponents: ControllerComponents,
-  enrolmentStoreProxyConnector: EnrolmentStoreProxyConnector
+  enrolmentStoreProxyConnector: EnrolmentStoreProxyConnector,
+  taxEnrolmentsConnector: TaxEnrolmentsConnector
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
 
@@ -56,21 +60,29 @@ class UserEnrolmentController @Inject() (
         val userEnrolmentRequest = request.body
         logPayload("PPT User Enrol request", userEnrolmentRequest)
 
-        def failedResult(code: EnrolmentFailedCode) =
+        def failedResult(code: EnrolmentFailedCode) = {
+          logger.warn(s"Enrol failed [$code]")
           BadRequest(UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference, code))
+        }
 
         def successResult() =
           Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
 
         findEnrolment(userEnrolmentRequest).flatMap {
           case Success(_) =>
-            getGroupsWithEnrolment(userEnrolmentRequest.pptReference).map { groupIds =>
+            getGroupsWithEnrolment(userEnrolmentRequest.pptReference).flatMap { groupIds =>
               if (groupIds.isEmpty)
-                // TODO: create new assignment using current user group
-                successResult()
+                taxEnrolmentsConnector.assignEnrolmentToGroup(request.userId,
+                                                              request.groupId,
+                                                              userEnrolmentRequest
+                ).map(_ => successResult()).recover {
+                  case e =>
+                    logger.warn(s"Assign enrolment to group failed - ${e.getMessage}")
+                    failedResult(EnrolmentFailedCode.GroupEnrolmentFailed)
+                }
               else
                 // TODO: check whether user in same group
-                failedResult(EnrolmentFailedCode.GroupEnrolled)
+                Future.successful(failedResult(EnrolmentFailedCode.GroupEnrolled))
             }
           case Failure(e: FindEnrolmentFailure) => Future.successful(failedResult(e.failureCode))
           case Failure(_)                       => Future.successful(failedResult(EnrolmentFailedCode.Failed))

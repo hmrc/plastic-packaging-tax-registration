@@ -51,16 +51,19 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   lazy val nonRepudiationApiKey: String =
     servicesConfig.getString("microservice.services.nrs.api-key")
 
-  def getTaxEnrolmentsSubscriberUrl(formBundleId: String) =
+  def taxEnrolmentsSubscriptionsSubscriberUrl(formBundleId: String) =
     s"$taxEnrolmentsHost/tax-enrolments/subscriptions/$formBundleId/subscriber"
 
-  def getTaxEnrolmentsAssignUserToEnrolmentUrl(userId: String, enrolmentKey: String) =
+  def taxEnrolmentsES8AssignUserToGroupUrl(groupId: String, enrolmentKey: String) =
+    s"$taxEnrolmentsHost/tax-enrolments/groups/$groupId/enrolments/$enrolmentKey"
+
+  def taxEnrolmentsES11AssignUserToEnrolmentUrl(userId: String, enrolmentKey: String) =
     s"$taxEnrolmentsHost/tax-enrolments/users/$userId/enrolments/$enrolmentKey"
 
-  lazy val enrolmentStoreProxyES20Url =
+  lazy val enrolmentStoreProxyES20QueryKnownFactsUrl =
     s"$enrolmentStoreProxyHost/enrolment-store-proxy/enrolment-store/enrolments"
 
-  def enrolmentStoreProxyES1Url(enrolmentKey: String) =
+  def enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(enrolmentKey: String) =
     s"$enrolmentStoreProxyHost/enrolment-store-proxy/enrolment-store/enrolments/$enrolmentKey/groups"
 
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")

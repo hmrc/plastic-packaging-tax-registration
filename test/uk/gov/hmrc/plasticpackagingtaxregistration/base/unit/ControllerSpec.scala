@@ -62,7 +62,7 @@ trait ControllerSpec
                bind[NonRepudiationConnector].to(mockNonRepudiationConnector),
                bind[RegistrationRepository].to(mockRepository),
                bind[NonRepudiationService].to(mockNonRepudiationService),
-               bind[TaxEnrolmentsConnector].to(mockEnrolmentConnector),
+               bind[TaxEnrolmentsConnector].to(mockTaxEnrolmentsConnector),
                bind[EnrolmentStoreProxyConnector].to(mockEnrolmentStoreProxyConnector)
     )
     .build()

@@ -51,7 +51,7 @@ class EnrolmentStoreProxyConnector @Inject() (
     val timer = metrics.defaultRegistry.timer(GroupsWithEnrolmentsTimerTag).time()
 
     httpClient.GET[Option[GroupsWithEnrolmentsResponse]](url =
-      config.enrolmentStoreProxyES1Url(EnrolmentKey.create(pptReference))
+      config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference))
     ).andThen { case _ => timer.stop() }
   }
 
@@ -62,7 +62,7 @@ class EnrolmentStoreProxyConnector @Inject() (
     val timer = metrics.defaultRegistry.timer(KnownFactsTimerTag).time()
 
     httpClient.POST[QueryKnownFactsRequest, Option[QueryKnownFactsResponse]](
-      url = config.enrolmentStoreProxyES20Url,
+      url = config.enrolmentStoreProxyES20QueryKnownFactsUrl,
       body = QueryKnownFactsRequest(userEnrolment)
     ).andThen { case _ => timer.stop() }
   }

@@ -16,12 +16,24 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment
 
+import java.time.format.DateTimeFormatter
+
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue.{
-  etmpPptReferenceKey,
-  pptServiceName
+  postcodeKey,
+  registrationDateKey
 }
 
-object EnrolmentKey {
-  def create(pptReference: String) = s"$pptServiceName~$etmpPptReferenceKey~$pptReference"
+object KnownFacts {
+
+  private val registrationDateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+
+  def from(userEnrolmentRequest: UserEnrolmentRequest): Seq[KeyValue] =
+    Seq(
+      KeyValue(registrationDateKey,
+               userEnrolmentRequest.registrationDate.format(registrationDateFormatter)
+      ),
+      KeyValue(postcodeKey, userEnrolmentRequest.postcode.getOrElse(""))
+    ).filterNot(_.value.isEmpty)
 
 }

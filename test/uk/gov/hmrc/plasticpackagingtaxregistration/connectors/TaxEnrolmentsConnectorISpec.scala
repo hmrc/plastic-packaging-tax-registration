@@ -25,12 +25,14 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.UserEnrolmentData
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
-  AssignEnrolmentTimerTag,
+  AssignEnrolmentToGroupTimerTag,
+  AssignEnrolmentToUserTimerTag,
   SubscriberTimerTag
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.KeyValue.{
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue.{
   etmpPptReferenceKey,
   pptServiceName
 }
@@ -40,7 +42,8 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolme
 }
 
 class TaxEnrolmentsConnectorISpec
-    extends ConnectorISpec with Injector with ScalaFutures with TableDrivenPropertyChecks {
+    extends ConnectorISpec with Injector with ScalaFutures with TableDrivenPropertyChecks
+    with UserEnrolmentData {
 
   private val enrolmentConnector = app.injector.instanceOf[TaxEnrolmentsConnector]
 
@@ -86,7 +89,7 @@ class TaxEnrolmentsConnectorISpec
 
         await(enrolmentConnector.assignEnrolmentToUser(userId, pptReference))
 
-        getTimer(AssignEnrolmentTimerTag).getCount mustBe 1
+        getTimer(AssignEnrolmentToUserTimerTag).getCount mustBe 1
       }
 
       "throw UpstreamErrorResponse when tax-enrolments returns something other than 201 CREATED" in {
@@ -106,7 +109,43 @@ class TaxEnrolmentsConnectorISpec
             await(enrolmentConnector.assignEnrolmentToUser(userId, pptReference))
           }
         }
-        getTimer(AssignEnrolmentTimerTag).getCount mustBe failureStatuses.size
+        getTimer(AssignEnrolmentToUserTimerTag).getCount mustBe failureStatuses.size
+      }
+    }
+
+    "allocate enrolment to group" should {
+      val userId           = "user123"
+      val groupId          = "group123"
+      val enrolmentRequest = userEnrolmentRequest.copy(pptReference = pptReference)
+      val enrolmentKey     = s"$pptServiceName~$etmpPptReferenceKey~$pptReference"
+
+      "succeed when tax-enrolments returns a 201 CREATED" in {
+
+        mockSuccessfulAllocateEnrolmentToGroup(groupId, enrolmentKey)
+
+        await(enrolmentConnector.assignEnrolmentToGroup(userId, groupId, enrolmentRequest))
+
+        getTimer(AssignEnrolmentToGroupTimerTag).getCount mustBe 1
+      }
+
+      "throw UpstreamErrorResponse when tax-enrolments returns something other than 201 CREATED" in {
+        val enrolmentKey = s"$pptServiceName~$etmpPptReferenceKey~$pptReference"
+
+        val failureStatuses = Table("status",
+                                    Status.UNAUTHORIZED,
+                                    Status.NOT_FOUND,
+                                    Status.FORBIDDEN,
+                                    Status.BAD_REQUEST
+        )
+
+        forAll(failureStatuses) { failureStatus =>
+          mockFailedAllocateEnrolmentToGroup(groupId, enrolmentKey, failureStatus)
+
+          intercept[UpstreamErrorResponse] {
+            await(enrolmentConnector.assignEnrolmentToGroup(userId, groupId, enrolmentRequest))
+          }
+        }
+        getTimer(AssignEnrolmentToGroupTimerTag).getCount mustBe failureStatuses.size
       }
     }
   }
@@ -145,6 +184,28 @@ class TaxEnrolmentsConnectorISpec
   private def mockFailedUserEnrolmentAssignment(userId: String, enrolmentKey: String, status: Int) =
     stubFor(
       post(urlMatching(s"/tax-enrolments/users/$userId/enrolments/$enrolmentKey"))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+        )
+    )
+
+  private def mockSuccessfulAllocateEnrolmentToGroup(groupId: String, enrolmentKey: String) =
+    stubFor(
+      post(urlMatching(s"/tax-enrolments/groups/$groupId/enrolments/$enrolmentKey"))
+        .willReturn(
+          aResponse()
+            .withStatus(Status.CREATED)
+        )
+    )
+
+  private def mockFailedAllocateEnrolmentToGroup(
+    groupId: String,
+    enrolmentKey: String,
+    status: Int
+  ) =
+    stubFor(
+      post(urlMatching(s"/tax-enrolments/groups/$groupId/enrolments/$enrolmentKey"))
         .willReturn(
           aResponse()
             .withStatus(status)
