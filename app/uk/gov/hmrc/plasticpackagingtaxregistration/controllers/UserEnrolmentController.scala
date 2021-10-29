@@ -21,7 +21,11 @@ import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
+  AssignEnrolmentToGroupError,
+  AssignEnrolmentToUserError
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode.EnrolmentFailedCode
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
   EnrolmentFailedCode,
@@ -71,25 +75,18 @@ class UserEnrolmentController @Inject() (
         findEnrolment(userEnrolmentRequest).flatMap {
           case Success(_) =>
             getGroupsWithEnrolment(userEnrolmentRequest.pptReference).flatMap { groupIds =>
-              if (groupIds.isEmpty)
-                taxEnrolmentsConnector.assignEnrolmentToGroup(request.userId,
-                                                              request.groupId,
-                                                              userEnrolmentRequest
-                ).map(_ => successResult()).recover {
-                  case e =>
-                    logger.warn(s"Assign enrolment to group failed - ${e.getMessage}")
-                    failedResult(EnrolmentFailedCode.GroupEnrolmentFailed)
-                }
-              else
-                // TODO: check whether user in same group
-                Future.successful(failedResult(EnrolmentFailedCode.GroupEnrolled))
+              assignEnrolment(userEnrolmentRequest, groupIds).map {
+                case Success(_)                   => successResult()
+                case Failure(e: EnrolmentFailure) => failedResult(e.failureCode)
+                case Failure(_)                   => failedResult(EnrolmentFailedCode.Failed)
+              }
             }
-          case Failure(e: FindEnrolmentFailure) => Future.successful(failedResult(e.failureCode))
-          case Failure(_)                       => Future.successful(failedResult(EnrolmentFailedCode.Failed))
+          case Failure(e: EnrolmentFailure) => Future.successful(failedResult(e.failureCode))
+          case Failure(_)                   => Future.successful(failedResult(EnrolmentFailedCode.Failed))
         }
     }
 
-  case class FindEnrolmentFailure(failureCode: EnrolmentFailedCode) extends RuntimeException
+  case class EnrolmentFailure(failureCode: EnrolmentFailedCode) extends RuntimeException
 
   private def findEnrolment(
     request: UserEnrolmentRequest
@@ -97,8 +94,8 @@ class UserEnrolmentController @Inject() (
     enrolmentStoreProxyConnector.queryKnownFacts(request).map {
       case Some(facts) if facts.pptEnrolmentReferences.contains(request.pptReference) =>
         Success(Unit)
-      case Some(_) => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationFailed))
-      case _       => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationMissing))
+      case Some(_) => Failure(EnrolmentFailure(EnrolmentFailedCode.VerificationFailed))
+      case _       => Failure(EnrolmentFailure(EnrolmentFailedCode.VerificationMissing))
     }
 
   private def getGroupsWithEnrolment(
@@ -112,6 +109,32 @@ class UserEnrolmentController @Inject() (
         }
       case None => Seq()
     }
+
+  private def assignEnrolment(
+    userEnrolmentRequest: UserEnrolmentRequest,
+    groupsWithEnrolment: Seq[String]
+  )(implicit request: AuthorizedRequest[_]): Future[Try[Unit]] = {
+    val result: Future[Try[Unit]] =
+      if (groupsWithEnrolment.isEmpty)
+        taxEnrolmentsConnector.assignEnrolmentToGroup(request.userId,
+                                                      request.groupId,
+                                                      userEnrolmentRequest
+        ).map(_ => Success(Unit))
+      else if (groupsWithEnrolment.contains(request.groupId))
+        taxEnrolmentsConnector.assignEnrolmentToUser(request.userId,
+                                                     userEnrolmentRequest.pptReference
+        ).map(_ => Success(Unit))
+      else
+        Future.successful(Failure(EnrolmentFailure(EnrolmentFailedCode.GroupEnrolled)))
+
+    result.recover {
+      case UpstreamErrorResponse(AssignEnrolmentToUserError, _, _, _) =>
+        Failure(EnrolmentFailure(EnrolmentFailedCode.UserEnrolmentFailed))
+      case UpstreamErrorResponse(AssignEnrolmentToGroupError, _, _, _) =>
+        Failure(EnrolmentFailure(EnrolmentFailedCode.GroupEnrolmentFailed))
+      case e => Failure(EnrolmentFailure(EnrolmentFailedCode.Failed))
+    }
+  }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
     logger.debug(s"$prefix payload: ${toJson(payload)}")
