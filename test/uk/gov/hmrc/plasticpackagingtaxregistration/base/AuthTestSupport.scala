@@ -24,17 +24,13 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.Logger
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.internalId
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrieval}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{internalId, _}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrieval, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.SignedInUser
 import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService.NonRepudiationIdentityRetrievals
 
 import scala.concurrent.{ExecutionContext, Future}
-
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 
 trait AuthTestSupport extends MockitoSugar {
 
@@ -43,17 +39,20 @@ trait AuthTestSupport extends MockitoSugar {
 
   val userInternalId      = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
   val userGroupIdentifier = "testGroupId-419b91bc-8f97-4b5e-85ef-d58d4cfd4bb8"
+  val userCredentialsId   = "12342370495723"
 
   def withAuthorizedUser(
     user: SignedInUser = newUser(),
-    userGroup: Option[String] = Some(userGroupIdentifier)
+    userGroup: Option[String] = Some(userGroupIdentifier),
+    userCredentials: Option[Credentials] = Some(Credentials(userCredentialsId, "GovernmentGateway"))
   ): Unit =
     when(
-      mockAuthConnector.authorise(any(), ArgumentMatchers.eq(internalId and groupIdentifier))(any(),
-                                                                                              any()
-      )
+      mockAuthConnector.authorise(
+        any(),
+        ArgumentMatchers.eq(internalId and credentials and groupIdentifier)
+      )(any(), any())
     )
-      .thenReturn(Future.successful(new ~(user.internalId, userGroup)))
+      .thenReturn(Future.successful(new ~(new ~(user.internalId, userCredentials), userGroup)))
 
   def withUnauthorizedUser(error: Throwable): Unit =
     when(mockAuthConnector.authorise(any(), any())(any(), any())).thenReturn(Future.failed(error))

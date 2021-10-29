@@ -54,7 +54,7 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
     Action.async(bodyParser) { implicit request =>
       authorisedWithInternalIdAndGroupIdentifier.flatMap {
         case Right(authorisedRequest) =>
-          logger.info(s"Authorised request for ${authorisedRequest.userId}")
+          logger.info(s"Authorised request for ${authorisedRequest.registrationId}")
           body(authorisedRequest)
         case Left(error) =>
           logger.error(s"Problems with Authorisation: ${error.message}")
@@ -66,9 +66,11 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
     hc: HeaderCarrier,
     request: Request[A]
   ): Future[Either[ErrorResponse, AuthorizedRequest[A]]] =
-    authorised().retrieve(internalId and groupIdentifier) {
-      case Some(internalId) ~ Some(groupIdentifier) =>
-        Future.successful(Right(AuthorizedRequest(internalId, groupIdentifier, request)))
+    authorised().retrieve(internalId and credentials and groupIdentifier) {
+      case Some(internalId) ~ Some(credentials) ~ Some(groupIdentifier) =>
+        Future.successful(
+          Right(AuthorizedRequest(internalId, credentials.providerId, groupIdentifier, request))
+        )
       case _ =>
         val msg = "Unauthorised access. User without an HMRC Internal Id and/or Group Identifier"
         logger.error(msg)
@@ -85,5 +87,9 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
 
 }
 
-case class AuthorizedRequest[A](userId: String, groupId: String, request: Request[A])
-    extends WrappedRequest[A](request)
+case class AuthorizedRequest[A](
+  registrationId: String,
+  userId: String,
+  groupId: String,
+  request: Request[A]
+) extends WrappedRequest[A](request)

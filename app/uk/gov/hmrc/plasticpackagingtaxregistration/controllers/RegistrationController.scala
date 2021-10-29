@@ -50,7 +50,7 @@ class RegistrationController @Inject() (
       implicit request =>
         logPayload("Create Registration Request Received", request.body)
         registrationRepository
-          .create(request.body.toRegistration(request.userId))
+          .create(request.body.toRegistration(request.registrationId))
           .map(logPayload("Create Registration Response", _))
           .map(registration => Created(registration))
     }
@@ -62,7 +62,7 @@ class RegistrationController @Inject() (
         registrationRepository.findByRegistrationId(id).flatMap {
           case Some(_) =>
             registrationRepository
-              .update(request.body.toRegistration(request.userId))
+              .update(request.body.toRegistration(request.registrationId))
               .map(logPayload("Update Registration Response", _))
               .map {
                 case Some(registration) => Ok(registration)
