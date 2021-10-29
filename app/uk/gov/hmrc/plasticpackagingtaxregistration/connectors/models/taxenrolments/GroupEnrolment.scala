@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.taxenrolments
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue.{
-  etmpPptReferenceKey,
-  pptServiceName
-}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
 
-object EnrolmentKey {
-  def create(pptReference: String) = s"$pptServiceName~$etmpPptReferenceKey~$pptReference"
+case class GroupEnrolment(
+  userId: String,
+  friendlyName: String = "PPT Manual Enrolment",
+  `type`: String = "principal",
+  verifiers: Seq[KeyValue]
+)
 
+object GroupEnrolment {
+  implicit val format: OFormat[GroupEnrolment] = Json.format[GroupEnrolment]
 }

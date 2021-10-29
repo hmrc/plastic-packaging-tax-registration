@@ -17,7 +17,8 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.KeyValue.etmpPptReferenceKey
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue.etmpPptReferenceKey
 
 case class Enrolment(identifiers: Seq[KeyValue], verifiers: Seq[KeyValue])
 

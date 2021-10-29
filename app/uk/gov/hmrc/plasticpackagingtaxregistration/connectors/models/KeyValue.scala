@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models
 
 import play.api.libs.json.{Json, OFormat}
 

@@ -52,7 +52,7 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected val mockSubscriptionsConnector: SubscriptionsConnector   = mock[SubscriptionsConnector]
   protected val mockNonRepudiationConnector: NonRepudiationConnector = mock[NonRepudiationConnector]
-  protected val mockEnrolmentConnector: TaxEnrolmentsConnector       = mock[TaxEnrolmentsConnector]
+  protected val mockTaxEnrolmentsConnector: TaxEnrolmentsConnector   = mock[TaxEnrolmentsConnector]
 
   protected val mockEnrolmentStoreProxyConnector: EnrolmentStoreProxyConnector =
     mock[EnrolmentStoreProxyConnector]
@@ -61,7 +61,7 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
     super.beforeEach()
     reset(mockSubscriptionsConnector,
           mockNonRepudiationConnector,
-          mockEnrolmentConnector,
+          mockTaxEnrolmentsConnector,
           mockEnrolmentStoreProxyConnector
     )
   }
@@ -122,19 +122,19 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected def mockEnrolmentSuccess()
     : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
-    when(mockEnrolmentConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
+    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.successful(Right(SuccessfulTaxEnrolment))
     )
 
   protected def mockEnrolmentFailure()
     : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
-    when(mockEnrolmentConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
+    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.successful(Left(FailedTaxEnrolment(1)))
     )
 
   protected def mockEnrolmentFailureException()
     : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
-    when(mockEnrolmentConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
+    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.failed(new IllegalStateException("BANG!"))
     )
 

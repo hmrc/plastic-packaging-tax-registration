@@ -24,6 +24,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.UserEnrolmentData
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
@@ -45,6 +46,10 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
 
     when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
       Future.successful(None)
+    )
+
+    when(mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(any())).thenReturn(
+      Future.successful(())
     )
   }
 
@@ -123,6 +128,27 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference,
                                               "failureCode"  -> "GroupEnrolled"
+        )
+      }
+
+      "assign enrolment to group fails" in {
+        withAuthorizedUser()
+
+        when(
+          mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(any())
+        ).thenReturn(Future.failed(UpstreamErrorResponse("Enrolment to group failed", 404)))
+
+        val userEnrolment = Json.obj("pptReference" -> knownPptReference,
+                                     "registrationDate" -> "2021-10-09",
+                                     "postcode"         -> "AB1 2CD"
+        )
+
+        val result: Future[Result] =
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
+
+        status(result) must be(BAD_REQUEST)
+        contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference,
+                                              "failureCode"  -> "GroupEnrolmentFailed"
         )
       }
 
