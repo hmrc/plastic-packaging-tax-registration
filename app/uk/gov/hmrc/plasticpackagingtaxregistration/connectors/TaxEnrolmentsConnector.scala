@@ -80,7 +80,7 @@ class TaxEnrolmentsConnector @Inject() (
       config.taxEnrolmentsES11AssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference))
     ).map { resp =>
       resp.status match {
-        case Status.CREATED => // Do nothing - return without exception
+        case status if Status.isSuccessful(status) => () // Do nothing - return without exception
         case otherStatus =>
           throw UpstreamErrorResponse(AssignEnrolmentToUserError, otherStatus)
       }
@@ -106,7 +106,7 @@ class TaxEnrolmentsConnector @Inject() (
       body = body
     ).map { resp =>
       resp.status match {
-        case Status.CREATED => // Do nothing - return without exception
+        case status if Status.isSuccessful(status) => () // Do nothing - return without exception
         case otherStatus =>
           throw UpstreamErrorResponse(AssignEnrolmentToGroupError, otherStatus)
       }
