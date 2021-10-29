@@ -73,6 +73,7 @@ class UserEnrolmentController @Inject() (
                 failedResult(EnrolmentFailedCode.GroupEnrolled)
             }
           case Failure(e: FindEnrolmentFailure) => Future.successful(failedResult(e.failureCode))
+          case Failure(_)                       => Future.successful(failedResult(EnrolmentFailedCode.Failed))
         }
     }
 
@@ -82,9 +83,10 @@ class UserEnrolmentController @Inject() (
     request: UserEnrolmentRequest
   )(implicit hc: HeaderCarrier): Future[Try[Unit]] =
     enrolmentStoreProxyConnector.queryKnownFacts(request).map {
-      case Some(facts) if facts.pptEnrolmentReferences.contains(request.pptReference) => Success()
-      case Some(_)                                                                    => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationFailed))
-      case _                                                                          => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationMissing))
+      case Some(facts) if facts.pptEnrolmentReferences.contains(request.pptReference) =>
+        Success(Unit)
+      case Some(_) => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationFailed))
+      case _       => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationMissing))
     }
 
   private def getGroupsWithEnrolment(
