@@ -27,6 +27,11 @@ import uk.gov.hmrc.auth.core.InsufficientEnrolments
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.UserEnrolmentData
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
+  AssignEnrolmentToGroupError,
+  AssignEnrolmentToUserError
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 
 import scala.concurrent.Future
@@ -53,10 +58,13 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
     )
   }
 
+  private def groupsWithEnrolmentResponse(groupId: String) =
+    GroupsWithEnrolmentsResponse(principalGroupIds = Some(Seq(groupId)), delegatedGroupIds = None)
+
   "User Enrolment Controller" should {
 
     "return 201 (Create)" when {
-      "enrolment is successful" in {
+      "no group has enrolment" in {
         withAuthorizedUser()
 
         val userEnrolment = Json.obj("pptReference" -> knownPptReference,
@@ -70,6 +78,30 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
         status(result) must be(CREATED)
         contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference)
       }
+
+      "group has enrolment and user is in same group" in {
+        withAuthorizedUser()
+
+        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
+          Future.successful(Some(groupsWithEnrolmentResponse(userGroupIdentifier)))
+        )
+
+        when(mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(any())).thenReturn(
+          Future.successful(())
+        )
+
+        val userEnrolment = Json.obj("pptReference" -> knownPptReference,
+                                     "registrationDate" -> "2021-10-09",
+                                     "postcode"         -> "AB1 2CD"
+        )
+
+        val result: Future[Result] =
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
+
+        status(result) must be(CREATED)
+        contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference)
+      }
+
     }
 
     "return 400" when {
@@ -85,7 +117,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("pptReference" -> unknownPptReference,
-                                              "failureCode"  -> "VerificationFailed"
+                                              "failureCode"  -> VerificationFailed
         )
       }
 
@@ -96,7 +128,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
           Future.successful(None)
         )
 
-        val userEnrolment = Json.obj("pptReference" -> unknownPptReference,
+        val userEnrolment = Json.obj("pptReference" -> knownPptReference,
                                      "registrationDate" -> "2021-10-09",
                                      "postcode"         -> "AB1 2CD"
         )
@@ -105,16 +137,16 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
           route(app, post.withJsonBody(toJson(userEnrolment))).get
 
         status(result) must be(BAD_REQUEST)
-        contentAsJson(result) mustBe Json.obj("pptReference" -> unknownPptReference,
-                                              "failureCode"  -> "VerificationMissing"
+        contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference,
+                                              "failureCode"  -> VerificationMissing
         )
       }
 
-      "groups exist with enrolment" in {
+      "groups exist with enrolment and user not in group" in {
         withAuthorizedUser()
 
         when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
-          Future.successful(Some(GroupsWithEnrolmentsResponse(Some(Seq("some-group-id")), None)))
+          Future.successful(Some(groupsWithEnrolmentResponse("some-group-id")))
         )
 
         val userEnrolment = Json.obj("pptReference" -> knownPptReference,
@@ -127,7 +159,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference,
-                                              "failureCode"  -> "GroupEnrolled"
+                                              "failureCode"  -> GroupEnrolled
         )
       }
 
@@ -136,7 +168,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
 
         when(
           mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(any())
-        ).thenReturn(Future.failed(UpstreamErrorResponse("Enrolment to group failed", 404)))
+        ).thenReturn(Future.failed(UpstreamErrorResponse(AssignEnrolmentToGroupError, 404)))
 
         val userEnrolment = Json.obj("pptReference" -> knownPptReference,
                                      "registrationDate" -> "2021-10-09",
@@ -148,7 +180,32 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference,
-                                              "failureCode"  -> "GroupEnrolmentFailed"
+                                              "failureCode"  -> GroupEnrolmentFailed
+        )
+      }
+
+      "assign enrolment to user fails" in {
+        withAuthorizedUser()
+
+        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
+          Future.successful(Some(groupsWithEnrolmentResponse(userGroupIdentifier)))
+        )
+
+        when(mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(any())).thenReturn(
+          Future.failed(UpstreamErrorResponse(AssignEnrolmentToUserError, 404))
+        )
+
+        val userEnrolment = Json.obj("pptReference" -> knownPptReference,
+                                     "registrationDate" -> "2021-10-09",
+                                     "postcode"         -> "AB1 2CD"
+        )
+
+        val result: Future[Result] =
+          route(app, post.withJsonBody(toJson(userEnrolment))).get
+
+        status(result) must be(BAD_REQUEST)
+        contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference,
+                                              "failureCode"  -> UserEnrolmentFailed
         )
       }
 

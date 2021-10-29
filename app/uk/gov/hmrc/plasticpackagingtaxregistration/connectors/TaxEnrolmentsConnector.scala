@@ -28,11 +28,7 @@ import uk.gov.hmrc.http.{
   UpstreamErrorResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
-  AssignEnrolmentToGroupTimerTag,
-  AssignEnrolmentToUserTimerTag,
-  SubscriberTimerTag
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue.pptServiceName
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
   EnrolmentKey,
@@ -57,8 +53,10 @@ class TaxEnrolmentsConnector @Inject() (
   def submitEnrolment(pptReference: String, safeId: String, formBundleId: String)(implicit
     hc: HeaderCarrier
   ): Future[TaxEnrolmentsResponse] = {
+
     def taxEnrolmentsCallbackUrl(pptReference: String): String =
       s"${config.selfHost}${routes.TaxEnrolmentsController.callback(pptReference).url}"
+
     val timer = metrics.defaultRegistry.timer(SubscriberTimerTag).time()
     val enrolmentRequestBody =
       Json.obj("serviceName" -> pptServiceName,
@@ -82,9 +80,9 @@ class TaxEnrolmentsConnector @Inject() (
       config.taxEnrolmentsES11AssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference))
     ).map { resp =>
       resp.status match {
-        case Status.CREATED => // Do nothing - return without exception
+        case status if Status.isSuccessful(status) => () // Do nothing - return without exception
         case otherStatus =>
-          throw UpstreamErrorResponse("User enrolment assignment failed", otherStatus)
+          throw UpstreamErrorResponse(AssignEnrolmentToUserError, otherStatus)
       }
     }.andThen { case _ => timer.stop() }
   }
@@ -108,9 +106,9 @@ class TaxEnrolmentsConnector @Inject() (
       body = body
     ).map { resp =>
       resp.status match {
-        case Status.CREATED => // Do nothing - return without exception
+        case status if Status.isSuccessful(status) => () // Do nothing - return without exception
         case otherStatus =>
-          throw UpstreamErrorResponse("Enrolment to group failed", otherStatus)
+          throw UpstreamErrorResponse(AssignEnrolmentToGroupError, otherStatus)
       }
     }.andThen { case _ => timer.stop() }
 
@@ -122,4 +120,7 @@ object TaxEnrolmentsConnector {
   val SubscriberTimerTag             = "ppt.tax-enrolments.subscriber.timer"
   val AssignEnrolmentToUserTimerTag  = "ppt.tax-enrolments.assign-enrolment-user.timer"
   val AssignEnrolmentToGroupTimerTag = "ppt.tax-enrolments.assign-enrolment-group.timer"
+
+  val AssignEnrolmentToUserError  = "User enrolment assignment failed"
+  val AssignEnrolmentToGroupError = "Enrolment to group failed"
 }
