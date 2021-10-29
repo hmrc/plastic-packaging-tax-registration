@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
 import com.kenshoo.play.metrics.Metrics
+import javax.inject.{Inject, Singleton}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{
@@ -31,14 +32,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConne
   AssignEnrolmentTimerTag,
   SubscriberTimerTag
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.KeyValue.{
-  etmpPptReferenceKey,
-  pptServiceName
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentKey
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.KeyValue.pptServiceName
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.routes
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -65,10 +63,12 @@ class TaxEnrolmentsConnector @Inject() (
     ).andThen { case _ => timer.stop() }
   }
 
-  def assignEnrolmentToUser(userId: String, pptReference: String)(implicit hc: HeaderCarrier) = {
+  def assignEnrolmentToUser(userId: String, pptReference: String)(implicit
+    hc: HeaderCarrier
+  ): Future[Unit] = {
     val timer = metrics.defaultRegistry.timer(AssignEnrolmentTimerTag).time()
     httpClient.POSTEmpty[HttpResponse](url =
-      config.getTaxEnrolmentsAssignUserToEnrolmentUrl(userId, enrolmentKey(pptReference))
+      config.getTaxEnrolmentsAssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference))
     ).map { resp =>
       resp.status match {
         case Status.CREATED => // Do nothing - return without exception
@@ -80,9 +80,6 @@ class TaxEnrolmentsConnector @Inject() (
 
   private def taxEnrolmentsCallbackUrl(pptReference: String): String =
     s"${config.selfHost}${routes.TaxEnrolmentsController.callback(pptReference).url}"
-
-  private def enrolmentKey(pptReference: String) =
-    s"$pptServiceName~$etmpPptReferenceKey~$pptReference"
 
 }
 

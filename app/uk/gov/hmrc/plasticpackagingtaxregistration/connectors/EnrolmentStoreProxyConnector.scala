@@ -20,9 +20,16 @@ import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReadsHttpResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector.KnownFactsTimerTag
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.UserEnrolmentRequest
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector.{
+  GroupsWithEnrolmentsTimerTag,
+  KnownFactsTimerTag
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
+  EnrolmentKey,
+  UserEnrolmentRequest
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.{
+  GroupsWithEnrolmentsResponse,
   QueryKnownFactsRequest,
   QueryKnownFactsResponse
 }
@@ -37,6 +44,17 @@ class EnrolmentStoreProxyConnector @Inject() (
 )(implicit ec: ExecutionContext)
     extends HttpReadsHttpResponse {
 
+  /** ES1 **/
+  def queryGroupsWithEnrolment(
+    pptReference: String
+  )(implicit hc: HeaderCarrier): Future[Option[GroupsWithEnrolmentsResponse]] = {
+    val timer = metrics.defaultRegistry.timer(GroupsWithEnrolmentsTimerTag).time()
+
+    httpClient.GET[Option[GroupsWithEnrolmentsResponse]](url =
+      config.enrolmentStoreProxyES1Url(EnrolmentKey.create(pptReference))
+    ).andThen { case _ => timer.stop() }
+  }
+
   /** ES20 **/
   def queryKnownFacts(
     userEnrolment: UserEnrolmentRequest
@@ -44,7 +62,7 @@ class EnrolmentStoreProxyConnector @Inject() (
     val timer = metrics.defaultRegistry.timer(KnownFactsTimerTag).time()
 
     httpClient.POST[QueryKnownFactsRequest, Option[QueryKnownFactsResponse]](
-      url = config.enrolmentStoreProxyE20Url,
+      url = config.enrolmentStoreProxyES20Url,
       body = QueryKnownFactsRequest(userEnrolment)
     ).andThen { case _ => timer.stop() }
   }
@@ -52,5 +70,6 @@ class EnrolmentStoreProxyConnector @Inject() (
 }
 
 object EnrolmentStoreProxyConnector {
-  val KnownFactsTimerTag = "ppt.enrolment-store-proxy.known-facts.timer"
+  val KnownFactsTimerTag           = "ppt.enrolment-store-proxy.known-facts.timer"
+  val GroupsWithEnrolmentsTimerTag = "ppt.enrolment-store-proxy.groups-with-enrolments.timer"
 }

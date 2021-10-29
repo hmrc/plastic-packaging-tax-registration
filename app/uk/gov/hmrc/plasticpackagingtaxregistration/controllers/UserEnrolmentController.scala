@@ -21,18 +21,24 @@ import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode.EnrolmentFailedCode
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
   EnrolmentFailedCode,
   UserEnrolmentFailedResponse,
   UserEnrolmentRequest,
   UserEnrolmentSuccessResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
+import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{
+  Authenticator,
+  AuthorizedRequest
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class UserEnrolmentController @Inject() (
@@ -50,24 +56,49 @@ class UserEnrolmentController @Inject() (
         val userEnrolmentRequest = request.body
         logPayload("PPT User Enrol request", userEnrolmentRequest)
 
-        enrolmentStoreProxyConnector.queryKnownFacts(userEnrolmentRequest).map {
-          case Some(facts) =>
-            // TODO - perform group checks and make the actual enrolment call
-            if (facts.pptEnrolmentReferences.contains(userEnrolmentRequest.pptReference))
-              Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
-            else
-              BadRequest(
-                UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference,
-                                            EnrolmentFailedCode.VerificationFailed
-                )
-              )
-          case _ =>
-            BadRequest(
-              UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference,
-                                          EnrolmentFailedCode.VerificationMissing
-              )
-            )
+        def failedResult(code: EnrolmentFailedCode) =
+          BadRequest(UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference, code))
+
+        def successResult() =
+          Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
+
+        findEnrolment(userEnrolmentRequest).flatMap {
+          case Success(_) =>
+            getGroupsWithEnrolment(userEnrolmentRequest.pptReference).map { groupIds =>
+              if (groupIds.isEmpty)
+                // TODO: create new assignment using current user group
+                successResult()
+              else
+                // TODO: check whether user in same group
+                failedResult(EnrolmentFailedCode.GroupEnrolled)
+            }
+          case Failure(e: FindEnrolmentFailure) => Future.successful(failedResult(e.failureCode))
+          case Failure(_)                       => Future.successful(failedResult(EnrolmentFailedCode.Failed))
         }
+    }
+
+  case class FindEnrolmentFailure(failureCode: EnrolmentFailedCode) extends RuntimeException
+
+  private def findEnrolment(
+    request: UserEnrolmentRequest
+  )(implicit hc: HeaderCarrier): Future[Try[Unit]] =
+    enrolmentStoreProxyConnector.queryKnownFacts(request).map {
+      case Some(facts) if facts.pptEnrolmentReferences.contains(request.pptReference) =>
+        Success(Unit)
+      case Some(_) => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationFailed))
+      case _       => Failure(FindEnrolmentFailure(EnrolmentFailedCode.VerificationMissing))
+    }
+
+  private def getGroupsWithEnrolment(
+    pptReference: String
+  )(implicit request: AuthorizedRequest[_]): Future[Seq[String]] =
+    enrolmentStoreProxyConnector.queryGroupsWithEnrolment(pptReference).map {
+      case Some(groupsResponse) =>
+        groupsResponse.principalGroupIds match {
+          case Some(groupIds) => groupIds
+          case None           => Seq()
+        }
+      case None => Seq()
     }
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {

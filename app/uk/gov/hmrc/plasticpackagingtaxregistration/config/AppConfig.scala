@@ -57,8 +57,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def getTaxEnrolmentsAssignUserToEnrolmentUrl(userId: String, enrolmentKey: String) =
     s"$taxEnrolmentsHost/tax-enrolments/users/$userId/enrolments/$enrolmentKey"
 
-  lazy val enrolmentStoreProxyE20Url =
+  lazy val enrolmentStoreProxyES20Url =
     s"$enrolmentStoreProxyHost/enrolment-store-proxy/enrolment-store/enrolments"
+
+  def enrolmentStoreProxyES1Url(enrolmentKey: String) =
+    s"$enrolmentStoreProxyHost/enrolment-store-proxy/enrolment-store/enrolments/$enrolmentKey/groups"
 
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
 }

@@ -25,9 +25,13 @@ import play.api.http.Status
 import play.api.test.Helpers.await
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector.KnownFactsTimerTag
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector.{
+  GroupsWithEnrolmentsTimerTag,
+  KnownFactsTimerTag
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnectorISpec._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.UserEnrolmentRequest
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 
 class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
 
@@ -90,6 +94,50 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
       }
     }
 
+    "query groups with enrolment" when {
+
+      "no groups exist" in {
+        mockNoGroupsWithEnrolmentsResponse("HMRC-PPT-ORG~EtmpRegistrationNumber~XYPPT0000000283")
+
+        val groupsResponse =
+          await(enrolmentStoreProxyConnector.queryGroupsWithEnrolment("XYPPT0000000283"))
+
+        groupsResponse mustBe None
+        getTimer(GroupsWithEnrolmentsTimerTag).getCount mustBe 1
+      }
+
+      "all groups exist" in {
+        mockGroupsWithEnrolmentsResponse("HMRC-PPT-ORG~EtmpRegistrationNumber~XYPPT0000000283",
+                                         allGroupsWithEnrolmentsResponse
+        )
+
+        val groupsResponse =
+          await(enrolmentStoreProxyConnector.queryGroupsWithEnrolment("XYPPT0000000283"))
+
+        groupsResponse mustBe Some(
+          GroupsWithEnrolmentsResponse(Some(Seq("ABCEDEFGI1234567", "ABCEDEFGI1234568")),
+                                       Some(Seq("ABCEDEFGI1234567", "ABCEDEFGI1234568"))
+          )
+        )
+        getTimer(GroupsWithEnrolmentsTimerTag).getCount mustBe 1
+      }
+
+      "principle groups exist" in {
+        mockGroupsWithEnrolmentsResponse("HMRC-PPT-ORG~EtmpRegistrationNumber~XYPPT0000000283",
+                                         principalGroupsWithEnrolmentsResponse
+        )
+
+        val groupsResponse =
+          await(enrolmentStoreProxyConnector.queryGroupsWithEnrolment("XYPPT0000000283"))
+
+        groupsResponse mustBe Some(
+          GroupsWithEnrolmentsResponse(Some(Seq("ABCEDEFGI1234567", "ABCEDEFGI1234568")), None)
+        )
+        getTimer(GroupsWithEnrolmentsTimerTag).getCount mustBe 1
+      }
+
+    }
+
   }
 
   private def mockSuccessfulKnownFactResponse(
@@ -113,6 +161,28 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
         .willReturn(
           aResponse()
             .withStatus(Status.NO_CONTENT)
+        )
+    )
+
+  private def mockNoGroupsWithEnrolmentsResponse(enrolmentKey: String): StubMapping =
+    stubFor(
+      get(urlMatching(s"/enrolment-store-proxy/enrolment-store/enrolments/$enrolmentKey/groups"))
+        .willReturn(
+          aResponse()
+            .withStatus(Status.NO_CONTENT)
+        )
+    )
+
+  private def mockGroupsWithEnrolmentsResponse(
+    enrolmentKey: String,
+    response: String
+  ): StubMapping =
+    stubFor(
+      get(urlMatching(s"/enrolment-store-proxy/enrolment-store/enrolments/$enrolmentKey/groups"))
+        .willReturn(
+          aResponse()
+            .withStatus(Status.OK)
+            .withBody(response)
         )
     )
 
@@ -182,6 +252,30 @@ object EnrolmentStoreProxyConnectorISpec {
       |{
       |  "service": "HMRC-PPT-ORG",
       |  "enrolments": []
+      |}
+      |""".stripMargin
+
+  private val allGroupsWithEnrolmentsResponse =
+    """
+      |{
+      |    "principalGroupIds": [
+      |       "ABCEDEFGI1234567",
+      |       "ABCEDEFGI1234568"
+      |    ],
+      |    "delegatedGroupIds": [
+      |       "ABCEDEFGI1234567",
+      |       "ABCEDEFGI1234568"
+      |    ]
+      |}
+      |""".stripMargin
+
+  private val principalGroupsWithEnrolmentsResponse =
+    """
+      |{
+      |    "principalGroupIds": [
+      |       "ABCEDEFGI1234567",
+      |       "ABCEDEFGI1234568"
+      |    ]
       |}
       |""".stripMargin
 
