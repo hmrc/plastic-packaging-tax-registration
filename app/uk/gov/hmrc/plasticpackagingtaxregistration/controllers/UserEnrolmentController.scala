@@ -62,6 +62,7 @@ class UserEnrolmentController @Inject() (
     authenticator.authorisedAction(authenticator.parsingJson[UserEnrolmentRequest]) {
       implicit request =>
         val userEnrolmentRequest = request.body
+        logger.info(s"PPT User Enrol with pptReference [${userEnrolmentRequest.pptReference}]")
         logPayload("PPT User Enrol request", userEnrolmentRequest)
 
         def failedResult(code: EnrolmentFailedCode) = {
@@ -69,8 +70,12 @@ class UserEnrolmentController @Inject() (
           BadRequest(UserEnrolmentFailedResponse(userEnrolmentRequest.pptReference, code))
         }
 
-        def successResult() =
+        def successResult() = {
+          logger.info(
+            s"Successfully enrolled user with pptReference [${userEnrolmentRequest.pptReference}]"
+          )
           Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
+        }
 
         findEnrolment(userEnrolmentRequest).flatMap {
           case Success(_) =>
@@ -103,11 +108,18 @@ class UserEnrolmentController @Inject() (
   )(implicit request: AuthorizedRequest[_]): Future[Seq[String]] =
     enrolmentStoreProxyConnector.queryGroupsWithEnrolment(pptReference).map {
       case Some(groupsResponse) =>
+        logger.info(
+          s"ES1 called queryGroupsWithEnrolment with pptReference [$pptReference] and got principalGroupIds [${groupsResponse.principalGroupIds}]"
+        )
         groupsResponse.principalGroupIds match {
           case Some(groupIds) => groupIds
           case None           => Seq()
         }
-      case None => Seq()
+      case None =>
+        logger.info(
+          s"ES1 called queryGroupsWithEnrolment with pptReference [$pptReference] and got no groupIds"
+        )
+        Seq()
     }
 
   private def assignEnrolment(

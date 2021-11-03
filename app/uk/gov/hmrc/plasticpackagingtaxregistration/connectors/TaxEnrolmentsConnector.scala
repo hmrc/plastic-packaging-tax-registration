@@ -17,7 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{
@@ -39,6 +39,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.taxenrolmen
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.routes
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -48,6 +49,8 @@ class TaxEnrolmentsConnector @Inject() (
   metrics: Metrics
 )(implicit ec: ExecutionContext)
     extends HttpReadsHttpResponse {
+
+  private val logger = Logger(this.getClass)
 
   /** Async ROSM "Subscriber" call **/
   def submitEnrolment(pptReference: String, safeId: String, formBundleId: String)(implicit
@@ -80,8 +83,16 @@ class TaxEnrolmentsConnector @Inject() (
       config.taxEnrolmentsES11AssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference))
     ).map { resp =>
       resp.status match {
-        case status if Status.isSuccessful(status) => () // Do nothing - return without exception
+        case status if Status.isSuccessful(status) =>
+          logger.info(
+            s"ES11 successful assign enrolment to user with userId [$userId] and pptReference [$pptReference]"
+          )
+          ()
+        // Do nothing - return without exception
         case otherStatus =>
+          logger.warn(
+            s"ES11 failed assign enrolment to user with userId [$userId] and pptReference [$pptReference] with status $otherStatus"
+          )
           throw UpstreamErrorResponse(AssignEnrolmentToUserError, otherStatus)
       }
     }.andThen { case _ => timer.stop() }
@@ -106,8 +117,16 @@ class TaxEnrolmentsConnector @Inject() (
       body = body
     ).map { resp =>
       resp.status match {
-        case status if Status.isSuccessful(status) => () // Do nothing - return without exception
+        case status if Status.isSuccessful(status) =>
+          logger.info(
+            s"ES8 successful assign enrolment to group with userId [$userId], groupId [$groupId] and pptReference [${userEnrolmentRequest.pptReference}]"
+          )
+          ()
+        // Do nothing - return without exception
         case otherStatus =>
+          logger.warn(
+            s"ES8 failed assign enrolment to user with userId [$userId] and pptReference [${userEnrolmentRequest.pptReference}] with status [$otherStatus]"
+          )
           throw UpstreamErrorResponse(AssignEnrolmentToGroupError, otherStatus)
       }
     }.andThen { case _ => timer.stop() }
