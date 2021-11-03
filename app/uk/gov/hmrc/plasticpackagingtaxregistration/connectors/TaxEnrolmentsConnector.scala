@@ -85,13 +85,13 @@ class TaxEnrolmentsConnector @Inject() (
       resp.status match {
         case status if Status.isSuccessful(status) =>
           logger.info(
-            s"Successfully called ES11 assign enrolment to user with userId $userId and pptReference $pptReference"
+            s"ES11 successful assign enrolment to user with userId [$userId] and pptReference [$pptReference]"
           )
           ()
         // Do nothing - return without exception
         case otherStatus =>
           logger.warn(
-            s"Failed ES11 assign enrolment to user with userId $userId and pptReference $pptReference with status $otherStatus"
+            s"ES11 failed assign enrolment to user with userId [$userId] and pptReference [$pptReference] with status $otherStatus"
           )
           throw UpstreamErrorResponse(AssignEnrolmentToUserError, otherStatus)
       }
@@ -119,13 +119,13 @@ class TaxEnrolmentsConnector @Inject() (
       resp.status match {
         case status if Status.isSuccessful(status) =>
           logger.info(
-            s"Successfully called ES8 assign enrolment to group with userId $userId, groupId $groupId and pptReference ${userEnrolmentRequest.pptReference}"
+            s"ES8 successful assign enrolment to group with userId [$userId], groupId [$groupId] and pptReference [${userEnrolmentRequest.pptReference}]"
           )
           ()
         // Do nothing - return without exception
         case otherStatus =>
           logger.warn(
-            s"Failed ES8 assign enrolment to user with userId $userId and pptReference ${userEnrolmentRequest.pptReference} with status $otherStatus"
+            s"ES8 failed assign enrolment to user with userId [$userId] and pptReference [${userEnrolmentRequest.pptReference}] with status [$otherStatus]"
           )
           throw UpstreamErrorResponse(AssignEnrolmentToGroupError, otherStatus)
       }

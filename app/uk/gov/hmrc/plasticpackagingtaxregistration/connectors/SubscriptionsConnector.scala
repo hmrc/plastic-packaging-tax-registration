@@ -62,7 +62,7 @@ class SubscriptionsConnector @Inject() (
     }
       .recover {
         case e =>
-          logger.error(
+          logger.warn(
             s"Get subscription status failed for correlationId [$correlationId] and safeId [$safeId] - ${e.getMessage}"
           )
           SubscriptionStatusResponse(SubscriptionStatus.UNKNOWN)
