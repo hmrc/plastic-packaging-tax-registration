@@ -55,14 +55,16 @@ class SubscriptionsConnector @Inject() (
     httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
                                                    headers = headers :+ correlationIdHeader
     ).map { etmpResponse =>
-      logger.debug(
-        s"PPT Subscription status response payload for safeId $safeId ${toJson(etmpResponse)}"
+      logger.info(
+        s"PPT subscription status sent with correlationId [$correlationId] and safeId [$safeId] had response payload ${toJson(etmpResponse)}"
       )
       SubscriptionStatusResponse.fromETMPResponse(etmpResponse)
     }
       .recover {
         case e =>
-          logger.error(s"Get subscription status failed for [$safeId] - ${e.getMessage}")
+          logger.error(
+            s"Get subscription status failed for correlationId [$correlationId] and safeId [$safeId] - ${e.getMessage}"
+          )
           SubscriptionStatusResponse(SubscriptionStatus.UNKNOWN)
       }
       .andThen { case _ => timer.stop() }
@@ -82,6 +84,10 @@ class SubscriptionsConnector @Inject() (
       .andThen { case _ => timer.stop() }
       .map {
         subscriptionResponse =>
+          logger.info(
+            s"PPT subscription create sent with correlationId [$correlationId] and safeId [$safeNumber] had response payload ${subscriptionResponse.json}"
+          )
+
           if (Status.isSuccessful(subscriptionResponse.status))
             Try(subscriptionResponse.json.as[SubscriptionCreateSuccessfulResponse]) match {
               case Success(successfulCreateResponse) => successfulCreateResponse
@@ -117,6 +123,6 @@ class SubscriptionsConnector @Inject() (
     safeId: String,
     errorMessage: String
   ) =
-    s"PPT subscription with Correlation ID [$correlationId] and Safe ID [$safeId] failed - $errorMessage"
+    s"PPT subscription create with correlationId [$correlationId] and safeId [$safeId] failed - $errorMessage"
 
 }
