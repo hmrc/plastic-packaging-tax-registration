@@ -50,20 +50,20 @@ class SubscriptionsConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[SubscriptionStatusResponse] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
-    val correlationIdHeader = correlationId -> UUID.randomUUID().toString
+    val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
     httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
                                                    headers = headers :+ correlationIdHeader
     ).map { etmpResponse =>
       logger.info(
-        s"PPT subscription status sent with correlationId [$correlationId] and safeId [$safeId] had response payload ${toJson(etmpResponse)}"
+        s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and safeId [$safeId] had response payload ${toJson(etmpResponse)}"
       )
       SubscriptionStatusResponse.fromETMPResponse(etmpResponse)
     }
       .recover {
         case e =>
           logger.warn(
-            s"Get subscription status failed for correlationId [$correlationId] and safeId [$safeId] - ${e.getMessage}"
+            s"Get subscription status failed for correlationId [${correlationIdHeader._2}] and safeId [$safeId] - ${e.getMessage}"
           )
           SubscriptionStatusResponse(SubscriptionStatus.UNKNOWN)
       }
@@ -75,7 +75,7 @@ class SubscriptionsConnector @Inject() (
   ): Future[SubscriptionCreateResponse] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
-    val correlationIdHeader = correlationId -> UUID.randomUUID().toString
+    val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
     httpClient.POST[Subscription, HttpResponse](url = appConfig.subscriptionCreateUrl(safeNumber),
                                                 body = subscription,
@@ -85,7 +85,7 @@ class SubscriptionsConnector @Inject() (
       .map {
         subscriptionResponse =>
           logger.info(
-            s"PPT subscription create sent with correlationId [$correlationId] and safeId [$safeNumber] had response payload ${subscriptionResponse.json}"
+            s"PPT subscription create sent with correlationId [${correlationIdHeader._2}] and safeId [$safeNumber] had response payload ${subscriptionResponse.json}"
           )
 
           if (Status.isSuccessful(subscriptionResponse.status))
