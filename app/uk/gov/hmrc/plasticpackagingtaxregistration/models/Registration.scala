@@ -17,9 +17,12 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 
 case class Registration(
   id: String,
+  registrationType: Option[RegType] = None,
+  groupDetail: Option[GroupDetail] = None,
   incorpJourneyId: Option[String],
   liabilityDetails: LiabilityDetails = LiabilityDetails(),
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),

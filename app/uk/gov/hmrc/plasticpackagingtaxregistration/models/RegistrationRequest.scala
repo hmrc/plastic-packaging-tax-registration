@@ -16,7 +16,11 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
+
 case class RegistrationRequest(
+  registrationType: Option[RegType] = None,
+  groupDetail: Option[GroupDetail] = None,
   incorpJourneyId: Option[String],
   liabilityDetails: LiabilityDetails = LiabilityDetails(),
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
@@ -27,6 +31,8 @@ case class RegistrationRequest(
 
   def toRegistration(providerId: String): Registration =
     Registration(id = providerId,
+                 registrationType = this.registrationType,
+                 groupDetail = this.groupDetail,
                  incorpJourneyId = this.incorpJourneyId,
                  liabilityDetails = this.liabilityDetails,
                  primaryContactDetails = this.primaryContactDetails,
