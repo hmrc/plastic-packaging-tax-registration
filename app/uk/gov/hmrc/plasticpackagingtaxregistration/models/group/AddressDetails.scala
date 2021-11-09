@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.models.group
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMember
 
-case class GroupDetail(
-  membersUnderGroupControl: Option[Boolean] = None,
-  members: Seq[GroupMember] = Seq.empty
+case class AddressDetails(
+  addressLine1: String,
+  addressLine2: String,
+  addressLine3: Option[String] = None,
+  addressLine4: Option[String] = None,
+  postalCode: Option[String] = None,
+  countryCode: String
 )
 
-object GroupDetail {
-  implicit val format: OFormat[GroupDetail] = Json.format[GroupDetail]
+object AddressDetails {
+  implicit val format: OFormat[AddressDetails] = Json.format[AddressDetails]
 }
