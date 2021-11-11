@@ -17,11 +17,13 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMember
 
 case class GroupDetail(
   membersUnderGroupControl: Option[Boolean] = None,
-  members: Seq[GroupMember] = Seq.empty
+  members: Seq[GroupMember] = Seq.empty,
+  currentMemberOrganisationType : Option[OrgType] = None
 )
 
 object GroupDetail {
