@@ -19,6 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models.group
 import play.api.libs.json.{Json, OFormat}
 
 case class GroupMember(
+  id: String,
   customerIdentification1: String,
   customerIdentification2: Option[String],
   organisationDetails: Option[OrganisationDetails],
