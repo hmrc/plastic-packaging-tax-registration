@@ -17,18 +17,10 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.CustomerType.{
-  Individual,
-  Organisation
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
-  GENERAL_PARTNERSHIP,
-  SCOTTISH_PARTNERSHIP
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  OrgType,
-  OrganisationDetails => PPTOrganisationDetails
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.CustomerType.{Individual, Organisation}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionConstants.MISSING_BUSINESS_IDENTIFIER
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{GENERAL_PARTNERSHIP, SCOTTISH_PARTNERSHIP}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, OrganisationDetails => PPTOrganisationDetails}
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneOffset, ZonedDateTime}
@@ -60,7 +52,7 @@ object LegalEntityDetails {
     pptOrganisationDetails.organisationType match {
       case Some(OrgType.SOLE_TRADER) =>
         pptOrganisationDetails.soleTraderDetails.map { details =>
-          updateLegalEntityDetails(customerIdentification1 = details.nino,
+          updateLegalEntityDetails(customerIdentification1 = details.nino.getOrElse(MISSING_BUSINESS_IDENTIFIER),
                                    customerIdentification2 = details.sautr,
                                    pptOrganisationDetails = pptOrganisationDetails
           )
@@ -71,7 +63,7 @@ object LegalEntityDetails {
             partnershipDetails.partnershipType match {
               case GENERAL_PARTNERSHIP =>
                 partnershipDetails.generalPartnershipDetails.map { details =>
-                  updateLegalEntityDetails(customerIdentification1 = details.sautr,
+                  updateLegalEntityDetails(customerIdentification1 = details.sautr.getOrElse(MISSING_BUSINESS_IDENTIFIER),
                                            customerIdentification2 = Some(details.postcode),
                                            pptOrganisationDetails = pptOrganisationDetails
                   )
@@ -80,7 +72,7 @@ object LegalEntityDetails {
                 )
               case SCOTTISH_PARTNERSHIP =>
                 partnershipDetails.scottishPartnershipDetails.map { details =>
-                  updateLegalEntityDetails(customerIdentification1 = details.sautr,
+                  updateLegalEntityDetails(customerIdentification1 = details.sautr.getOrElse(MISSING_BUSINESS_IDENTIFIER),
                                            customerIdentification2 = Some(details.postcode),
                                            pptOrganisationDetails = pptOrganisationDetails
                   )

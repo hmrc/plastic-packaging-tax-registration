@@ -68,7 +68,7 @@ class SubscriptionController @Inject() (
       }
     }
 
-  def submit(safeId: String): Action[RegistrationRequest] =
+  def submit(safeId: Option[String]): Action[RegistrationRequest] =
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
         val pptRegistration = request.body.toRegistration(request.registrationId)

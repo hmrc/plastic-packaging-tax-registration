@@ -22,7 +22,7 @@ case class SoleTraderIncorporationDetails(
   firstName: String,
   lastName: String,
   dateOfBirth: String,
-  nino: String,
+  nino: Option[String],
   sautr: Option[String],
   override val registration: IncorporationRegistrationDetails
 ) extends RegistrationDetails

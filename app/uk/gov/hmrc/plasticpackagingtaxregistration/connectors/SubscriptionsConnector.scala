@@ -70,14 +70,14 @@ class SubscriptionsConnector @Inject() (
       .andThen { case _ => timer.stop() }
   }
 
-  def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
-    hc: HeaderCarrier
+  def submitSubscription(safeNumber: Option[String], subscription: Subscription)(implicit
+                                                                                 hc: HeaderCarrier
   ): Future[SubscriptionCreateResponse] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
-    httpClient.POST[Subscription, HttpResponse](url = appConfig.subscriptionCreateUrl(safeNumber),
+    httpClient.POST[Subscription, HttpResponse](url = getSubscriptionUrl(safeNumber),
                                                 body = subscription,
                                                 headers = headers :+ correlationIdHeader
     )
@@ -118,9 +118,14 @@ class SubscriptionsConnector @Inject() (
       }
   }
 
+  private def getSubscriptionUrl(safeNumber: Option[String]): String = safeNumber match {
+    case Some(safeNumber) => appConfig.subscriptionCreateUrl(safeNumber)
+    case _ => appConfig.subscriptionCreateUrl()
+  }
+
   private def buildCreateSubscriptionErrorMessage(
     correlationId: String,
-    safeId: String,
+    safeId: Option[String],
     errorMessage: String
   ) =
     s"PPT subscription create with correlationId [$correlationId] and safeId [$safeId] failed - $errorMessage"

@@ -44,7 +44,7 @@ object PartnershipDetails {
 }
 
 case class GeneralPartnershipDetails(
-  sautr: String,
+  sautr: Option[String],
   postcode: String,
   override val registration: IncorporationRegistrationDetails
 ) extends RegistrationDetails
@@ -54,7 +54,7 @@ object GeneralPartnershipDetails {
 }
 
 case class ScottishPartnershipDetails(
-  sautr: String,
+  sautr: Option[String],
   postcode: String,
   override val registration: IncorporationRegistrationDetails
 ) extends RegistrationDetails
