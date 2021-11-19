@@ -23,6 +23,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
   SubscriptionTestData
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.Address
 
 class BusinessCorrespondenceDetailsSpec
     extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData
@@ -41,7 +42,9 @@ class BusinessCorrespondenceDetailsSpec
           BusinessCorrespondenceDetails(registrationUsingBusinessAddress)
 
         businessCorrespondenceDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
-        businessCorrespondenceDetails.addressLine2 mustBe pptBusinessAddress.addressLine2
+        businessCorrespondenceDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.getOrElse(
+          ""
+        )
         businessCorrespondenceDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
         businessCorrespondenceDetails.addressLine4 mustBe Some(pptBusinessAddress.townOrCity)
         businessCorrespondenceDetails.postalCode mustBe Some(pptBusinessAddress.postCode)
@@ -61,12 +64,65 @@ class BusinessCorrespondenceDetailsSpec
           BusinessCorrespondenceDetails(registrationWithDifferentPrimaryContractAddress)
 
         businessCorrespondenceDetails.addressLine1 mustBe pptPrimaryContactAddress.addressLine1
-        businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2
+        businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2.getOrElse(
+          ""
+        )
         businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
         businessCorrespondenceDetails.addressLine4 mustBe Some(pptPrimaryContactAddress.townOrCity)
         businessCorrespondenceDetails.postalCode mustBe Some(pptPrimaryContactAddress.postCode)
         businessCorrespondenceDetails.countryCode mustBe "GB"
       }
+
+    }
+
+    "map address with one line" in {
+
+      val businessCorrespondenceDetails = BusinessCorrespondenceDetails(
+        Address(addressLine1 = "line1", townOrCity = "town", postCode = "postcode")
+      )
+      businessCorrespondenceDetails.addressLine1 mustBe "line1"
+      businessCorrespondenceDetails.addressLine2 mustBe "town"
+      businessCorrespondenceDetails.addressLine3 mustBe None
+      businessCorrespondenceDetails.addressLine4 mustBe None
+      businessCorrespondenceDetails.postalCode mustBe Some("postcode")
+      businessCorrespondenceDetails.countryCode mustBe "GB" // default
+
+    }
+
+    "map address with two lines" in {
+
+      val businessCorrespondenceDetails = BusinessCorrespondenceDetails(
+        Address(addressLine1 = "line1",
+                addressLine2 = Some("line2"),
+                townOrCity = "town",
+                postCode = "postcode"
+        )
+      )
+      businessCorrespondenceDetails.addressLine1 mustBe "line1"
+      businessCorrespondenceDetails.addressLine2 mustBe "line2"
+      businessCorrespondenceDetails.addressLine3 mustBe Some("town")
+      businessCorrespondenceDetails.addressLine4 mustBe None
+      businessCorrespondenceDetails.postalCode mustBe Some("postcode")
+      businessCorrespondenceDetails.countryCode mustBe "GB" // default
+
+    }
+
+    "map address with three lines" in {
+
+      val businessCorrespondenceDetails = BusinessCorrespondenceDetails(
+        Address(addressLine1 = "line1",
+                addressLine2 = Some("line2"),
+                addressLine3 = Some("line3"),
+                townOrCity = "town",
+                postCode = "postcode"
+        )
+      )
+      businessCorrespondenceDetails.addressLine1 mustBe "line1"
+      businessCorrespondenceDetails.addressLine2 mustBe "line2"
+      businessCorrespondenceDetails.addressLine3 mustBe Some("line3")
+      businessCorrespondenceDetails.addressLine4 mustBe Some("town")
+      businessCorrespondenceDetails.postalCode mustBe Some("postcode")
+      businessCorrespondenceDetails.countryCode mustBe "GB" // default
 
     }
 

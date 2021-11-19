@@ -73,7 +73,7 @@ class RegistrationRepositorySpec
             OrganisationDetails(organisationType = Some(OrgType.UK_COMPANY),
                                 businessRegisteredAddress = Some(
                                   Address(addressLine1 = "addressLine1",
-                                          addressLine2 = "addressLine2",
+                                          addressLine2 = Some("addressLine2"),
                                           townOrCity = "Town",
                                           postCode = "PostCode"
                                   )
@@ -153,7 +153,7 @@ class RegistrationRepositorySpec
                                                                  Address(addressLine1 =
                                                                            "addressLine1",
                                                                          addressLine2 =
-                                                                           "addressLine2",
+                                                                           Some("addressLine2"),
                                                                          townOrCity = "Town",
                                                                          postCode = "PostCode"
                                                                  )
@@ -169,7 +169,7 @@ class RegistrationRepositorySpec
                                                Address(addressLine1 =
                                                          "addressLine1",
                                                        addressLine2 =
-                                                         "addressLine2",
+                                                         Some("addressLine2"),
                                                        townOrCity = "Town",
                                                        postCode = "PostCode"
                                                )

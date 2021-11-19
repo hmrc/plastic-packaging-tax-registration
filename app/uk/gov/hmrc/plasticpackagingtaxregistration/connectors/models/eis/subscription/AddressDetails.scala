@@ -32,14 +32,14 @@ case class AddressDetails(
 object AddressDetails {
   implicit val format: OFormat[AddressDetails] = Json.format[AddressDetails]
 
-  def apply(address: Option[PPTAddress]): AddressDetails =
-    address match {
-      case Some(addressDetails) =>
-        AddressDetails(addressLine1 = addressDetails.addressLine1,
-                       addressLine2 = addressDetails.addressLine2,
-                       addressLine3 = addressDetails.addressLine3,
-                       addressLine4 = Some(addressDetails.townOrCity),
-                       postalCode = Some(addressDetails.postCode),
+  def apply(maybeAddress: Option[PPTAddress]): AddressDetails =
+    maybeAddress match {
+      case Some(address) =>
+        AddressDetails(addressLine1 = address.eisAddressLines._1,
+                       addressLine2 = address.eisAddressLines._2,
+                       addressLine3 = address.eisAddressLines._3,
+                       addressLine4 = address.eisAddressLines._4,
+                       postalCode = Some(address.postCode),
                        countryCode = "GB"
         )
       case None => throw InternalError(s"The legal entity registered address is required.")

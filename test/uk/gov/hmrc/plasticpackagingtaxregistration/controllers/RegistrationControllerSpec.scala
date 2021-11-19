@@ -169,7 +169,7 @@ class RegistrationControllerSpec
                                 phoneNumber = Some("1234567890"),
                                 address = Some(
                                   Address(addressLine1 = "addressLine1",
-                                          addressLine2 = "addressLine2",
+                                          addressLine2 = Some("addressLine2"),
                                           townOrCity = "Town",
                                           postCode = "PostCode"
                                   )
@@ -185,7 +185,7 @@ class RegistrationControllerSpec
                                                                      Address(addressLine1 =
                                                                                "addressLine1",
                                                                              addressLine2 =
-                                                                               "addressLine2",
+                                                                               Some("addressLine2"),
                                                                              townOrCity = "Town",
                                                                              postCode = "PostCode"
                                                                      )
@@ -204,7 +204,7 @@ class RegistrationControllerSpec
                                 phoneNumber = Some("1234567890"),
                                 address = Some(
                                   Address(addressLine1 = "addressLine1",
-                                          addressLine2 = "addressLine2",
+                                          addressLine2 = Some("addressLine2"),
                                           townOrCity = "Town",
                                           postCode = "PostCode"
                                   )

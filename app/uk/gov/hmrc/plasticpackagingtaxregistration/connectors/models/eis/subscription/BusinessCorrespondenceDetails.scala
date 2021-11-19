@@ -17,7 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address, Registration}
 
 case class BusinessCorrespondenceDetails(
   addressLine1: String,
@@ -34,7 +34,7 @@ object BusinessCorrespondenceDetails {
     Json.format[BusinessCorrespondenceDetails]
 
   def apply(registration: Registration): BusinessCorrespondenceDetails = {
-    val businessCorrespondenceAddress =
+    val address =
       if (registration.primaryContactDetails.useRegisteredAddress.getOrElse(false))
         registration.organisationDetails.businessRegisteredAddress.getOrElse(
           throw new IllegalStateException((s"The legal entity registered address is required."))
@@ -44,13 +44,16 @@ object BusinessCorrespondenceDetails {
           throw new IllegalStateException(s"The primary contact details address is required.")
         )
 
-    BusinessCorrespondenceDetails(addressLine1 = businessCorrespondenceAddress.addressLine1,
-                                  addressLine2 = businessCorrespondenceAddress.addressLine2,
-                                  addressLine3 = businessCorrespondenceAddress.addressLine3,
-                                  addressLine4 = Some(businessCorrespondenceAddress.townOrCity),
-                                  postalCode = Some(businessCorrespondenceAddress.postCode),
-                                  countryCode = "GB"
-    )
+    BusinessCorrespondenceDetails(address)
   }
+
+  def apply(address: Address): BusinessCorrespondenceDetails =
+    new BusinessCorrespondenceDetails(addressLine1 = address.eisAddressLines._1,
+                                      addressLine2 = address.eisAddressLines._2,
+                                      addressLine3 = address.eisAddressLines._3,
+                                      addressLine4 = address.eisAddressLines._4,
+                                      postalCode = Some(address.postCode),
+                                      countryCode = "GB"
+    )
 
 }
