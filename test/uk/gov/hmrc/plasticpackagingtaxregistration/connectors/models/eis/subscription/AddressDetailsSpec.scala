@@ -18,14 +18,10 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address => PPTAddress}
 
-class AddressDetailsSpec
-    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData {
+class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
 
   "AddressDetails" should {
     "map from PPT Address" when {

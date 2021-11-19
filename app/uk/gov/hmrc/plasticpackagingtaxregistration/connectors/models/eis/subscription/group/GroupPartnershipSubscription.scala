@@ -1,0 +1,172 @@
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group
+
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ContactDetails,
+  IndividualDetails,
+  AddressDetails => SubscriptionAddressDetails,
+  OrganisationDetails => SubscriptionOrganisationDetails
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  PrimaryContactDetails,
+  Registration,
+  Address => RegistrationPrimaryContactAddress,
+  OrganisationDetails => RegistrationOrganisationDetails
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMember
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  AddressDetails => RegistrationAddressDetails
+}
+
+case class GroupPartnershipSubscription(
+  representativeControl: Boolean,
+  allMembersControl: Boolean,
+  groupPartnershipDetails: Seq[GroupPartnershipDetails]
+)
+
+object GroupPartnershipSubscription {
+
+  implicit val format: OFormat[GroupPartnershipSubscription] =
+    Json.format[GroupPartnershipSubscription]
+
+  def apply(registration: Registration): Option[GroupPartnershipSubscription] =
+    registration.groupDetail.flatMap(
+      _ =>
+        Some(
+          GroupPartnershipSubscription(representativeControl = true,
+                                       allMembersControl = true,
+                                       createGroupPartnershipDetails(registration)
+          )
+        )
+    )
+
+  private def createGroupPartnershipDetails(
+    registration: Registration
+  ): Seq[GroupPartnershipDetails] = {
+
+    if (registration.groupDetail.nonEmpty && registration.groupDetail.get.members.isEmpty)
+      throw new IllegalStateException("Group must have members")
+
+    createRepresentative(registration.organisationDetails,
+                         registration.primaryContactDetails
+    ) +: registration.groupDetail.map {
+      groupDetail =>
+        groupDetail.members.map { member =>
+          createMember(registration, member)
+        }
+    }.get
+  }
+
+  private def createRepresentative(
+    organisationDetails: RegistrationOrganisationDetails,
+    primaryContactDetails: PrimaryContactDetails
+  ): GroupPartnershipDetails =
+    GroupPartnershipDetails(relationship = "Representative",
+                            customerIdentification1 =
+                              organisationDetails.incorporationDetails.map(
+                                details => details.companyNumber
+                              ).getOrElse(
+                                throw new IllegalStateException(
+                                  "Incorporation details are required for group representative"
+                                )
+                              ),
+                            customerIdentification2 =
+                              Some(organisationDetails.incorporationDetails.get.ctutr),
+                            organisationDetails = toGroupOrganisationDetails(organisationDetails),
+                            individualDetails = toIndividualDetails(primaryContactDetails),
+                            addressDetails =
+                              toAddressDetails(organisationDetails.businessRegisteredAddress),
+                            contactDetails = ContactDetails(primaryContactDetails)
+    )
+
+  private def createMember(
+    registration: Registration,
+    member: GroupMember
+  ): GroupPartnershipDetails =
+    GroupPartnershipDetails(relationship = "Member",
+                            customerIdentification1 = member.customerIdentification1,
+                            customerIdentification2 = member.customerIdentification2,
+                            organisationDetails = member.organisationDetails.map { details =>
+                              SubscriptionOrganisationDetails(Some(details.organisationType),
+                                                              details.organisationName
+                              )
+                            }.getOrElse(
+                              throw new IllegalStateException(
+                                "Group member must have an organisation"
+                              )
+                            ),
+                            individualDetails =
+                              toIndividualDetails(registration.primaryContactDetails),
+                            addressDetails = toSubscriptionAddressDetails(member.addressDetails),
+                            contactDetails = ContactDetails(registration.primaryContactDetails)
+    )
+
+  private def toAddressDetails(
+    address: Option[RegistrationPrimaryContactAddress]
+  ): SubscriptionAddressDetails =
+    address.map { address =>
+      SubscriptionAddressDetails(address.addressLine1,
+                                 address.addressLine2,
+                                 address.addressLine3,
+                                 Some(address.townOrCity),
+                                 Some(address.postCode),
+                                 address.country.getOrElse("GB")
+      )
+    }.getOrElse(
+      throw new IllegalStateException("Primary Contact address required for group representative")
+    )
+
+  private def toSubscriptionAddressDetails(
+    address: RegistrationAddressDetails
+  ): SubscriptionAddressDetails =
+    SubscriptionAddressDetails(address.addressLine1,
+                               address.addressLine2,
+                               address.addressLine3,
+                               address.addressLine4,
+                               address.postalCode,
+                               "GB"
+    )
+
+  private def toGroupOrganisationDetails(
+    regOrgDetails: RegistrationOrganisationDetails
+  ): SubscriptionOrganisationDetails =
+    SubscriptionOrganisationDetails(regOrgDetails.organisationType.map(orgType => orgType.toString),
+                                    regOrgDetails.incorporationDetails.map { details =>
+                                      details.companyName
+                                    }.getOrElse(
+                                      throw new IllegalStateException(
+                                        "Incorporation details are required for group representative"
+                                      )
+                                    )
+    )
+
+  private def toIndividualDetails(primary: PrimaryContactDetails): IndividualDetails = {
+    val name =
+      primary.name.getOrElse(throw new IllegalStateException("Primary contact name required"))
+
+    val allNames: Array[String] = name.split(" ")
+    allNames.length match {
+      case 1 =>
+        IndividualDetails(None, allNames(0), None, allNames(0))
+      case _ =>
+        IndividualDetails(None, allNames(0), None, allNames(allNames.length - 1))
+    }
+  }
+
+}

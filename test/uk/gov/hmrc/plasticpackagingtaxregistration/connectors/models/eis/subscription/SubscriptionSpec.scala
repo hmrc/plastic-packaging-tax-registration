@@ -16,21 +16,17 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
+import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
+
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
 import java.time.format.DateTimeFormatter
 
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-
 class SubscriptionSpec
-    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData
-    with RegistrationBuilder {
+    extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
   "Subscription" should {
     "build successfully" when {
       "UK Limited Company" in {
@@ -52,6 +48,27 @@ class SubscriptionSpec
         )
         assertCommonDetails(subscription, None)
         mustHaveValidIncorporationLegalEntityDetails(subscription)
+      }
+      "Group" in {
+        val subscription = Subscription(
+          aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                        withPrimaryContactDetails(pptPrimaryContactDetails),
+                        withLiabilityDetails(pptLiabilityDetails),
+                        withGroupDetail(groupDetail),
+                        asGroup()
+          )
+        )
+
+        subscription.groupPartnershipSubscription.get.groupPartnershipDetails.size mustBe 2
+        subscription.declaration.declarationBox1 mustBe true
+        subscription.last12MonthTotalTonnageAmt mustBe 10000
+        subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
+
+        mustHaveValidPrimaryContactDetails(subscription)
+        mustHaveValidBusinessCorrespondenceDetails(subscription)
+        mustHaveValidPrincipalPlaceOfBusinessDetails(subscription)
+        mustHaveValidIncorporationLegalEntityDetails(subscription, groupFlag = true)
+        mustHaveValidGroupPartnershipSubscription(subscription)
       }
       "Sole Trader" in {
         val subscription = Subscription(
@@ -109,7 +126,7 @@ class SubscriptionSpec
   }
 
   private def assertCommonDetails(subscription: Subscription, expectedPPTWeight: Option[Long]) = {
-    subscription.groupOrPartnershipSubscription mustBe None
+    subscription.groupPartnershipSubscription mustBe None
     subscription.declaration.declarationBox1 mustBe true
     subscription.last12MonthTotalTonnageAmt mustBe expectedPPTWeight.getOrElse(0)
     subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
@@ -149,7 +166,10 @@ class SubscriptionSpec
     subscription.businessCorrespondenceDetails.countryCode mustBe pptPrimaryContactAddress.country.get
   }
 
-  private def mustHaveValidIncorporationLegalEntityDetails(subscription: Subscription): Any = {
+  private def mustHaveValidIncorporationLegalEntityDetails(
+    subscription: Subscription,
+    groupFlag: Boolean = false
+  ): Any = {
     subscription.legalEntityDetails.customerIdentification1 mustBe pptIncorporationDetails.incorporationDetails.get.companyNumber
     subscription.legalEntityDetails.customerIdentification2 mustBe Some(
       pptIncorporationDetails.incorporationDetails.get.ctutr
@@ -158,6 +178,8 @@ class SubscriptionSpec
     subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(
       DateTimeFormatter.ofPattern("yyyy-MM-dd")
     )
+
+    subscription.legalEntityDetails.groupSubscriptionFlag mustBe groupFlag
 
     subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
     subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
@@ -227,6 +249,12 @@ class SubscriptionSpec
     subscription.primaryContactDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
     subscription.primaryContactDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
     subscription.primaryContactDetails.contactDetails.mobileNumber mustBe None
+  }
+
+  private def mustHaveValidGroupPartnershipSubscription(subscription: Subscription) = {
+    subscription.groupPartnershipSubscription.get.representativeControl mustBe true
+    subscription.groupPartnershipSubscription.get.allMembersControl mustBe true
+    subscription.groupPartnershipSubscription.get.groupPartnershipDetails.size mustBe 2
   }
 
 }

@@ -18,13 +18,9 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 
-class CustomerDetailsSpec
-    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData {
+class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
   "CustomerDetails" should {
     "build successfully" when {
       "subscripting an organisation" in {
@@ -110,7 +106,8 @@ class CustomerDetailsSpec
                   None
                 )
               )
-            )
+            ),
+            false
           )
         }
       }
@@ -124,7 +121,8 @@ class CustomerDetailsSpec
                   scottishPartnershipDetails = None
                 )
               )
-            )
+            ),
+            false
           )
         }
       }

@@ -18,25 +18,22 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum
 
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
 import java.time.format.DateTimeFormatter
 
-class LegalEntityDetailsSpec
-    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData {
+class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
   "LegalEntityDetails" should {
     "build successfully" when {
-      "subscripting an organisation" in {
-        val legalEntityDetails = LegalEntityDetails(pptIncorporationDetails)
+      "subscribing an organisation" in {
+        val legalEntityDetails = LegalEntityDetails(pptIncorporationDetails, false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
+        legalEntityDetails.groupSubscriptionFlag mustBe false
 
         legalEntityDetails.customerIdentification1 mustBe pptIncorporationDetails.incorporationDetails.get.companyNumber
         legalEntityDetails.customerIdentification2 mustBe Some(
@@ -49,8 +46,14 @@ class LegalEntityDetailsSpec
         legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptIncorporationDetails.incorporationDetails.get.companyName
         legalEntityDetails.customerDetails.individualDetails mustBe None
       }
-      "subscripting an individual" in {
-        val legalEntityDetails = LegalEntityDetails(pptSoleTraderDetails)
+
+      "subscribing a group" in {
+        val legalEntityDetails = LegalEntityDetails(pptIncorporationDetails, true)
+        legalEntityDetails.groupSubscriptionFlag mustBe true
+      }
+
+      "subscribing an individual" in {
+        val legalEntityDetails = LegalEntityDetails(pptSoleTraderDetails, false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
@@ -67,8 +70,8 @@ class LegalEntityDetailsSpec
         legalEntityDetails.customerDetails.individualDetails.get.lastName mustBe pptSoleTraderDetails.soleTraderDetails.get.lastName
         legalEntityDetails.customerDetails.individualDetails.get.middleName mustBe None
       }
-      "subscripting a general partnership" in {
-        val legalEntityDetails = LegalEntityDetails(pptGeneralPartnershipDetails)
+      "subscribing a general partnership" in {
+        val legalEntityDetails = LegalEntityDetails(pptGeneralPartnershipDetails, false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
@@ -87,8 +90,8 @@ class LegalEntityDetailsSpec
         )
         legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipName.get
       }
-      "subscripting a scottish partnership" in {
-        val legalEntityDetails = LegalEntityDetails(pptScottishPartnershipDetails)
+      "subscribing a scottish partnership" in {
+        val legalEntityDetails = LegalEntityDetails(pptScottishPartnershipDetails, false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
@@ -118,19 +121,19 @@ class LegalEntityDetailsSpec
 
       "corporate and incorporation details are missing" in {
         intercept[Exception] {
-          LegalEntityDetails(pptIncorporationDetails.copy(incorporationDetails = None))
+          LegalEntityDetails(pptIncorporationDetails.copy(incorporationDetails = None), false)
         }
       }
 
       "sole trader and sole trader details are missing" in {
         intercept[Exception] {
-          LegalEntityDetails(pptSoleTraderDetails.copy(soleTraderDetails = None))
+          LegalEntityDetails(pptSoleTraderDetails.copy(soleTraderDetails = None), false)
         }
       }
 
       "partnership and partnership details are missing" in {
         intercept[Exception] {
-          LegalEntityDetails(pptGeneralPartnershipDetails.copy(partnershipDetails = None))
+          LegalEntityDetails(pptGeneralPartnershipDetails.copy(partnershipDetails = None), false)
         }
       }
 
@@ -144,7 +147,8 @@ class LegalEntityDetailsSpec
                   partnershipName = None
                 )
               )
-            )
+            ),
+            false
           )
         }
       }
@@ -158,7 +162,8 @@ class LegalEntityDetailsSpec
                   None
                 )
               )
-            )
+            ),
+            false
           )
         }
       }
@@ -172,7 +177,8 @@ class LegalEntityDetailsSpec
                   scottishPartnershipDetails = None
                 )
               )
-            )
+            ),
+            false
           )
         }
       }

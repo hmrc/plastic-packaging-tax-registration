@@ -19,11 +19,14 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
 import java.time.format.DateTimeFormatter
-
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{
+  GroupPartnershipDetails,
+  GroupPartnershipSubscription
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
   ETMPSubscriptionStatus,
@@ -63,7 +66,7 @@ trait SubscriptionTestData {
       Seq(EISError(code = "123", reason = "error"))
     )
 
-  protected val ukLimitedCompaySubscription: Subscription = Subscription(
+  protected val ukLimitedCompanySubscription: Subscription = Subscription(
     legalEntityDetails =
       LegalEntityDetails(dateOfApplication =
                            now(UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
@@ -73,7 +76,8 @@ trait SubscriptionTestData {
                            customerType = CustomerType.Organisation,
                            organisationDetails =
                              Some(OrganisationDetails(organisationName = "Plastics Ltd"))
-                         )
+                         ),
+                         groupSubscriptionFlag = false
       ),
     principalPlaceOfBusinessDetails =
       PrincipalPlaceOfBusinessDetails(
@@ -98,7 +102,46 @@ trait SubscriptionTestData {
     taxObligationStartDate = now(UTC).toString,
     last12MonthTotalTonnageAmt = 15000,
     declaration = Declaration(declarationBox1 = true),
-    groupOrPartnershipSubscription = None
+    groupPartnershipSubscription = None
   )
+
+  private val groupPartnershipDetailsRep: GroupPartnershipDetails = GroupPartnershipDetails(
+    "Representative",
+    "123456789",
+    Some("987654321"),
+    OrganisationDetails(Some("UkCompany"), "Plastic Limited"),
+    IndividualDetails(None, "first", None, "last"),
+    AddressDetails("line1", "line2", Some("line3"), Some("line4"), Some("postcode"), "GB"),
+    ContactDetails("some@email.com", "0123-456789", None)
+  )
+
+  private val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
+    "Member",
+    "member-1",
+    Some("member-2"),
+    OrganisationDetails(Some("UkCompany"), "Plastics Member"),
+    IndividualDetails(None, "Arthur", None, "Surname"),
+    AddressDetails("addressLine1",
+                   "addressLine2",
+                   Some("addressLine3"),
+                   Some("addressLine4"),
+                   Some("postcode"),
+                   "GB"
+    ),
+    ContactDetails("member@email.com", "0987-456789", None)
+  )
+
+  protected val groupPartnershipSubscription: GroupPartnershipSubscription =
+    new GroupPartnershipSubscription(representativeControl = true,
+                                     allMembersControl = true,
+                                     Seq(groupPartnershipDetailsRep, groupPartnershipDetailsMember)
+    )
+
+  protected val ukLimitedCompanyGroupSubscription: Subscription =
+    ukLimitedCompanySubscription.copy(
+      legalEntityDetails =
+        ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = true),
+      groupPartnershipSubscription = Some(groupPartnershipSubscription)
+    )
 
 }
