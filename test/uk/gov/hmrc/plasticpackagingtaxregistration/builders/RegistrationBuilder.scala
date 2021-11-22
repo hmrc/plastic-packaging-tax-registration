@@ -59,9 +59,6 @@ trait RegistrationBuilder {
     _.copy(organisationDetails = organisationDetails)
 
   def withGroupDetail(groupDetail: GroupDetail): RegistrationModifier =
-    _.copy(groupDetail = Some(groupDetail))
-
-  def asGroup(): RegistrationModifier =
-    _.copy(registrationType = Some(RegType.GROUP))
+    _.copy(registrationType = Some(RegType.GROUP), groupDetail = Some(groupDetail))
 
 }

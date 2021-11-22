@@ -40,12 +40,12 @@ class GroupPartnershipSubscriptionSpec
                         withGroupDetail(groupDetail)
           )
 
-        val group = GroupPartnershipSubscription(registration).get
-        group.allMembersControl mustBe true
-        group.representativeControl mustBe true
+        val groupSubscription = GroupPartnershipSubscription(registration).get
+        groupSubscription.allMembersControl mustBe true
+        groupSubscription.representativeControl mustBe true
 
-        assertRepresentativeDetails(group.groupPartnershipDetails.head)
-        assertMemberDetails(group.groupPartnershipDetails(1))
+        assertRepresentativeDetails(groupSubscription.groupPartnershipDetails.head)
+        assertMemberDetails(groupSubscription.groupPartnershipDetails(1))
       }
 
       "return None when no group detail" in {
@@ -55,8 +55,8 @@ class GroupPartnershipSubscriptionSpec
                         withLiabilityDetails(pptLiabilityDetails)
           )
 
-        val group = GroupPartnershipSubscription(registration)
-        group.isDefined mustBe false
+        val groupSubscription = GroupPartnershipSubscription(registration)
+        groupSubscription.isDefined mustBe false
       }
 
       "split name when there are middle names" in {
@@ -69,14 +69,14 @@ class GroupPartnershipSubscriptionSpec
                         withGroupDetail(groupDetail)
           )
 
-        val group = GroupPartnershipSubscription(registration).get
-        group.groupPartnershipDetails.head.individualDetails.firstName mustBe "First"
-        group.groupPartnershipDetails.head.individualDetails.lastName mustBe "Last"
-        group.groupPartnershipDetails(1).individualDetails.firstName mustBe "First"
-        group.groupPartnershipDetails(1).individualDetails.lastName mustBe "Last"
+        val groupSubscription = GroupPartnershipSubscription(registration).get
+        groupSubscription.groupPartnershipDetails.head.individualDetails.firstName mustBe "First"
+        groupSubscription.groupPartnershipDetails.head.individualDetails.lastName mustBe "Last"
+        groupSubscription.groupPartnershipDetails(1).individualDetails.firstName mustBe "First"
+        groupSubscription.groupPartnershipDetails(1).individualDetails.lastName mustBe "Last"
       }
 
-      "when one word in name use it as full and last name" in {
+      "when one word in name use it as first and last name" in {
         val registration =
           aRegistration(withOrganisationDetails(pptIncorporationDetails),
                         withPrimaryContactDetails(
@@ -145,6 +145,7 @@ class GroupPartnershipSubscriptionSpec
 
   }
 
+  //TODO consider comparing with fields from Registration rather than values
   private def assertRepresentativeDetails(representative: GroupPartnershipDetails) = {
     representative.relationship mustBe "Representative"
     representative.customerIdentification1 mustBe "1234567890"

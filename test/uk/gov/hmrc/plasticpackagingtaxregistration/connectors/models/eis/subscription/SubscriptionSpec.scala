@@ -54,8 +54,7 @@ class SubscriptionSpec
           aRegistration(withOrganisationDetails(pptIncorporationDetails),
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails),
-                        withGroupDetail(groupDetail),
-                        asGroup()
+                        withGroupDetail(groupDetail)
           )
         )
 

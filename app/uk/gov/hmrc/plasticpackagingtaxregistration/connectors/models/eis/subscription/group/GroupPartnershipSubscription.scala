@@ -46,13 +46,11 @@ object GroupPartnershipSubscription {
     Json.format[GroupPartnershipSubscription]
 
   def apply(registration: Registration): Option[GroupPartnershipSubscription] =
-    registration.groupDetail.flatMap(
+    registration.groupDetail.map(
       _ =>
-        Some(
-          GroupPartnershipSubscription(representativeControl = true,
-                                       allMembersControl = true,
-                                       createGroupPartnershipDetails(registration)
-          )
+        GroupPartnershipSubscription(representativeControl = true,
+                                     allMembersControl = true,
+                                     createGroupPartnershipDetails(registration)
         )
     )
 
@@ -87,7 +85,7 @@ object GroupPartnershipSubscription {
                                 )
                               ),
                             customerIdentification2 =
-                              Some(organisationDetails.incorporationDetails.get.ctutr),
+                              organisationDetails.incorporationDetails.map(_.ctutr),
                             organisationDetails = toGroupOrganisationDetails(organisationDetails),
                             individualDetails = toIndividualDetails(primaryContactDetails),
                             addressDetails =
