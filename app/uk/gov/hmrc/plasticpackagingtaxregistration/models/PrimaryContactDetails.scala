@@ -20,12 +20,19 @@ import play.api.libs.json.{Json, OFormat}
 
 case class Address(
   addressLine1: String,
-  addressLine2: String,
+  addressLine2: Option[String] = None,
   addressLine3: Option[String] = None,
   townOrCity: String,
   postCode: String,
   country: Option[String] = Some("GB")
-)
+) {
+
+  val eisAddressLines: (String, String, Option[String], Option[String]) = {
+    val list = Seq(Some(addressLine1), addressLine2, addressLine3, Some(townOrCity)).flatten
+    (list.head, list(1), list.lift(2), list.lift(3))
+  }
+
+}
 
 object Address {
   implicit val format: OFormat[Address] = Json.format[Address]

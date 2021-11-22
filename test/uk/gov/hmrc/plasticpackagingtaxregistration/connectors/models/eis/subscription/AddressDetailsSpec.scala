@@ -29,26 +29,46 @@ class AddressDetailsSpec
 
   "AddressDetails" should {
     "map from PPT Address" when {
+      "only 'addressLine1', 'townOrCity' and 'PostCode' are available" in {
+        val pptAddress =
+          PPTAddress(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+        val addressDetails = AddressDetails(Some(pptAddress))
+        addressDetails.addressLine1 mustBe "addressLine1"
+        addressDetails.addressLine2 mustBe "Town"
+        addressDetails.addressLine3 mustBe None
+        addressDetails.addressLine4 mustBe None
+        addressDetails.postalCode mustBe Some("PostCode")
+      }
+
       "only 'addressLine1', 'addressLine2', 'townOrCity' and 'PostCode' are available" in {
         val pptAddress =
           PPTAddress(addressLine1 = "addressLine1",
-                     addressLine2 = "addressLine2",
+                     addressLine2 = Some("addressLine2"),
                      townOrCity = "Town",
                      postCode = "PostCode"
           )
         val addressDetails = AddressDetails(Some(pptAddress))
-        addressDetails.addressLine1 mustBe pptAddress.addressLine1
-        addressDetails.addressLine2 mustBe pptAddress.addressLine2
-        addressDetails.addressLine3 mustBe None
-        addressDetails.addressLine4 mustBe Some(pptAddress.townOrCity)
+        addressDetails.addressLine1 mustBe "addressLine1"
+        addressDetails.addressLine2 mustBe "addressLine2"
+        addressDetails.addressLine3 mustBe Some("Town")
+        addressDetails.addressLine4 mustBe None
+        addressDetails.postalCode mustBe Some("PostCode")
       }
 
       "all  PPT address fields are available" in {
-        val addressDetails = AddressDetails(Some(pptBusinessAddress))
-        addressDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
-        addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2
-        addressDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
-        addressDetails.addressLine4 mustBe Some(pptBusinessAddress.townOrCity)
+        val pptAddress =
+          PPTAddress(addressLine1 = "addressLine1",
+                     addressLine2 = Some("addressLine2"),
+                     addressLine3 = Some("addressLine3"),
+                     townOrCity = "Town",
+                     postCode = "PostCode"
+          )
+        val addressDetails = AddressDetails(Some(pptAddress))
+        addressDetails.addressLine1 mustBe "addressLine1"
+        addressDetails.addressLine2 mustBe "addressLine2"
+        addressDetails.addressLine3 mustBe Some("addressLine3")
+        addressDetails.addressLine4 mustBe Some("Town")
+        addressDetails.postalCode mustBe Some("PostCode")
       }
     }
 
