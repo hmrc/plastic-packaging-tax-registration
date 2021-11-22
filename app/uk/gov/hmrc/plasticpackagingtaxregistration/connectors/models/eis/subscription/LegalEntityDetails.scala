@@ -39,7 +39,7 @@ case class LegalEntityDetails(
   customerIdentification1: String,
   customerIdentification2: Option[String] = None,
   customerDetails: CustomerDetails,
-  groupSubscriptionFlag: Boolean = false,
+  groupSubscriptionFlag: Boolean,
   partnershipSubscriptionFlag: Boolean = false
 ) {
 
@@ -56,7 +56,10 @@ object LegalEntityDetails {
 
   implicit val format: OFormat[LegalEntityDetails] = Json.format[LegalEntityDetails]
 
-  implicit def apply(pptOrganisationDetails: PPTOrganisationDetails): LegalEntityDetails =
+  implicit def apply(
+    pptOrganisationDetails: PPTOrganisationDetails,
+    isGroup: Boolean
+  ): LegalEntityDetails =
     pptOrganisationDetails.organisationType match {
       case Some(OrgType.SOLE_TRADER) =>
         pptOrganisationDetails.soleTraderDetails.map { details =>
@@ -95,8 +98,10 @@ object LegalEntityDetails {
         pptOrganisationDetails.incorporationDetails.map { details =>
           updateLegalEntityDetails(customerIdentification1 = details.companyNumber,
                                    customerIdentification2 = Some(details.ctutr),
-                                   pptOrganisationDetails = pptOrganisationDetails
+                                   pptOrganisationDetails = pptOrganisationDetails,
+                                   isGroup
           )
+
         }.getOrElse(throw new IllegalStateException("Incorporation details are required"))
     }
 
@@ -106,13 +111,15 @@ object LegalEntityDetails {
   private def updateLegalEntityDetails(
     customerIdentification1: String,
     customerIdentification2: Option[String],
-    pptOrganisationDetails: PPTOrganisationDetails
+    pptOrganisationDetails: PPTOrganisationDetails,
+    isGroup: Boolean = false
   ): LegalEntityDetails =
     LegalEntityDetails(dateOfApplication = getDateOfApplication,
                        customerIdentification1 = customerIdentification1,
                        customerIdentification2 =
                          customerIdentification2,
-                       customerDetails = CustomerDetails(pptOrganisationDetails)
+                       customerDetails = CustomerDetails(pptOrganisationDetails),
+                       groupSubscriptionFlag = isGroup
     )
 
 }

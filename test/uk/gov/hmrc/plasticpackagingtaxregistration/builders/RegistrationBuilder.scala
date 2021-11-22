@@ -18,9 +18,11 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import org.joda.time.DateTime
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  GroupDetail,
   LiabilityDetails,
   OrganisationDetails,
   PrimaryContactDetails,
+  RegType,
   Registration
 }
 
@@ -55,5 +57,8 @@ trait RegistrationBuilder {
 
   def withOrganisationDetails(organisationDetails: OrganisationDetails): RegistrationModifier =
     _.copy(organisationDetails = organisationDetails)
+
+  def withGroupDetail(groupDetail: GroupDetail): RegistrationModifier =
+    _.copy(registrationType = Some(RegType.GROUP), groupDetail = Some(groupDetail))
 
 }

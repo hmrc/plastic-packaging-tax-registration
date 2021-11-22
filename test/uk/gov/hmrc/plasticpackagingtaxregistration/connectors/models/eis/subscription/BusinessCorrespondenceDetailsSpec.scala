@@ -18,16 +18,12 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.Address
 
 class BusinessCorrespondenceDetailsSpec
-    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData
-    with RegistrationBuilder {
+    extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
 
   "BusinessCorrespondenceDetails" should {
     "map from registration business entity registered address" when {

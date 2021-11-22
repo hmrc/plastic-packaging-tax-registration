@@ -20,6 +20,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  AddressDetails,
+  GroupMember,
+  OrganisationDetails => GroupOrganisationDetails
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 trait RegistrationTestData {
@@ -131,6 +136,33 @@ trait RegistrationTestData {
   protected val pptLiabilityDetails: LiabilityDetails = LiabilityDetails(
     weight = Some(LiabilityWeight(Some(10000))),
     startDate = Some(Date(day = Some(6), month = Some(4), year = Some(2022)))
+  )
+
+  protected val groupAddressDetails: AddressDetails = AddressDetails(addressLine1 = "Line 1",
+                                                                     addressLine2 = "Line 2",
+                                                                     addressLine3 = Some("Line 3"),
+                                                                     addressLine4 = Some("Line 4"),
+                                                                     Some("postcode"),
+                                                                     "GB"
+  )
+
+  protected val groupDetail = GroupDetail(membersUnderGroupControl = Some(true),
+                                          currentMemberOrganisationType = None,
+                                          members = Seq(
+                                            GroupMember(id = "some-id",
+                                                        customerIdentification1 = "customerId-1",
+                                                        customerIdentification2 =
+                                                          Some("customerId-2"),
+                                                        organisationDetails = Some(
+                                                          GroupOrganisationDetails(
+                                                            organisationType = "UkCompany",
+                                                            organisationName = "Plastic Company 1",
+                                                            businessPartnerId = None
+                                                          )
+                                                        ),
+                                                        addressDetails = groupAddressDetails
+                                            )
+                                          )
   )
 
   protected val pptLiabilityDetailsWithExpectedWeight: LiabilityDetails = LiabilityDetails(

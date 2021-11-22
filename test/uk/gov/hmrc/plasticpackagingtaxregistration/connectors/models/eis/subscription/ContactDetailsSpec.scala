@@ -18,13 +18,9 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 
-class ContactDetailsSpec
-    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData {
+class ContactDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
   "ContactDetails" should {
     "map from PPT PrimaryContactDetails" in {
       val contactDetails = ContactDetails(pptPrimaryContactDetails)

@@ -76,8 +76,12 @@ class SubscriptionsConnector @Inject() (
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
+    val createUrl =
+      if (subscription.legalEntityDetails.groupSubscriptionFlag)
+        appConfig.subscriptionCreateWithoutSafeIdUrl()
+      else appConfig.subscriptionCreateUrl(safeNumber)
 
-    httpClient.POST[Subscription, HttpResponse](url = appConfig.subscriptionCreateUrl(safeNumber),
+    httpClient.POST[Subscription, HttpResponse](url = createUrl,
                                                 body = subscription,
                                                 headers = headers :+ correlationIdHeader
     )

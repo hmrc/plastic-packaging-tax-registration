@@ -18,13 +18,9 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 
-class PrimaryContactDetailsSpec
-    extends AnyWordSpec with Matchers with SubscriptionTestData with RegistrationTestData {
+class PrimaryContactDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
 
   "PrimaryContactDetails" should {
     "build successfully" in {

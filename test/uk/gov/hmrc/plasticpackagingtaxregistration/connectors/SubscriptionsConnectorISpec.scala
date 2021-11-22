@@ -17,7 +17,6 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
 import java.time.{ZoneOffset, ZonedDateTime}
-
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post}
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
@@ -171,9 +170,9 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         )
 
         val res: SubscriptionCreateSuccessfulResponse =
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription)).asInstanceOf[
-            SubscriptionCreateSuccessfulResponse
-          ]
+          await(
+            connector.submitSubscription(safeNumber, ukLimitedCompanySubscription)
+          ).asInstanceOf[SubscriptionCreateSuccessfulResponse]
 
         res.pptReferenceNumber mustBe pptReference
         res.formBundleNumber mustBe formBundleNumber
@@ -191,7 +190,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
 
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
         resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
           SubscriptionCreateFailureResponse(
@@ -217,7 +216,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.CONFLICT, errors = errors)
 
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
         resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
           SubscriptionCreateFailureResponse(
@@ -243,7 +242,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.UNPROCESSABLE_ENTITY, errors = errors)
 
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
         resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
           SubscriptionCreateFailureResponse(
@@ -270,7 +269,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
                                           errors = errors
         )
 
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
         resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
           SubscriptionCreateFailureResponse(
@@ -291,7 +290,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
 
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
         resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
           SubscriptionCreateFailureResponse(
@@ -312,7 +311,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         stubSubscriptionSubmissionFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
 
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
         resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
           SubscriptionCreateFailureResponse(
@@ -337,7 +336,7 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         )
 
         intercept[UpstreamErrorResponse] {
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+          await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
         }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
       }
 
@@ -354,8 +353,40 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
         )
 
         intercept[UpstreamErrorResponse] {
-          await(connector.submitSubscription(safeNumber, ukLimitedCompaySubscription))
+          await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
         }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "submitting a group subscription" should {
+      "handle a 200" in {
+        val pptReference               = "XDPPT123456789"
+        val subscriptionProcessingDate = ZonedDateTime.now(ZoneOffset.UTC).toString
+        val formBundleNumber           = "1234567890"
+        stubFor(
+          post(s"/plastic-packaging-tax/subscriptions/PPT/create")
+            .willReturn(
+              aResponse()
+                .withStatus(Status.OK)
+                .withBody(
+                  Json.obj("pptReferenceNumber" -> pptReference,
+                           "processingDate"     -> subscriptionProcessingDate,
+                           "formBundleNumber"   -> formBundleNumber
+                  ).toString
+                )
+            )
+        )
+
+        val res: SubscriptionCreateSuccessfulResponse =
+          await(
+            connector.submitSubscription(safeNumber, ukLimitedCompanyGroupSubscription)
+          ).asInstanceOf[SubscriptionCreateSuccessfulResponse]
+
+        res.pptReferenceNumber mustBe pptReference
+        res.formBundleNumber mustBe formBundleNumber
+        res.processingDate mustBe ZonedDateTime.parse(subscriptionProcessingDate)
+
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
     }
   }
