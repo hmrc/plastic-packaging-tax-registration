@@ -23,15 +23,15 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   AddressDetails => SubscriptionAddressDetails,
   OrganisationDetails => SubscriptionOrganisationDetails
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  GroupMember,
+  AddressDetails => RegistrationAddressDetails
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   PrimaryContactDetails,
   Registration,
   Address => RegistrationPrimaryContactAddress,
   OrganisationDetails => RegistrationOrganisationDetails
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMember
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
-  AddressDetails => RegistrationAddressDetails
 }
 
 case class GroupPartnershipSubscription(
@@ -119,10 +119,10 @@ object GroupPartnershipSubscription {
     address: Option[RegistrationPrimaryContactAddress]
   ): SubscriptionAddressDetails =
     address.map { address =>
-      SubscriptionAddressDetails(address.addressLine1,
-                                 address.addressLine2,
-                                 address.addressLine3,
-                                 Some(address.townOrCity),
+      SubscriptionAddressDetails(address.eisAddressLines._1,
+                                 address.eisAddressLines._2,
+                                 address.eisAddressLines._3,
+                                 address.eisAddressLines._4,
                                  Some(address.postCode),
                                  address.country.getOrElse("GB")
       )
