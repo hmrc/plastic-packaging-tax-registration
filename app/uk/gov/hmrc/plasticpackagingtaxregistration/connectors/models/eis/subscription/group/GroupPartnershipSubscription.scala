@@ -23,15 +23,15 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   AddressDetails => SubscriptionAddressDetails,
   OrganisationDetails => SubscriptionOrganisationDetails
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  GroupMember,
+  AddressDetails => RegistrationAddressDetails
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   PrimaryContactDetails,
   Registration,
   Address => RegistrationPrimaryContactAddress,
   OrganisationDetails => RegistrationOrganisationDetails
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMember
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
-  AddressDetails => RegistrationAddressDetails
 }
 
 case class GroupPartnershipSubscription(
