@@ -38,10 +38,8 @@ class PrincipalPlaceOfBusinessDetailsSpec
       principalPlaceOfBusinessDetails.addressDetails.addressLine4 mustBe Some(
         pptBusinessAddress.townOrCity
       )
-      principalPlaceOfBusinessDetails.addressDetails.postalCode mustBe Some(
-        pptBusinessAddress.postCode
-      )
-      principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptBusinessAddress.country.get
+      principalPlaceOfBusinessDetails.addressDetails.postalCode mustBe pptBusinessAddress.postCode
+      principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptBusinessAddress.countryCode
 
       principalPlaceOfBusinessDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
       principalPlaceOfBusinessDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get

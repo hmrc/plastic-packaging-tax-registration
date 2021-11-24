@@ -171,7 +171,7 @@ class RegistrationControllerSpec
                                   Address(addressLine1 = "addressLine1",
                                           addressLine2 = Some("addressLine2"),
                                           townOrCity = "Town",
-                                          postCode = "PostCode"
+                                          postCode = Some("PostCode")
                                   )
                                 )
           )
@@ -187,7 +187,8 @@ class RegistrationControllerSpec
                                                                              addressLine2 =
                                                                                Some("addressLine2"),
                                                                              townOrCity = "Town",
-                                                                             postCode = "PostCode"
+                                                                             postCode =
+                                                                               Some("PostCode")
                                                                      )
                                                                    )
                                              )
@@ -206,7 +207,7 @@ class RegistrationControllerSpec
                                   Address(addressLine1 = "addressLine1",
                                           addressLine2 = Some("addressLine2"),
                                           townOrCity = "Town",
-                                          postCode = "PostCode"
+                                          postCode = Some("PostCode")
                                   )
                                 )
           )

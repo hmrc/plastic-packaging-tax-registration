@@ -34,7 +34,7 @@ trait RegistrationTestData {
             addressLine2 = Some("Some Place"),
             addressLine3 = Some("Some Area"),
             townOrCity = "Leeds",
-            postCode = "LS1 1AA"
+            postCode = Some("LS1 1AA")
     )
 
   protected val pptPrimaryContactAddress: Address =
@@ -42,7 +42,7 @@ trait RegistrationTestData {
             addressLine2 = Some("Some Other Place"),
             addressLine3 = Some("Some Other Area"),
             townOrCity = "Bradford",
-            postCode = "BD1 1AA"
+            postCode = Some("BD1 1AA")
     )
 
   protected val incorporationRegistrationDetails: IncorporationRegistrationDetails =

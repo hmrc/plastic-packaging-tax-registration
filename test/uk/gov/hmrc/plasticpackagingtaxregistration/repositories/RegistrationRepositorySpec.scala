@@ -75,7 +75,7 @@ class RegistrationRepositorySpec
                                   Address(addressLine1 = "addressLine1",
                                           addressLine2 = Some("addressLine2"),
                                           townOrCity = "Town",
-                                          postCode = "PostCode"
+                                          postCode = Some("PostCode")
                                   )
                                 )
             )
@@ -155,7 +155,7 @@ class RegistrationRepositorySpec
                                                                          addressLine2 =
                                                                            Some("addressLine2"),
                                                                          townOrCity = "Town",
-                                                                         postCode = "PostCode"
+                                                                         postCode = Some("PostCode")
                                                                  )
                                                                )
                                          )
@@ -171,7 +171,7 @@ class RegistrationRepositorySpec
                                                        addressLine2 =
                                                          Some("addressLine2"),
                                                        townOrCity = "Town",
-                                                       postCode = "PostCode"
+                                                       postCode = Some("PostCode")
                                                )
                                              )
                                          )

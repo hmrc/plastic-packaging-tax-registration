@@ -39,8 +39,8 @@ object AddressDetails {
                        addressLine2 = address.eisAddressLines._2,
                        addressLine3 = address.eisAddressLines._3,
                        addressLine4 = address.eisAddressLines._4,
-                       postalCode = Some(address.postCode),
-                       countryCode = "GB"
+                       postalCode = address.postCode,
+                       countryCode = address.countryCode
         )
       case None => throw InternalError(s"The legal entity registered address is required.")
     }

@@ -43,7 +43,7 @@ class BusinessCorrespondenceDetailsSpec
         )
         businessCorrespondenceDetails.addressLine3 mustBe pptBusinessAddress.addressLine3
         businessCorrespondenceDetails.addressLine4 mustBe Some(pptBusinessAddress.townOrCity)
-        businessCorrespondenceDetails.postalCode mustBe Some(pptBusinessAddress.postCode)
+        businessCorrespondenceDetails.postalCode mustBe pptBusinessAddress.postCode
         businessCorrespondenceDetails.countryCode mustBe "GB"
       }
     }
@@ -65,7 +65,7 @@ class BusinessCorrespondenceDetailsSpec
         )
         businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
         businessCorrespondenceDetails.addressLine4 mustBe Some(pptPrimaryContactAddress.townOrCity)
-        businessCorrespondenceDetails.postalCode mustBe Some(pptPrimaryContactAddress.postCode)
+        businessCorrespondenceDetails.postalCode mustBe pptPrimaryContactAddress.postCode
         businessCorrespondenceDetails.countryCode mustBe "GB"
       }
 
@@ -74,7 +74,7 @@ class BusinessCorrespondenceDetailsSpec
     "map address with one line" in {
 
       val businessCorrespondenceDetails = BusinessCorrespondenceDetails(
-        Address(addressLine1 = "line1", townOrCity = "town", postCode = "postcode")
+        Address(addressLine1 = "line1", townOrCity = "town", postCode = Some("postcode"))
       )
       businessCorrespondenceDetails.addressLine1 mustBe "line1"
       businessCorrespondenceDetails.addressLine2 mustBe "town"
@@ -91,7 +91,7 @@ class BusinessCorrespondenceDetailsSpec
         Address(addressLine1 = "line1",
                 addressLine2 = Some("line2"),
                 townOrCity = "town",
-                postCode = "postcode"
+                postCode = Some("postcode")
         )
       )
       businessCorrespondenceDetails.addressLine1 mustBe "line1"
@@ -110,7 +110,7 @@ class BusinessCorrespondenceDetailsSpec
                 addressLine2 = Some("line2"),
                 addressLine3 = Some("line3"),
                 townOrCity = "town",
-                postCode = "postcode"
+                postCode = Some("postcode")
         )
       )
       businessCorrespondenceDetails.addressLine1 mustBe "line1"
