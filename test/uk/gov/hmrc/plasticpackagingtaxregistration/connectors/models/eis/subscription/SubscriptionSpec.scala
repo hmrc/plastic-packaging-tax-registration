@@ -144,10 +144,8 @@ class SubscriptionSpec
     subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine4 mustBe Some(
       pptBusinessAddress.townOrCity
     )
-    subscription.principalPlaceOfBusinessDetails.addressDetails.postalCode mustBe Some(
-      pptBusinessAddress.postCode
-    )
-    subscription.principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptBusinessAddress.country.get
+    subscription.principalPlaceOfBusinessDetails.addressDetails.postalCode mustBe pptBusinessAddress.postCode
+    subscription.principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptBusinessAddress.countryCode
 
     subscription.principalPlaceOfBusinessDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
     subscription.principalPlaceOfBusinessDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
@@ -163,10 +161,8 @@ class SubscriptionSpec
     subscription.businessCorrespondenceDetails.addressLine4 mustBe Some(
       pptPrimaryContactAddress.townOrCity
     )
-    subscription.businessCorrespondenceDetails.postalCode mustBe Some(
-      pptPrimaryContactAddress.postCode
-    )
-    subscription.businessCorrespondenceDetails.countryCode mustBe pptPrimaryContactAddress.country.get
+    subscription.businessCorrespondenceDetails.postalCode mustBe pptPrimaryContactAddress.postCode
+    subscription.businessCorrespondenceDetails.countryCode mustBe pptPrimaryContactAddress.countryCode
   }
 
   private def mustHaveValidIncorporationLegalEntityDetails(

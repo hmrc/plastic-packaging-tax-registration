@@ -117,18 +117,7 @@ object GroupPartnershipSubscription {
 
   private def toAddressDetails(
     address: Option[RegistrationPrimaryContactAddress]
-  ): SubscriptionAddressDetails =
-    address.map { address =>
-      SubscriptionAddressDetails(address.eisAddressLines._1,
-                                 address.eisAddressLines._2,
-                                 address.eisAddressLines._3,
-                                 address.eisAddressLines._4,
-                                 Some(address.postCode),
-                                 address.country.getOrElse("GB")
-      )
-    }.getOrElse(
-      throw new IllegalStateException("Primary Contact address required for group representative")
-    )
+  ): SubscriptionAddressDetails = SubscriptionAddressDetails(address)
 
   private def toSubscriptionAddressDetails(
     address: RegistrationAddressDetails
@@ -138,7 +127,7 @@ object GroupPartnershipSubscription {
                                address.addressLine3,
                                address.addressLine4,
                                address.postalCode,
-                               "GB"
+                               address.countryCode
     )
 
   private def toGroupOrganisationDetails(

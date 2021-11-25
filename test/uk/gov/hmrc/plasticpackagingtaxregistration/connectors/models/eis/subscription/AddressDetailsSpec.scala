@@ -27,7 +27,10 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
     "map from PPT Address" when {
       "only 'addressLine1', 'townOrCity' and 'PostCode' are available" in {
         val pptAddress =
-          PPTAddress(addressLine1 = "addressLine1", townOrCity = "Town", postCode = "PostCode")
+          PPTAddress(addressLine1 = "addressLine1",
+                     townOrCity = "Town",
+                     postCode = Some("PostCode")
+          )
         val addressDetails = AddressDetails(Some(pptAddress))
         addressDetails.addressLine1 mustBe "addressLine1"
         addressDetails.addressLine2 mustBe "Town"
@@ -41,7 +44,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
           PPTAddress(addressLine1 = "addressLine1",
                      addressLine2 = Some("addressLine2"),
                      townOrCity = "Town",
-                     postCode = "PostCode"
+                     postCode = Some("PostCode")
           )
         val addressDetails = AddressDetails(Some(pptAddress))
         addressDetails.addressLine1 mustBe "addressLine1"
@@ -57,7 +60,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
                      addressLine2 = Some("addressLine2"),
                      addressLine3 = Some("addressLine3"),
                      townOrCity = "Town",
-                     postCode = "PostCode"
+                     postCode = Some("PostCode")
           )
         val addressDetails = AddressDetails(Some(pptAddress))
         addressDetails.addressLine1 mustBe "addressLine1"

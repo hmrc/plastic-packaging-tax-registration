@@ -23,8 +23,8 @@ case class Address(
   addressLine2: Option[String] = None,
   addressLine3: Option[String] = None,
   townOrCity: String,
-  postCode: String,
-  country: Option[String] = Some("GB")
+  postCode: Option[String],
+  countryCode: String = "GB"
 ) {
 
   val eisAddressLines: (String, String, Option[String], Option[String]) = {
