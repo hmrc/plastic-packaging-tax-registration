@@ -18,19 +18,15 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  AddressDetails,
   ContactDetails,
   IndividualDetails,
-  AddressDetails => SubscriptionAddressDetails,
   OrganisationDetails => SubscriptionOrganisationDetails
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
-  GroupMember,
-  AddressDetails => RegistrationAddressDetails
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMember
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   PrimaryContactDetails,
   Registration,
-  Address => RegistrationPrimaryContactAddress,
   OrganisationDetails => RegistrationOrganisationDetails
 }
 
@@ -89,7 +85,7 @@ object GroupPartnershipSubscription {
                             organisationDetails = toGroupOrganisationDetails(organisationDetails),
                             individualDetails = toIndividualDetails(primaryContactDetails),
                             addressDetails =
-                              toAddressDetails(organisationDetails.businessRegisteredAddress),
+                              AddressDetails(organisationDetails.registeredBusinessAddress),
                             contactDetails = ContactDetails(primaryContactDetails)
     )
 
@@ -111,23 +107,8 @@ object GroupPartnershipSubscription {
                             ),
                             individualDetails =
                               toIndividualDetails(registration.primaryContactDetails),
-                            addressDetails = toSubscriptionAddressDetails(member.addressDetails),
+                            addressDetails = AddressDetails(member.addressDetails),
                             contactDetails = ContactDetails(registration.primaryContactDetails)
-    )
-
-  private def toAddressDetails(
-    address: Option[RegistrationPrimaryContactAddress]
-  ): SubscriptionAddressDetails = SubscriptionAddressDetails(address)
-
-  private def toSubscriptionAddressDetails(
-    address: RegistrationAddressDetails
-  ): SubscriptionAddressDetails =
-    SubscriptionAddressDetails(address.addressLine1,
-                               address.addressLine2,
-                               address.addressLine3,
-                               address.addressLine4,
-                               address.postalCode,
-                               address.countryCode
     )
 
   private def toGroupOrganisationDetails(

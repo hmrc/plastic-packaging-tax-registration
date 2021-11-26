@@ -19,7 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address => PPTAddress}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PPTAddress
 
 class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
 
@@ -31,7 +31,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
                      townOrCity = "Town",
                      postCode = Some("PostCode")
           )
-        val addressDetails = AddressDetails(Some(pptAddress))
+        val addressDetails = AddressDetails(pptAddress)
         addressDetails.addressLine1 mustBe "addressLine1"
         addressDetails.addressLine2 mustBe "Town"
         addressDetails.addressLine3 mustBe None
@@ -46,7 +46,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
                      townOrCity = "Town",
                      postCode = Some("PostCode")
           )
-        val addressDetails = AddressDetails(Some(pptAddress))
+        val addressDetails = AddressDetails(pptAddress)
         addressDetails.addressLine1 mustBe "addressLine1"
         addressDetails.addressLine2 mustBe "addressLine2"
         addressDetails.addressLine3 mustBe Some("Town")
@@ -62,18 +62,12 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
                      townOrCity = "Town",
                      postCode = Some("PostCode")
           )
-        val addressDetails = AddressDetails(Some(pptAddress))
+        val addressDetails = AddressDetails(pptAddress)
         addressDetails.addressLine1 mustBe "addressLine1"
         addressDetails.addressLine2 mustBe "addressLine2"
         addressDetails.addressLine3 mustBe Some("addressLine3")
         addressDetails.addressLine4 mustBe Some("Town")
         addressDetails.postalCode mustBe Some("PostCode")
-      }
-    }
-
-    "throw exception if PPT Address is not available" in {
-      intercept[Exception] {
-        AddressDetails(None)
       }
     }
 

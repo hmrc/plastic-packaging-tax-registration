@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json._
+import uk.gov.hmrc.auth.core.InternalError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.Status
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
 
@@ -38,13 +39,20 @@ object OrgType extends Enumeration {
 
 case class OrganisationDetails(
   organisationType: Option[OrgType] = None,
-  businessRegisteredAddress: Option[Address] = None,
+  businessRegisteredAddress: Option[PPTAddress] = None,
   safeNumber: Option[String] = None,
   soleTraderDetails: Option[SoleTraderIncorporationDetails] = None,
   partnershipDetails: Option[PartnershipDetails] = None,
   incorporationDetails: Option[IncorporationDetails] = None,
   subscriptionStatus: Option[Status] = None
-)
+) {
+
+  def registeredBusinessAddress: PPTAddress =
+    businessRegisteredAddress.getOrElse(
+      throw InternalError(s"The legal entity registered address is required.")
+    )
+
+}
 
 object OrganisationDetails {
   implicit val format: OFormat[OrganisationDetails] = Json.format[OrganisationDetails]

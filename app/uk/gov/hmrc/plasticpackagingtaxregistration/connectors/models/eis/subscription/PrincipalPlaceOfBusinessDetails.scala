@@ -29,7 +29,7 @@ object PrincipalPlaceOfBusinessDetails {
 
   def apply(registration: Registration): PrincipalPlaceOfBusinessDetails =
     PrincipalPlaceOfBusinessDetails(
-      addressDetails = AddressDetails(registration.organisationDetails.businessRegisteredAddress),
+      addressDetails = AddressDetails(registration.organisationDetails.registeredBusinessAddress),
       contactDetails = ContactDetails(registration.primaryContactDetails.email.getOrElse(""),
                                       telephone =
                                         registration.primaryContactDetails.phoneNumber.getOrElse("")

@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
+import java.time.format.DateTimeFormatter
+import java.time.{ZoneOffset, ZonedDateTime}
+
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.CustomerType.{
   Individual,
@@ -30,8 +33,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   OrganisationDetails => PPTOrganisationDetails
 }
 
-import java.time.format.DateTimeFormatter
-import java.time.{ZoneOffset, ZonedDateTime}
 import scala.language.implicitConversions
 
 case class LegalEntityDetails(

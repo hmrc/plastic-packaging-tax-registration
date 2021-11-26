@@ -20,29 +20,28 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
-  AddressDetails,
   GroupMember,
   OrganisationDetails => GroupOrganisationDetails
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 trait RegistrationTestData {
 
-  protected val pptBusinessAddress: Address =
-    Address(addressLine1 = "1 Some Street",
-            addressLine2 = Some("Some Place"),
-            addressLine3 = Some("Some Area"),
-            townOrCity = "Leeds",
-            postCode = Some("LS1 1AA")
+  protected val pptBusinessAddress: PPTAddress =
+    PPTAddress(addressLine1 = "1 Some Street",
+               addressLine2 = Some("Some Place"),
+               addressLine3 = Some("Some Area"),
+               townOrCity = "Leeds",
+               postCode = Some("LS1 1AA")
     )
 
-  protected val pptPrimaryContactAddress: Address =
-    Address(addressLine1 = "2 Some Other Street",
-            addressLine2 = Some("Some Other Place"),
-            addressLine3 = Some("Some Other Area"),
-            townOrCity = "Bradford",
-            postCode = Some("BD1 1AA")
+  protected val pptPrimaryContactAddress: PPTAddress =
+    PPTAddress(addressLine1 = "2 Some Other Street",
+               addressLine2 = Some("Some Other Place"),
+               addressLine3 = Some("Some Other Area"),
+               townOrCity = "Bradford",
+               postCode = Some("BD1 1AA")
     )
 
   protected val incorporationRegistrationDetails: IncorporationRegistrationDetails =
@@ -138,12 +137,12 @@ trait RegistrationTestData {
     startDate = Some(Date(day = Some(6), month = Some(4), year = Some(2022)))
   )
 
-  protected val groupAddressDetails: AddressDetails = AddressDetails(addressLine1 = "Line 1",
-                                                                     addressLine2 = "Line 2",
-                                                                     addressLine3 = Some("Line 3"),
-                                                                     addressLine4 = Some("Line 4"),
-                                                                     Some("postcode"),
-                                                                     "GB"
+  protected val groupAddressDetails: PPTAddress = PPTAddress(addressLine1 = "Line 1",
+                                                             addressLine2 = Some("Line 2"),
+                                                             addressLine3 = Some("Line 3"),
+                                                             townOrCity = "Line 4",
+                                                             Some("postcode"),
+                                                             "GB"
   )
 
   protected val groupDetail = GroupDetail(membersUnderGroupControl = Some(true),

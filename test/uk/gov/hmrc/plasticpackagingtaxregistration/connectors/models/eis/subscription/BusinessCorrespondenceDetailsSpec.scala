@@ -20,7 +20,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.Address
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PPTAddress
 
 class BusinessCorrespondenceDetailsSpec
     extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
@@ -74,7 +74,7 @@ class BusinessCorrespondenceDetailsSpec
     "map address with one line" in {
 
       val businessCorrespondenceDetails = BusinessCorrespondenceDetails(
-        Address(addressLine1 = "line1", townOrCity = "town", postCode = Some("postcode"))
+        PPTAddress(addressLine1 = "line1", townOrCity = "town", postCode = Some("postcode"))
       )
       businessCorrespondenceDetails.addressLine1 mustBe "line1"
       businessCorrespondenceDetails.addressLine2 mustBe "town"
@@ -88,10 +88,10 @@ class BusinessCorrespondenceDetailsSpec
     "map address with two lines" in {
 
       val businessCorrespondenceDetails = BusinessCorrespondenceDetails(
-        Address(addressLine1 = "line1",
-                addressLine2 = Some("line2"),
-                townOrCity = "town",
-                postCode = Some("postcode")
+        PPTAddress(addressLine1 = "line1",
+                   addressLine2 = Some("line2"),
+                   townOrCity = "town",
+                   postCode = Some("postcode")
         )
       )
       businessCorrespondenceDetails.addressLine1 mustBe "line1"
@@ -106,11 +106,11 @@ class BusinessCorrespondenceDetailsSpec
     "map address with three lines" in {
 
       val businessCorrespondenceDetails = BusinessCorrespondenceDetails(
-        Address(addressLine1 = "line1",
-                addressLine2 = Some("line2"),
-                addressLine3 = Some("line3"),
-                townOrCity = "town",
-                postCode = Some("postcode")
+        PPTAddress(addressLine1 = "line1",
+                   addressLine2 = Some("line2"),
+                   addressLine3 = Some("line3"),
+                   townOrCity = "town",
+                   postCode = Some("postcode")
         )
       )
       businessCorrespondenceDetails.addressLine1 mustBe "line1"

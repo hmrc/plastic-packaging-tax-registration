@@ -168,10 +168,10 @@ class RegistrationControllerSpec
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
                                 address = Some(
-                                  Address(addressLine1 = "addressLine1",
-                                          addressLine2 = Some("addressLine2"),
-                                          townOrCity = "Town",
-                                          postCode = Some("PostCode")
+                                  PPTAddress(addressLine1 = "addressLine1",
+                                             addressLine2 = Some("addressLine2"),
+                                             townOrCity = "Town",
+                                             postCode = Some("PostCode")
                                   )
                                 )
           )
@@ -182,13 +182,14 @@ class RegistrationControllerSpec
                                                                    Some(OrgType.UK_COMPANY),
                                                                  businessRegisteredAddress =
                                                                    Some(
-                                                                     Address(addressLine1 =
-                                                                               "addressLine1",
-                                                                             addressLine2 =
-                                                                               Some("addressLine2"),
-                                                                             townOrCity = "Town",
-                                                                             postCode =
-                                                                               Some("PostCode")
+                                                                     PPTAddress(
+                                                                       addressLine1 =
+                                                                         "addressLine1",
+                                                                       addressLine2 =
+                                                                         Some("addressLine2"),
+                                                                       townOrCity = "Town",
+                                                                       postCode =
+                                                                         Some("PostCode")
                                                                      )
                                                                    )
                                              )
@@ -204,10 +205,10 @@ class RegistrationControllerSpec
                                 email = Some("test@test.com"),
                                 phoneNumber = Some("1234567890"),
                                 address = Some(
-                                  Address(addressLine1 = "addressLine1",
-                                          addressLine2 = Some("addressLine2"),
-                                          townOrCity = "Town",
-                                          postCode = Some("PostCode")
+                                  PPTAddress(addressLine1 = "addressLine1",
+                                             addressLine2 = Some("addressLine2"),
+                                             townOrCity = "Town",
+                                             postCode = Some("PostCode")
                                   )
                                 )
           )
