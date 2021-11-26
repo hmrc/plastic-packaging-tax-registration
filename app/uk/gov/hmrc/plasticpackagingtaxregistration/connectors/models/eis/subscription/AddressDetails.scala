@@ -17,8 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.auth.core.InternalError
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address => PPTAddress}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PPTAddress
 
 case class AddressDetails(
   addressLine1: String,
@@ -32,17 +31,13 @@ case class AddressDetails(
 object AddressDetails {
   implicit val format: OFormat[AddressDetails] = Json.format[AddressDetails]
 
-  def apply(maybeAddress: Option[PPTAddress]): AddressDetails =
-    maybeAddress match {
-      case Some(address) =>
-        AddressDetails(addressLine1 = address.eisAddressLines._1,
-                       addressLine2 = address.eisAddressLines._2,
-                       addressLine3 = address.eisAddressLines._3,
-                       addressLine4 = address.eisAddressLines._4,
-                       postalCode = address.postCode,
-                       countryCode = address.countryCode
-        )
-      case None => throw InternalError(s"The legal entity registered address is required.")
-    }
+  def apply(address: PPTAddress): AddressDetails =
+    AddressDetails(addressLine1 = address.eisAddressLines._1,
+                   addressLine2 = address.eisAddressLines._2,
+                   addressLine3 = address.eisAddressLines._3,
+                   addressLine4 = address.eisAddressLines._4,
+                   postalCode = address.postCode,
+                   countryCode = address.countryCode
+    )
 
 }

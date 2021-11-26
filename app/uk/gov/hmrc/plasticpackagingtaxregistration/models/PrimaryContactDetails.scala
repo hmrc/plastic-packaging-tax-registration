@@ -18,33 +18,13 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class Address(
-  addressLine1: String,
-  addressLine2: Option[String] = None,
-  addressLine3: Option[String] = None,
-  townOrCity: String,
-  postCode: Option[String],
-  countryCode: String = "GB"
-) {
-
-  val eisAddressLines: (String, String, Option[String], Option[String]) = {
-    val list = Seq(Some(addressLine1), addressLine2, addressLine3, Some(townOrCity)).flatten
-    (list.head, list(1), list.lift(2), list.lift(3))
-  }
-
-}
-
-object Address {
-  implicit val format: OFormat[Address] = Json.format[Address]
-}
-
 case class PrimaryContactDetails(
   name: Option[String] = None,
   jobTitle: Option[String] = None,
   email: Option[String] = None,
   phoneNumber: Option[String] = None,
   useRegisteredAddress: Option[Boolean] = None,
-  address: Option[Address] = None,
+  address: Option[PPTAddress] = None,
   journeyId: Option[String] = None
 )
 

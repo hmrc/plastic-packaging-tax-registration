@@ -17,7 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Address, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, Registration}
 
 case class BusinessCorrespondenceDetails(
   addressLine1: String,
@@ -47,7 +47,7 @@ object BusinessCorrespondenceDetails {
     BusinessCorrespondenceDetails(address)
   }
 
-  def apply(address: Address): BusinessCorrespondenceDetails =
+  def apply(address: PPTAddress): BusinessCorrespondenceDetails =
     new BusinessCorrespondenceDetails(addressLine1 = address.eisAddressLines._1,
                                       addressLine2 = address.eisAddressLines._2,
                                       addressLine3 = address.eisAddressLines._3,

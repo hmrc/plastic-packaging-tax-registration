@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models.group
+package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class AddressDetails(
+case class PPTAddress(
   addressLine1: String,
-  addressLine2: String,
+  addressLine2: Option[String] = None,
   addressLine3: Option[String] = None,
-  addressLine4: Option[String] = None,
-  postalCode: Option[String] = None,
-  countryCode: String
-)
+  townOrCity: String,
+  postCode: Option[String],
+  countryCode: String = "GB"
+) {
 
-object AddressDetails {
-  implicit val format: OFormat[AddressDetails] = Json.format[AddressDetails]
+  val eisAddressLines: (String, String, Option[String], Option[String]) = {
+    val list = Seq(Some(addressLine1), addressLine2, addressLine3, Some(townOrCity)).flatten
+    (list.head, list(1), list.lift(2), list.lift(3))
+  }
+
+}
+
+object PPTAddress {
+  implicit val format: OFormat[PPTAddress] = Json.format[PPTAddress]
 }

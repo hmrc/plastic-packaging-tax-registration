@@ -17,13 +17,14 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models.group
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PPTAddress
 
 case class GroupMember(
   id: String,
   customerIdentification1: String,
   customerIdentification2: Option[String],
   organisationDetails: Option[OrganisationDetails],
-  addressDetails: AddressDetails
+  addressDetails: PPTAddress
 )
 
 object GroupMember {
