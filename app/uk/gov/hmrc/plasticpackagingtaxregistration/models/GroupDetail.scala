@@ -18,12 +18,13 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMember
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{GroupError, GroupMember}
 
 case class GroupDetail(
   membersUnderGroupControl: Option[Boolean] = None,
   members: Seq[GroupMember] = Seq.empty,
-  currentMemberOrganisationType: Option[OrgType] = None
+  currentMemberOrganisationType: Option[OrgType] = None,
+  groupError: Option[GroupError] = None
 )
 
 object GroupDetail {
