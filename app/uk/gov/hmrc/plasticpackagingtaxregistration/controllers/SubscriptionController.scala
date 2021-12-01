@@ -82,7 +82,7 @@ class SubscriptionController @Inject() (
                                                                              formBundleNumber
                 ) =>
               logger.info(
-                s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name} with safeId $safeId, " +
+                s"Successful PPT subscription with safeId $safeId, " +
                   s"PPT Reference [$pptReferenceNumber] FormBundleId [$formBundleNumber]"
               )
               for {
@@ -113,9 +113,7 @@ class SubscriptionController @Inject() (
               logPayload(s"PPT Subscription Create failed response for safeId $safeId ",
                          failedSubscriptionResponse
               )
-              logger.warn(
-                s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name} with safeId $safeId - ${firstError.reason}"
-              )
+              logger.warn(s"Failed PPT subscription with safeId $safeId - ${firstError.reason}")
               Future.successful(Status(statusCode)(failedSubscriptionResponse))
           }
     }

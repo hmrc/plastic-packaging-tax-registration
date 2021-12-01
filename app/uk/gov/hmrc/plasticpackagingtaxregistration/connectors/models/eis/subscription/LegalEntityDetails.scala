@@ -20,10 +20,6 @@ import java.time.format.DateTimeFormatter
 import java.time.{ZoneOffset, ZonedDateTime}
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.CustomerType.{
-  Individual,
-  Organisation
-}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
@@ -42,16 +38,7 @@ case class LegalEntityDetails(
   customerDetails: CustomerDetails,
   groupSubscriptionFlag: Boolean,
   partnershipSubscriptionFlag: Boolean = false
-) {
-
-  val name: String = customerDetails.customerType match {
-    case Organisation => customerDetails.organisationDetails.get.organisationName
-    case Individual =>
-      val name = customerDetails.individualDetails.get
-      s"${name.firstName} ${name.lastName}"
-  }
-
-}
+)
 
 object LegalEntityDetails {
 
