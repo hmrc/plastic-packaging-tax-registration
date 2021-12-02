@@ -19,7 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 import java.time.LocalDate
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionDisplay.SubscriptionDisplayResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 
 case class Registration(
@@ -53,7 +53,9 @@ object Registration {
 
   implicit val format: OFormat[Registration] = Json.format[Registration]
 
-  def apply(subscription: SubscriptionDisplayResponse): Registration = {
+  def apply(subscription: Subscription): Registration = {
+
+    def illegalState(message: String) = throw new IllegalStateException(message)
 
     val regType =
       if (subscription.legalEntityDetails.groupSubscriptionFlag) Some(RegType.GROUP)
@@ -83,14 +85,13 @@ object Registration {
             companyNumber = subscription.legalEntityDetails.customerIdentification1,
             companyName = subscription.legalEntityDetails.customerDetails.organisationDetails.map(
               _.organisationName
-            ).getOrElse("UNKNOWN"),
-            ctutr = subscription.legalEntityDetails.customerIdentification2.getOrElse("UNKNOWN"),
-            businessVerificationStatus = "UNKNOWN",
+            ).getOrElse(illegalState("Missing organisation name")),
+            ctutr = subscription.legalEntityDetails.customerIdentification2.getOrElse(
+              illegalState("Missing organisation UTR")
+            ),
+            businessVerificationStatus = "UPDATE",
             companyAddress = IncorporationAddressDetails(),
-            registration =
-              IncorporationRegistrationDetails(registrationStatus = "UNKNOWN",
-                                               registeredBusinessPartnerId = None
-              )
+            registration = None
           )
         )
 
@@ -117,7 +118,7 @@ object Registration {
       weight = Some(LiabilityWeight(Some(subscription.last12MonthTotalTonnageAmt.longValue())))
     )
 
-    Registration(id = "UNKNOWN",
+    Registration(id = "UPDATE",
                  registrationType = regType,
                  groupDetail = None, //TODO
                  incorpJourneyId = None,

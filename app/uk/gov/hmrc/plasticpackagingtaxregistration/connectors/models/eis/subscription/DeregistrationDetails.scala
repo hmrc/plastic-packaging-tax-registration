@@ -14,21 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionDisplay
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-
-case class ChangeOfCircumstanceDetails(
-  changeOfCircumstance: String,
-  deregistrationDetails: Option[DeregistrationDetails] = None
-)
-
-object ChangeOfCircumstanceDetails {
-
-  implicit val format: OFormat[ChangeOfCircumstanceDetails] =
-    Json.format[ChangeOfCircumstanceDetails]
-
-}
 
 case class DeregistrationDetails(
   deregistrationReason: String,

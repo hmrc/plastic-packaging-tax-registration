@@ -27,7 +27,6 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionDisplay.SubscriptionDisplayResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
   ETMPSubscriptionStatusResponse,
   SubscriptionStatus,
@@ -126,11 +125,11 @@ class SubscriptionsConnector @Inject() (
 
   def getSubscription(
     pptReference: String
-  )(implicit hc: HeaderCarrier): Future[Either[Int, SubscriptionDisplayResponse]] = {
+  )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
-    httpClient.GET[SubscriptionDisplayResponse](appConfig.subscriptionDisplayUrl(pptReference),
-                                                headers = headers :+ correlationIdHeader
+    httpClient.GET[Subscription](appConfig.subscriptionDisplayUrl(pptReference),
+                                 headers = headers :+ correlationIdHeader
     )
       .andThen { case _ => timer.stop() }
       .map { response =>

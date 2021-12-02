@@ -16,20 +16,16 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionDisplay.SubscriptionDisplayResponse
 
 class RegistrationSpec extends AnyWordSpec with RegistrationTestData {
 
   "Registration" should {
 
-    "convert from subscription display" in {
+    "convert from subscription" in {
 
       val initialRegistration = Registration(id = "some-id",
                                              registrationType = Some(RegType.SINGLE_ENTITY),
@@ -44,27 +40,7 @@ class RegistrationSpec extends AnyWordSpec with RegistrationTestData {
 
       val existingSubscription = Subscription(initialRegistration)
 
-      val subscriptionDisplay =
-        SubscriptionDisplayResponse(processingDate =
-                                      DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()),
-                                    changeOfCircumstanceDetails = None,
-                                    legalEntityDetails = existingSubscription.legalEntityDetails,
-                                    principalPlaceOfBusinessDetails =
-                                      existingSubscription.principalPlaceOfBusinessDetails,
-                                    primaryContactDetails =
-                                      existingSubscription.primaryContactDetails,
-                                    businessCorrespondenceDetails =
-                                      existingSubscription.businessCorrespondenceDetails,
-                                    taxObligationStartDate =
-                                      existingSubscription.taxObligationStartDate,
-                                    last12MonthTotalTonnageAmt =
-                                      existingSubscription.last12MonthTotalTonnageAmt,
-                                    declaration = existingSubscription.declaration,
-                                    groupOrPartnershipSubscription =
-                                      existingSubscription.groupPartnershipSubscription
-        )
-
-      val rehydratedRegistration = Registration(subscriptionDisplay)
+      val rehydratedRegistration = Registration(existingSubscription)
 
       val updatedSubscription = Subscription(rehydratedRegistration)
 

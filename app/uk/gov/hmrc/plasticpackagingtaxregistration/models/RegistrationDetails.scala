@@ -17,5 +17,5 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 trait RegistrationDetails {
-  val registration: IncorporationRegistrationDetails
+  val registration: Option[IncorporationRegistrationDetails]
 }
