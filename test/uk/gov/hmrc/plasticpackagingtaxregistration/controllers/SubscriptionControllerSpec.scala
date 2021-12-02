@@ -31,10 +31,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationRequestBuilder
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  SubscriptionCreateFailureResponse,
-  SubscriptionCreateFailureResponseWithStatusCode,
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateFailureResponseWithStatusCode
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
+  SubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{MetaData, RegistrationRequest}
@@ -190,8 +191,8 @@ class SubscriptionControllerSpec
     "return underlying status code and error response when we receive an error response from EIS" in {
       withAuthorizedUser()
       mockGetSubscriptionSubmitFailure(
-        SubscriptionCreateFailureResponseWithStatusCode(
-          failureResponse = SubscriptionCreateFailureResponse(failures =
+        SubscriptionFailureResponseWithStatusCode(
+          failureResponse = SubscriptionFailureResponse(failures =
             List(
               EISError("ACTIVE_SUBSCRIPTION_EXISTS",
                        "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
@@ -205,7 +206,7 @@ class SubscriptionControllerSpec
       val rawResp = route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
       status(rawResp) mustBe 422
-      val resp = contentAsJson(rawResp).as[SubscriptionCreateFailureResponse]
+      val resp = contentAsJson(rawResp).as[SubscriptionFailureResponse]
       resp.failures mustBe List(
         EISError("ACTIVE_SUBSCRIPTION_EXISTS",
                  "The remote endpoint has indicated that Business Partner already has active subscription for this regime."

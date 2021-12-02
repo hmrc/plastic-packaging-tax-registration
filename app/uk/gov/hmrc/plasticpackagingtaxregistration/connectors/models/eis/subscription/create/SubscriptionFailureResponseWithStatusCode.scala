@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
 
-case class IncorporationDetails(
-  companyNumber: String,
-  companyName: String,
-  ctutr: String,
-  businessVerificationStatus: String,
-  companyAddress: IncorporationAddressDetails,
-  override val registration: Option[IncorporationRegistrationDetails]
-) extends RegistrationDetails
+case class SubscriptionFailureResponseWithStatusCode(
+  failureResponse: SubscriptionFailureResponse,
+  statusCode: Int
+) extends SubscriptionResponse
 
-object IncorporationDetails {
+object SubscriptionFailureResponseWithStatusCode {
 
-  implicit val format: Format[IncorporationDetails] = Json.format[IncorporationDetails]
+  implicit val format: OFormat[SubscriptionFailureResponseWithStatusCode] =
+    Json.format[SubscriptionFailureResponseWithStatusCode]
+
 }

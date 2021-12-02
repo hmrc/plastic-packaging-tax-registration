@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{AddressDetails, BusinessCorrespondenceDetails}
 
 case class PPTAddress(
   addressLine1: String,
@@ -36,4 +37,39 @@ case class PPTAddress(
 
 object PPTAddress {
   implicit val format: OFormat[PPTAddress] = Json.format[PPTAddress]
+
+  def apply(businessCorrespondenceDetails: BusinessCorrespondenceDetails): PPTAddress = {
+    val lines = Seq(Some(businessCorrespondenceDetails.addressLine1),
+      Some(businessCorrespondenceDetails.addressLine2),
+      businessCorrespondenceDetails.addressLine3,
+      businessCorrespondenceDetails.addressLine4
+    ).flatten
+
+    PPTAddress(lines,
+      businessCorrespondenceDetails.postalCode,
+      businessCorrespondenceDetails.countryCode
+    )
+  }
+
+  def apply(addressDetail: AddressDetails): PPTAddress = {
+
+    val lines = Seq(Some(addressDetail.addressLine1),
+      Some(addressDetail.addressLine2),
+      addressDetail.addressLine3,
+      addressDetail.addressLine4
+    ).flatten
+
+    PPTAddress(lines, addressDetail.postalCode, addressDetail.countryCode)
+  }
+
+  private def apply(lines: Seq[String], postCode: Option[String], countryCode: String): PPTAddress =
+    PPTAddress(addressLine1 = lines.head,
+      addressLine2 =
+        if (lines.size > 2) lines.lift(1) else None,
+      addressLine3 =
+        if (lines.size > 3) lines.lift(2) else None,
+      townOrCity = lines.last,
+      postCode = postCode,
+      countryCode = countryCode
+    )
 }

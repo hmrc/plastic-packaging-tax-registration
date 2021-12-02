@@ -16,10 +16,29 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
-import java.time.ZonedDateTime
+import play.api.libs.json.{Json, OFormat}
 
-trait EISSubscriptionCreateSuccessfulResponse extends EISResponse {
-  val pptReference: String
-  val processingDate: ZonedDateTime
-  val formBundleNumber: String
+case class ChangeOfCircumstanceDetails(
+  changeOfCircumstance: String,
+  deregistrationDetails: Option[DeregistrationDetails] = None
+)
+
+object ChangeOfCircumstanceDetails {
+
+  implicit val format: OFormat[ChangeOfCircumstanceDetails] =
+    Json.format[ChangeOfCircumstanceDetails]
+
+}
+
+case class DeregistrationDetails(
+  deregistrationReason: String,
+  deregistrationDate: String,
+  deregistrationDeclarationBox1: Boolean
+)
+
+object DeregistrationDetails {
+
+  implicit val format: OFormat[DeregistrationDetails] =
+    Json.format[DeregistrationDetails]
+
 }

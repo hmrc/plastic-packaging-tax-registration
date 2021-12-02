@@ -23,6 +23,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Date, RegType, Regist
 import scala.language.implicitConversions
 
 case class Subscription(
+  changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None,
   legalEntityDetails: LegalEntityDetails,
   principalPlaceOfBusinessDetails: PrincipalPlaceOfBusinessDetails,
   primaryContactDetails: PrimaryContactDetails,
@@ -44,6 +45,8 @@ object Subscription {
 
   def apply(registration: Registration): Subscription =
     Subscription(
+      changeOfCircumstanceDetails =
+        Some(ChangeOfCircumstanceDetails(changeOfCircumstance = "", deregistrationDetails = None)),
       legalEntityDetails =
         LegalEntityDetails(registration.organisationDetails, isGroup(registration)),
       principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration),

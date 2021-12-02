@@ -26,10 +26,11 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  SubscriptionCreateFailureResponse,
-  SubscriptionCreateFailureResponseWithStatusCode,
-  SubscriptionCreateSuccessfulResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.{
@@ -169,10 +170,10 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
             )
         )
 
-        val res: SubscriptionCreateSuccessfulResponse =
+        val res: SubscriptionSuccessfulResponse =
           await(
             connector.submitSubscription(safeNumber, ukLimitedCompanySubscription)
-          ).asInstanceOf[SubscriptionCreateSuccessfulResponse]
+          ).asInstanceOf[SubscriptionSuccessfulResponse]
 
         res.pptReferenceNumber mustBe pptReference
         res.formBundleNumber mustBe formBundleNumber
@@ -192,8 +193,8 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
-        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
-          SubscriptionCreateFailureResponse(
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
             List(
               EISError("INVALID_IDVALUE",
                        "Submission has not passed validation. Invalid parameter idValue."
@@ -218,8 +219,8 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
-        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
-          SubscriptionCreateFailureResponse(
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
             List(
               EISError("DUPLICATE_SUBMISSION",
                        "The remote endpoint has indicated that duplicate submission acknowledgment reference."
@@ -244,8 +245,8 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
-        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
-          SubscriptionCreateFailureResponse(
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
             List(
               EISError("ACTIVE_SUBSCRIPTION_EXISTS",
                        "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
@@ -271,8 +272,8 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
-        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
-          SubscriptionCreateFailureResponse(
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
             List(EISError("NO_DATA_FOUND", "Dependent systems are currently not responding."))
           ),
           500
@@ -292,8 +293,8 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
-        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
-          SubscriptionCreateFailureResponse(
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
             List(EISError("BAD_GATEWAY", "Dependent systems are currently not responding."))
           ),
           502
@@ -313,8 +314,8 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
 
         val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
-        resp mustBe SubscriptionCreateFailureResponseWithStatusCode(
-          SubscriptionCreateFailureResponse(
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
             List(EISError("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding."))
           ),
           503
@@ -377,10 +378,10 @@ class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with Scal
             )
         )
 
-        val res: SubscriptionCreateSuccessfulResponse =
+        val res: SubscriptionSuccessfulResponse =
           await(
             connector.submitSubscription(safeNumber, ukLimitedCompanyGroupSubscription)
-          ).asInstanceOf[SubscriptionCreateSuccessfulResponse]
+          ).asInstanceOf[SubscriptionSuccessfulResponse]
 
         res.pptReferenceNumber mustBe pptReference
         res.formBundleNumber mustBe formBundleNumber

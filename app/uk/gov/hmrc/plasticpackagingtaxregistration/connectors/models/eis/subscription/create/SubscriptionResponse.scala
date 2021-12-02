@@ -14,21 +14,6 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
 
-import play.api.libs.json.{Json, OFormat}
-
-import java.time.ZonedDateTime
-
-case class SubscriptionCreateSuccessfulResponse(
-  pptReferenceNumber: String,
-  processingDate: ZonedDateTime,
-  formBundleNumber: String
-) extends SubscriptionCreateResponse
-
-object SubscriptionCreateSuccessfulResponse {
-
-  implicit val format: OFormat[SubscriptionCreateSuccessfulResponse] =
-    Json.format[SubscriptionCreateSuccessfulResponse]
-
-}
+trait SubscriptionResponse

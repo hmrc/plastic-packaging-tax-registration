@@ -23,10 +23,11 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  SubscriptionCreateFailureResponseWithStatusCode,
-  SubscriptionCreateResponse,
-  SubscriptionCreateSuccessfulResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionResponse,
+  SubscriptionSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser
@@ -71,13 +72,13 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected def mockGetSubscriptionSubmitFailure(
     ex: Exception
-  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+  ): OngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any()))
       .thenThrow(ex)
 
   protected def mockGetSubscriptionSubmitFailure(
-    failedResponse: SubscriptionCreateFailureResponseWithStatusCode
-  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+    failedResponse: SubscriptionFailureResponseWithStatusCode
+  ): OngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
       Future.successful(failedResponse)
     )
@@ -90,8 +91,8 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
     )
 
   protected def mockGetSubscriptionCreate(
-    subscription: SubscriptionCreateSuccessfulResponse
-  ): OngoingStubbing[Future[SubscriptionCreateResponse]] =
+    subscription: SubscriptionSuccessfulResponse
+  ): OngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
       Future.successful(subscription)
     )

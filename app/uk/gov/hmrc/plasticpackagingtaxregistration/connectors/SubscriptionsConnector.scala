@@ -16,24 +16,23 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import java.util.UUID
+import com.codahale.metrics.Timer
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status
+import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
-  ETMPSubscriptionStatusResponse,
-  SubscriptionStatus,
-  SubscriptionStatusResponse
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse, SubscriptionStatus, SubscriptionStatusResponse}
 
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class SubscriptionsConnector @Inject() (
@@ -72,7 +71,7 @@ class SubscriptionsConnector @Inject() (
 
   def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
     hc: HeaderCarrier
-  ): Future[SubscriptionCreateResponse] = {
+  ): Future[SubscriptionResponse] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
@@ -93,7 +92,7 @@ class SubscriptionsConnector @Inject() (
           )
 
           if (Status.isSuccessful(subscriptionResponse.status))
-            Try(subscriptionResponse.json.as[SubscriptionCreateSuccessfulResponse]) match {
+            Try(subscriptionResponse.json.as[SubscriptionSuccessfulResponse]) match {
               case Success(successfulCreateResponse) => successfulCreateResponse
               case _ =>
                 throw UpstreamErrorResponse.apply(
@@ -105,10 +104,10 @@ class SubscriptionsConnector @Inject() (
                 )
             }
           else
-            Try(subscriptionResponse.json.as[SubscriptionCreateFailureResponse]) match {
+            Try(subscriptionResponse.json.as[SubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
-                SubscriptionCreateFailureResponseWithStatusCode(failedCreateResponse,
-                                                                subscriptionResponse.status
+                SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
+                                                          subscriptionResponse.status
                 )
               case _ =>
                 throw UpstreamErrorResponse.apply(
@@ -119,6 +118,65 @@ class SubscriptionsConnector @Inject() (
                   Status.INTERNAL_SERVER_ERROR
                 )
             }
+      }
+  }
+
+  def getSubscription(
+    pptReference: String
+  )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
+    val timer               = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
+    val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
+    httpClient.GET[Subscription](appConfig.subscriptionDisplayUrl(pptReference),
+                                 headers = headers :+ correlationIdHeader
+    )
+      .andThen { case _ => timer.stop() }
+      .map { response =>
+        logger.info(
+          s"PPT view subscription with correlationId [$correlationIdHeader._2] and pptReference [$pptReference]"
+        )
+        Right(response)
+      }
+      .recover {
+        case httpEx: UpstreamErrorResponse =>
+          logger.warn(
+            s"Upstream error returned on viewing subscription with correlationId [${correlationIdHeader._2}] and " +
+              s"pptReference [$pptReference], status: ${httpEx.statusCode}, body: ${httpEx.getMessage()}"
+          )
+          Left(httpEx.statusCode)
+        case ex: Exception =>
+          logger.warn(
+            s"Subscription display with correlationId [${correlationIdHeader._2}] and " +
+              s"pptReference [$pptReference] is currently unavailable due to [${ex.getMessage}]",
+            ex
+          )
+          Left(INTERNAL_SERVER_ERROR)
+      }
+  }
+
+  def updateSubscription(pptReference: String, subscription: Subscription)(implicit
+    hc: HeaderCarrier
+  ): Future[SubscriptionResponse] = {
+    val timer: Timer.Context = metrics.defaultRegistry.timer("ppt.subscription.update.timer").time()
+    val correlationIdHeader: (String, String) =
+      correlationIdHeaderName -> UUID.randomUUID().toString
+    httpClient.PUT[Subscription, SubscriptionSuccessfulResponse](
+      url = appConfig.subscriptionUpdateUrl(pptReference),
+      body = subscription,
+      headers = headers :+ correlationIdHeader
+    )
+      .andThen { case _ => timer.stop() }
+      .andThen {
+        case Success(response) =>
+          logger.info(
+            s"PPT subscription update sent with correlationId [${correlationIdHeader._2}] and pptReference [$pptReference] had response payload ${toJson(response)}"
+          )
+          response
+        case Failure(exception) =>
+          throw new Exception(
+            s"Subscription update with correlationId [${correlationIdHeader._2}] and " +
+              s"pptReference [$pptReference] is currently unavailable due to [${exception.getMessage}]",
+            exception
+          )
       }
   }
 

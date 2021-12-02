@@ -23,6 +23,10 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponse,
+  SubscriptionSuccessfulResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{
   GroupPartnershipDetails,
   GroupPartnershipSubscription
@@ -55,14 +59,14 @@ trait SubscriptionTestData {
   protected val subscriptionStatusResponse: SubscriptionStatusResponse =
     SubscriptionStatusResponse(status = NOT_SUBSCRIBED, pptReference = Some("ZPPT"))
 
-  protected val subscriptionCreateResponse: SubscriptionCreateSuccessfulResponse =
-    SubscriptionCreateSuccessfulResponse(pptReferenceNumber = "XMPPT123456789",
-                                         processingDate = now(UTC),
-                                         formBundleNumber = "123456789"
+  protected val subscriptionCreateResponse: SubscriptionSuccessfulResponse =
+    SubscriptionSuccessfulResponse(pptReferenceNumber = "XMPPT123456789",
+                                   processingDate = now(UTC),
+                                   formBundleNumber = "123456789"
     )
 
-  protected val subscriptionCreateFailureResponse: SubscriptionCreateFailureResponse =
-    SubscriptionCreateFailureResponse(failures =
+  protected val subscriptionCreateFailureResponse: SubscriptionFailureResponse =
+    SubscriptionFailureResponse(failures =
       Seq(EISError(code = "123", reason = "error"))
     )
 

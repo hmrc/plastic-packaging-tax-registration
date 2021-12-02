@@ -41,14 +41,15 @@ object GroupPartnershipSubscription {
   implicit val format: OFormat[GroupPartnershipSubscription] =
     Json.format[GroupPartnershipSubscription]
 
-  def apply(registration: Registration): Option[GroupPartnershipSubscription] =
-    registration.groupDetail.map(
-      _ =>
-        GroupPartnershipSubscription(representativeControl = true,
-                                     allMembersControl = true,
-                                     createGroupPartnershipDetails(registration)
-        )
-    )
+  def apply(registration: Registration): Option[GroupPartnershipSubscription] = {
+    registration.groupDetail match {
+      case Some(_) =>  Some(GroupPartnershipSubscription(representativeControl = true,
+        allMembersControl = true,
+        createGroupPartnershipDetails(registration)
+      ))
+      case None => None
+    }
+  }
 
   private def createGroupPartnershipDetails(
     registration: Registration

@@ -69,5 +69,11 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(enrolmentKey: String) =
     s"$enrolmentStoreProxyHost/enrolment-store-proxy/enrolment-store/enrolments/$enrolmentKey/groups"
 
+  def subscriptionDisplayUrl(pptReference: String): String =
+    s"$eisHost/plastic-packaging-tax/subscriptions/PPT/$pptReference/display"
+
+  def subscriptionUpdateUrl(pptReference: String): String =
+    s"$eisHost/plastic-packaging-tax/subscriptions/PPT/$pptReference/update"
+
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
 }

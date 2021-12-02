@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 
-case class SubscriptionCreateFailureResponseWithStatusCode(
-  failureResponse: SubscriptionCreateFailureResponse,
-  statusCode: Int
-) extends SubscriptionCreateResponse
+case class SubscriptionFailureResponse(failures: Seq[EISError]) extends SubscriptionResponse
 
-object SubscriptionCreateFailureResponseWithStatusCode {
+object SubscriptionFailureResponse {
 
-  implicit val format: OFormat[SubscriptionCreateFailureResponseWithStatusCode] =
-    Json.format[SubscriptionCreateFailureResponseWithStatusCode]
+  implicit val format: OFormat[SubscriptionFailureResponse] =
+    Json.format[SubscriptionFailureResponse]
 
 }
