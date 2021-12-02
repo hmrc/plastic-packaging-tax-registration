@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
+import java.time.LocalDate
+
 import org.joda.time.{DateTime, DateTimeZone}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionDisplay.SubscriptionDisplayResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 
 case class Registration(
@@ -49,4 +52,81 @@ object Registration {
   }
 
   implicit val format: OFormat[Registration] = Json.format[Registration]
+
+  def apply(subscription: SubscriptionDisplayResponse): Registration = {
+
+    val regType =
+      if (subscription.legalEntityDetails.groupSubscriptionFlag) Some(RegType.GROUP)
+      else Some(RegType.SINGLE_ENTITY)
+
+    val contact = subscription.primaryContactDetails
+
+    val contactDetails = PrimaryContactDetails(name = Some(contact.name),
+                                               jobTitle = Some(contact.positionInCompany),
+                                               email = Some(contact.contactDetails.email),
+                                               phoneNumber = Some(contact.contactDetails.telephone),
+                                               address = Some(
+                                                 PPTAddress(
+                                                   subscription.businessCorrespondenceDetails
+                                                 )
+                                               )
+    )
+    val organisationType =
+      subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
+        _.organisationType
+      ).map(OrgType.withName)
+
+    val incorporationDetails = organisationType match {
+      case Some(OrgType.UK_COMPANY) =>
+        Some(
+          IncorporationDetails(
+            companyNumber = subscription.legalEntityDetails.customerIdentification1,
+            companyName = subscription.legalEntityDetails.customerDetails.organisationDetails.map(
+              _.organisationName
+            ).getOrElse("UNKNOWN"),
+            ctutr = subscription.legalEntityDetails.customerIdentification2.getOrElse("UNKNOWN"),
+            businessVerificationStatus = "UNKNOWN",
+            companyAddress = IncorporationAddressDetails(),
+            registration =
+              IncorporationRegistrationDetails(registrationStatus = "UNKNOWN",
+                                               registeredBusinessPartnerId = None
+              )
+          )
+        )
+
+      // TODO - other OrgTypes
+      case _ => None
+    }
+    val organisationDetails = OrganisationDetails(organisationType = organisationType,
+                                                  businessRegisteredAddress =
+                                                    Some(
+                                                      PPTAddress(
+                                                        subscription.principalPlaceOfBusinessDetails.addressDetails
+                                                      )
+                                                    ),
+                                                  safeNumber = None,
+                                                  soleTraderDetails = None,  // TODO
+                                                  partnershipDetails = None, // TODO
+                                                  incorporationDetails = incorporationDetails,
+                                                  subscriptionStatus = None
+    )
+
+    val liabilityDetails = LiabilityDetails(
+      startDate =
+        Some(Date(LocalDate.parse(subscription.taxObligationStartDate))),
+      weight = Some(LiabilityWeight(Some(subscription.last12MonthTotalTonnageAmt.longValue())))
+    )
+
+    Registration(id = "UNKNOWN",
+                 registrationType = regType,
+                 groupDetail = None, //TODO
+                 incorpJourneyId = None,
+                 liabilityDetails = liabilityDetails,
+                 primaryContactDetails = contactDetails,
+                 organisationDetails = organisationDetails,
+                 metaData = MetaData(),
+                 lastModifiedDateTime = None
+    )
+  }
+
 }
