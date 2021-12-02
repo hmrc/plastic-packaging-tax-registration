@@ -47,6 +47,7 @@ object Date {
 
   def apply(date: LocalDate): Date =
     Date(Some(date.getDayOfMonth), Some(date.getMonthValue), Some(date.getYear))
+
 }
 
 case class LiabilityDetails(

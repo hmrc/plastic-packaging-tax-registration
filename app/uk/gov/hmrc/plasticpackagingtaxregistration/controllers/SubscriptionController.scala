@@ -85,32 +85,32 @@ class SubscriptionController @Inject() (
         val updatedSubscription = Subscription(updatedRegistration)
         subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
           case response @ SubscriptionSuccessfulResponse(_, _, _) =>
-            for{
+            for {
               nrsResponse <- notifyNRS(request, updatedRegistration, response)
             } yield Ok(
-                  SubscriptionUpdateWithNrsStatusResponse(pptReference =
-                                                            response.pptReferenceNumber,
-                                                          processingDate = response.processingDate,
-                                                          formBundleNumber =
-                                                            response.formBundleNumber,
-                                                          nrsNotifiedSuccessfully =
-                                                            nrsResponse.isSuccess,
-                                                          nrsSubmissionId = nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
-                                                          nrsFailureReason = None
-                  )
-                )
-              case SubscriptionFailureResponseWithStatusCode(failedSubscriptionResponse,
-                                                             statusCode
-                  ) =>
-                val firstError: EISError = failedSubscriptionResponse.failures.head
-                logPayload(s"PPT Subscription update failed for pptReference $pptReference ",
-                           failedSubscriptionResponse
-                )
-                logger.warn(
-                  s"Failed PPT update subscription for pptReference $pptReference - ${firstError.reason}"
-                )
-                Future.successful(Status(statusCode)(failedSubscriptionResponse))
-            }
+              SubscriptionUpdateWithNrsStatusResponse(
+                pptReference =
+                  response.pptReferenceNumber,
+                processingDate = response.processingDate,
+                formBundleNumber =
+                  response.formBundleNumber,
+                nrsNotifiedSuccessfully =
+                  nrsResponse.isSuccess,
+                nrsSubmissionId =
+                  nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
+                nrsFailureReason = None
+              )
+            )
+          case SubscriptionFailureResponseWithStatusCode(failedSubscriptionResponse, statusCode) =>
+            val firstError: EISError = failedSubscriptionResponse.failures.head
+            logPayload(s"PPT Subscription update failed for pptReference $pptReference ",
+                       failedSubscriptionResponse
+            )
+            logger.warn(
+              s"Failed PPT update subscription for pptReference $pptReference - ${firstError.reason}"
+            )
+            Future.successful(Status(statusCode)(failedSubscriptionResponse))
+        }
     }
 
   def submit(safeId: String): Action[RegistrationRequest] =

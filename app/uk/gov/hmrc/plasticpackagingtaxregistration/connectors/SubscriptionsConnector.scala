@@ -26,8 +26,17 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse, SubscriptionStatus, SubscriptionStatusResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionResponse,
+  SubscriptionSuccessfulResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
+  ETMPSubscriptionStatusResponse,
+  SubscriptionStatus,
+  SubscriptionStatusResponse
+}
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}

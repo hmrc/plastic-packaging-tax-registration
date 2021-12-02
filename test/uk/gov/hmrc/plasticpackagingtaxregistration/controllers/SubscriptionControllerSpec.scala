@@ -31,7 +31,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationRequestBuilder
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateFailureResponseWithStatusCode
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
   SubscriptionFailureResponse,

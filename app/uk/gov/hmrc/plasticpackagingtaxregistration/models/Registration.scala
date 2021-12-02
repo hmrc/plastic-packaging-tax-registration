@@ -17,7 +17,10 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{ChangeOfCircumstanceDetails, Subscription}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstanceDetails,
+  Subscription
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 
 import java.time.LocalDate
@@ -65,14 +68,14 @@ object Registration {
     val contact = subscription.primaryContactDetails
 
     val contactDetails = PrimaryContactDetails(name = Some(contact.name),
-      jobTitle = Some(contact.positionInCompany),
-      email = Some(contact.contactDetails.email),
-      phoneNumber = Some(contact.contactDetails.telephone),
-      address = Some(
-        PPTAddress(
-          subscription.businessCorrespondenceDetails
-        )
-      )
+                                               jobTitle = Some(contact.positionInCompany),
+                                               email = Some(contact.contactDetails.email),
+                                               phoneNumber = Some(contact.contactDetails.telephone),
+                                               address = Some(
+                                                 PPTAddress(
+                                                   subscription.businessCorrespondenceDetails
+                                                 )
+                                               )
     )
     val organisationType =
       subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
@@ -100,17 +103,17 @@ object Registration {
       case _ => None
     }
     val organisationDetails = OrganisationDetails(organisationType = organisationType,
-      businessRegisteredAddress =
-        Some(
-          PPTAddress(
-            subscription.principalPlaceOfBusinessDetails.addressDetails
-          )
-        ),
-      safeNumber = None,
-      soleTraderDetails = None,  // TODO
-      partnershipDetails = None, // TODO
-      incorporationDetails = incorporationDetails,
-      subscriptionStatus = None
+                                                  businessRegisteredAddress =
+                                                    Some(
+                                                      PPTAddress(
+                                                        subscription.principalPlaceOfBusinessDetails.addressDetails
+                                                      )
+                                                    ),
+                                                  safeNumber = None,
+                                                  soleTraderDetails = None,  // TODO
+                                                  partnershipDetails = None, // TODO
+                                                  incorporationDetails = incorporationDetails,
+                                                  subscriptionStatus = None
     )
 
     val liabilityDetails = LiabilityDetails(
@@ -120,14 +123,15 @@ object Registration {
     )
 
     Registration(id = "UPDATE",
-      registrationType = regType,
-      groupDetail = None, //TODO
-      incorpJourneyId = None,
-      liabilityDetails = liabilityDetails,
-      primaryContactDetails = contactDetails,
-      organisationDetails = organisationDetails,
-      metaData = MetaData(),
-      lastModifiedDateTime = None
+                 registrationType = regType,
+                 groupDetail = None, //TODO
+                 incorpJourneyId = None,
+                 liabilityDetails = liabilityDetails,
+                 primaryContactDetails = contactDetails,
+                 organisationDetails = organisationDetails,
+                 metaData = MetaData(),
+                 lastModifiedDateTime = None
     )
   }
+
 }

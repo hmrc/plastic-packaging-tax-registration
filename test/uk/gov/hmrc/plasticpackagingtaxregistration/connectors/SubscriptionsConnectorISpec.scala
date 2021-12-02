@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import java.time.{ZoneOffset, ZonedDateTime}
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post}
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
@@ -26,7 +25,6 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.SubscriptionCreateSuccessfulResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
   SubscriptionFailureResponse,
   SubscriptionFailureResponseWithStatusCode,
@@ -38,6 +36,8 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   UNKNOWN
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
+
+import java.time.{ZoneOffset, ZonedDateTime}
 
 class SubscriptionsConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
 
