@@ -39,8 +39,7 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
     , "metrics\\..*"
     , ".*(BuildInfo|Routes|Options).*"
   ).mkString(";"),
-//  reduced from 95% for spike
-  coverageMinimum := 94,
+  coverageMinimum := 95,
   coverageFailOnMinimum := true,
   coverageHighlighting := true,
   parallelExecution in Test := false
