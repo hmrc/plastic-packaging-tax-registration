@@ -44,9 +44,11 @@ trait RegistrationTestData {
                postCode = Some("BD1 1AA")
     )
 
-  protected val incorporationRegistrationDetails: IncorporationRegistrationDetails =
-    IncorporationRegistrationDetails(registrationStatus = "REGISTERED",
-                                     registeredBusinessPartnerId = Some("1234567890")
+  protected val registrationDetails: RegistrationDetails =
+    RegistrationDetails(identifiersMatch = true,
+                        verificationStatus = "PASS",
+                        registrationStatus = "REGISTERED",
+                        registeredBusinessPartnerId = Some("1234567890")
     )
 
   protected val pptPrimaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(
@@ -75,9 +77,8 @@ trait RegistrationTestData {
       IncorporationDetails(companyNumber = "1234567890",
                            companyName = "Plastic Limited",
                            ctutr = "987654321",
-                           businessVerificationStatus = "PASS",
                            companyAddress = IncorporationAddressDetails(),
-                           registration = incorporationRegistrationDetails
+                           registration = registrationDetails
       )
     )
   )
@@ -92,7 +93,7 @@ trait RegistrationTestData {
                                      dateOfBirth = "1978-01-01",
                                      nino = "567890123",
                                      Some("123456789"),
-                                     registration = incorporationRegistrationDetails
+                                     registration = registrationDetails
       )
     )
   )
@@ -107,7 +108,7 @@ trait RegistrationTestData {
                          generalPartnershipDetails = Some(
                            GeneralPartnershipDetails(sautr = "7454768902",
                                                      postcode = "AA1 1AA",
-                                                     registration = incorporationRegistrationDetails
+                                                     registration = registrationDetails
                            )
                          )
       )
@@ -125,7 +126,7 @@ trait RegistrationTestData {
                            ScottishPartnershipDetails(sautr = "1435676545",
                                                       postcode = "BB1 1BB",
                                                       registration =
-                                                        incorporationRegistrationDetails
+                                                        registrationDetails
                            )
                          )
       )

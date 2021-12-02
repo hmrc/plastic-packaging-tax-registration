@@ -24,8 +24,8 @@ case class SoleTraderIncorporationDetails(
   dateOfBirth: String,
   nino: String,
   sautr: Option[String],
-  override val registration: IncorporationRegistrationDetails
-) extends RegistrationDetails
+  override val registration: RegistrationDetails
+) extends HasRegistrationDetails
 
 object SoleTraderIncorporationDetails {
 
