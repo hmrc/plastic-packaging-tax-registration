@@ -107,6 +107,25 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
       Future.successful(subscription)
     )
 
+  protected def mockSubscriptionUpdate(
+    subscription: SubscriptionSuccessfulResponse
+  ): OngoingStubbing[Future[SubscriptionResponse]] =
+    when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenReturn(
+      Future.successful(subscription)
+    )
+
+  protected def mockSubscriptionUpdateFailure(
+    failedResponse: SubscriptionFailureResponseWithStatusCode
+  ): OngoingStubbing[Future[SubscriptionResponse]] =
+    when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenReturn(
+      Future.successful(failedResponse)
+    )
+
+  protected def mockSubscriptionUpdateFailure(
+    ex: Exception
+  ): OngoingStubbing[Future[SubscriptionResponse]] =
+    when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenThrow(ex)
+
   protected def mockNonRepudiationSubmission(
     response: NonRepudiationSubmissionAccepted
   ): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =

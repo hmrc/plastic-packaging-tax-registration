@@ -50,7 +50,10 @@ trait SubscriptionTestData {
     FakeRequest("GET", "/subscriptions/status/" + safeNumber)
 
   protected val subscriptionResponse_HttpGet: FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest("GET", "/registration/display/" + pptReference)
+    FakeRequest("GET", "/subscriptions/" + pptReference)
+
+  protected val subscriptionResponse_HttpPut: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("PUT", "/subscriptions/" + pptReference)
 
   protected val subscriptionCreate_HttpPost: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest("POST", "/subscriptions/" + safeNumber)
@@ -65,7 +68,7 @@ trait SubscriptionTestData {
   protected val subscriptionStatusResponse: SubscriptionStatusResponse =
     SubscriptionStatusResponse(status = NOT_SUBSCRIBED, pptReference = Some("ZPPT"))
 
-  protected val subscriptionCreateResponse: SubscriptionSuccessfulResponse =
+  protected val subscriptionSuccessfulResponse: SubscriptionSuccessfulResponse =
     SubscriptionSuccessfulResponse(pptReferenceNumber = "XMPPT123456789",
                                    processingDate = now(UTC),
                                    formBundleNumber = "123456789"

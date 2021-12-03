@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, put}
 import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
@@ -52,6 +52,7 @@ class SubscriptionsConnectorISpec
   private val pptSubscriptionSubmissionTimer = "ppt.subscription.submission.timer"
   private val pptSubscriptionStatusTimer     = "ppt.subscription.status.timer"
   private val pptSubscriptionDisplayTimer    = "ppt.subscription.display.timer"
+  private val pptSubscriptionUpdateTimer     = "ppt.subscription.update.timer"
 
   "Subscription connector" when {
     "requesting a subscription status" should {
@@ -435,6 +436,206 @@ class SubscriptionsConnectorISpec
       }
 
     }
+
+    "updating a subscription" should {
+      "handle a 200" in {
+        val pptReference                       = "XDPPT123456789"
+        val subscriptionProcessingDate: String = ZonedDateTime.now(ZoneOffset.UTC).toString
+        val formBundleNumber                   = "1234567890"
+        stubFor(
+          put(s"/plastic-packaging-tax/subscriptions/PPT/${pptReference}/update")
+            .willReturn(
+              aResponse()
+                .withStatus(Status.OK)
+                .withBody(
+                  Json.obj("pptReferenceNumber" -> pptReference,
+                           "processingDate"     -> subscriptionProcessingDate,
+                           "formBundleNumber"   -> formBundleNumber
+                  ).toString
+                )
+            )
+        )
+
+        val res: SubscriptionSuccessfulResponse =
+          await(
+            connector.updateSubscription(pptReference, ukLimitedCompanySubscription)
+          ).asInstanceOf[SubscriptionSuccessfulResponse]
+
+        res.pptReferenceNumber mustBe pptReference
+        res.formBundleNumber mustBe formBundleNumber
+        res.processingDate mustBe ZonedDateTime.parse(subscriptionProcessingDate)
+
+        getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1
+      }
+
+      "handle a 400" in {
+        val errors =
+          createErrorResponse(code = "INVALID_REGIME",
+                              reason =
+                                "Submission has not passed validation. Invalid regime."
+          )
+
+        stubSubscriptionUpdateFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
+
+        val resp = await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
+
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
+            List(
+              EISError("INVALID_REGIME", "Submission has not passed validation. Invalid regime.")
+            )
+          ),
+          400
+        )
+
+        getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1
+      }
+
+      "handle a 409" in {
+        val errors =
+          createErrorResponse(
+            code = "DUPLICATE_SUBMISSION",
+            reason =
+              "The remote endpoint has indicated that duplicate submission acknowledgment reference."
+          )
+
+        stubSubscriptionUpdateFailure(httpStatus = Status.CONFLICT, errors = errors)
+
+        val resp = await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
+
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
+            List(
+              EISError("DUPLICATE_SUBMISSION",
+                       "The remote endpoint has indicated that duplicate submission acknowledgment reference."
+              )
+            )
+          ),
+          409
+        )
+
+        getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1
+      }
+
+      "handle a 422" in {
+        val errors =
+          createErrorResponse(
+            code = "INVALID_PPT_REFERENCE_NUMBER",
+            reason =
+              "The remote endpoint has indicated that the PPT Reference Number provided is invalid."
+          )
+
+        stubSubscriptionUpdateFailure(httpStatus = Status.UNPROCESSABLE_ENTITY, errors = errors)
+
+        val resp = await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
+
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
+            List(
+              EISError("INVALID_PPT_REFERENCE_NUMBER",
+                       "The remote endpoint has indicated that the PPT Reference Number provided is invalid."
+              )
+            )
+          ),
+          422
+        )
+
+        getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1
+      }
+
+      "handle a 500" in {
+        val errors =
+          createErrorResponse(code = "NO_DATA_FOUND",
+                              reason =
+                                "Dependent systems are currently not responding."
+          )
+
+        stubSubscriptionUpdateFailure(httpStatus = Status.INTERNAL_SERVER_ERROR, errors = errors)
+
+        val resp = await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
+
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
+            List(EISError("NO_DATA_FOUND", "Dependent systems are currently not responding."))
+          ),
+          500
+        )
+
+        getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1
+      }
+
+      "handle a 502" in {
+        val errors =
+          createErrorResponse(code = "BAD_GATEWAY",
+                              reason =
+                                "Dependent systems are currently not responding."
+          )
+
+        stubSubscriptionUpdateFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
+
+        val resp = await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
+
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
+            List(EISError("BAD_GATEWAY", "Dependent systems are currently not responding."))
+          ),
+          502
+        )
+
+        getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1
+      }
+
+      "handle a 503" in {
+        val errors =
+          createErrorResponse(code = "SERVICE_UNAVAILABLE",
+                              reason =
+                                "Dependent systems are currently not responding."
+          )
+
+        stubSubscriptionUpdateFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
+
+        val resp = await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
+
+        resp mustBe SubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponse(
+            List(EISError("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding."))
+          ),
+          503
+        )
+
+        getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1
+      }
+
+      "return 500 for malformed successful responses" in {
+        stubFor(
+          put(s"/plastic-packaging-tax/subscriptions/PPT/${pptReference}/update")
+            .willReturn(
+              aResponse()
+                .withStatus(Status.OK)
+                .withBody(Json.obj("xxx" -> "xxx").toString)
+            )
+        )
+
+        intercept[UpstreamErrorResponse] {
+          await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
+        }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
+      }
+
+      "return 500 for malformed failed responses" in {
+        stubFor(
+          put(s"/plastic-packaging-tax/subscriptions/PPT/${pptReference}/update")
+            .willReturn(
+              aResponse()
+                .withStatus(Status.CONFLICT)
+                .withBody(Json.obj("xxx" -> "xxx").toString)
+            )
+        )
+
+        intercept[UpstreamErrorResponse] {
+          await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
+        }.statusCode mustBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
   }
 
   private def createErrorResponse(code: String, reason: String): Seq[EISError] =
@@ -477,6 +678,16 @@ class SubscriptionsConnectorISpec
   ): Any =
     stubFor(
       get(s"/plastic-packaging-tax/subscriptions/PPT/$pptReference/display")
+        .willReturn(
+          aResponse()
+            .withStatus(httpStatus)
+            .withBody(Json.obj("failures" -> errors).toString)
+        )
+    )
+
+  private def stubSubscriptionUpdateFailure(httpStatus: Int, errors: Seq[EISError]): Any =
+    stubFor(
+      put(s"/plastic-packaging-tax/subscriptions/PPT/${pptReference}/update")
         .willReturn(
           aResponse()
             .withStatus(httpStatus)

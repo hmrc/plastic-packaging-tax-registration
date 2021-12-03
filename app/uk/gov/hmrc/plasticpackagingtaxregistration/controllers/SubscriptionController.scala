@@ -81,10 +81,10 @@ class SubscriptionController @Inject() (
   def update(pptReference: String): Action[RegistrationRequest] =
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
-        val updatedRegistration = request.body.toRegistration(request.registrationId)
-        val updatedSubscription = Subscription(updatedRegistration)
+        val updatedRegistration: Registration = request.body.toRegistration(request.registrationId)
+        val updatedSubscription: Subscription = Subscription(updatedRegistration)
         subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
-          case response @ SubscriptionSuccessfulResponse(_, _, _) =>
+          case response @ SubscriptionSuccessfulResponse(pptReferenceNumber, _, formBundleNumber) =>
             for {
               nrsResponse <- notifyNRS(request, updatedRegistration, response)
             } yield Ok(
@@ -98,7 +98,7 @@ class SubscriptionController @Inject() (
                   nrsResponse.isSuccess,
                 nrsSubmissionId =
                   nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
-                nrsFailureReason = None
+                nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None)
               )
             )
           case SubscriptionFailureResponseWithStatusCode(failedSubscriptionResponse, statusCode) =>
