@@ -44,6 +44,10 @@ case class Date(day: Option[Int], month: Option[Int], year: Option[Int]) {
 
 object Date {
   implicit val dateFormat = Json.format[Date]
+
+  def apply(date: LocalDate): Date =
+    Date(Some(date.getDayOfMonth), Some(date.getMonthValue), Some(date.getYear))
+
 }
 
 case class LiabilityDetails(

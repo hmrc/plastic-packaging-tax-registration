@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
 import java.util.UUID
+
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
@@ -119,6 +120,38 @@ class SubscriptionsConnector @Inject() (
                   Status.INTERNAL_SERVER_ERROR
                 )
             }
+      }
+  }
+
+  def getSubscription(
+    pptReference: String
+  )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
+    val timer               = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
+    val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
+    httpClient.GET[Subscription](appConfig.subscriptionDisplayUrl(pptReference),
+                                 headers = headers :+ correlationIdHeader
+    )
+      .andThen { case _ => timer.stop() }
+      .map { response =>
+        logger.info(
+          s"PPT view subscription with correlationId [$correlationIdHeader._2] and pptReference [$pptReference]"
+        )
+        Right(response)
+      }
+      .recover {
+        case httpEx: UpstreamErrorResponse =>
+          logger.warn(
+            s"Upstream error returned on viewing subscription with correlationId [${correlationIdHeader._2}] and " +
+              s"pptReference [$pptReference], status: ${httpEx.statusCode}, body: ${httpEx.getMessage()}"
+          )
+          Left(httpEx.statusCode)
+        case ex: Exception =>
+          logger.warn(
+            s"Subscription display with correlationId [${correlationIdHeader._2}] and " +
+              s"pptReference [$pptReference] is currently unavailable due to [${ex.getMessage}]",
+            ex
+          )
+          Left(Status.INTERNAL_SERVER_ERROR)
       }
   }
 

@@ -17,6 +17,9 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models.group
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  OrganisationDetails => EISOrganisationDetails
+}
 
 case class OrganisationDetails(
   organisationType: String,
@@ -26,4 +29,13 @@ case class OrganisationDetails(
 
 object OrganisationDetails {
   implicit val format: OFormat[OrganisationDetails] = Json.format[OrganisationDetails]
+
+  def apply(details: EISOrganisationDetails): OrganisationDetails =
+    new OrganisationDetails(organisationType = details.organisationType.getOrElse(
+                              throw new IllegalStateException("Missing organisationType")
+                            ),
+                            organisationName = details.organisationName,
+                            businessPartnerId = None
+    )
+
 }
