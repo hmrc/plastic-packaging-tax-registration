@@ -77,7 +77,7 @@ trait RegistrationTestData {
                            ctutr = "987654321",
                            businessVerificationStatus = "PASS",
                            companyAddress = IncorporationAddressDetails(),
-                           registration = incorporationRegistrationDetails
+                           registration = Some(incorporationRegistrationDetails)
       )
     )
   )
@@ -89,10 +89,10 @@ trait RegistrationTestData {
     soleTraderDetails = Some(
       SoleTraderIncorporationDetails(firstName = "Test",
                                      lastName = "User",
-                                     dateOfBirth = "1978-01-01",
+                                     dateOfBirth = Some("1978-01-01"),
                                      nino = "567890123",
-                                     Some("123456789"),
-                                     registration = incorporationRegistrationDetails
+                                     sautr = Some("123456789"),
+                                     registration = Some(incorporationRegistrationDetails)
       )
     )
   )
@@ -107,7 +107,8 @@ trait RegistrationTestData {
                          generalPartnershipDetails = Some(
                            GeneralPartnershipDetails(sautr = "7454768902",
                                                      postcode = "AA1 1AA",
-                                                     registration = incorporationRegistrationDetails
+                                                     registration =
+                                                       Some(incorporationRegistrationDetails)
                            )
                          )
       )
@@ -125,7 +126,7 @@ trait RegistrationTestData {
                            ScottishPartnershipDetails(sautr = "1435676545",
                                                       postcode = "BB1 1BB",
                                                       registration =
-                                                        incorporationRegistrationDetails
+                                                        Some(incorporationRegistrationDetails)
                            )
                          )
       )

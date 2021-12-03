@@ -47,6 +47,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def subscriptionCreateWithoutSafeIdUrl(): String =
     s"$eisHost/plastic-packaging-tax/subscriptions/PPT/create"
 
+  def subscriptionDisplayUrl(pptReference: String): String =
+    s"$eisHost/plastic-packaging-tax/subscriptions/PPT/$pptReference/display"
+
   val bearerToken: String = s"Bearer ${config.get[String]("microservice.services.eis.bearerToken")}"
 
   lazy val nonRepudiationSubmissionUrl: String = s"${nrsHost}/submission"
