@@ -46,7 +46,7 @@ trait RegistrationTestData {
 
   protected val registrationDetails: RegistrationDetails =
     RegistrationDetails(identifiersMatch = true,
-                        verificationStatus = "PASS",
+                        verificationStatus = Some("PASS"),
                         registrationStatus = "REGISTERED",
                         registeredBusinessPartnerId = Some("1234567890")
     )
