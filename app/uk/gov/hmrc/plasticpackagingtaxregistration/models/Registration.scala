@@ -16,14 +16,25 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
+import java.time.LocalDate
+import java.util.UUID
+
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  ChangeOfCircumstanceDetails,
+  CustomerType,
   Subscription
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
+  OVERSEAS_COMPANY_UK_BRANCH,
+  REGISTERED_SOCIETY,
+  SOLE_TRADER,
+  UK_COMPANY
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
-
-import java.time.LocalDate
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  GroupMember,
+  OrganisationDetails => GroupDetails
+}
 
 case class Registration(
   id: String,
@@ -77,13 +88,16 @@ object Registration {
                                                  )
                                                )
     )
-    val organisationType =
-      subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
-        _.organisationType
-      ).map(OrgType.withName)
+    val organisationType = subscription.legalEntityDetails.customerDetails.customerType match {
+      case CustomerType.Individual => SOLE_TRADER
+      case CustomerType.Organisation =>
+        subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
+          _.organisationType
+        ).map(OrgType.withName).getOrElse(illegalState("Missing organisation type"))
+    }
 
     val incorporationDetails = organisationType match {
-      case Some(OrgType.UK_COMPANY) =>
+      case UK_COMPANY | REGISTERED_SOCIETY | OVERSEAS_COMPANY_UK_BRANCH =>
         Some(
           IncorporationDetails(
             companyNumber = subscription.legalEntityDetails.customerIdentification1,
@@ -98,11 +112,50 @@ object Registration {
             registration = None
           )
         )
-
-      // TODO - other OrgTypes
       case _ => None
     }
-    val organisationDetails = OrganisationDetails(organisationType = organisationType,
+    val soleTraderDetails = organisationType match {
+      case OrgType.SOLE_TRADER =>
+        Some(
+          SoleTraderIncorporationDetails(
+            firstName = subscription.legalEntityDetails.customerDetails.individualDetails.map(
+              _.firstName
+            ).getOrElse(illegalState("Missing firstName")),
+            lastName = subscription.legalEntityDetails.customerDetails.individualDetails.map(
+              _.lastName
+            ).getOrElse(illegalState("Missing lastName")),
+            nino = subscription.legalEntityDetails.customerIdentification1,
+            sautr = subscription.legalEntityDetails.customerIdentification2,
+            registration = None
+          )
+        )
+      case _ => None
+    }
+    val partnershipDetails = organisationType match {
+      case OrgType.PARTNERSHIP =>
+        Some(
+          //TODO - how to work out other partnership types?
+          PartnershipDetails(partnershipType = PartnershipTypeEnum.GENERAL_PARTNERSHIP,
+                             partnershipName =
+                               subscription.legalEntityDetails.customerDetails.organisationDetails.map(
+                                 _.organisationName
+                               ),
+                             generalPartnershipDetails = Some(
+                               GeneralPartnershipDetails(
+                                 sautr = subscription.legalEntityDetails.customerIdentification1,
+                                 postcode =
+                                   subscription.legalEntityDetails.customerIdentification2.getOrElse(
+                                     illegalState("Missing partnership postcode")
+                                   ),
+                                 registration = None
+                               )
+                             ),
+                             scottishPartnershipDetails = None
+          )
+        )
+      case _ => None
+    }
+    val organisationDetails = OrganisationDetails(organisationType = Some(organisationType),
                                                   businessRegisteredAddress =
                                                     Some(
                                                       PPTAddress(
@@ -110,21 +163,40 @@ object Registration {
                                                       )
                                                     ),
                                                   safeNumber = None,
-                                                  soleTraderDetails = None,  // TODO
-                                                  partnershipDetails = None, // TODO
+                                                  soleTraderDetails = soleTraderDetails,
+                                                  partnershipDetails = partnershipDetails,
                                                   incorporationDetails = incorporationDetails,
                                                   subscriptionStatus = None
     )
-
     val liabilityDetails = LiabilityDetails(
       startDate =
         Some(Date(LocalDate.parse(subscription.taxObligationStartDate))),
       weight = Some(LiabilityWeight(Some(subscription.last12MonthTotalTonnageAmt.longValue())))
     )
+    val groupDetail = subscription.groupPartnershipSubscription match {
+      case Some(groupPartnershipSubscription) =>
+        Some(
+          GroupDetail(
+            membersUnderGroupControl = Some(groupPartnershipSubscription.allMembersControl),
+            members = groupPartnershipSubscription.groupPartnershipDetails.filterNot(
+              _.relationship == "Representative"
+            ).map(
+              detail =>
+                GroupMember(id = UUID.randomUUID().toString,
+                            customerIdentification1 = detail.customerIdentification1,
+                            customerIdentification2 = detail.customerIdentification2,
+                            organisationDetails = Some(GroupDetails(detail.organisationDetails)),
+                            addressDetails = PPTAddress(detail.addressDetails)
+                )
+            )
+          )
+        )
+      case _ => None
+    }
 
     Registration(id = "UPDATE",
                  registrationType = regType,
-                 groupDetail = None, //TODO
+                 groupDetail = groupDetail,
                  incorpJourneyId = None,
                  liabilityDetails = liabilityDetails,
                  primaryContactDetails = contactDetails,

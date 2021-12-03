@@ -89,9 +89,9 @@ trait RegistrationTestData {
     soleTraderDetails = Some(
       SoleTraderIncorporationDetails(firstName = "Test",
                                      lastName = "User",
-                                     dateOfBirth = "1978-01-01",
+                                     dateOfBirth = Some("1978-01-01"),
                                      nino = "567890123",
-                                     Some("123456789"),
+                                     sautr = Some("123456789"),
                                      registration = Some(incorporationRegistrationDetails)
       )
     )

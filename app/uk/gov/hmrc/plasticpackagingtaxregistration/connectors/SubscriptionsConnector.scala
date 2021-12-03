@@ -158,12 +158,12 @@ class SubscriptionsConnector @Inject() (
               s"pptReference [$pptReference] is currently unavailable due to [${ex.getMessage}]",
             ex
           )
-          Left(INTERNAL_SERVER_ERROR)
+          Left(Status.INTERNAL_SERVER_ERROR)
       }
   }
 
   def updateSubscription(pptReference: String, subscription: Subscription)(implicit
-    hc: HeaderCarrier
+                                                                           hc: HeaderCarrier
   ): Future[SubscriptionResponse] = {
     val timer: Timer.Context = metrics.defaultRegistry.timer("ppt.subscription.update.timer").time()
     val correlationIdHeader: (String, String) =

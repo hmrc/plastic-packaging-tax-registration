@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
 
-case class SoleTraderIncorporationDetails(
-  firstName: String,
-  lastName: String,
-  nino: String,
-  sautr: Option[String],
-  override val registration: Option[IncorporationRegistrationDetails],
-  dateOfBirth: Option[String] = None
-) extends RegistrationDetails
+case class DeregistrationDetails(
+  deregistrationReason: String,
+  deregistrationDate: String,
+  deregistrationDeclarationBox1: Boolean
+)
 
-object SoleTraderIncorporationDetails {
+object DeregistrationDetails {
 
-  implicit val format: Format[SoleTraderIncorporationDetails] =
-    Json.format[SoleTraderIncorporationDetails]
+  implicit val format: OFormat[DeregistrationDetails] =
+    Json.format[DeregistrationDetails]
 
 }

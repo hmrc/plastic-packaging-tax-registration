@@ -19,6 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
 import java.time.format.DateTimeFormatter
+
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
@@ -37,14 +38,19 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   ETMPSubscriptionStatusResponse,
   SubscriptionStatusResponse
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType
 
 trait SubscriptionTestData {
 
-  protected val safeNumber = "123456"
-  protected val idType     = "ZPPT"
+  protected val safeNumber   = "123456"
+  protected val idType       = "ZPPT"
+  protected val pptReference = "XMPPT0000000001"
 
   protected val subscriptionStatusResponse_HttpGet: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest("GET", "/subscriptions/status/" + safeNumber)
+
+  protected val subscriptionResponse_HttpGet: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("GET", "/registration/display/" + pptReference)
 
   protected val subscriptionCreate_HttpPost: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest("POST", "/subscriptions/" + safeNumber)
@@ -76,10 +82,16 @@ trait SubscriptionTestData {
                            now(UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                          customerIdentification1 = "123456789",
                          customerIdentification2 = Some("1234567890"),
-                         customerDetails = CustomerDetails(
-                           customerType = CustomerType.Organisation,
-                           organisationDetails =
-                             Some(OrganisationDetails(organisationName = "Plastics Ltd"))
+                         customerDetails = CustomerDetails(customerType = CustomerType.Organisation,
+                                                           organisationDetails =
+                                                             Some(
+                                                               OrganisationDetails(
+                                                                 organisationType = Some(
+                                                                   OrgType.UK_COMPANY.toString
+                                                                 ),
+                                                                 organisationName = "Plastics Ltd"
+                                                               )
+                                                             )
                          ),
                          groupSubscriptionFlag = false
       ),
@@ -103,7 +115,7 @@ trait SubscriptionTestData {
                                                                   postalCode = Some("W1T 2HN"),
                                                                   countryCode = "GB"
     ),
-    taxObligationStartDate = now(UTC).toString,
+    taxObligationStartDate = now(UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
     last12MonthTotalTonnageAmt = 15000,
     declaration = Declaration(declarationBox1 = true),
     groupPartnershipSubscription = None

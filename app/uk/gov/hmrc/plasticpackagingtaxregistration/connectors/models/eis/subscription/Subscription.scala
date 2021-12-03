@@ -31,7 +31,9 @@ case class Subscription(
   declaration: Declaration,
   taxObligationStartDate: String,
   last12MonthTotalTonnageAmt: Long,
-  groupPartnershipSubscription: Option[GroupPartnershipSubscription] = None
+  groupPartnershipSubscription: Option[GroupPartnershipSubscription] = None,
+  processingDate: Option[String] = None,
+  changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None
 )
 
 object Subscription {

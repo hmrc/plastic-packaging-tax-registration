@@ -11,6 +11,9 @@ GET         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregist
 GET         /subscriptions/status/:safeNumber   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.getStatus(safeNumber: String)
 POST        /subscriptions/:safeNumber           uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.submit(safeNumber: String)
 
+# EIS SubscriptionDisplay
+GET         /registration/display/:pptReference   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionDisplayController.get(pptReference: String)
+
 # User Enrolment
 POST        /enrolment                         uk.gov.hmrc.plasticpackagingtaxregistration.controllers.UserEnrolmentController.enrol()
 
