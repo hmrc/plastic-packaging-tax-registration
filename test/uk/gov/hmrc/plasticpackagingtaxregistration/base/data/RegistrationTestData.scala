@@ -78,7 +78,7 @@ trait RegistrationTestData {
                            companyName = "Plastic Limited",
                            ctutr = "987654321",
                            companyAddress = IncorporationAddressDetails(),
-                           registration = registrationDetails
+                           registration = Some(registrationDetails)
       )
     )
   )
@@ -90,10 +90,10 @@ trait RegistrationTestData {
     soleTraderDetails = Some(
       SoleTraderIncorporationDetails(firstName = "Test",
                                      lastName = "User",
-                                     dateOfBirth = "1978-01-01",
+                                     dateOfBirth = Some("1978-01-01"),
                                      nino = "567890123",
                                      Some("123456789"),
-                                     registration = registrationDetails
+                                     registration = Some(registrationDetails)
       )
     )
   )
@@ -108,7 +108,7 @@ trait RegistrationTestData {
                          generalPartnershipDetails = Some(
                            GeneralPartnershipDetails(sautr = "7454768902",
                                                      postcode = "AA1 1AA",
-                                                     registration = registrationDetails
+                                                     registration = Some(registrationDetails)
                            )
                          )
       )
@@ -126,7 +126,7 @@ trait RegistrationTestData {
                            ScottishPartnershipDetails(sautr = "1435676545",
                                                       postcode = "BB1 1BB",
                                                       registration =
-                                                        registrationDetails
+                                                        Some(registrationDetails)
                            )
                          )
       )
