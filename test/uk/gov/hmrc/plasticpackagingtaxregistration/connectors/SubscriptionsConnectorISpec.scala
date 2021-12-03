@@ -18,7 +18,6 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
-
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post}
 import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
@@ -30,11 +29,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  Subscription,
-  SubscriptionCreateFailureResponse,
-  SubscriptionCreateFailureResponseWithStatusCode,
-  SubscriptionCreateSuccessfulResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
   SubscriptionFailureResponse,
   SubscriptionFailureResponseWithStatusCode,

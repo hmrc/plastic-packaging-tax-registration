@@ -163,7 +163,7 @@ class SubscriptionsConnector @Inject() (
   }
 
   def updateSubscription(pptReference: String, subscription: Subscription)(implicit
-                                                                           hc: HeaderCarrier
+    hc: HeaderCarrier
   ): Future[SubscriptionResponse] = {
     val timer: Timer.Context = metrics.defaultRegistry.timer("ppt.subscription.update.timer").time()
     val correlationIdHeader: (String, String) =

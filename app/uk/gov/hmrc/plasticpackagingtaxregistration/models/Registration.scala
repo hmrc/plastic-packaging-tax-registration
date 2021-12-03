@@ -18,9 +18,9 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import java.time.LocalDate
 import java.util.UUID
-
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstanceDetails,
   CustomerType,
   Subscription
 }
