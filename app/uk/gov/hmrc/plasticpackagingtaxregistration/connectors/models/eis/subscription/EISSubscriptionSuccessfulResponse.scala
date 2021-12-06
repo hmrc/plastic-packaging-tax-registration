@@ -16,19 +16,10 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
-import play.api.libs.json.{Json, OFormat}
-
 import java.time.ZonedDateTime
 
-case class SubscriptionCreateSuccessfulResponse(
-  pptReferenceNumber: String,
-  processingDate: ZonedDateTime,
-  formBundleNumber: String
-) extends SubscriptionCreateResponse
-
-object SubscriptionCreateSuccessfulResponse {
-
-  implicit val format: OFormat[SubscriptionCreateSuccessfulResponse] =
-    Json.format[SubscriptionCreateSuccessfulResponse]
-
+trait EISSubscriptionSuccessfulResponse extends EISResponse {
+  val pptReference: String
+  val processingDate: ZonedDateTime
+  val formBundleNumber: String
 }

@@ -23,6 +23,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Date, RegType, Regist
 import scala.language.implicitConversions
 
 case class Subscription(
+  changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None,
   legalEntityDetails: LegalEntityDetails,
   principalPlaceOfBusinessDetails: PrincipalPlaceOfBusinessDetails,
   primaryContactDetails: PrimaryContactDetails,
@@ -31,8 +32,7 @@ case class Subscription(
   taxObligationStartDate: String,
   last12MonthTotalTonnageAmt: Long,
   groupPartnershipSubscription: Option[GroupPartnershipSubscription] = None,
-  processingDate: Option[String] = None,
-  changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None
+  processingDate: Option[String] = None
 )
 
 object Subscription {
@@ -45,17 +45,18 @@ object Subscription {
     }
 
   def apply(registration: Registration): Subscription =
-    Subscription(
-      legalEntityDetails =
-        LegalEntityDetails(registration.organisationDetails, isGroup(registration)),
-      principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration),
-      primaryContactDetails = PrimaryContactDetails(registration.primaryContactDetails),
-      businessCorrespondenceDetails = BusinessCorrespondenceDetails(registration),
-      declaration = Declaration(true),
-      taxObligationStartDate = registration.liabilityDetails.startDate,
-      last12MonthTotalTonnageAmt =
-        registration.liabilityDetails.liabilityWeight.getOrElse(0),
-      groupPartnershipSubscription = GroupPartnershipSubscription(registration)
+    Subscription(changeOfCircumstanceDetails = registration.changeOfCircumstanceDetails,
+                 processingDate = registration.processingDate,
+                 legalEntityDetails =
+                   LegalEntityDetails(registration.organisationDetails, isGroup(registration)),
+                 principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration),
+                 primaryContactDetails = PrimaryContactDetails(registration.primaryContactDetails),
+                 businessCorrespondenceDetails = BusinessCorrespondenceDetails(registration),
+                 declaration = Declaration(true),
+                 taxObligationStartDate = registration.liabilityDetails.startDate,
+                 last12MonthTotalTonnageAmt =
+                   registration.liabilityDetails.liabilityWeight.getOrElse(0),
+                 groupPartnershipSubscription = GroupPartnershipSubscription(registration)
     )
 
   private def isGroup(registration: Registration): Boolean =

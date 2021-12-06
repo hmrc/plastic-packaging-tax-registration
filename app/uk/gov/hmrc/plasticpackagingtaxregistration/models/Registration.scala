@@ -18,9 +18,9 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import java.time.LocalDate
 import java.util.UUID
-
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstanceDetails,
   CustomerType,
   Subscription
 }
@@ -45,7 +45,9 @@ case class Registration(
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
   organisationDetails: OrganisationDetails = OrganisationDetails(),
   metaData: MetaData = MetaData(),
-  lastModifiedDateTime: Option[DateTime] = None
+  lastModifiedDateTime: Option[DateTime] = None,
+  changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None,
+  processingDate: Option[String] = None
 ) {
 
   def updateLastModified(): Registration =
@@ -165,7 +167,9 @@ object Registration {
                                                   soleTraderDetails = soleTraderDetails,
                                                   partnershipDetails = partnershipDetails,
                                                   incorporationDetails = incorporationDetails,
-                                                  subscriptionStatus = None
+                                                  subscriptionStatus = None,
+                                                  regWithoutIDFlag =
+                                                    subscription.legalEntityDetails.regWithoutIDFlag
     )
     val liabilityDetails = LiabilityDetails(
       startDate =
