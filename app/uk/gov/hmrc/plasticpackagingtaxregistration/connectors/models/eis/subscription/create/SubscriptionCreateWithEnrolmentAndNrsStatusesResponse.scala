@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.EISSubscriptionSuccessfulResponse
 
 import java.time.ZonedDateTime
 
@@ -28,7 +29,7 @@ case class SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
   nrsSubmissionId: Option[String],
   nrsFailureReason: Option[String],
   enrolmentInitiatedSuccessfully: Boolean
-) extends EISSubscriptionCreateSuccessfulResponse
+) extends EISSubscriptionSuccessfulResponse
 
 object SubscriptionCreateWithEnrolmentAndNrsStatusesResponse {
 

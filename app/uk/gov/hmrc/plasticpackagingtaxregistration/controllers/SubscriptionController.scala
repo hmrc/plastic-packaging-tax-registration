@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
-import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  Subscription,
-  SubscriptionCreateFailureResponseWithStatusCode,
-  SubscriptionCreateSuccessfulResponse,
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
   SubscriptionsConnector,
@@ -44,6 +45,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepo
 import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -60,12 +62,55 @@ class SubscriptionController @Inject() (
 
   private val logger = Logger(this.getClass)
 
-  def get(safeNumber: String): Action[AnyContent] =
+  def getStatus(safeNumber: String): Action[AnyContent] =
     authenticator.authorisedAction(parse.default) { implicit request =>
       subscriptionsConnector.getSubscriptionStatus(safeNumber).map { response =>
         logPayload(s"PPT Subscription status response for safeId $safeNumber ", response)
         Ok(response)
       }
+    }
+
+  def get(pptReference: String): Action[AnyContent] =
+    authenticator.authorisedAction(parse.default) { implicit request =>
+      subscriptionsConnector.getSubscription(pptReference).map {
+        case Right(response)       => Ok(Registration(response))
+        case Left(errorStatusCode) => new Status(errorStatusCode)
+      }
+    }
+
+  def update(pptReference: String): Action[RegistrationRequest] =
+    authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
+      implicit request =>
+        val updatedRegistration: Registration = request.body.toRegistration(request.registrationId)
+        val updatedSubscription: Subscription = Subscription(updatedRegistration)
+        subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
+          case response @ SubscriptionSuccessfulResponse(pptReferenceNumber, _, formBundleNumber) =>
+            for {
+              nrsResponse <- notifyNRS(request, updatedRegistration, response)
+            } yield Ok(
+              SubscriptionUpdateWithNrsStatusResponse(
+                pptReference =
+                  response.pptReferenceNumber,
+                processingDate = response.processingDate,
+                formBundleNumber =
+                  response.formBundleNumber,
+                nrsNotifiedSuccessfully =
+                  nrsResponse.isSuccess,
+                nrsSubmissionId =
+                  nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
+                nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None)
+              )
+            )
+          case SubscriptionFailureResponseWithStatusCode(failedSubscriptionResponse, statusCode) =>
+            val firstError: EISError = failedSubscriptionResponse.failures.head
+            logPayload(s"PPT Subscription update failed for pptReference $pptReference ",
+                       failedSubscriptionResponse
+            )
+            logger.warn(
+              s"Failed PPT update subscription for pptReference $pptReference - ${firstError.reason}"
+            )
+            Future.successful(Status(statusCode)(failedSubscriptionResponse))
+        }
     }
 
   def submit(safeId: String): Action[RegistrationRequest] =
@@ -77,9 +122,9 @@ class SubscriptionController @Inject() (
 
         subscriptionsConnector.submitSubscription(safeId, pptSubscription)
           .flatMap {
-            case subscriptionResponse @ SubscriptionCreateSuccessfulResponse(pptReferenceNumber,
-                                                                             _,
-                                                                             formBundleNumber
+            case subscriptionResponse @ SubscriptionSuccessfulResponse(pptReferenceNumber,
+                                                                       _,
+                                                                       formBundleNumber
                 ) =>
               logger.info(
                 s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name} with safeId $safeId, " +
@@ -106,8 +151,8 @@ class SubscriptionController @Inject() (
                     enrolmentResponse.isSuccess
                 )
               )
-            case SubscriptionCreateFailureResponseWithStatusCode(failedSubscriptionResponse,
-                                                                 statusCode
+            case SubscriptionFailureResponseWithStatusCode(failedSubscriptionResponse,
+                                                           statusCode
                 ) =>
               val firstError = failedSubscriptionResponse.failures.head
               logPayload(s"PPT Subscription Create failed response for safeId $safeId ",
@@ -152,7 +197,7 @@ class SubscriptionController @Inject() (
   private def notifyNRS(
     request: AuthorizedRequest[RegistrationRequest],
     registration: Registration,
-    subscriptionResponse: SubscriptionCreateSuccessfulResponse
+    subscriptionResponse: SubscriptionSuccessfulResponse
   )(implicit hc: HeaderCarrier): Future[Try[NonRepudiationSubmissionAccepted]] =
     nonRepudiationService.submitNonRepudiation(payloadString = toJson(registration).toString,
                                                submissionTimestamp =
