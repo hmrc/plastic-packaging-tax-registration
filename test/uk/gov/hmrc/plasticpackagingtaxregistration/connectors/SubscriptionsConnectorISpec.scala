@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, pu
 import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
+import play.api.http.Status.{CONFLICT, OK}
 import play.api.libs.json.Json
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.UpstreamErrorResponse
@@ -190,159 +191,31 @@ class SubscriptionsConnectorISpec
         getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
       }
 
-      "handle a 400" in {
-        val errors =
-          createErrorResponse(code = "INVALID_IDVALUE",
-                              reason =
-                                "Submission has not passed validation. Invalid parameter idValue."
-          )
-
-        stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
-
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
-
-        resp mustBe SubscriptionFailureResponseWithStatusCode(
-          SubscriptionFailureResponse(
-            List(
-              EISError("INVALID_IDVALUE",
-                       "Submission has not passed validation. Invalid parameter idValue."
+      forAll(Seq(400, 404, 422, 409, 500, 502, 503)) { statusCode =>
+        "return " + statusCode when {
+          statusCode + " is returned from downstream service" in {
+            val errors =
+              createErrorResponse(code = statusCode.toString,
+                                  reason =
+                                    "Error reason."
               )
+
+            stubSubscriptionSubmissionFailure(httpStatus = statusCode, errors = errors)
+
+            val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+
+            resp mustBe SubscriptionFailureResponseWithStatusCode(
+              SubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
+              statusCode
             )
-          ),
-          400
-        )
 
-        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
-      }
-
-      "handle a 409" in {
-        val errors =
-          createErrorResponse(
-            code = "DUPLICATE_SUBMISSION",
-            reason =
-              "The remote endpoint has indicated that duplicate submission acknowledgment reference."
-          )
-
-        stubSubscriptionSubmissionFailure(httpStatus = Status.CONFLICT, errors = errors)
-
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
-
-        resp mustBe SubscriptionFailureResponseWithStatusCode(
-          SubscriptionFailureResponse(
-            List(
-              EISError("DUPLICATE_SUBMISSION",
-                       "The remote endpoint has indicated that duplicate submission acknowledgment reference."
-              )
-            )
-          ),
-          409
-        )
-
-        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
-      }
-
-      "handle a 422" in {
-        val errors =
-          createErrorResponse(
-            code = "ACTIVE_SUBSCRIPTION_EXISTS",
-            reason =
-              "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
-          )
-
-        stubSubscriptionSubmissionFailure(httpStatus = Status.UNPROCESSABLE_ENTITY, errors = errors)
-
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
-
-        resp mustBe SubscriptionFailureResponseWithStatusCode(
-          SubscriptionFailureResponse(
-            List(
-              EISError("ACTIVE_SUBSCRIPTION_EXISTS",
-                       "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
-              )
-            )
-          ),
-          422
-        )
-
-        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
-      }
-
-      "handle a 500" in {
-        val errors =
-          createErrorResponse(code = "NO_DATA_FOUND",
-                              reason =
-                                "Dependent systems are currently not responding."
-          )
-
-        stubSubscriptionSubmissionFailure(httpStatus = Status.INTERNAL_SERVER_ERROR,
-                                          errors = errors
-        )
-
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
-
-        resp mustBe SubscriptionFailureResponseWithStatusCode(
-          SubscriptionFailureResponse(
-            List(EISError("NO_DATA_FOUND", "Dependent systems are currently not responding."))
-          ),
-          500
-        )
-
-        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
-      }
-
-      "handle a 502" in {
-        val errors =
-          createErrorResponse(code = "BAD_GATEWAY",
-                              reason =
-                                "Dependent systems are currently not responding."
-          )
-
-        stubSubscriptionSubmissionFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
-
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
-
-        resp mustBe SubscriptionFailureResponseWithStatusCode(
-          SubscriptionFailureResponse(
-            List(EISError("BAD_GATEWAY", "Dependent systems are currently not responding."))
-          ),
-          502
-        )
-
-        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
-      }
-
-      "handle a 503" in {
-        val errors =
-          createErrorResponse(code = "SERVICE_UNAVAILABLE",
-                              reason =
-                                "Dependent systems are currently not responding."
-          )
-
-        stubSubscriptionSubmissionFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
-
-        val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
-
-        resp mustBe SubscriptionFailureResponseWithStatusCode(
-          SubscriptionFailureResponse(
-            List(EISError("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding."))
-          ),
-          503
-        )
-
-        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+            getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+          }
+        }
       }
 
       "return 500 for malformed successful responses" in {
-        stubFor(
-          post(
-            s"/plastic-packaging-tax/subscriptions/PPT/create?idType=SAFEID&idValue=${safeNumber}"
-          )
-            .willReturn(
-              aResponse()
-                .withStatus(Status.OK)
-                .withBody(Json.obj("xxx" -> "xxx").toString)
-            )
-        )
+        stubSubscriptionSubmitException(OK)
 
         intercept[UpstreamErrorResponse] {
           await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
@@ -350,16 +223,7 @@ class SubscriptionsConnectorISpec
       }
 
       "return 500 for malformed failed responses" in {
-        stubFor(
-          post(
-            s"/plastic-packaging-tax/subscriptions/PPT/create?idType=SAFEID&idValue=${safeNumber}"
-          )
-            .willReturn(
-              aResponse()
-                .withStatus(Status.CONFLICT)
-                .withBody(Json.obj("xxx" -> "xxx").toString)
-            )
-        )
+        stubSubscriptionSubmitException(CONFLICT)
 
         intercept[UpstreamErrorResponse] {
           await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
@@ -569,6 +433,16 @@ class SubscriptionsConnectorISpec
   private def stubSubscriptionUpdateException(httpStatus: Int): Any =
     stubFor(
       put(s"/plastic-packaging-tax/subscriptions/PPT/${pptReference}/update")
+        .willReturn(
+          aResponse()
+            .withStatus(httpStatus)
+            .withBody(Json.obj("xxx" -> "xxx").toString)
+        )
+    )
+
+  private def stubSubscriptionSubmitException(httpStatus: Int): Any =
+    stubFor(
+      post(s"/plastic-packaging-tax/subscriptions/PPT/create?idType=SAFEID&idValue=${safeNumber}")
         .willReturn(
           aResponse()
             .withStatus(httpStatus)
