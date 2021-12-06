@@ -38,6 +38,40 @@ class RegistrationSpec extends AnyWordSpec with RegistrationTestData with Regist
 
     }
 
+    "convert from overseas company with UK branch subscription" in {
+
+      val ukCompanyRegistration =
+        aRegistration(
+          withOrganisationDetails(
+            pptIncorporationDetails.copy(organisationType =
+              Some(OrgType.OVERSEAS_COMPANY_UK_BRANCH)
+            )
+          ),
+          withPrimaryContactDetails(pptPrimaryContactDetails),
+          withLiabilityDetails(pptLiabilityDetails)
+        )
+
+      assertConversion(ukCompanyRegistration)
+
+    }
+
+    "convert from registered society subscription" in {
+
+      val ukCompanyRegistration =
+        aRegistration(
+          withOrganisationDetails(
+            pptIncorporationDetails.copy(organisationType =
+              Some(OrgType.REGISTERED_SOCIETY)
+            )
+          ),
+          withPrimaryContactDetails(pptPrimaryContactDetails),
+          withLiabilityDetails(pptLiabilityDetails)
+        )
+
+      assertConversion(ukCompanyRegistration)
+
+    }
+
     "convert from sole trader subscription" in {
 
       val soleTraderRegistration =
