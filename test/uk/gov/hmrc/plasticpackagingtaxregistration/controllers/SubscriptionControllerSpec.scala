@@ -38,7 +38,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{MetaData, RegistrationRequest}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  MetaData,
+  Registration,
+  RegistrationRequest
+}
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -223,7 +227,7 @@ class SubscriptionControllerSpec
       val result: Future[Result] = route(app, subscriptionResponse_HttpGet).get
 
       status(result) must be(OK)
-      //      contentAsJson(result) mustBe toJson(subscriptionStatusResponse)
+      contentAsJson(result) mustBe toJson(Registration(ukLimitedCompanySubscription))
       verify(mockSubscriptionsConnector).getSubscription(ArgumentMatchers.eq(pptReference))(any())
     }
 
