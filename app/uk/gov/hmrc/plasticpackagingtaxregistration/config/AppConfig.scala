@@ -73,4 +73,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     s"$enrolmentStoreProxyHost/enrolment-store-proxy/enrolment-store/enrolments/$enrolmentKey/groups"
 
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
+
+  val mongoUri = config.get[String]("mongodb.uri")
+  val mongoDb = config.get[String]("mongodb.database")
+  val mongoCollection = config.get[String]("mongodb.collection")
 }
