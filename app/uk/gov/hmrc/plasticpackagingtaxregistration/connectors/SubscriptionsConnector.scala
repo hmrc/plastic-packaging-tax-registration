@@ -176,7 +176,7 @@ class SubscriptionsConnector @Inject() (
         subscriptionUpdateResponse =>
           logger.info(
             s"Update PPT subscription sent with correlationId [${correlationIdHeader._2}] " +
-              s"and safeId [$pptReference] had response payload had response payload ${subscriptionUpdateResponse.json}"
+              s"and pptReference [$pptReference] had response payload had response payload ${subscriptionUpdateResponse.json}"
           )
 
           if (Status.isSuccessful(subscriptionUpdateResponse.status))
@@ -185,7 +185,7 @@ class SubscriptionsConnector @Inject() (
               case _ =>
                 throw UpstreamErrorResponse.apply(
                   s"PPT subscription update with correlationId [${correlationIdHeader._2}] " +
-                    s"and safeId [$pptReference] failed - successful response in unexpected format",
+                    s"and pptReference [$pptReference] failed - successful response in unexpected format",
                   Status.INTERNAL_SERVER_ERROR
                 )
             }
@@ -198,7 +198,7 @@ class SubscriptionsConnector @Inject() (
               case _ =>
                 throw UpstreamErrorResponse.apply(
                   s"PPT subscription update with correlationId [${correlationIdHeader._2}] " +
-                    s"and safeId [$pptReference] failed - failed response in unexpected format",
+                    s"and pptReference [$pptReference] failed - failed response in unexpected format",
                   Status.INTERNAL_SERVER_ERROR
                 )
             }

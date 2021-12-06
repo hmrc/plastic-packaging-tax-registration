@@ -46,7 +46,8 @@ case class Registration(
   organisationDetails: OrganisationDetails = OrganisationDetails(),
   metaData: MetaData = MetaData(),
   lastModifiedDateTime: Option[DateTime] = None,
-  changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None
+  changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None,
+  processingDate: Option[String] = None
 ) {
 
   def updateLastModified(): Registration =
@@ -166,7 +167,9 @@ object Registration {
                                                   soleTraderDetails = soleTraderDetails,
                                                   partnershipDetails = partnershipDetails,
                                                   incorporationDetails = incorporationDetails,
-                                                  subscriptionStatus = None
+                                                  subscriptionStatus = None,
+                                                  regWithoutIDFlag =
+                                                    subscription.legalEntityDetails.regWithoutIDFlag
     )
     val liabilityDetails = LiabilityDetails(
       startDate =
