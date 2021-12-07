@@ -213,10 +213,15 @@ trait RegistrationTestData {
                          customerIdentification1 = "123456789",
                          customerIdentification2 = Some("1234567890"),
                          customerDetails =
-                           CustomerDetails(
-                             customerType = CustomerType.Organisation,
-                             organisationDetails =
-                               Some(EISOrganisationDetails(organisationName = "Plastics Ltd", organisationType = Some(OrgType.UK_COMPANY.toString)))
+                           CustomerDetails(customerType = CustomerType.Organisation,
+                                           organisationDetails =
+                                             Some(
+                                               EISOrganisationDetails(
+                                                 organisationName = "Plastics Ltd",
+                                                 organisationType =
+                                                   Some(OrgType.UK_COMPANY.toString)
+                                               )
+                                             )
                            ),
                          groupSubscriptionFlag = false,
                          partnershipSubscriptionFlag = false
