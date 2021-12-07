@@ -41,7 +41,8 @@ case class LegalEntityDetails(
   customerIdentification2: Option[String] = None,
   customerDetails: CustomerDetails,
   groupSubscriptionFlag: Boolean,
-  partnershipSubscriptionFlag: Boolean = false
+  partnershipSubscriptionFlag: Boolean = false,
+  regWithoutIDFlag: Option[Boolean] = None
 ) {
 
   val name: String = customerDetails.customerType match {
@@ -120,7 +121,8 @@ object LegalEntityDetails {
                        customerIdentification2 =
                          customerIdentification2,
                        customerDetails = CustomerDetails(pptOrganisationDetails),
-                       groupSubscriptionFlag = isGroup
+                       groupSubscriptionFlag = isGroup,
+                       regWithoutIDFlag = pptOrganisationDetails.regWithoutIDFlag
     )
 
 }

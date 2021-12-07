@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
+package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
 
-import java.time.ZonedDateTime
-
-trait EISSubscriptionCreateSuccessfulResponse extends EISResponse {
-  val pptReference: String
-  val processingDate: ZonedDateTime
-  val formBundleNumber: String
-}
+trait SubscriptionResponse

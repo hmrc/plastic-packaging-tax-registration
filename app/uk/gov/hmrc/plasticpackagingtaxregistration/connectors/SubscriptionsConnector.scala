@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import java.util.UUID
-
+import com.codahale.metrics.Timer
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.Json._
@@ -27,12 +25,20 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionResponse,
+  SubscriptionSuccessfulResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
   ETMPSubscriptionStatusResponse,
   SubscriptionStatus,
   SubscriptionStatusResponse
 }
 
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
@@ -73,7 +79,7 @@ class SubscriptionsConnector @Inject() (
 
   def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
     hc: HeaderCarrier
-  ): Future[SubscriptionCreateResponse] = {
+  ): Future[SubscriptionResponse] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
@@ -94,7 +100,7 @@ class SubscriptionsConnector @Inject() (
           )
 
           if (Status.isSuccessful(subscriptionResponse.status))
-            Try(subscriptionResponse.json.as[SubscriptionCreateSuccessfulResponse]) match {
+            Try(subscriptionResponse.json.as[SubscriptionSuccessfulResponse]) match {
               case Success(successfulCreateResponse) => successfulCreateResponse
               case _ =>
                 throw UpstreamErrorResponse.apply(
@@ -106,10 +112,10 @@ class SubscriptionsConnector @Inject() (
                 )
             }
           else
-            Try(subscriptionResponse.json.as[SubscriptionCreateFailureResponse]) match {
+            Try(subscriptionResponse.json.as[SubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
-                SubscriptionCreateFailureResponseWithStatusCode(failedCreateResponse,
-                                                                subscriptionResponse.status
+                SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
+                                                          subscriptionResponse.status
                 )
               case _ =>
                 throw UpstreamErrorResponse.apply(
@@ -152,6 +158,50 @@ class SubscriptionsConnector @Inject() (
             ex
           )
           Left(Status.INTERNAL_SERVER_ERROR)
+      }
+  }
+
+  def updateSubscription(pptReference: String, subscription: Subscription)(implicit
+    hc: HeaderCarrier
+  ): Future[SubscriptionResponse] = {
+    val timer: Timer.Context = metrics.defaultRegistry.timer("ppt.subscription.update.timer").time()
+    val correlationIdHeader: (String, String) =
+      correlationIdHeaderName -> UUID.randomUUID().toString
+    httpClient.PUT[Subscription, HttpResponse](url = appConfig.subscriptionUpdateUrl(pptReference),
+                                               body = subscription,
+                                               headers = headers :+ correlationIdHeader
+    )
+      .andThen { case _ => timer.stop() }
+      .map {
+        subscriptionUpdateResponse =>
+          logger.info(
+            s"Update PPT subscription sent with correlationId [${correlationIdHeader._2}] " +
+              s"and pptReference [$pptReference] had response payload had response payload ${subscriptionUpdateResponse.json}"
+          )
+
+          if (Status.isSuccessful(subscriptionUpdateResponse.status))
+            Try(subscriptionUpdateResponse.json.as[SubscriptionSuccessfulResponse]) match {
+              case Success(successfulCreateResponse) => successfulCreateResponse
+              case _ =>
+                throw UpstreamErrorResponse.apply(
+                  s"PPT subscription update with correlationId [${correlationIdHeader._2}] " +
+                    s"and pptReference [$pptReference] failed - successful response in unexpected format",
+                  Status.INTERNAL_SERVER_ERROR
+                )
+            }
+          else
+            Try(subscriptionUpdateResponse.json.as[SubscriptionFailureResponse]) match {
+              case Success(failedCreateResponse) =>
+                SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
+                                                          subscriptionUpdateResponse.status
+                )
+              case _ =>
+                throw UpstreamErrorResponse.apply(
+                  s"PPT subscription update with correlationId [${correlationIdHeader._2}] " +
+                    s"and pptReference [$pptReference] failed - failed response in unexpected format",
+                  Status.INTERNAL_SERVER_ERROR
+                )
+            }
       }
   }
 
