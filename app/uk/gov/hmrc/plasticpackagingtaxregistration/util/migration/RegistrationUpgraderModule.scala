@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.util.migration
 
 import com.google.inject.AbstractModule
 
-class EagerLoaderModule extends AbstractModule {
+class RegistrationUpgraderModule extends AbstractModule {
 
   override def configure() =
     bind(classOf[RegistrationUpgrader]).asEagerSingleton()
