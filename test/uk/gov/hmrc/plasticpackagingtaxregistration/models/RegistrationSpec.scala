@@ -26,6 +26,16 @@ class RegistrationSpec extends AnyWordSpec with RegistrationTestData with Regist
 
   "Registration" should {
 
+    "convert from subscription to registration and then to subscription " in {
+
+      val rehydratedRegistration = Registration(ukLimitedCompany)
+
+      val updatedSubscription = Subscription(rehydratedRegistration)
+
+      updatedSubscription mustBe ukLimitedCompany
+
+    }
+
     "convert from UK company subscription" in {
 
       val ukCompanyRegistration =

@@ -16,6 +16,19 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  AddressDetails,
+  BusinessCorrespondenceDetails,
+  ContactDetails,
+  CustomerDetails,
+  CustomerType,
+  Declaration,
+  LegalEntityDetails,
+  PrincipalPlaceOfBusinessDetails,
+  Subscription,
+  OrganisationDetails => EISOrganisationDetails,
+  PrimaryContactDetails => EISPrimaryContactDetails
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
@@ -25,6 +38,8 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
   GroupMember,
   OrganisationDetails => GroupOrganisationDetails
 }
+
+import java.time.{ZoneOffset, ZonedDateTime}
 
 trait RegistrationTestData {
 
@@ -175,5 +190,54 @@ trait RegistrationTestData {
   protected val registrationCompleted: Boolean = true
 
   protected val pptUserHeaders: Map[String, String] = Map("testHeaderKey" -> "testHeaderValue")
+
+  protected val ukAddressDetails: AddressDetails = AddressDetails(addressLine1 = "2-3 Scala Street",
+                                                                  addressLine2 = "London",
+                                                                  postalCode = Some("W1T 2HN"),
+                                                                  countryCode = "GB"
+  )
+
+  protected val ukBusinessCorrespondenceDetails: BusinessCorrespondenceDetails =
+    BusinessCorrespondenceDetails(addressLine1 = "2-3 Scala Street",
+                                  addressLine2 = "London",
+                                  postalCode = Some("W1T 2HN"),
+                                  countryCode = "GB"
+    )
+
+  protected val ukContactDetails: ContactDetails =
+    ContactDetails(email = "test@test.com", telephone = "02034567890")
+
+  protected val ukLimitedCompany: Subscription = Subscription(
+    legalEntityDetails =
+      LegalEntityDetails(dateOfApplication = ZonedDateTime.now(ZoneOffset.UTC).toLocalDate.toString,
+                         customerIdentification1 = "123456789",
+                         customerIdentification2 = Some("1234567890"),
+                         customerDetails =
+                           CustomerDetails(
+                             customerType = CustomerType.Organisation,
+                             organisationDetails =
+                               Some(EISOrganisationDetails(organisationName = "Plastics Ltd", organisationType = Some(OrgType.UK_COMPANY.toString)))
+                           ),
+                         groupSubscriptionFlag = false,
+                         partnershipSubscriptionFlag = false
+      ),
+    principalPlaceOfBusinessDetails =
+      PrincipalPlaceOfBusinessDetails(addressDetails = ukAddressDetails,
+                                      contactDetails = ukContactDetails
+      ),
+    primaryContactDetails =
+      EISPrimaryContactDetails(name = "Kevin Durant",
+                               contactDetails =
+                                 ContactDetails(email = "test@test.com", telephone = "02034567890"),
+                               positionInCompany = "Director"
+      ),
+    businessCorrespondenceDetails = ukBusinessCorrespondenceDetails,
+    taxObligationStartDate = ZonedDateTime.now(ZoneOffset.UTC).toLocalDate.toString,
+    last12MonthTotalTonnageAmt = 15000,
+    declaration = Declaration(declarationBox1 = true),
+    groupPartnershipSubscription = None,
+    processingDate = None,
+    changeOfCircumstanceDetails = None
+  )
 
 }
