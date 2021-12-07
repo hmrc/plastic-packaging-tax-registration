@@ -31,6 +31,8 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
   private val validAppConfig: Config =
     ConfigFactory.parseString("""
         |mongodb.uri="mongodb://localhost:27017/plastic-packaging-tax"
+        |mongodb.database="plastic-packaging-tax"
+        |mongodb.collection="registrations"
         |mongodb.timeToLiveInSeconds=100
         |microservice.services.auth.host=localhostauth
         |microservice.services.auth.port=9988
