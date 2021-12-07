@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.util.migration
 
 import com.google.inject.{Inject, Singleton}
 import org.mongodb.scala.Document
-import org.mongodb.scala.bson.{BsonDocument, BsonString}
+import org.mongodb.scala.bson.{BsonBoolean, BsonDocument, BsonString}
 import play.api.Logger
 
 @Singleton
@@ -58,7 +58,7 @@ class RegistrationUpgrader @Inject() (
           logger.info(s"Upgrading in-flight registration with id [${reg.getString("id")}]")
           incorporationDetails.remove(BV_STATUS_OLD)
           registration.append(BV_STATUS_NEW, bvStatus.get)
-          registration.append(IDS_MATCH, BsonString("true")) // Do it matter what we set this to?
+          registration.append(IDS_MATCH, BsonBoolean(true)) // Does it matter what we set this to?
         } else
           logger.info(
             s"Not upgrading compatible in-flight registration with id [${reg.getString("id")}]"
