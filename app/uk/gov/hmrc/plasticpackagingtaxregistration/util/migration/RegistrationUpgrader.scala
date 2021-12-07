@@ -63,8 +63,14 @@ class RegistrationUpgrader @Inject() (
           logger.info(
             s"Not upgrading compatible in-flight registration with id [${reg.getString("id")}]"
           )
-      }
-    }
+      } else
+        logger.info(
+          s"Not upgrading compatible in-flight registration with id [${reg.getString("id")}]"
+        )
+    } else
+      logger.info(
+        s"Not upgrading compatible in-flight registration with id [${reg.getString("id")}]"
+      )
 
     reg
   }
