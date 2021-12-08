@@ -46,8 +46,8 @@ object PartnershipDetails {
 case class GeneralPartnershipDetails(
   sautr: String,
   postcode: String,
-  override val registration: Option[IncorporationRegistrationDetails]
-) extends RegistrationDetails
+  override val registration: Option[RegistrationDetails]
+) extends HasRegistrationDetails
 
 object GeneralPartnershipDetails {
   implicit val format: OFormat[GeneralPartnershipDetails] = Json.format[GeneralPartnershipDetails]
@@ -56,8 +56,8 @@ object GeneralPartnershipDetails {
 case class ScottishPartnershipDetails(
   sautr: String,
   postcode: String,
-  override val registration: Option[IncorporationRegistrationDetails]
-) extends RegistrationDetails
+  override val registration: Option[RegistrationDetails]
+) extends HasRegistrationDetails
 
 object ScottishPartnershipDetails {
   implicit val format: OFormat[ScottishPartnershipDetails] = Json.format[ScottishPartnershipDetails]

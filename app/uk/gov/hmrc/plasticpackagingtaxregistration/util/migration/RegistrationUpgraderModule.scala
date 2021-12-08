@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package uk.gov.hmrc.plasticpackagingtaxregistration.util.migration
 
-import play.api.libs.json.{Format, Json}
+import com.google.inject.AbstractModule
 
-case class IncorporationDetails(
-  companyNumber: String,
-  companyName: String,
-  ctutr: String,
-  companyAddress: IncorporationAddressDetails,
-  override val registration: Option[RegistrationDetails]
-) extends HasRegistrationDetails
+class RegistrationUpgraderModule extends AbstractModule {
 
-object IncorporationDetails {
+  override def configure() =
+    bind(classOf[RegistrationUpgrader]).asEagerSingleton()
 
-  implicit val format: Format[IncorporationDetails] = Json.format[IncorporationDetails]
 }

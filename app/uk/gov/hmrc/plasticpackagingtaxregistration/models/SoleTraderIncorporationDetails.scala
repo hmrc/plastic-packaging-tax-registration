@@ -21,11 +21,11 @@ import play.api.libs.json.{Format, Json}
 case class SoleTraderIncorporationDetails(
   firstName: String,
   lastName: String,
+  dateOfBirth: Option[String],
   nino: String,
   sautr: Option[String],
-  override val registration: Option[IncorporationRegistrationDetails],
-  dateOfBirth: Option[String] = None
-) extends RegistrationDetails
+  override val registration: Option[RegistrationDetails]
+) extends HasRegistrationDetails
 
 object SoleTraderIncorporationDetails {
 
