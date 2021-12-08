@@ -33,6 +33,12 @@ class RegistrationUpgrader @Inject() (
   private val BV_STATUS_NEW  = "verificationStatus"
   private val IDS_MATCH      = "identifiersMatch"
 
+  private val BUSINESS_REGISTERED_ADDRESS = "businessRegisteredAddress"
+  private val COUNTRY_CODE                = "countryCode"
+
+  private val PRIMARY_CONTACT_DETAILS = "primaryContactDetails"
+  private val ADDRESS                 = "address"
+
   private val logger = Logger(this.getClass)
 
   // Do it on startup, when the singleton is created. This is done eagerly in 'production' mode.
@@ -40,10 +46,52 @@ class RegistrationUpgrader @Inject() (
 
   def upgradeRegistrations() = {
     logger.info("Upgrading any existing in-flight registrations")
-    genericRegistrationRepository.upgradeRegistrations(upgradeRegistration)
+    //genericRegistrationRepository.upgradeRegistrations(upgradeIncorporationDetails)
+    genericRegistrationRepository.upgradeRegistrations(addMissingCountryCodes)
   }
 
-  private def upgradeRegistration(reg: Document): Document = {
+  private def addMissingCountryCodes(reg: Document): Document = {
+    val organisationDetails: Option[BsonDocument] = reg.get[BsonDocument](ORG_DETAILS)
+    if (organisationDetails.exists(od => od.containsKey(BUSINESS_REGISTERED_ADDRESS))) {
+      val businessRegisteredAddress =
+        organisationDetails.get.getDocument(BUSINESS_REGISTERED_ADDRESS)
+      if (businessRegisteredAddress.containsKey(COUNTRY_CODE))
+        logger.info(
+          s"Not adding business registered address country code to in-flight registration with id [${reg.getString("id")}]"
+        )
+      else {
+        logger.info(
+          s"Adding business registered address country code to in-flight registration with id [${reg.getString("id")}]"
+        )
+        businessRegisteredAddress.append(COUNTRY_CODE, BsonString("GB"))
+      }
+    } else
+      logger.info(
+        s"Not adding business registered address country code to in-flight registration with id [${reg.getString("id")}]"
+      )
+
+    val primaryContactDetails: Option[BsonDocument] = reg.get[BsonDocument](PRIMARY_CONTACT_DETAILS)
+    if (primaryContactDetails.exists(pcd => pcd.containsKey(ADDRESS))) {
+      val address = primaryContactDetails.get.getDocument(ADDRESS)
+      if (address.containsKey(COUNTRY_CODE))
+        logger.info(
+          s"Not adding primary contact address country code to in-flight registration with id [${reg.getString("id")}]"
+        )
+      else {
+        logger.info(
+          s"Adding primary contact address country code to in-flight registration with id [${reg.getString("id")}]"
+        )
+        address.append(COUNTRY_CODE, BsonString("GB"))
+      }
+    } else
+      logger.info(
+        s"Not adding primary contact address country code to in-flight registration with id [${reg.getString("id")}]"
+      )
+
+    reg
+  }
+
+  private def upgradeIncorporationDetails(reg: Document): Document = {
     val organisationDetails: Option[BsonDocument] = reg.get[BsonDocument](ORG_DETAILS)
     if (organisationDetails.exists(od => od.containsKey(INCORP_DETAILS))) {
       val incorporationDetails = organisationDetails.get.getDocument(INCORP_DETAILS)
