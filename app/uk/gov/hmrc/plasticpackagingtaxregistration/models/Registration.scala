@@ -205,7 +205,9 @@ object Registration {
                  primaryContactDetails = contactDetails,
                  organisationDetails = organisationDetails,
                  metaData = MetaData(),
-                 lastModifiedDateTime = None
+                 lastModifiedDateTime = None,
+                 changeOfCircumstanceDetails = subscription.changeOfCircumstanceDetails,
+                 processingDate = subscription.processingDate
     )
   }
 

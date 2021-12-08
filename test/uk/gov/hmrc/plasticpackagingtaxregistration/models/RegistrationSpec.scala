@@ -18,21 +18,35 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
+  RegistrationTestData,
+  SubscriptionTestData
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstanceDetails,
+  Subscription
+}
 
-class RegistrationSpec extends AnyWordSpec with RegistrationTestData with RegistrationBuilder {
+import java.time.{ZoneOffset, ZonedDateTime}
+
+class RegistrationSpec
+    extends AnyWordSpec with RegistrationTestData with RegistrationBuilder
+    with SubscriptionTestData {
 
   "Registration" should {
 
     "convert from subscription to registration and then to subscription " in {
-
-      val rehydratedRegistration = Registration(ukLimitedCompany)
+      val updatedUKLimitedSubscription = ukLimitedCompanySubscription.copy(
+        changeOfCircumstanceDetails =
+          Some(ChangeOfCircumstanceDetails(changeOfCircumstance = "01")),
+        processingDate = Some(ZonedDateTime.now(ZoneOffset.UTC).toLocalDate.toString)
+      )
+      val rehydratedRegistration = Registration(updatedUKLimitedSubscription)
 
       val updatedSubscription = Subscription(rehydratedRegistration)
 
-      updatedSubscription mustBe ukLimitedCompany
+      updatedSubscription mustBe updatedUKLimitedSubscription
 
     }
 
