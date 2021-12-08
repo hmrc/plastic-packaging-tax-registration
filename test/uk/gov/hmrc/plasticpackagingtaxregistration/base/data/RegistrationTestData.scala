@@ -16,11 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  AddressDetails,
-  BusinessCorrespondenceDetails,
-  ContactDetails
-}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
@@ -165,7 +160,9 @@ trait RegistrationTestData {
                                                             businessPartnerId = None
                                                           )
                                                         ),
-                                                        addressDetails = groupAddressDetails
+                                                        addressDetails = groupAddressDetails,
+                                                        primaryContactDetails =
+                                                          Some(pptPrimaryContactDetails)
                                             )
                                           )
   )
@@ -180,21 +177,5 @@ trait RegistrationTestData {
   protected val registrationCompleted: Boolean = true
 
   protected val pptUserHeaders: Map[String, String] = Map("testHeaderKey" -> "testHeaderValue")
-
-  protected val ukAddressDetails: AddressDetails = AddressDetails(addressLine1 = "2-3 Scala Street",
-                                                                  addressLine2 = "London",
-                                                                  postalCode = Some("W1T 2HN"),
-                                                                  countryCode = "GB"
-  )
-
-  protected val ukBusinessCorrespondenceDetails: BusinessCorrespondenceDetails =
-    BusinessCorrespondenceDetails(addressLine1 = "2-3 Scala Street",
-                                  addressLine2 = "London",
-                                  postalCode = Some("W1T 2HN"),
-                                  countryCode = "GB"
-    )
-
-  protected val ukContactDetails: ContactDetails =
-    ContactDetails(email = "test@test.com", telephone = "02034567890")
 
 }

@@ -37,11 +37,19 @@ class RegistrationSpec
   "Registration" should {
 
     "convert from subscription to registration and then to subscription " in {
-      val updatedUKLimitedSubscription = ukLimitedCompanySubscription.copy(
-        changeOfCircumstanceDetails =
-          Some(ChangeOfCircumstanceDetails(changeOfCircumstance = "01")),
-        processingDate = Some(ZonedDateTime.now(ZoneOffset.UTC).toLocalDate.toString)
-      )
+      val updatedUKLimitedSubscription =
+        ukLimitedCompanySubscription.copy(groupPartnershipSubscription =
+                                            Some(groupPartnershipSubscription),
+                                          changeOfCircumstanceDetails =
+                                            Some(
+                                              ChangeOfCircumstanceDetails(changeOfCircumstance =
+                                                "01"
+                                              )
+                                            ),
+                                          processingDate = Some(
+                                            ZonedDateTime.now(ZoneOffset.UTC).toLocalDate.toString
+                                          )
+        )
       val rehydratedRegistration = Registration(updatedUKLimitedSubscription)
 
       val updatedSubscription = Subscription(rehydratedRegistration)

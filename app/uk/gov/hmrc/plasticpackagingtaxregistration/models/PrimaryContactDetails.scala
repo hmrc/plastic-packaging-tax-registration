@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
 
 case class PrimaryContactDetails(
   name: Option[String] = None,
@@ -30,4 +31,20 @@ case class PrimaryContactDetails(
 
 object PrimaryContactDetails {
   implicit val format: OFormat[PrimaryContactDetails] = Json.format[PrimaryContactDetails]
+
+  def apply(groupPartnershipDetails: GroupPartnershipDetails): PrimaryContactDetails = {
+    val individualDetails = groupPartnershipDetails.individualDetails
+    val contactDetails    = groupPartnershipDetails.contactDetails
+    val addressDetails    = groupPartnershipDetails.addressDetails
+    PrimaryContactDetails(
+      name = Some(
+        s"${individualDetails.firstName} ${individualDetails.middleName} ${individualDetails.lastName}"
+      ),
+      jobTitle = individualDetails.title,
+      phoneNumber = Some(contactDetails.telephone),
+      email = Some(contactDetails.email),
+      address = Some(PPTAddress(addressDetails))
+    )
+  }
+
 }

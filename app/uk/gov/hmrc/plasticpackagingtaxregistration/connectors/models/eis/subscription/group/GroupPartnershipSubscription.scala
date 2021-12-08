@@ -65,7 +65,7 @@ object GroupPartnershipSubscription {
     ) +: registration.groupDetail.map {
       groupDetail =>
         groupDetail.members.map { member =>
-          createMember(registration, member)
+          createMember(member)
         }
     }.get
   }
@@ -92,10 +92,12 @@ object GroupPartnershipSubscription {
                             contactDetails = ContactDetails(primaryContactDetails)
     )
 
-  private def createMember(
-    registration: Registration,
-    member: GroupMember
-  ): GroupPartnershipDetails =
+  private def createMember(member: GroupMember): GroupPartnershipDetails = {
+    val primaryContactDetails = member.primaryContactDetails.getOrElse(
+      throw new IllegalStateException(
+        "Primary contact details are required for group representative"
+      )
+    )
     GroupPartnershipDetails(relationship = "Member",
                             customerIdentification1 = member.customerIdentification1,
                             customerIdentification2 = member.customerIdentification2,
@@ -109,10 +111,11 @@ object GroupPartnershipSubscription {
                               )
                             ),
                             individualDetails =
-                              toIndividualDetails(registration.primaryContactDetails),
+                              toIndividualDetails(primaryContactDetails),
                             addressDetails = AddressDetails(member.addressDetails),
-                            contactDetails = ContactDetails(registration.primaryContactDetails)
+                            contactDetails = ContactDetails(primaryContactDetails)
     )
+  }
 
   private def toGroupOrganisationDetails(
     regOrgDetails: RegistrationOrganisationDetails
