@@ -108,7 +108,6 @@ object Registration {
             ctutr = subscription.legalEntityDetails.customerIdentification2.getOrElse(
               illegalState("Missing organisation UTR")
             ),
-            businessVerificationStatus = "UPDATE",
             companyAddress = IncorporationAddressDetails(),
             registration = None
           )
@@ -125,6 +124,7 @@ object Registration {
             lastName = subscription.legalEntityDetails.customerDetails.individualDetails.map(
               _.lastName
             ).getOrElse(illegalState("Missing lastName")),
+            dateOfBirth = None,
             nino = subscription.legalEntityDetails.customerIdentification1,
             sautr = subscription.legalEntityDetails.customerIdentification2,
             registration = None
