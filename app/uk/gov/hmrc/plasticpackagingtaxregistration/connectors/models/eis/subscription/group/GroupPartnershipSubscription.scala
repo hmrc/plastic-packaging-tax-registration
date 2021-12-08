@@ -65,7 +65,7 @@ object GroupPartnershipSubscription {
     ) +: registration.groupDetail.map {
       groupDetail =>
         groupDetail.members.map { member =>
-          createMember(member)
+          createMember(registration, member)
         }
     }.get
   }
@@ -93,14 +93,12 @@ object GroupPartnershipSubscription {
                             regWithoutIDFlag = organisationDetails.regWithoutIDFlag
     )
 
-  private def createMember(member: GroupMember): GroupPartnershipDetails = {
-    val primaryContactDetails = member.primaryContactDetails.getOrElse(
-      //TODO used until we populate contact details for group member
-      PrimaryContactDetails(name = Some("Test Group"),
-                            email = Some("test@test.com"),
-                            phoneNumber = Some("0213123123")
-      )
-    )
+  private def createMember(
+    registration: Registration,
+    member: GroupMember
+  ): GroupPartnershipDetails = {
+    val primaryContactDetails =
+      member.primaryContactDetails.getOrElse(registration.primaryContactDetails)
     GroupPartnershipDetails(relationship = "Member",
                             customerIdentification1 = member.customerIdentification1,
                             customerIdentification2 = member.customerIdentification2,
