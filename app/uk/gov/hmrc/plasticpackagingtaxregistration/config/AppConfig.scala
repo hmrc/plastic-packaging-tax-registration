@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.config
 
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.FiniteDuration
 
 @Singleton
@@ -76,8 +76,4 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     s"$eisHost/plastic-packaging-tax/subscriptions/PPT/$pptReference/update"
 
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
-
-  val mongoUri        = config.get[String]("mongodb.uri")
-  val mongoDb         = config.get[String]("mongodb.database")
-  val mongoCollection = config.get[String]("mongodb.collection")
 }
