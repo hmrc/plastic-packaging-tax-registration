@@ -190,7 +190,8 @@ object Registration {
                             customerIdentification2 = detail.customerIdentification2,
                             organisationDetails = Some(GroupDetails(detail.organisationDetails)),
                             addressDetails = PPTAddress(detail.addressDetails),
-                            primaryContactDetails = Some(PrimaryContactDetails(detail))
+                            primaryContactDetails = Some(PrimaryContactDetails(detail)),
+                            regWithoutIDFlag = detail.regWithoutIDFlag
                 )
             )
           )

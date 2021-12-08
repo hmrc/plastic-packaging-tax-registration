@@ -25,7 +25,8 @@ case class GroupMember(
   customerIdentification2: Option[String],
   organisationDetails: Option[OrganisationDetails],
   primaryContactDetails: Option[PrimaryContactDetails],
-  addressDetails: PPTAddress
+  addressDetails: PPTAddress,
+  regWithoutIDFlag: Option[Boolean] = None
 )
 
 object GroupMember {

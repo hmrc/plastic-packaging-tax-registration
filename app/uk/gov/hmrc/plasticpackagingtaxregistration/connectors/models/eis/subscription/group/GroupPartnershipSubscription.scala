@@ -89,13 +89,16 @@ object GroupPartnershipSubscription {
                             individualDetails = toIndividualDetails(primaryContactDetails),
                             addressDetails =
                               AddressDetails(organisationDetails.registeredBusinessAddress),
-                            contactDetails = ContactDetails(primaryContactDetails)
+                            contactDetails = ContactDetails(primaryContactDetails),
+                            regWithoutIDFlag = organisationDetails.regWithoutIDFlag
     )
 
   private def createMember(member: GroupMember): GroupPartnershipDetails = {
     val primaryContactDetails = member.primaryContactDetails.getOrElse(
-      throw new IllegalStateException(
-        "Primary contact details are required for group representative"
+      //TODO used until we populate contact details for group member
+      PrimaryContactDetails(name = Some("Test Group"),
+                            email = Some("test@test.com"),
+                            phoneNumber = Some("0213123123")
       )
     )
     GroupPartnershipDetails(relationship = "Member",
@@ -113,7 +116,8 @@ object GroupPartnershipSubscription {
                             individualDetails =
                               toIndividualDetails(primaryContactDetails),
                             addressDetails = AddressDetails(member.addressDetails),
-                            contactDetails = ContactDetails(primaryContactDetails)
+                            contactDetails = ContactDetails(primaryContactDetails),
+                            regWithoutIDFlag = member.regWithoutIDFlag
     )
   }
 

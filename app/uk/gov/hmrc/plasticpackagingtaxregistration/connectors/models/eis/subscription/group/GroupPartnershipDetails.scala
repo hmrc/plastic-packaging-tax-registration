@@ -31,7 +31,8 @@ case class GroupPartnershipDetails(
   organisationDetails: OrganisationDetails,
   individualDetails: IndividualDetails,
   addressDetails: AddressDetails,
-  contactDetails: ContactDetails
+  contactDetails: ContactDetails,
+  regWithoutIDFlag: Option[Boolean] = None
 )
 
 object GroupPartnershipDetails {
