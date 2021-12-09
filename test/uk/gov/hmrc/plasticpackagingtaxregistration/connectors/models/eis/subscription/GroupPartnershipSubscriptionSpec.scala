@@ -72,8 +72,8 @@ class GroupPartnershipSubscriptionSpec
         val groupSubscription = GroupPartnershipSubscription(registration).get
         groupSubscription.groupPartnershipDetails.head.individualDetails.firstName mustBe "First"
         groupSubscription.groupPartnershipDetails.head.individualDetails.lastName mustBe "Last"
-        groupSubscription.groupPartnershipDetails(1).individualDetails.firstName mustBe "First"
-        groupSubscription.groupPartnershipDetails(1).individualDetails.lastName mustBe "Last"
+        groupSubscription.groupPartnershipDetails(1).individualDetails.firstName mustBe "Test"
+        groupSubscription.groupPartnershipDetails(1).individualDetails.lastName mustBe "User"
       }
 
       "when one word in name use it as first and last name" in {
@@ -89,8 +89,8 @@ class GroupPartnershipSubscriptionSpec
         val group = GroupPartnershipSubscription(registration).get
         group.groupPartnershipDetails.head.individualDetails.firstName mustBe "OneName"
         group.groupPartnershipDetails.head.individualDetails.lastName mustBe "OneName"
-        group.groupPartnershipDetails(1).individualDetails.firstName mustBe "OneName"
-        group.groupPartnershipDetails(1).individualDetails.lastName mustBe "OneName"
+        group.groupPartnershipDetails(1).individualDetails.firstName mustBe "Test"
+        group.groupPartnershipDetails(1).individualDetails.lastName mustBe "User"
       }
     }
 

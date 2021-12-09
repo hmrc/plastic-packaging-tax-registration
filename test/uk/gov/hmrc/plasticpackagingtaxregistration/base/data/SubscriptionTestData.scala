@@ -127,14 +127,14 @@ trait SubscriptionTestData {
   private val groupPartnershipDetailsRep: GroupPartnershipDetails = GroupPartnershipDetails(
     "Representative",
     "123456789",
-    Some("987654321"),
-    OrganisationDetails(Some("UkCompany"), "Plastic Limited"),
-    IndividualDetails(None, "first", None, "last"),
-    AddressDetails("line1", "line2", Some("line3"), Some("line4"), Some("postcode"), "GB"),
-    ContactDetails("some@email.com", "0123-456789", None)
+    Some("1234567890"),
+    OrganisationDetails(Some("UkCompany"), "Plastics Ltd"),
+    IndividualDetails(None, "Kevin", None, "Durant"),
+    AddressDetails("2-3 Scala Street", "London", None, None, Some("W1T 2HN"), "GB"),
+    ContactDetails("test@test.com", "02034567890", None)
   )
 
-  private val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
+  protected val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
     "Member",
     "member-1",
     Some("member-2"),

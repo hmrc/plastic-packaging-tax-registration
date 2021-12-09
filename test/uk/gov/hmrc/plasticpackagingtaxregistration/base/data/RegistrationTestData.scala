@@ -160,7 +160,9 @@ trait RegistrationTestData {
                                                             businessPartnerId = None
                                                           )
                                                         ),
-                                                        addressDetails = groupAddressDetails
+                                                        addressDetails = groupAddressDetails,
+                                                        primaryContactDetails =
+                                                          Some(pptPrimaryContactDetails)
                                             )
                                           )
   )

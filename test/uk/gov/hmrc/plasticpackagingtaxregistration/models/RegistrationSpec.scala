@@ -18,13 +18,46 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
+  RegistrationTestData,
+  SubscriptionTestData
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstance,
+  ChangeOfCircumstanceDetails,
+  Subscription
+}
 
-class RegistrationSpec extends AnyWordSpec with RegistrationTestData with RegistrationBuilder {
+import java.time.{ZoneOffset, ZonedDateTime}
+
+class RegistrationSpec
+    extends AnyWordSpec with RegistrationTestData with RegistrationBuilder
+    with SubscriptionTestData {
 
   "Registration" should {
+
+    "convert from subscription to registration and then to subscription " in {
+      val updatedUKLimitedSubscription =
+        ukLimitedCompanySubscription.copy(groupPartnershipSubscription =
+                                            Some(groupPartnershipSubscription),
+                                          changeOfCircumstanceDetails =
+                                            Some(
+                                              ChangeOfCircumstanceDetails(changeOfCircumstance =
+                                                ChangeOfCircumstance.UPDATE_TO_DETAILS.toString
+                                              )
+                                            ),
+                                          processingDate = Some(
+                                            ZonedDateTime.now(ZoneOffset.UTC).toLocalDate.toString
+                                          )
+        )
+      val rehydratedRegistration = Registration(updatedUKLimitedSubscription)
+
+      val updatedSubscription = Subscription(rehydratedRegistration)
+
+      updatedSubscription mustBe updatedUKLimitedSubscription
+
+    }
 
     "convert from UK company subscription" in {
 
@@ -32,6 +65,40 @@ class RegistrationSpec extends AnyWordSpec with RegistrationTestData with Regist
         aRegistration(withOrganisationDetails(pptIncorporationDetails),
                       withPrimaryContactDetails(pptPrimaryContactDetails),
                       withLiabilityDetails(pptLiabilityDetails)
+        )
+
+      assertConversion(ukCompanyRegistration)
+
+    }
+
+    "convert from overseas company with UK branch subscription" in {
+
+      val ukCompanyRegistration =
+        aRegistration(
+          withOrganisationDetails(
+            pptIncorporationDetails.copy(organisationType =
+              Some(OrgType.OVERSEAS_COMPANY_UK_BRANCH)
+            )
+          ),
+          withPrimaryContactDetails(pptPrimaryContactDetails),
+          withLiabilityDetails(pptLiabilityDetails)
+        )
+
+      assertConversion(ukCompanyRegistration)
+
+    }
+
+    "convert from registered society subscription" in {
+
+      val ukCompanyRegistration =
+        aRegistration(
+          withOrganisationDetails(
+            pptIncorporationDetails.copy(organisationType =
+              Some(OrgType.REGISTERED_SOCIETY)
+            )
+          ),
+          withPrimaryContactDetails(pptPrimaryContactDetails),
+          withLiabilityDetails(pptLiabilityDetails)
         )
 
       assertConversion(ukCompanyRegistration)

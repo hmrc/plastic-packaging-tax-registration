@@ -16,7 +16,17 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
+
+object ChangeOfCircumstance extends Enumeration {
+  type ChangeOfCircumstance = Value
+  val UPDATE_TO_DETAILS: Value = Value("Update to details")
+  val MANUAL_TO_ONLINE: Value  = Value("Manual to Online")
+
+  implicit val format: Format[ChangeOfCircumstance] =
+    Format(Reads.enumNameReads(ChangeOfCircumstance), Writes.enumNameWrites)
+
+}
 
 case class ChangeOfCircumstanceDetails(
   changeOfCircumstance: String,

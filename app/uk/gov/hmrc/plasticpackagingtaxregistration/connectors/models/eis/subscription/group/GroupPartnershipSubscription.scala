@@ -89,13 +89,16 @@ object GroupPartnershipSubscription {
                             individualDetails = toIndividualDetails(primaryContactDetails),
                             addressDetails =
                               AddressDetails(organisationDetails.registeredBusinessAddress),
-                            contactDetails = ContactDetails(primaryContactDetails)
+                            contactDetails = ContactDetails(primaryContactDetails),
+                            regWithoutIDFlag = organisationDetails.regWithoutIDFlag
     )
 
   private def createMember(
     registration: Registration,
     member: GroupMember
-  ): GroupPartnershipDetails =
+  ): GroupPartnershipDetails = {
+    val primaryContactDetails =
+      member.primaryContactDetails.getOrElse(registration.primaryContactDetails)
     GroupPartnershipDetails(relationship = "Member",
                             customerIdentification1 = member.customerIdentification1,
                             customerIdentification2 = member.customerIdentification2,
@@ -109,10 +112,12 @@ object GroupPartnershipSubscription {
                               )
                             ),
                             individualDetails =
-                              toIndividualDetails(registration.primaryContactDetails),
+                              toIndividualDetails(primaryContactDetails),
                             addressDetails = AddressDetails(member.addressDetails),
-                            contactDetails = ContactDetails(registration.primaryContactDetails)
+                            contactDetails = ContactDetails(primaryContactDetails),
+                            regWithoutIDFlag = member.regWithoutIDFlag
     )
+  }
 
   private def toGroupOrganisationDetails(
     regOrgDetails: RegistrationOrganisationDetails
