@@ -24,6 +24,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstance,
   ChangeOfCircumstanceDetails,
   Subscription
 }
@@ -43,7 +44,7 @@ class RegistrationSpec
                                           changeOfCircumstanceDetails =
                                             Some(
                                               ChangeOfCircumstanceDetails(changeOfCircumstance =
-                                                "01"
+                                                ChangeOfCircumstance.UPDATE_TO_DETAILS.toString
                                               )
                                             ),
                                           processingDate = Some(

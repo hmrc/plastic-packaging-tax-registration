@@ -134,7 +134,7 @@ trait SubscriptionTestData {
     ContactDetails("test@test.com", "02034567890", None)
   )
 
-  private val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
+  protected val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
     "Member",
     "member-1",
     Some("member-2"),

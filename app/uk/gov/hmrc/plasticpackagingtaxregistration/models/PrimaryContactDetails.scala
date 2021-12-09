@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.IndividualDetails
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
 
 case class PrimaryContactDetails(
@@ -36,15 +37,19 @@ object PrimaryContactDetails {
     val individualDetails = groupPartnershipDetails.individualDetails
     val contactDetails    = groupPartnershipDetails.contactDetails
     val addressDetails    = groupPartnershipDetails.addressDetails
-    PrimaryContactDetails(
-      name = Some(
-        s"${individualDetails.firstName} ${individualDetails.middleName} ${individualDetails.lastName}"
-      ),
-      jobTitle = individualDetails.title,
-      phoneNumber = Some(contactDetails.telephone),
-      email = Some(contactDetails.email),
-      address = Some(PPTAddress(addressDetails))
+    PrimaryContactDetails(name = Some(name(individualDetails)),
+                          jobTitle = individualDetails.title,
+                          phoneNumber = Some(contactDetails.telephone),
+                          email = Some(contactDetails.email),
+                          address = Some(PPTAddress(addressDetails))
     )
   }
+
+  private def name(individualDetails: IndividualDetails): String =
+    individualDetails.middleName match {
+      case Some(middleName) =>
+        s"${individualDetails.firstName} ${middleName} ${individualDetails.lastName}"
+      case None => s"${individualDetails.firstName} ${individualDetails.lastName}"
+    }
 
 }
