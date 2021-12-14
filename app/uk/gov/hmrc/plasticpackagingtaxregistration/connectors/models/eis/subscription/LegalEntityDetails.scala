@@ -16,23 +16,18 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
-import java.time.format.DateTimeFormatter
-import java.time.{ZoneOffset, ZonedDateTime}
-
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.CustomerType.{
   Individual,
   Organisation
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
-  GENERAL_PARTNERSHIP,
-  SCOTTISH_PARTNERSHIP
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   OrgType,
   OrganisationDetails => PPTOrganisationDetails
 }
 
+import java.time.format.DateTimeFormatter
+import java.time.{ZoneOffset, ZonedDateTime}
 import scala.language.implicitConversions
 
 case class LegalEntityDetails(
@@ -73,27 +68,14 @@ object LegalEntityDetails {
       case Some(OrgType.PARTNERSHIP) =>
         pptOrganisationDetails.partnershipDetails match {
           case Some(partnershipDetails) =>
-            partnershipDetails.partnershipType match {
-              case GENERAL_PARTNERSHIP =>
-                partnershipDetails.generalPartnershipDetails.map { details =>
-                  updateLegalEntityDetails(customerIdentification1 = details.sautr,
-                                           customerIdentification2 = Some(details.postcode),
-                                           pptOrganisationDetails = pptOrganisationDetails
-                  )
-                }.getOrElse(
-                  throw new IllegalStateException("General partnership details are required")
-                )
-              case SCOTTISH_PARTNERSHIP =>
-                partnershipDetails.scottishPartnershipDetails.map { details =>
-                  updateLegalEntityDetails(customerIdentification1 = details.sautr,
-                                           customerIdentification2 = Some(details.postcode),
-                                           pptOrganisationDetails = pptOrganisationDetails
-                  )
-                }.getOrElse(
-                  throw new IllegalStateException("Scottish partnership details are required")
-                )
-              case _ => throw new IllegalStateException("Unsupported partnership type")
-            }
+            partnershipDetails.partnershipBusinessDetails.map { details =>
+              updateLegalEntityDetails(customerIdentification1 = details.sautr,
+                                       customerIdentification2 = Some(details.postcode),
+                                       pptOrganisationDetails = pptOrganisationDetails
+              )
+            }.getOrElse(
+              throw new IllegalStateException("Incorporated partnership details are required")
+            )
           case _ => throw new IllegalStateException("Partnership details missing")
         }
       case _ =>

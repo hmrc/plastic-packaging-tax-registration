@@ -102,8 +102,9 @@ class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTes
           LegalEntityDetails(
             pptGeneralPartnershipDetails.copy(partnershipDetails =
               Some(
-                pptGeneralPartnershipDetails.partnershipDetails.get.copy(generalPartnershipDetails =
-                  None
+                pptGeneralPartnershipDetails.partnershipDetails.get.copy(
+                  partnershipBusinessDetails =
+                    None
                 )
               )
             ),
@@ -118,7 +119,7 @@ class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTes
             pptScottishPartnershipDetails.copy(partnershipDetails =
               Some(
                 pptScottishPartnershipDetails.partnershipDetails.get.copy(
-                  scottishPartnershipDetails = None
+                  partnershipBusinessDetails = None
                 )
               )
             ),

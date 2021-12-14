@@ -76,9 +76,9 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
 
-        legalEntityDetails.customerIdentification1 mustBe pptGeneralPartnershipDetails.partnershipDetails.get.generalPartnershipDetails.get.sautr
+        legalEntityDetails.customerIdentification1 mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.sautr
         legalEntityDetails.customerIdentification2 mustBe Some(
-          pptGeneralPartnershipDetails.partnershipDetails.get.generalPartnershipDetails.get.postcode
+          pptGeneralPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.postcode
         )
 
         legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
@@ -96,9 +96,9 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
 
-        legalEntityDetails.customerIdentification1 mustBe pptScottishPartnershipDetails.partnershipDetails.get.scottishPartnershipDetails.get.sautr
+        legalEntityDetails.customerIdentification1 mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.sautr
         legalEntityDetails.customerIdentification2 mustBe Some(
-          pptScottishPartnershipDetails.partnershipDetails.get.scottishPartnershipDetails.get.postcode
+          pptScottishPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.postcode
         )
 
         legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
@@ -137,29 +137,14 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
         }
       }
 
-      "partnership and unsupported partnership type" in {
-        intercept[Exception] {
-          LegalEntityDetails(
-            pptGeneralPartnershipDetails.copy(partnershipDetails =
-              Some(
-                pptGeneralPartnershipDetails.partnershipDetails.get.copy(
-                  partnershipType = PartnershipTypeEnum.LIMITED_PARTNERSHIP,
-                  partnershipName = None
-                )
-              )
-            ),
-            false
-          )
-        }
-      }
-
       "partnership and partnership general partnership details are missing" in {
         intercept[Exception] {
           LegalEntityDetails(
             pptGeneralPartnershipDetails.copy(partnershipDetails =
               Some(
-                pptGeneralPartnershipDetails.partnershipDetails.get.copy(generalPartnershipDetails =
-                  None
+                pptGeneralPartnershipDetails.partnershipDetails.get.copy(
+                  partnershipBusinessDetails =
+                    None
                 )
               )
             ),
@@ -174,7 +159,7 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
             pptScottishPartnershipDetails.copy(partnershipDetails =
               Some(
                 pptScottishPartnershipDetails.partnershipDetails.get.copy(
-                  scottishPartnershipDetails = None
+                  partnershipBusinessDetails = None
                 )
               )
             ),

@@ -141,17 +141,17 @@ object Registration {
                                subscription.legalEntityDetails.customerDetails.organisationDetails.map(
                                  _.organisationName
                                ),
-                             generalPartnershipDetails = Some(
-                               GeneralPartnershipDetails(
+                             partnershipBusinessDetails = Some(
+                               PartnershipBusinessDetails(
                                  sautr = subscription.legalEntityDetails.customerIdentification1,
                                  postcode =
                                    subscription.legalEntityDetails.customerIdentification2.getOrElse(
                                      illegalState("Missing partnership postcode")
                                    ),
-                                 registration = None
+                                 registration = None,
+                                 companyProfile = None
                                )
-                             ),
-                             scottishPartnershipDetails = None
+                             )
           )
         )
       case _ => None
