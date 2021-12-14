@@ -68,7 +68,7 @@ object LegalEntityDetails {
       case Some(OrgType.PARTNERSHIP) =>
         pptOrganisationDetails.partnershipDetails match {
           case Some(partnershipDetails) =>
-            partnershipDetails.incorporatedPartnershipDetails.map { details =>
+            partnershipDetails.partnershipBusinessDetails.map { details =>
               updateLegalEntityDetails(customerIdentification1 = details.sautr,
                                        customerIdentification2 = Some(details.postcode),
                                        pptOrganisationDetails = pptOrganisationDetails

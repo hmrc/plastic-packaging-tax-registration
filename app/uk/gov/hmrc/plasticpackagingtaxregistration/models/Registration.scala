@@ -141,8 +141,8 @@ object Registration {
                                subscription.legalEntityDetails.customerDetails.organisationDetails.map(
                                  _.organisationName
                                ),
-                             incorporatedPartnershipDetails = Some(
-                               IncorporatedPartnershipDetails(
+                             partnershipBusinessDetails = Some(
+                               PartnershipBusinessDetails(
                                  sautr = subscription.legalEntityDetails.customerIdentification1,
                                  postcode =
                                    subscription.legalEntityDetails.customerIdentification2.getOrElse(

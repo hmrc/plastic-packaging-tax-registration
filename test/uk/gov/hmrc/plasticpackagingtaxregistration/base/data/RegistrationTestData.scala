@@ -105,8 +105,8 @@ trait RegistrationTestData {
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
                          partnershipName = Some("A general partnership"),
-                         incorporatedPartnershipDetails = Some(
-                           IncorporatedPartnershipDetails(sautr = "7454768902",
+                         partnershipBusinessDetails = Some(
+                           PartnershipBusinessDetails(sautr = "7454768902",
                                                           postcode = "AA1 1AA",
                                                           registration = Some(registrationDetails),
                                                           companyProfile = None
@@ -123,8 +123,8 @@ trait RegistrationTestData {
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = SCOTTISH_PARTNERSHIP,
                          partnershipName = Some("A Scottish partnership"),
-                         incorporatedPartnershipDetails = Some(
-                           IncorporatedPartnershipDetails(sautr = "1435676545",
+                         partnershipBusinessDetails = Some(
+                           PartnershipBusinessDetails(sautr = "1435676545",
                                                           postcode = "BB1 1BB",
                                                           registration =
                                                             Some(registrationDetails),
