@@ -35,30 +35,33 @@ object PartnershipTypeEnum extends Enumeration {
 case class PartnershipDetails(
   partnershipType: PartnershipTypeEnum,
   partnershipName: Option[String] = None,
-  generalPartnershipDetails: Option[GeneralPartnershipDetails] = None,
-  scottishPartnershipDetails: Option[ScottishPartnershipDetails] = None
+  incorporatedPartnershipDetails: Option[IncorporatedPartnershipDetails] = None
 )
 
 object PartnershipDetails {
   implicit val format: Format[PartnershipDetails] = Json.format[PartnershipDetails]
 }
 
-case class GeneralPartnershipDetails(
-  sautr: String,
-  postcode: String,
-  override val registration: Option[RegistrationDetails]
-) extends HasRegistrationDetails
+case class CompanyProfile(
+  companyNumber: String,
+  companyName: String,
+  companyAddress: IncorporationAddressDetails
+)
 
-object GeneralPartnershipDetails {
-  implicit val format: OFormat[GeneralPartnershipDetails] = Json.format[GeneralPartnershipDetails]
+object CompanyProfile {
+  implicit val format: OFormat[CompanyProfile] = Json.format[CompanyProfile]
 }
 
-case class ScottishPartnershipDetails(
+case class IncorporatedPartnershipDetails(
   sautr: String,
   postcode: String,
+  companyProfile: Option[CompanyProfile],
   override val registration: Option[RegistrationDetails]
 ) extends HasRegistrationDetails
 
-object ScottishPartnershipDetails {
-  implicit val format: OFormat[ScottishPartnershipDetails] = Json.format[ScottishPartnershipDetails]
+object IncorporatedPartnershipDetails {
+
+  implicit val format: OFormat[IncorporatedPartnershipDetails] =
+    Json.format[IncorporatedPartnershipDetails]
+
 }

@@ -189,9 +189,9 @@ class SubscriptionSpec
   }
 
   private def mustHaveValidGeneralPartnershipLegalEntityDetails(subscription: Subscription): Any = {
-    subscription.legalEntityDetails.customerIdentification1 mustBe pptGeneralPartnershipDetails.partnershipDetails.get.generalPartnershipDetails.get.sautr
+    subscription.legalEntityDetails.customerIdentification1 mustBe pptGeneralPartnershipDetails.partnershipDetails.get.incorporatedPartnershipDetails.get.sautr
     subscription.legalEntityDetails.customerIdentification2 mustBe Some(
-      pptGeneralPartnershipDetails.partnershipDetails.get.generalPartnershipDetails.get.postcode
+      pptGeneralPartnershipDetails.partnershipDetails.get.incorporatedPartnershipDetails.get.postcode
     )
 
     subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(
@@ -209,9 +209,9 @@ class SubscriptionSpec
   private def mustHaveValidScottishPartnershipLegalEntityDetails(
     subscription: Subscription
   ): Any = {
-    subscription.legalEntityDetails.customerIdentification1 mustBe pptScottishPartnershipDetails.partnershipDetails.get.scottishPartnershipDetails.get.sautr
+    subscription.legalEntityDetails.customerIdentification1 mustBe pptScottishPartnershipDetails.partnershipDetails.get.incorporatedPartnershipDetails.get.sautr
     subscription.legalEntityDetails.customerIdentification2 mustBe Some(
-      pptScottishPartnershipDetails.partnershipDetails.get.scottishPartnershipDetails.get.postcode
+      pptScottishPartnershipDetails.partnershipDetails.get.incorporatedPartnershipDetails.get.postcode
     )
 
     subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(

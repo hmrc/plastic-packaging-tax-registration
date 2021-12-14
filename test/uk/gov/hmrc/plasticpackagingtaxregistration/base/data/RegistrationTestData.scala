@@ -105,10 +105,11 @@ trait RegistrationTestData {
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
                          partnershipName = Some("A general partnership"),
-                         generalPartnershipDetails = Some(
-                           GeneralPartnershipDetails(sautr = "7454768902",
-                                                     postcode = "AA1 1AA",
-                                                     registration = Some(registrationDetails)
+                         incorporatedPartnershipDetails = Some(
+                           IncorporatedPartnershipDetails(sautr = "7454768902",
+                                                          postcode = "AA1 1AA",
+                                                          registration = Some(registrationDetails),
+                                                          companyProfile = None
                            )
                          )
       )
@@ -122,11 +123,12 @@ trait RegistrationTestData {
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = SCOTTISH_PARTNERSHIP,
                          partnershipName = Some("A Scottish partnership"),
-                         scottishPartnershipDetails = Some(
-                           ScottishPartnershipDetails(sautr = "1435676545",
-                                                      postcode = "BB1 1BB",
-                                                      registration =
-                                                        Some(registrationDetails)
+                         incorporatedPartnershipDetails = Some(
+                           IncorporatedPartnershipDetails(sautr = "1435676545",
+                                                          postcode = "BB1 1BB",
+                                                          registration =
+                                                            Some(registrationDetails),
+                                                          companyProfile = None
                            )
                          )
       )

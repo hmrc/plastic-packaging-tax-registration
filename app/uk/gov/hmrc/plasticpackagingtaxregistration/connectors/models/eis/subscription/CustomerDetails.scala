@@ -52,7 +52,8 @@ object CustomerDetails {
                               // TODO: can we do this? I think partnership names might be optional, especially for general partnerships.
                               organisationName = details.partnershipName.getOrElse("")
                             )
-                          )
+                          ),
+                          individualDetails = None
           )
         }.getOrElse(throw new Exception("Partnership organisation details are required"))
       case Some(orgType) =>
