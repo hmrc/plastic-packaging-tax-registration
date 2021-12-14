@@ -33,9 +33,9 @@ object PartnershipTypeEnum extends Enumeration {
 }
 
 case class PartnershipDetails(
-                               partnershipType: PartnershipTypeEnum,
-                               partnershipName: Option[String] = None,
-                               partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None
+  partnershipType: PartnershipTypeEnum,
+  partnershipName: Option[String] = None,
+  partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None
 )
 
 object PartnershipDetails {
