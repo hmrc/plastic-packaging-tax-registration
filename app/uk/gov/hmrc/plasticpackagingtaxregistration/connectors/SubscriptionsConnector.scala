@@ -83,10 +83,13 @@ class SubscriptionsConnector @Inject() (
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
-    val createUrl =
+
+    val msgCommon =
+      s"PPT subscription create sent with correlationId [${correlationIdHeader._2}] and"
+    val (createUrl, msg) =
       if (subscription.legalEntityDetails.groupSubscriptionFlag)
-        appConfig.subscriptionCreateWithoutSafeIdUrl()
-      else appConfig.subscriptionCreateUrl(safeNumber)
+        (appConfig.subscriptionCreateWithoutSafeIdUrl(), s"$msgCommon no safeId")
+      else (appConfig.subscriptionCreateUrl(safeNumber), s"$msgCommon safeId [$safeNumber]")
 
     httpClient.POST[Subscription, HttpResponse](url = createUrl,
                                                 body = subscription,
@@ -95,9 +98,7 @@ class SubscriptionsConnector @Inject() (
       .andThen { case _ => timer.stop() }
       .map {
         subscriptionResponse =>
-          logger.info(
-            s"PPT subscription create sent with correlationId [${correlationIdHeader._2}] and safeId [$safeNumber] had response payload ${subscriptionResponse.json}"
-          )
+          logger.info(s"$msg had response payload ${subscriptionResponse.json}")
 
           if (Status.isSuccessful(subscriptionResponse.status))
             Try(subscriptionResponse.json.as[SubscriptionSuccessfulResponse]) match {
@@ -140,7 +141,7 @@ class SubscriptionsConnector @Inject() (
       .andThen { case _ => timer.stop() }
       .map { response =>
         logger.info(
-          s"PPT view subscription with correlationId [$correlationIdHeader._2] and pptReference [$pptReference]"
+          s"PPT view subscription with correlationId [${correlationIdHeader._2}] and pptReference [$pptReference]"
         )
         Right(response)
       }
