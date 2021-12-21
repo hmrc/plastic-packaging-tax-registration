@@ -158,7 +158,7 @@ class SubscriptionController @Inject() (
               logPayload(s"PPT Subscription Create failed response for safeId $safeId ",
                          failedSubscriptionResponse
               )
-              logger.warn(
+              logger.error(
                 s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name} with safeId $safeId - ${firstError.reason}"
               )
               Future.successful(Status(statusCode)(failedSubscriptionResponse))
