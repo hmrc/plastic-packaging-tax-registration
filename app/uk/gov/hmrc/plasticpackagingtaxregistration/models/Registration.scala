@@ -125,7 +125,7 @@ object Registration {
               _.lastName
             ).getOrElse(illegalState("Missing lastName")),
             dateOfBirth = None,
-            nino = subscription.legalEntityDetails.customerIdentification1,
+            ninoOrTrn = subscription.legalEntityDetails.customerIdentification1,
             sautr = subscription.legalEntityDetails.customerIdentification2,
             registration = None
           )

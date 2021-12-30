@@ -60,7 +60,7 @@ object LegalEntityDetails {
     pptOrganisationDetails.organisationType match {
       case Some(OrgType.SOLE_TRADER) =>
         pptOrganisationDetails.soleTraderDetails.map { details =>
-          updateLegalEntityDetails(customerIdentification1 = details.nino,
+          updateLegalEntityDetails(customerIdentification1 = details.ninoOrTrn,
                                    customerIdentification2 = details.sautr,
                                    pptOrganisationDetails = pptOrganisationDetails
           )
