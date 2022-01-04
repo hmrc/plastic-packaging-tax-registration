@@ -58,7 +58,7 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
 
-        legalEntityDetails.customerIdentification1 mustBe pptSoleTraderDetails.soleTraderDetails.get.nino
+        legalEntityDetails.customerIdentification1 mustBe pptSoleTraderDetails.soleTraderDetails.get.ninoOrTrn
         legalEntityDetails.customerIdentification2 mustBe
           pptSoleTraderDetails.soleTraderDetails.get.sautr
 

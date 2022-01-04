@@ -230,7 +230,7 @@ class SubscriptionSpec
     subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(
       DateTimeFormatter.ofPattern("yyyy-MM-dd")
     )
-    subscription.legalEntityDetails.customerIdentification1 mustBe pptSoleTraderDetails.soleTraderDetails.get.nino
+    subscription.legalEntityDetails.customerIdentification1 mustBe pptSoleTraderDetails.soleTraderDetails.get.ninoOrTrn
     subscription.legalEntityDetails.customerIdentification2 mustBe pptSoleTraderDetails.soleTraderDetails.get.sautr
     subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Individual
 
