@@ -68,7 +68,7 @@ object GroupPartnershipSubscription {
     ) +: registration.groupDetail.map {
       groupDetail =>
         groupDetail.members.map { member =>
-          createMember(registration, member)
+          createMember(member)
         }
     }.get
   }
@@ -96,9 +96,7 @@ object GroupPartnershipSubscription {
                             regWithoutIDFlag = organisationDetails.regWithoutIDFlag
     )
 
-  private def createMember(
-    member: GroupMember
-  ): GroupPartnershipDetails = {
+  private def createMember(member: GroupMember): GroupPartnershipDetails = {
     val groupMemberContactDetails =
       member.contactDetails.getOrElse(
         throw new IllegalStateException("Contact details are required for group member")
