@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMemberContactDetails
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   PrimaryContactDetails => PPTPrimaryContactDetails
 }
@@ -30,6 +31,14 @@ object ContactDetails {
     ContactDetails(
       email = pptPrimaryContactDetails.email.getOrElse(throw new Exception("Email is required")),
       telephone = pptPrimaryContactDetails.phoneNumber.getOrElse(
+        throw new Exception("Phone Number is required")
+      )
+    )
+
+  def apply(groupMemberContactDetails: GroupMemberContactDetails): ContactDetails =
+    ContactDetails(
+      email = groupMemberContactDetails.email.getOrElse(throw new Exception("Email is required")),
+      telephone = groupMemberContactDetails.phoneNumber.getOrElse(
         throw new Exception("Phone Number is required")
       )
     )

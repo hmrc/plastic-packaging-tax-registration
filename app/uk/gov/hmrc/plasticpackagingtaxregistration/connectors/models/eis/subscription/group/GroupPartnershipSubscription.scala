@@ -23,7 +23,10 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   IndividualDetails,
   OrganisationDetails => SubscriptionOrganisationDetails
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMember
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  GroupMember,
+  GroupMemberContactDetails
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   PrimaryContactDetails,
   Registration,
@@ -65,7 +68,7 @@ object GroupPartnershipSubscription {
     ) +: registration.groupDetail.map {
       groupDetail =>
         groupDetail.members.map { member =>
-          createMember(registration, member)
+          createMember(member)
         }
     }.get
   }
@@ -93,12 +96,11 @@ object GroupPartnershipSubscription {
                             regWithoutIDFlag = organisationDetails.regWithoutIDFlag
     )
 
-  private def createMember(
-    registration: Registration,
-    member: GroupMember
-  ): GroupPartnershipDetails = {
-    val primaryContactDetails =
-      member.primaryContactDetails.getOrElse(registration.primaryContactDetails)
+  private def createMember(member: GroupMember): GroupPartnershipDetails = {
+    val groupMemberContactDetails =
+      member.contactDetails.getOrElse(
+        throw new IllegalStateException("Contact details are required for group member")
+      )
     GroupPartnershipDetails(relationship = "Member",
                             customerIdentification1 = member.customerIdentification1,
                             customerIdentification2 = member.customerIdentification2,
@@ -112,9 +114,9 @@ object GroupPartnershipSubscription {
                               )
                             ),
                             individualDetails =
-                              toIndividualDetails(primaryContactDetails),
+                              toIndividualDetails(groupMemberContactDetails),
                             addressDetails = AddressDetails(member.addressDetails),
-                            contactDetails = ContactDetails(primaryContactDetails),
+                            contactDetails = ContactDetails(groupMemberContactDetails),
                             regWithoutIDFlag = member.regWithoutIDFlag
     )
   }
@@ -131,6 +133,12 @@ object GroupPartnershipSubscription {
                                       )
                                     )
     )
+
+  private def toIndividualDetails(primary: GroupMemberContactDetails): IndividualDetails = {
+    val firstName = primary.firstName
+    val lastName  = primary.lastName
+    IndividualDetails(title = None, firstName = firstName, middleName = None, lastName = lastName)
+  }
 
   private def toIndividualDetails(primary: PrimaryContactDetails): IndividualDetails = {
     val name =

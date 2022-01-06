@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
@@ -23,6 +24,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
   GroupMember,
+  GroupMemberContactDetails,
   OrganisationDetails => GroupOrganisationDetails
 }
 
@@ -57,6 +59,14 @@ trait RegistrationTestData {
     email = Some("some@test"),
     phoneNumber = Some("1234567890"),
     useRegisteredAddress = None,
+    address = Some(pptPrimaryContactAddress)
+  )
+
+  protected val groupMemberContactDetails: GroupMemberContactDetails = GroupMemberContactDetails(
+    firstName = "Test",
+    lastName = "User",
+    email = Some("some@test"),
+    phoneNumber = Some("1234567890"),
     address = Some(pptPrimaryContactAddress)
   )
 
@@ -163,8 +173,8 @@ trait RegistrationTestData {
                                                           )
                                                         ),
                                                         addressDetails = groupAddressDetails,
-                                                        primaryContactDetails =
-                                                          Some(pptPrimaryContactDetails)
+                                                        contactDetails =
+                                                          Some(groupMemberContactDetails)
                                             )
                                           )
   )

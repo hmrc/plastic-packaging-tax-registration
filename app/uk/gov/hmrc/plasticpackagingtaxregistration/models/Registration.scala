@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import java.time.LocalDate
-import java.util.UUID
 import org.joda.time.{DateTime, DateTimeZone}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   ChangeOfCircumstanceDetails,
@@ -33,8 +31,12 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
   GroupMember,
+  GroupMemberContactDetails,
   OrganisationDetails => GroupDetails
 }
+
+import java.time.LocalDate
+import java.util.UUID
 
 case class Registration(
   id: String,
@@ -190,7 +192,7 @@ object Registration {
                             customerIdentification2 = detail.customerIdentification2,
                             organisationDetails = Some(GroupDetails(detail.organisationDetails)),
                             addressDetails = PPTAddress(detail.addressDetails),
-                            primaryContactDetails = Some(PrimaryContactDetails(detail)),
+                            contactDetails = Some(GroupMemberContactDetails(detail)),
                             regWithoutIDFlag = detail.regWithoutIDFlag
                 )
             )

@@ -19,7 +19,6 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum
 
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
