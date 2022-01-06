@@ -97,7 +97,6 @@ object GroupPartnershipSubscription {
     )
 
   private def createMember(
-    registration: Registration,
     member: GroupMember
   ): GroupPartnershipDetails = {
     val groupMemberContactDetails =
