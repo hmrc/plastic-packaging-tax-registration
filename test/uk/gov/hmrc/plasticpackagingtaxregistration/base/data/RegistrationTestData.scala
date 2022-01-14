@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipPartnerTypeEnum.SCOTTISH_LIMITED_PARTNERSHIP
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
@@ -115,6 +116,7 @@ trait RegistrationTestData {
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
                          partnershipName = Some("A general partnership"),
+                         nominatedPartnershipType = Some(SCOTTISH_LIMITED_PARTNERSHIP),
                          partnershipBusinessDetails = Some(
                            PartnershipBusinessDetails(sautr = "7454768902",
                                                       postcode = "AA1 1AA",
@@ -133,6 +135,7 @@ trait RegistrationTestData {
     partnershipDetails = Some(
       PartnershipDetails(partnershipType = SCOTTISH_PARTNERSHIP,
                          partnershipName = Some("A Scottish partnership"),
+                         nominatedPartnershipType = Some(SCOTTISH_LIMITED_PARTNERSHIP),
                          partnershipBusinessDetails = Some(
                            PartnershipBusinessDetails(sautr = "1435676545",
                                                       postcode = "BB1 1BB",

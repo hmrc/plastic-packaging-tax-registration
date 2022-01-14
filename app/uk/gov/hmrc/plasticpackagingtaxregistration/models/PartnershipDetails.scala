@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
+import play.api.libs.json._
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipPartnerTypeEnum.PartnershipPartnerTypeEnum
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.PartnershipTypeEnum
 
 object PartnershipTypeEnum extends Enumeration {
@@ -32,9 +33,26 @@ object PartnershipTypeEnum extends Enumeration {
 
 }
 
+object PartnershipPartnerTypeEnum extends Enumeration {
+  type PartnershipPartnerTypeEnum = Value
+  val SOLE_TRADER: Value                          = Value("SoleTrader")
+  val UK_COMPANY: Value                           = Value("UkCompany")
+  val LIMITED_LIABILITY_PARTNERSHIP: Value        = Value("LimitedLiabilityPartnership")
+  val SCOTTISH_PARTNERSHIP: Value                 = Value("ScottishPartnership")
+  val SCOTTISH_LIMITED_PARTNERSHIP: Value         = Value("ScottishLimitedPartnership")
+  val CHARITABLE_INCORPORATED_ORGANISATION: Value = Value("CIO")
+  val OVERSEAS_COMPANY_UK_BRANCH: Value           = Value("OverseasCompanyUkBranch")
+  val OVERSEAS_COMPANY_NO_UK_BRANCH: Value        = Value("OverseasCompanyNoUKBranch")
+
+  implicit val format: Format[PartnershipPartnerTypeEnum] =
+    Format(Reads.enumNameReads(PartnershipPartnerTypeEnum), Writes.enumNameWrites)
+
+}
+
 case class PartnershipDetails(
   partnershipType: PartnershipTypeEnum,
   partnershipName: Option[String] = None,
+  nominatedPartnershipType: Option[PartnershipPartnerTypeEnum] = None,
   partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None
 )
 
