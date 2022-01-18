@@ -39,7 +39,7 @@ object PartnerTypeEnum extends Enumeration {
 
 case class Partner(
   id: String = UUID.randomUUID().toString,
-  partnerType: PartnerTypeEnum,
+  partnerType: Option[PartnerTypeEnum],
   soleTraderDetails: Option[SoleTraderIncorporationDetails] = None,
   incorporationDetails: Option[IncorporationDetails] = None,
   partnershipDetails: Option[PartnershipDetails] = None,
