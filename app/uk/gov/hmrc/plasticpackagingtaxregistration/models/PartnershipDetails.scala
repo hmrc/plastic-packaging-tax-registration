@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import play.api.libs.json._
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipPartnerTypeEnum.PartnershipPartnerTypeEnum
+import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.PartnershipTypeEnum
 
 object PartnershipTypeEnum extends Enumeration {
@@ -52,8 +51,10 @@ object PartnershipPartnerTypeEnum extends Enumeration {
 case class PartnershipDetails(
   partnershipType: PartnershipTypeEnum,
   partnershipName: Option[String] = None,
-  nominatedPartnershipType: Option[PartnershipPartnerTypeEnum] = None,
-  partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None
+  partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None,
+  nominatedPartner: Option[Partner] = None,
+  otherPartners: Option[Seq[Partner]] = None,
+  inflightPartner: Option[Partner] = None // Scratch area for newly added partner
 )
 
 object PartnershipDetails {

@@ -45,7 +45,8 @@ case class OrganisationDetails(
   partnershipDetails: Option[PartnershipDetails] = None,
   incorporationDetails: Option[IncorporationDetails] = None,
   subscriptionStatus: Option[Status] = None,
-  regWithoutIDFlag: Option[Boolean] = None
+  regWithoutIDFlag: Option[Boolean] = None,
+  isBusinessAddressFromGrs: Option[Boolean] = None
 ) {
 
   def registeredBusinessAddress: PPTAddress =
