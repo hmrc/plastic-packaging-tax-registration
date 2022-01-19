@@ -28,6 +28,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
   SOLE_TRADER,
   UK_COMPANY
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.GENERAL_PARTNERSHIP
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
   GroupMember,
@@ -138,7 +139,7 @@ object Registration {
       case OrgType.PARTNERSHIP =>
         Some(
           //TODO - how to work out other partnership types?
-          PartnershipDetails(partnershipType = PartnershipTypeEnum.GENERAL_PARTNERSHIP,
+          PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
                              partnershipName =
                                subscription.legalEntityDetails.customerDetails.organisationDetails.map(
                                  _.organisationName

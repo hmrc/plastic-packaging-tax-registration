@@ -16,40 +16,11 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.PartnershipTypeEnum
-
-object PartnershipTypeEnum extends Enumeration {
-  type PartnershipTypeEnum = Value
-  val GENERAL_PARTNERSHIP: Value           = Value("GeneralPartnership")
-  val LIMITED_LIABILITY_PARTNERSHIP: Value = Value("LimitedLiabilityPartnership")
-  val LIMITED_PARTNERSHIP: Value           = Value("LimitedPartnership")
-  val SCOTTISH_PARTNERSHIP: Value          = Value("ScottishPartnership")
-  val SCOTTISH_LIMITED_PARTNERSHIP: Value  = Value("ScottishLimitedPartnership")
-
-  implicit val format: Format[PartnershipTypeEnum] =
-    Format(Reads.enumNameReads(PartnershipTypeEnum), Writes.enumNameWrites)
-
-}
-
-object PartnershipPartnerTypeEnum extends Enumeration {
-  type PartnershipPartnerTypeEnum = Value
-  val SOLE_TRADER: Value                          = Value("SoleTrader")
-  val UK_COMPANY: Value                           = Value("UkCompany")
-  val LIMITED_LIABILITY_PARTNERSHIP: Value        = Value("LimitedLiabilityPartnership")
-  val SCOTTISH_PARTNERSHIP: Value                 = Value("ScottishPartnership")
-  val SCOTTISH_LIMITED_PARTNERSHIP: Value         = Value("ScottishLimitedPartnership")
-  val CHARITABLE_INCORPORATED_ORGANISATION: Value = Value("CIO")
-  val OVERSEAS_COMPANY_UK_BRANCH: Value           = Value("OverseasCompanyUkBranch")
-  val OVERSEAS_COMPANY_NO_UK_BRANCH: Value        = Value("OverseasCompanyNoUKBranch")
-
-  implicit val format: Format[PartnershipPartnerTypeEnum] =
-    Format(Reads.enumNameReads(PartnershipPartnerTypeEnum), Writes.enumNameWrites)
-
-}
+import play.api.libs.json.{Format, Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.PartnerTypeEnum
 
 case class PartnershipDetails(
-  partnershipType: PartnershipTypeEnum,
+  partnershipType: PartnerTypeEnum,
   partnershipName: Option[String] = None,
   partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None,
   nominatedPartner: Option[Partner] = None,
