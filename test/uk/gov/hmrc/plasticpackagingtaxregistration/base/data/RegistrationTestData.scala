@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnershipTypeEnum.{
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
   GENERAL_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
 }

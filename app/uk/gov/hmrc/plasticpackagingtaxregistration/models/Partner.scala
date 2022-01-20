@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import play.api.libs.json.{Format, Json, OFormat, Reads, Writes}
+import play.api.libs.json._
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.PartnerTypeEnum
 
 import java.util.UUID
@@ -25,7 +25,9 @@ object PartnerTypeEnum extends Enumeration {
   type PartnerTypeEnum = Value
   val SOLE_TRADER: Value                          = Value("SoleTrader")
   val UK_COMPANY: Value                           = Value("UkCompany")
+  val GENERAL_PARTNERSHIP: Value                  = Value("GeneralPartnership")
   val LIMITED_LIABILITY_PARTNERSHIP: Value        = Value("LimitedLiabilityPartnership")
+  val LIMITED_PARTNERSHIP: Value                  = Value("LimitedPartnership")
   val SCOTTISH_PARTNERSHIP: Value                 = Value("ScottishPartnership")
   val SCOTTISH_LIMITED_PARTNERSHIP: Value         = Value("ScottishLimitedPartnership")
   val CHARITABLE_INCORPORATED_ORGANISATION: Value = Value("CIO")
@@ -42,7 +44,7 @@ case class Partner(
   partnerType: Option[PartnerTypeEnum],
   soleTraderDetails: Option[SoleTraderIncorporationDetails] = None,
   incorporationDetails: Option[IncorporationDetails] = None,
-  partnershipDetails: Option[PartnershipDetails] = None,
+  partnerPartnershipDetails: Option[PartnerPartnershipDetails] = None,
   contactDetails: Option[PartnerContactDetails] = None
 )
 
