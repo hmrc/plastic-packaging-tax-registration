@@ -55,3 +55,13 @@ object PartnershipBusinessDetails {
     Json.format[PartnershipBusinessDetails]
 
 }
+
+case class PartnerPartnershipDetails(
+  partnershipType: PartnerTypeEnum,
+  partnershipName: Option[String] = None,
+  partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None
+)
+
+object PartnerPartnershipDetails {
+  implicit val format: OFormat[PartnerPartnershipDetails] = Json.format[PartnerPartnershipDetails]
+}

@@ -44,7 +44,7 @@ case class Partner(
   partnerType: Option[PartnerTypeEnum],
   soleTraderDetails: Option[SoleTraderIncorporationDetails] = None,
   incorporationDetails: Option[IncorporationDetails] = None,
-  partnershipDetails: Option[PartnershipDetails] = None,
+  partnerPartnershipDetails: Option[PartnerPartnershipDetails] = None,
   contactDetails: Option[PartnerContactDetails] = None
 )
 
