@@ -23,8 +23,7 @@ case class PartnershipDetails(
   partnershipType: PartnerTypeEnum,
   partnershipName: Option[String] = None,
   partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None,
-  nominatedPartner: Option[Partner] = None,
-  otherPartners: Option[Seq[Partner]] = None,
+  partners: Seq[Partner] = Seq(),
   inflightPartner: Option[Partner] = None // Scratch area for newly added partner
 )
 
