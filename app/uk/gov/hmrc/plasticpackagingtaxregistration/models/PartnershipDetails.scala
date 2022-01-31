@@ -25,7 +25,14 @@ case class PartnershipDetails(
   partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None,
   partners: Seq[Partner] = Seq(),
   inflightPartner: Option[Partner] = None // Scratch area for newly added partner
-)
+) {
+
+  val partnershipOrCompanyName: Option[String] = partnershipName match {
+    case Some(name) => Some(name)
+    case _          => partnershipBusinessDetails.flatMap(_.companyName)
+  }
+
+}
 
 object PartnershipDetails {
   implicit val format: Format[PartnershipDetails] = Json.format[PartnershipDetails]
@@ -46,7 +53,11 @@ case class PartnershipBusinessDetails(
   postcode: String,
   companyProfile: Option[CompanyProfile],
   override val registration: Option[RegistrationDetails]
-) extends HasRegistrationDetails
+) extends HasRegistrationDetails {
+
+  def companyName: Option[String] = companyProfile.map(_.companyName)
+
+}
 
 object PartnershipBusinessDetails {
 
