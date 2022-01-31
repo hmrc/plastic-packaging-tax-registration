@@ -18,6 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
   GENERAL_PARTNERSHIP,
+  LIMITED_LIABILITY_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
@@ -138,6 +139,32 @@ trait RegistrationTestData {
                                                       registration =
                                                         Some(registrationDetails),
                                                       companyProfile = None
+                           )
+                         )
+      )
+    )
+  )
+
+  protected val pptLimitedLiabilityPartnershipDetails: OrganisationDetails = OrganisationDetails(
+    organisationType = Some(OrgType.PARTNERSHIP),
+    businessRegisteredAddress = Some(pptBusinessAddress),
+    safeNumber = Some("1234567890"),
+    partnershipDetails = Some(
+      PartnershipDetails(partnershipType = LIMITED_LIABILITY_PARTNERSHIP,
+                         partnershipName = None,
+                         partnershipBusinessDetails = Some(
+                           PartnershipBusinessDetails(sautr = "1435676545",
+                                                      postcode = "BB1 1BB",
+                                                      registration =
+                                                        Some(registrationDetails),
+                                                      companyProfile = Some(
+                                                        CompanyProfile(
+                                                          companyNumber = "154648",
+                                                          companyName = "Test Company",
+                                                          companyAddress =
+                                                            IncorporationAddressDetails()
+                                                        )
+                                                      )
                            )
                          )
       )
