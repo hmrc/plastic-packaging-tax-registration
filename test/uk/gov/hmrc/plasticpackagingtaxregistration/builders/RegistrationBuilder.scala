@@ -21,6 +21,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   GroupDetail,
   LiabilityDetails,
   OrganisationDetails,
+  Partner,
   PrimaryContactDetails,
   RegType,
   Registration
@@ -60,5 +61,15 @@ trait RegistrationBuilder {
 
   def withGroupDetail(groupDetail: GroupDetail): RegistrationModifier =
     _.copy(registrationType = Some(RegType.GROUP), groupDetail = Some(groupDetail))
+
+  def withPartnerModifications(partnerModifier: Partner => Partner): RegistrationModifier =
+    registration =>
+      registration.copy(organisationDetails =
+        registration.organisationDetails.copy(partnershipDetails =
+          registration.organisationDetails.partnershipDetails.map(
+            pd => pd.copy(partners = pd.partners.map(partnerModifier(_)))
+          )
+        )
+      )
 
 }

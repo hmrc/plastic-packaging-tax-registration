@@ -17,7 +17,11 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Format, Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.PartnerTypeEnum
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
+  GENERAL_PARTNERSHIP,
+  PartnerTypeEnum,
+  SCOTTISH_PARTNERSHIP
+}
 
 case class PartnershipDetails(
   partnershipType: PartnerTypeEnum,
@@ -25,7 +29,14 @@ case class PartnershipDetails(
   partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None,
   partners: Seq[Partner] = Seq(),
   inflightPartner: Option[Partner] = None // Scratch area for newly added partner
-)
+) {
+
+  lazy val name: Option[String] = partnershipType match {
+    case GENERAL_PARTNERSHIP | SCOTTISH_PARTNERSHIP => partnershipName
+    case _                                          => partnershipBusinessDetails.flatMap(_.companyProfile.map(_.companyName))
+  }
+
+}
 
 object PartnershipDetails {
   implicit val format: Format[PartnershipDetails] = Json.format[PartnershipDetails]
@@ -59,7 +70,14 @@ case class PartnerPartnershipDetails(
   partnershipType: PartnerTypeEnum,
   partnershipName: Option[String] = None,
   partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None
-)
+) {
+
+  lazy val name: Option[String] = partnershipType match {
+    case GENERAL_PARTNERSHIP | SCOTTISH_PARTNERSHIP => partnershipName
+    case _                                          => partnershipBusinessDetails.flatMap(_.companyProfile.map(_.companyName))
+  }
+
+}
 
 object PartnerPartnershipDetails {
   implicit val format: OFormat[PartnerPartnershipDetails] = Json.format[PartnerPartnershipDetails]

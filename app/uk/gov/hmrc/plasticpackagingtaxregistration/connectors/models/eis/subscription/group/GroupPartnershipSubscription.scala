@@ -28,6 +28,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
   GroupMemberContactDetails
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  Partner,
   PrimaryContactDetails,
   Registration,
   OrganisationDetails => RegistrationOrganisationDetails
@@ -44,21 +45,29 @@ object GroupPartnershipSubscription {
   implicit val format: OFormat[GroupPartnershipSubscription] =
     Json.format[GroupPartnershipSubscription]
 
-  def apply(registration: Registration): Option[GroupPartnershipSubscription] =
-    registration.groupDetail match {
-      case Some(_) =>
-        Some(
-          GroupPartnershipSubscription(representativeControl = true,
-                                       allMembersControl = true,
-                                       createGroupPartnershipDetails(registration)
-          )
-        )
-      case None => None
-    }
+  def apply(registration: Registration): Option[GroupPartnershipSubscription] = {
+    val groupReg   = isGroupRegistration(registration)
+    val partnerReg = isPartnershipWithDefinedPartnerDetailRegistration(registration)
 
-  private def createGroupPartnershipDetails(
-    registration: Registration
-  ): Seq[GroupPartnershipDetails] = {
+    if (groupReg || partnerReg)
+      Some(
+        GroupPartnershipSubscription(representativeControl = true,
+                                     allMembersControl = true,
+                                     groupPartnershipDetails =
+                                       if (groupReg) createGroupDetails(registration)
+                                       else createPartnersDetails(registration)
+        )
+      )
+    else
+      None
+  }
+
+  private def isGroupRegistration(registration: Registration) = registration.groupDetail.isDefined
+
+  private def isPartnershipWithDefinedPartnerDetailRegistration(registration: Registration) =
+    registration.organisationDetails.partnershipDetails.exists(_.partners.nonEmpty)
+
+  private def createGroupDetails(registration: Registration): Seq[GroupPartnershipDetails] = {
 
     if (registration.groupDetail.nonEmpty && registration.groupDetail.get.members.isEmpty)
       throw new IllegalStateException("Group must have members")
@@ -72,6 +81,44 @@ object GroupPartnershipSubscription {
         }
     }.get
   }
+
+  private def createPartnersDetails(registration: Registration): Seq[GroupPartnershipDetails] =
+    registration.organisationDetails.partnershipDetails.map(
+      _.partners.map(partner => createPartner(partner))
+    ).getOrElse(
+      throw new IllegalStateException(
+        "Partner details are required for non-corp partnership subscriptions"
+      )
+    )
+
+  private def createPartner(partner: Partner): GroupPartnershipDetails =
+    GroupPartnershipDetails(relationship = "Partner",
+                            customerIdentification1 = partner.customerIdentification1,
+                            customerIdentification2 = partner.customerIdentification2,
+                            organisationDetails =
+                              SubscriptionOrganisationDetails(organisationType =
+                                                                partner.partnerType.map(_.toString),
+                                                              organisationName = partner.name
+                              ),
+                            individualDetails = IndividualDetails(
+                              firstName = partner.contactDetails.flatMap(_.firstName).getOrElse(
+                                throw new IllegalStateException("Partner contact first name absent")
+                              ),
+                              lastName = partner.contactDetails.flatMap(_.lastName).getOrElse(
+                                throw new IllegalStateException("Partner contact last name absent")
+                              )
+                            ),
+                            addressDetails = AddressDetails(
+                              partner.contactDetails.flatMap(_.address).getOrElse(
+                                throw new IllegalStateException("Partner contact address absent")
+                              )
+                            ),
+                            contactDetails = ContactDetails(
+                              partner.contactDetails.getOrElse(
+                                throw new IllegalStateException("Partner contact details absent")
+                              )
+                            )
+    )
 
   private def createRepresentative(
     organisationDetails: RegistrationOrganisationDetails,

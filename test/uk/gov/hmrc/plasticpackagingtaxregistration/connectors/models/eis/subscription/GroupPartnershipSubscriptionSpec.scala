@@ -24,23 +24,22 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   GroupPartnershipDetails,
   GroupPartnershipSubscription
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{GroupDetail, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{GroupDetail, Partner, Registration}
 
 class GroupPartnershipSubscriptionSpec
     extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
 
-  "GroupPartnershipSubscription" should {
-    "build successfully" when {
-      "subscribing a group" in {
-
-        val registration =
+  "A GroupPartnershipSubscription" when {
+    "building group subscription" should {
+      "transform as expected" in {
+        val groupRegistration =
           aRegistration(withOrganisationDetails(pptIncorporationDetails),
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails),
                         withGroupDetail(groupDetail)
           )
 
-        val groupSubscription = GroupPartnershipSubscription(registration).get
+        val groupSubscription = GroupPartnershipSubscription(groupRegistration).get
         groupSubscription.allMembersControl mustBe true
         groupSubscription.representativeControl mustBe true
 
@@ -92,57 +91,126 @@ class GroupPartnershipSubscriptionSpec
         group.groupPartnershipDetails(1).individualDetails.firstName mustBe "Test"
         group.groupPartnershipDetails(1).individualDetails.lastName mustBe "User"
       }
-    }
 
-    "throw an exception" when {
-      "group detail members is empty" in {
-        val registration: Registration =
-          aRegistration(withOrganisationDetails(pptIncorporationDetails),
-                        withPrimaryContactDetails(pptPrimaryContactDetails),
-                        withLiabilityDetails(pptLiabilityDetails),
-                        withGroupDetail(GroupDetail(None, Seq.empty, None))
-          )
+      "throw an exception" when {
+        "group detail members is empty" in {
+          val registration: Registration =
+            aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                          withPrimaryContactDetails(pptPrimaryContactDetails),
+                          withLiabilityDetails(pptLiabilityDetails),
+                          withGroupDetail(GroupDetail(None, Seq.empty, None))
+            )
 
-        intercept[Exception] {
-          GroupPartnershipSubscription(registration)
+          intercept[Exception] {
+            GroupPartnershipSubscription(registration)
+          }
         }
-      }
 
-      "incorporationDetails is None" in {
-        val registration: Registration =
-          aRegistration(
-            withOrganisationDetails(pptIncorporationDetails.copy(incorporationDetails = None)),
-            withPrimaryContactDetails(pptPrimaryContactDetails),
-            withLiabilityDetails(pptLiabilityDetails),
-            withGroupDetail(groupDetail)
-          )
+        "incorporationDetails is None" in {
+          val registration: Registration =
+            aRegistration(
+              withOrganisationDetails(pptIncorporationDetails.copy(incorporationDetails = None)),
+              withPrimaryContactDetails(pptPrimaryContactDetails),
+              withLiabilityDetails(pptLiabilityDetails),
+              withGroupDetail(groupDetail)
+            )
 
-        intercept[Exception] {
-          GroupPartnershipSubscription(registration)
+          intercept[Exception] {
+            GroupPartnershipSubscription(registration)
+          }
         }
-      }
 
-      "group member organisation details is None" in {
+        "group member organisation details is None" in {
 
-        val registration: Registration =
-          aRegistration(
-            withOrganisationDetails(pptIncorporationDetails.copy(incorporationDetails = None)),
-            withPrimaryContactDetails(pptPrimaryContactDetails),
-            withLiabilityDetails(pptLiabilityDetails),
-            withGroupDetail(
-              groupDetail.copy(members =
-                Seq(groupDetail.members.head.copy(organisationDetails = None))
+          val registration: Registration =
+            aRegistration(
+              withOrganisationDetails(pptIncorporationDetails.copy(incorporationDetails = None)),
+              withPrimaryContactDetails(pptPrimaryContactDetails),
+              withLiabilityDetails(pptLiabilityDetails),
+              withGroupDetail(
+                groupDetail.copy(members =
+                  Seq(groupDetail.members.head.copy(organisationDetails = None))
+                )
               )
             )
-          )
 
-        intercept[Exception] {
-          GroupPartnershipSubscription(registration)
+          intercept[Exception] {
+            GroupPartnershipSubscription(registration)
+          }
         }
-      }
 
+      }
     }
 
+    "building partnership subscription" should {
+
+      "transform as expected" in {
+        val partnershipRegistration =
+          aRegistration(withLiabilityDetails(pptLiabilityDetails),
+                        withOrganisationDetails(pptGeneralPartnershipDetails)
+          )
+
+        val partnershipSubscription = GroupPartnershipSubscription(partnershipRegistration).get
+        partnershipSubscription.allMembersControl mustBe true
+        partnershipSubscription.representativeControl mustBe true
+
+        assertPartnersDetails(
+          partnershipSubscription,
+          partnershipRegistration.organisationDetails.partnershipDetails.get.partners
+        )
+      }
+
+      "throw IllegalStateException" when {
+        Seq(
+          ("first name",
+           { partner: Partner =>
+             partner.copy(contactDetails = partner.contactDetails.map(_.copy(firstName = None)))
+           }
+          ),
+          ("last name",
+           { partner: Partner =>
+             partner.copy(contactDetails = partner.contactDetails.map(_.copy(lastName = None)))
+           }
+          ),
+          ("contact address",
+           { partner: Partner =>
+             partner.copy(contactDetails = partner.contactDetails.map(_.copy(address = None)))
+           }
+          ),
+          ("contact details",
+           { partner: Partner =>
+             partner.copy(contactDetails = None)
+           }
+          )
+        ).foreach { testData =>
+          s"partners ${testData._1} absent" in {
+            val invalidPartnershipRegistration = withUpdatedPartners(
+              aRegistration(withLiabilityDetails(pptLiabilityDetails),
+                            withOrganisationDetails(pptGeneralPartnershipDetails)
+              ),
+              testData._2
+            )
+
+            intercept[IllegalStateException] {
+              GroupPartnershipSubscription(invalidPartnershipRegistration)
+            }
+          }
+
+        }
+      }
+    }
+
+    "building single entity subscription" should {
+      "return None" in {
+        val singleEntityRegistration =
+          aRegistration(withLiabilityDetails(pptLiabilityDetails),
+                        withOrganisationDetails(pptIncorporationDetails),
+                        withPrimaryContactDetails(pptPrimaryContactDetails)
+          )
+
+        GroupPartnershipSubscription(singleEntityRegistration) mustBe None
+      }
+    }
   }
 
   //TODO consider comparing with fields from Registration rather than values
@@ -195,5 +263,50 @@ class GroupPartnershipSubscriptionSpec
     member.contactDetails.telephone mustBe "1234567890"
     member.contactDetails.mobileNumber mustBe None
   }
+
+  private def assertPartnersDetails(
+    subscription: GroupPartnershipSubscription,
+    partners: Seq[Partner]
+  ) =
+    subscription.groupPartnershipDetails zip partners foreach {
+      case (groupPartner, partner) =>
+        groupPartner.relationship mustBe "Partner"
+        groupPartner.customerIdentification1 mustBe partner.customerIdentification1
+        groupPartner.customerIdentification2 mustBe partner.customerIdentification2
+
+        groupPartner.organisationDetails.organisationType mustBe partner.partnerType.map(_.toString)
+        groupPartner.organisationDetails.organisationName mustBe partner.name
+
+        groupPartner.individualDetails.title mustBe None
+        groupPartner.individualDetails.middleName mustBe None
+        groupPartner.individualDetails.firstName mustBe partner.contactDetails.flatMap(
+          _.firstName
+        ).get
+        groupPartner.individualDetails.lastName mustBe partner.contactDetails.flatMap(
+          _.lastName
+        ).get
+
+        groupPartner.addressDetails mustBe AddressDetails(
+          partner.contactDetails.flatMap(_.address).get
+        )
+
+        groupPartner.contactDetails.email mustBe partner.contactDetails.flatMap(_.emailAddress).get
+        groupPartner.contactDetails.telephone mustBe partner.contactDetails.flatMap(
+          _.phoneNumber
+        ).get
+        groupPartner.contactDetails.mobileNumber mustBe None
+    }
+
+  private def withUpdatedPartners(
+    registration: Registration,
+    partnerUpdator: Partner => Partner
+  ): Registration =
+    registration.copy(organisationDetails =
+      registration.organisationDetails.copy(partnershipDetails =
+        registration.organisationDetails.partnershipDetails.map(
+          pd => pd.copy(partners = pd.partners.map(partnerUpdator(_)))
+        )
+      )
+    )
 
 }

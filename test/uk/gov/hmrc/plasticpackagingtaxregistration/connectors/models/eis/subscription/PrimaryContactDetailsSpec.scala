@@ -19,32 +19,120 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
+import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Partner, Registration}
 
-class PrimaryContactDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
+class PrimaryContactDetailsSpec
+    extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
 
-  "PrimaryContactDetails" should {
-    "build successfully" in {
-      val primaryContactDetails = PrimaryContactDetails(pptPrimaryContactDetails)
-      primaryContactDetails.name mustBe pptPrimaryContactDetails.name.get
-      primaryContactDetails.positionInCompany mustBe pptPrimaryContactDetails.jobTitle.get
-      primaryContactDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
-      primaryContactDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
-      primaryContactDetails.contactDetails.mobileNumber mustBe None
-    }
+  private val registration =
+    Registration(id = "123", primaryContactDetails = pptPrimaryContactDetails)
 
-    "throw exception" when {
-      "'FullName' is not available" in {
-        intercept[Exception] {
-          PrimaryContactDetails(pptPrimaryContactDetails.copy(name = None))
-        }
+  "PrimaryContactDetails" when {
+    "populating from primary contact details (non-partnership registration)" should {
+      "build successfully" in {
+        val primaryContactDetails = PrimaryContactDetails(registration)
+        primaryContactDetails.name mustBe pptPrimaryContactDetails.name.get
+        primaryContactDetails.positionInCompany mustBe pptPrimaryContactDetails.jobTitle.get
+        primaryContactDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
+        primaryContactDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
+        primaryContactDetails.contactDetails.mobileNumber mustBe None
       }
 
-      "'JobTitle' is not available" in {
-        intercept[Exception] {
-          PrimaryContactDetails(pptPrimaryContactDetails.copy(jobTitle = None))
+      "throw IllegalStateException" when {
+        "primary contact name is absent" in {
+          intercept[IllegalStateException] {
+            PrimaryContactDetails(
+              registration.copy(primaryContactDetails =
+                registration.primaryContactDetails.copy(name = None)
+              )
+            )
+          }
         }
+
+        "primary contact job title is absent" in {
+          intercept[IllegalStateException] {
+            PrimaryContactDetails(
+              registration.copy(primaryContactDetails =
+                registration.primaryContactDetails.copy(jobTitle = None)
+              )
+            )
+          }
+        }
+
+      }
+    }
+
+    "populating from partnership registration" should {
+      "build successfully" in {
+        val partnershipRegistration =
+          aRegistration(withLiabilityDetails(pptLiabilityDetails),
+                        withOrganisationDetails(pptGeneralPartnershipDetails)
+          )
+
+        val primaryContactDetails = PrimaryContactDetails(partnershipRegistration)
+
+        val nominatedPartner = pptGeneralPartnershipDetails.partnershipDetails.get.partners.head
+
+        primaryContactDetails.name mustBe
+          s"${nominatedPartner.contactDetails.get.firstName.get} ${nominatedPartner.contactDetails.get.lastName.get}"
+        primaryContactDetails.positionInCompany mustBe "Nominated Partner"
+        primaryContactDetails.contactDetails.email mustBe nominatedPartner.contactDetails.get.emailAddress.get
+        primaryContactDetails.contactDetails.telephone mustBe nominatedPartner.contactDetails.get.phoneNumber.get
+        primaryContactDetails.contactDetails.mobileNumber mustBe None
+      }
+
+      "throw IllegalStateException" when {
+        "nominated partner is absent" in {
+          val partnershipRegistrationWithNoPartners =
+            aRegistration(withLiabilityDetails(pptLiabilityDetails),
+                          withOrganisationDetails(
+                            pptGeneralPartnershipDetails.copy(partnershipDetails =
+                              pptGeneralPartnershipDetails.partnershipDetails.map(
+                                _.copy(partners = Seq())
+                              )
+                            )
+                          )
+            )
+
+          intercept[IllegalStateException] {
+            PrimaryContactDetails(partnershipRegistrationWithNoPartners)
+          }
+        }
+        "nominated partner contact detail is absent" in {
+          val partnershipRegistrationWithMissingPartnerNames =
+            aRegistration(withLiabilityDetails(pptLiabilityDetails),
+                          withOrganisationDetails(pptGeneralPartnershipDetails),
+                          withPartnerModifications(partner => partner.copy(contactDetails = None))
+            )
+
+          intercept[IllegalStateException] {
+            PrimaryContactDetails(partnershipRegistrationWithMissingPartnerNames)
+          }
+        }
+        "nominated partner contact name is absent" in {
+          val partnershipRegistrationWithMissingPartnerNames =
+            aRegistration(withLiabilityDetails(pptLiabilityDetails),
+                          withOrganisationDetails(pptGeneralPartnershipDetails),
+                          withPartnerModifications(
+                            partner =>
+                              partner.copy(contactDetails =
+                                partner.contactDetails.map(
+                                  _.copy(firstName = None, lastName = None)
+                                )
+                              )
+                          )
+            )
+
+          intercept[IllegalStateException] {
+            PrimaryContactDetails(partnershipRegistrationWithMissingPartnerNames)
+          }
+        }
+
       }
 
     }
+
   }
+
 }

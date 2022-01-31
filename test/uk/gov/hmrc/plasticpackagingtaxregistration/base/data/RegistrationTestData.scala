@@ -18,6 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
   GENERAL_PARTNERSHIP,
+  LIMITED_LIABILITY_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
@@ -120,7 +121,9 @@ trait RegistrationTestData {
                                                       registration = Some(registrationDetails),
                                                       companyProfile = None
                            )
-                         )
+                         ),
+                         partners =
+                           Seq(aUkCompanyPartner(), aSoleTraderPartner(), aPartnershipPartner())
       )
     )
   )
@@ -139,10 +142,145 @@ trait RegistrationTestData {
                                                         Some(registrationDetails),
                                                       companyProfile = None
                            )
+                         ),
+                         partners =
+                           Seq(aUkCompanyPartner(), aSoleTraderPartner(), aPartnershipPartner())
+      )
+    )
+  )
+
+  protected val pptLimitedLiabilityDetails: OrganisationDetails = OrganisationDetails(
+    organisationType = Some(OrgType.PARTNERSHIP),
+    businessRegisteredAddress = Some(pptBusinessAddress),
+    safeNumber = Some("1234567890"),
+    partnershipDetails = Some(
+      PartnershipDetails(partnershipType = LIMITED_LIABILITY_PARTNERSHIP,
+                         partnershipBusinessDetails = Some(
+                           PartnershipBusinessDetails(sautr = "1435676545",
+                                                      postcode = "BB1 1BB",
+                                                      registration =
+                                                        Some(registrationDetails),
+                                                      companyProfile = Some(
+                                                        CompanyProfile(
+                                                          companyNumber = "2387462",
+                                                          companyName = "Plastics LLP",
+                                                          companyAddress =
+                                                            IncorporationAddressDetails()
+                                                        )
+                                                      )
+                           )
                          )
       )
     )
   )
+
+  protected def aUkCompanyPartner(): Partner =
+    Partner(partnerType = Some(PartnerTypeEnum.UK_COMPANY),
+            incorporationDetails = Some(
+              IncorporationDetails(companyNumber = "12345678",
+                                   companyName = "Plastics Inc",
+                                   ctutr = "ABC123456",
+                                   companyAddress = IncorporationAddressDetails(),
+                                   registration = Some(
+                                     RegistrationDetails(identifiersMatch = true,
+                                                         verificationStatus = Some("VERIFIED"),
+                                                         registrationStatus = "REGISTERED",
+                                                         registeredBusinessPartnerId =
+                                                           Some("XM12345678")
+                                     )
+                                   )
+              )
+            ),
+            contactDetails = Some(
+              PartnerContactDetails(firstName = Some("Robert"),
+                                    lastName = Some("Benkson"),
+                                    emailAddress = Some("robertbenkson@plastics-inc.com"),
+                                    phoneNumber = Some("07976123456"),
+                                    address = Some(
+                                      PPTAddress(addressLine1 = "200 Old Lane",
+                                                 townOrCity = "Leeds",
+                                                 postCode = Some("LS1 1HS")
+                                      )
+                                    )
+              )
+            )
+    )
+
+  protected def aSoleTraderPartner(): Partner =
+    Partner(partnerType = Some(PartnerTypeEnum.SOLE_TRADER),
+            soleTraderDetails = Some(
+              SoleTraderIncorporationDetails(firstName = "Steve",
+                                             lastName = "Knight",
+                                             dateOfBirth = None,
+                                             ninoOrTrn = "1234567890XYZ",
+                                             sautr = Some("123ABC456DEF"),
+                                             registration = Some(
+                                               RegistrationDetails(
+                                                 identifiersMatch = true,
+                                                 verificationStatus = Some("VERIFIED"),
+                                                 registrationStatus = "REGISTERED",
+                                                 registeredBusinessPartnerId = Some("XM123456")
+                                               )
+                                             )
+              )
+            ),
+            contactDetails = Some(
+              PartnerContactDetails(firstName = Some("Steve"),
+                                    lastName = Some("Knight"),
+                                    emailAddress = Some("steve@sknight.com"),
+                                    phoneNumber = Some("07976345345"),
+                                    address = Some(
+                                      PPTAddress(addressLine1 = "12 New Lane",
+                                                 townOrCity = "Leeds",
+                                                 postCode = Some("LS1 1RE")
+                                      )
+                                    )
+              )
+            )
+    )
+
+  protected def aPartnershipPartner(): Partner =
+    Partner(partnerType = Some(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP),
+            partnerPartnershipDetails = Some(
+              PartnerPartnershipDetails(
+                partnershipType = PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP,
+                partnershipName = None,
+                partnershipBusinessDetails = Some(
+                  PartnershipBusinessDetails(sautr = "876DFS629HGE",
+                                             postcode = "LS1 1AA",
+                                             companyProfile = Some(
+                                               CompanyProfile(companyNumber = "87654321",
+                                                              companyName = "Partners in Plastic",
+                                                              companyAddress =
+                                                                IncorporationAddressDetails()
+                                               )
+                                             ),
+                                             registration = Some(
+                                               RegistrationDetails(
+                                                 identifiersMatch = true,
+                                                 verificationStatus = Some("VERIFIED"),
+                                                 registrationStatus = "REGISTERED",
+                                                 registeredBusinessPartnerId = Some("XM123456")
+                                               )
+                                             )
+                  )
+                )
+              )
+            ),
+            contactDetails = Some(
+              PartnerContactDetails(firstName = Some("Steve"),
+                                    lastName = Some("Knight"),
+                                    emailAddress = Some("steve@sknight.com"),
+                                    phoneNumber = Some("07976345345"),
+                                    address = Some(
+                                      PPTAddress(addressLine1 = "12 New Lane",
+                                                 townOrCity = "Leeds",
+                                                 postCode = Some("LS1 1RE")
+                                      )
+                                    )
+              )
+            )
+    )
 
   protected val pptLiabilityDetails: LiabilityDetails = LiabilityDetails(
     weight = Some(LiabilityWeight(Some(10000))),
@@ -159,24 +297,24 @@ trait RegistrationTestData {
 
   protected val groupDetail = GroupDetail(membersUnderGroupControl = Some(true),
                                           currentMemberOrganisationType = None,
-                                          members = Seq(
-                                            GroupMember(id = "some-id",
-                                                        customerIdentification1 = "customerId-1",
-                                                        customerIdentification2 =
-                                                          Some("customerId-2"),
-                                                        organisationDetails = Some(
-                                                          GroupOrganisationDetails(
-                                                            organisationType = "UkCompany",
-                                                            organisationName = "Plastic Company 1",
-                                                            businessPartnerId = None
-                                                          )
-                                                        ),
-                                                        addressDetails = groupAddressDetails,
-                                                        contactDetails =
-                                                          Some(groupMemberContactDetails)
-                                            )
-                                          )
+                                          members = Seq(aGroupMember())
   )
+
+  protected def aGroupMember() =
+    GroupMember(id = "some-id",
+                customerIdentification1 = "customerId-1",
+                customerIdentification2 =
+                  Some("customerId-2"),
+                organisationDetails = Some(
+                  GroupOrganisationDetails(organisationType = "UkCompany",
+                                           organisationName = "Plastic Company 1",
+                                           businessPartnerId = None
+                  )
+                ),
+                addressDetails = groupAddressDetails,
+                contactDetails =
+                  Some(groupMemberContactDetails)
+    )
 
   protected val pptLiabilityDetailsWithExpectedWeight: LiabilityDetails = LiabilityDetails(
     weight = None,

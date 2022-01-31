@@ -54,7 +54,7 @@ class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTes
         customerDetails.individualDetails mustBe None
 
         customerDetails.organisationDetails.get.organisationType mustBe Some(
-          pptGeneralPartnershipDetails.organisationType.get.toString
+          pptGeneralPartnershipDetails.partnershipDetails.get.partnershipType.toString
         )
         customerDetails.organisationDetails.get.organisationName mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipName.get
       }
@@ -66,7 +66,7 @@ class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTes
         customerDetails.individualDetails mustBe None
 
         customerDetails.organisationDetails.get.organisationType mustBe Some(
-          pptScottishPartnershipDetails.organisationType.get.toString
+          pptScottishPartnershipDetails.partnershipDetails.get.partnershipType.toString
         )
         customerDetails.organisationDetails.get.organisationName mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipName.get
       }

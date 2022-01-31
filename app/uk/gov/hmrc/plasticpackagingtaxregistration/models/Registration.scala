@@ -43,7 +43,7 @@ case class Registration(
   id: String,
   registrationType: Option[RegType] = None,
   groupDetail: Option[GroupDetail] = None,
-  incorpJourneyId: Option[String],
+  incorpJourneyId: Option[String] = None,
   liabilityDetails: LiabilityDetails = LiabilityDetails(),
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
   organisationDetails: OrganisationDetails = OrganisationDetails(),
@@ -55,6 +55,27 @@ case class Registration(
 
   def updateLastModified(): Registration =
     this.copy(lastModifiedDateTime = Some(DateTime.now(DateTimeZone.UTC)))
+
+  def isGroup: Boolean = registrationType.contains(RegType.GROUP)
+
+  def isPartnership: Boolean = organisationDetails.organisationType.contains(OrgType.PARTNERSHIP)
+
+  def isPartnershipWithPartnerCollection: Boolean =
+    organisationDetails.organisationType.contains(OrgType.PARTNERSHIP) &&
+      (
+        organisationDetails.partnershipDetails.exists(
+          _.partnershipType == PartnerTypeEnum.GENERAL_PARTNERSHIP
+        ) ||
+          organisationDetails.partnershipDetails.exists(
+            _.partnershipType == PartnerTypeEnum.SCOTTISH_PARTNERSHIP
+          ) ||
+          organisationDetails.partnershipDetails.exists(
+            _.partnershipType == PartnerTypeEnum.LIMITED_PARTNERSHIP
+          ) ||
+          organisationDetails.partnershipDetails.exists(
+            _.partnershipType == PartnerTypeEnum.SCOTTISH_LIMITED_PARTNERSHIP
+          )
+      )
 
 }
 
@@ -135,6 +156,7 @@ object Registration {
         )
       case _ => None
     }
+    // TODO: reintroduce coverage on this class once partnership rehydration has been completed
     val partnershipDetails = organisationType match {
       case OrgType.PARTNERSHIP =>
         Some(
@@ -154,7 +176,9 @@ object Registration {
                                  registration = None,
                                  companyProfile = None
                                )
-                             )
+                             ),
+                             // TODO: rehydrate partners from subscription
+                             partners = Seq()
           )
         )
       case _ => None
@@ -179,28 +203,33 @@ object Registration {
         Some(Date(LocalDate.parse(subscription.taxObligationStartDate))),
       weight = Some(LiabilityWeight(Some(subscription.last12MonthTotalTonnageAmt.longValue())))
     )
-    val groupDetail = subscription.groupPartnershipSubscription match {
-      case Some(groupPartnershipSubscription) =>
-        Some(
-          GroupDetail(
-            membersUnderGroupControl = Some(groupPartnershipSubscription.allMembersControl),
-            members = groupPartnershipSubscription.groupPartnershipDetails.filterNot(
-              _.relationship == "Representative"
-            ).map(
-              detail =>
-                GroupMember(id = UUID.randomUUID().toString,
-                            customerIdentification1 = detail.customerIdentification1,
-                            customerIdentification2 = detail.customerIdentification2,
-                            organisationDetails = Some(GroupDetails(detail.organisationDetails)),
-                            addressDetails = PPTAddress(detail.addressDetails),
-                            contactDetails = Some(GroupMemberContactDetails(detail)),
-                            regWithoutIDFlag = detail.regWithoutIDFlag
+    val groupDetail =
+      if (subscription.legalEntityDetails.groupSubscriptionFlag)
+        subscription.groupPartnershipSubscription match {
+          case Some(groupPartnershipSubscription) =>
+            Some(
+              GroupDetail(
+                membersUnderGroupControl = Some(groupPartnershipSubscription.allMembersControl),
+                members = groupPartnershipSubscription.groupPartnershipDetails.filterNot(
+                  _.relationship == "Representative"
+                ).map(
+                  detail =>
+                    GroupMember(id = UUID.randomUUID().toString,
+                                customerIdentification1 = detail.customerIdentification1,
+                                customerIdentification2 = detail.customerIdentification2,
+                                organisationDetails =
+                                  Some(GroupDetails(detail.organisationDetails)),
+                                addressDetails = PPTAddress(detail.addressDetails),
+                                contactDetails = Some(GroupMemberContactDetails(detail)),
+                                regWithoutIDFlag = detail.regWithoutIDFlag
+                    )
                 )
+              )
             )
-          )
-        )
-      case _ => None
-    }
+          case _ => None
+        }
+      else
+        None
 
     Registration(id = "UPDATE",
                  registrationType = regType,

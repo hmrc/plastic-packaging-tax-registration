@@ -50,7 +50,7 @@ object Subscription {
                  legalEntityDetails =
                    LegalEntityDetails(registration.organisationDetails, isGroup(registration)),
                  principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration),
-                 primaryContactDetails = PrimaryContactDetails(registration.primaryContactDetails),
+                 primaryContactDetails = PrimaryContactDetails(registration),
                  businessCorrespondenceDetails = BusinessCorrespondenceDetails(registration),
                  declaration = Declaration(true),
                  taxObligationStartDate = registration.liabilityDetails.startDate,

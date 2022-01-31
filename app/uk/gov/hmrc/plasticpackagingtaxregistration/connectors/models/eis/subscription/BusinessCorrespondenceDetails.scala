@@ -33,19 +33,31 @@ object BusinessCorrespondenceDetails {
   implicit val format: OFormat[BusinessCorrespondenceDetails] =
     Json.format[BusinessCorrespondenceDetails]
 
-  def apply(registration: Registration): BusinessCorrespondenceDetails = {
-    val address =
-      if (registration.primaryContactDetails.useRegisteredAddress.getOrElse(false))
-        registration.organisationDetails.businessRegisteredAddress.getOrElse(
-          throw new IllegalStateException((s"The legal entity registered address is required."))
-        )
-      else
-        registration.primaryContactDetails.address.getOrElse(
-          throw new IllegalStateException(s"The primary contact details address is required.")
-        )
+  def apply(registration: Registration): BusinessCorrespondenceDetails =
+    if (registration.isPartnershipWithPartnerCollection) {
+      val nominatedPartner = registration.organisationDetails.partnershipDetails.flatMap(
+        _.partners.headOption
+      ).getOrElse(throw new IllegalStateException("Nominated partner name absent"))
+      val nominatedPartnerContactDetails = nominatedPartner.contactDetails.getOrElse(
+        throw new IllegalStateException("Nominated partner contact details absent")
+      )
+      val nominatedPartnerContactAddress = nominatedPartnerContactDetails.address.getOrElse(
+        throw new IllegalStateException("Nominated partner contact address absent")
+      )
 
-    BusinessCorrespondenceDetails(address)
-  }
+      BusinessCorrespondenceDetails(nominatedPartnerContactAddress)
+    } else {
+      val address =
+        if (registration.primaryContactDetails.useRegisteredAddress.getOrElse(false))
+          registration.organisationDetails.businessRegisteredAddress.getOrElse(
+            throw new IllegalStateException("The legal entity registered address is required.")
+          )
+        else
+          registration.primaryContactDetails.address.getOrElse(
+            throw new IllegalStateException("The primary contact details address is required.")
+          )
+      BusinessCorrespondenceDetails(address)
+    }
 
   def apply(address: PPTAddress): BusinessCorrespondenceDetails =
     new BusinessCorrespondenceDetails(addressLine1 = address.eisAddressLines._1,
