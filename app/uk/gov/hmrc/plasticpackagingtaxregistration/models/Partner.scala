@@ -17,7 +17,13 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json._
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.PartnerTypeEnum
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
+  LIMITED_LIABILITY_PARTNERSHIP,
+  PartnerTypeEnum,
+  SCOTTISH_LIMITED_PARTNERSHIP,
+  SCOTTISH_PARTNERSHIP,
+  SOLE_TRADER
+}
 
 import java.util.UUID
 
@@ -46,7 +52,56 @@ case class Partner(
   incorporationDetails: Option[IncorporationDetails] = None,
   partnerPartnershipDetails: Option[PartnerPartnershipDetails] = None,
   contactDetails: Option[PartnerContactDetails] = None
-)
+) {
+
+  lazy val customerIdentification1: String =
+    extractData(soleTraderDetails => Some(soleTraderDetails.ninoOrTrn),
+                partnershipDetails => partnershipDetails.partnershipBusinessDetails.map(_.sautr),
+                incorpDetails => Some(incorpDetails.companyNumber)
+    ).getOrElse(throw new IllegalStateException("First customer identifier is absent"))
+
+  lazy val customerIdentification2: Option[String] =
+    extractData(soleTraderDetails => soleTraderDetails.sautr,
+                partnershipDetails => partnershipDetails.partnershipBusinessDetails.map(_.postcode),
+                incorpDetails => Some(incorpDetails.ctutr)
+    )
+
+  lazy val name: String = extractData(
+    soleTraderDetails => Some(s"${soleTraderDetails.firstName} ${soleTraderDetails.lastName}"),
+    partnershipDetails => partnershipDetails.name,
+    incorpDetails => Some(incorpDetails.companyName)
+  ).getOrElse(throw new IllegalStateException("Partner name is absent"))
+
+  private def extractData(
+    soleTraderExtractor: SoleTraderIncorporationDetails => Option[String],
+    partnershipExtractor: PartnerPartnershipDetails => Option[String],
+    incorpExtractor: IncorporationDetails => Option[String]
+  ): Option[String] =
+    partnerType match {
+      case Some(SOLE_TRADER) =>
+        soleTraderExtractor(
+          this.soleTraderDetails.getOrElse(
+            throw new IllegalStateException("Sole trader details absent")
+          )
+        )
+      case Some(LIMITED_LIABILITY_PARTNERSHIP) | Some(SCOTTISH_LIMITED_PARTNERSHIP) | Some(
+            SCOTTISH_PARTNERSHIP
+          ) =>
+        partnershipExtractor(
+          this.partnerPartnershipDetails.getOrElse(
+            throw new IllegalStateException("Partnership details absent")
+          )
+        )
+      case Some(_) =>
+        incorpExtractor(
+          incorporationDetails.getOrElse(
+            throw new IllegalStateException("Incorporation details absent")
+          )
+        )
+      case None => throw new IllegalStateException("Partner type absent")
+    }
+
+}
 
 object Partner {
   implicit val format: OFormat[Partner] = Json.format[Partner]

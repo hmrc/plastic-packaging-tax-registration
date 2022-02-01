@@ -85,7 +85,7 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
         legalEntityDetails.customerDetails.individualDetails mustBe None
 
         legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
-          pptGeneralPartnershipDetails.organisationType.get.toString
+          pptGeneralPartnershipDetails.partnershipDetails.get.partnershipType.toString
         )
         legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipName.get
       }
@@ -105,9 +105,29 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
         legalEntityDetails.customerDetails.individualDetails mustBe None
 
         legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
-          pptScottishPartnershipDetails.organisationType.get.toString
+          pptScottishPartnershipDetails.partnershipDetails.get.partnershipType.toString
         )
         legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipName.get
+      }
+      "subscribing a limited liability partnership" in {
+        val legalEntityDetails = LegalEntityDetails(pptLimitedLiabilityDetails, false)
+        legalEntityDetails.dateOfApplication mustBe now(UTC).format(
+          DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        )
+
+        legalEntityDetails.customerIdentification1 mustBe pptLimitedLiabilityDetails.partnershipDetails.get.partnershipBusinessDetails.get.sautr
+        legalEntityDetails.customerIdentification2 mustBe Some(
+          pptLimitedLiabilityDetails.partnershipDetails.get.partnershipBusinessDetails.get.companyProfile.get.companyNumber
+        )
+
+        legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
+
+        legalEntityDetails.customerDetails.individualDetails mustBe None
+
+        legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
+          pptLimitedLiabilityDetails.partnershipDetails.get.partnershipType.toString
+        )
+        legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptLimitedLiabilityDetails.partnershipDetails.get.name.get
       }
     }
 

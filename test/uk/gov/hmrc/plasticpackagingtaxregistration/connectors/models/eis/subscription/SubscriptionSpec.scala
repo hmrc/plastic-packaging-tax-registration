@@ -20,6 +20,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.Partner
 
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
@@ -65,7 +66,7 @@ class SubscriptionSpec
 
         mustHaveValidPrimaryContactDetails(subscription)
         mustHaveValidBusinessCorrespondenceDetails(subscription)
-        mustHaveValidPrincipalPlaceOfBusinessDetails(subscription)
+        mustHaveValidPrincipalPlaceOfBusinessDetails(subscription, isPartnership = false)
         mustHaveValidIncorporationLegalEntityDetails(subscription, groupFlag = true)
         mustHaveValidGroupPartnershipSubscription(subscription)
       }
@@ -80,24 +81,30 @@ class SubscriptionSpec
         mustHaveValidIndividualLegalEntityDetails(subscription)
       }
       "General Partnership" in {
-        val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
-                        withPrimaryContactDetails(pptPrimaryContactDetails),
-                        withLiabilityDetails(pptLiabilityDetails)
-          )
+        val registration = aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
+                                         withLiabilityDetails(pptLiabilityDetails)
         )
-        assertCommonDetails(subscription, Some(10000))
+
+        val subscription = Subscription(registration)
+
+        assertCommonDetails(subscription, Some(10000), isPartnership = true)
         mustHaveValidGeneralPartnershipLegalEntityDetails(subscription)
+        mustHaveValidPartners(subscription,
+                              registration.organisationDetails.partnershipDetails.get.partners
+        )
       }
       "Scottish Partnership" in {
-        val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptScottishPartnershipDetails),
-                        withPrimaryContactDetails(pptPrimaryContactDetails),
-                        withLiabilityDetails(pptLiabilityDetails)
-          )
+        val registration = aRegistration(withOrganisationDetails(pptScottishPartnershipDetails),
+                                         withLiabilityDetails(pptLiabilityDetails)
         )
-        assertCommonDetails(subscription, Some(10000))
+
+        val subscription = Subscription(registration)
+
+        assertCommonDetails(subscription, Some(10000), isPartnership = true)
         mustHaveValidScottishPartnershipLegalEntityDetails(subscription)
+        mustHaveValidPartners(subscription,
+                              registration.organisationDetails.partnershipDetails.get.partners
+        )
       }
       "We have expected plastic packaging weight" in {
         val subscription = Subscription(
@@ -124,18 +131,24 @@ class SubscriptionSpec
     }
   }
 
-  private def assertCommonDetails(subscription: Subscription, expectedPPTWeight: Option[Long]) = {
-    subscription.groupPartnershipSubscription mustBe None
+  private def assertCommonDetails(
+    subscription: Subscription,
+    expectedPPTWeight: Option[Long],
+    isPartnership: Boolean = false
+  ) = {
     subscription.declaration.declarationBox1 mustBe true
     subscription.last12MonthTotalTonnageAmt mustBe expectedPPTWeight.getOrElse(0)
     subscription.taxObligationStartDate mustBe pptLiabilityDetails.startDate.get.pretty
 
-    mustHaveValidPrimaryContactDetails(subscription)
-    mustHaveValidBusinessCorrespondenceDetails(subscription)
-    mustHaveValidPrincipalPlaceOfBusinessDetails(subscription)
+    mustHaveValidPrimaryContactDetails(subscription, isPartnership)
+    mustHaveValidBusinessCorrespondenceDetails(subscription, isPartnership)
+    mustHaveValidPrincipalPlaceOfBusinessDetails(subscription, isPartnership)
   }
 
-  private def mustHaveValidPrincipalPlaceOfBusinessDetails(subscription: Subscription) = {
+  private def mustHaveValidPrincipalPlaceOfBusinessDetails(
+    subscription: Subscription,
+    isPartnership: Boolean
+  ) = {
     subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine1 mustBe pptBusinessAddress.addressLine1
     subscription.principalPlaceOfBusinessDetails.addressDetails.addressLine2 mustBe pptBusinessAddress.addressLine2.getOrElse(
       ""
@@ -147,23 +160,40 @@ class SubscriptionSpec
     subscription.principalPlaceOfBusinessDetails.addressDetails.postalCode mustBe pptBusinessAddress.postCode
     subscription.principalPlaceOfBusinessDetails.addressDetails.countryCode mustBe pptBusinessAddress.countryCode
 
-    subscription.principalPlaceOfBusinessDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
-    subscription.principalPlaceOfBusinessDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
+    if (isPartnership) {
+      val nominatedPartner = aUkCompanyPartner()
+      subscription.principalPlaceOfBusinessDetails.contactDetails.email mustBe nominatedPartner.contactDetails.get.emailAddress.get
+      subscription.principalPlaceOfBusinessDetails.contactDetails.telephone mustBe nominatedPartner.contactDetails.get.phoneNumber.get
+    } else {
+      subscription.principalPlaceOfBusinessDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
+      subscription.principalPlaceOfBusinessDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
+    }
     subscription.principalPlaceOfBusinessDetails.contactDetails.mobileNumber mustBe None
   }
 
-  private def mustHaveValidBusinessCorrespondenceDetails(subscription: Subscription) = {
-    subscription.businessCorrespondenceDetails.addressLine1 mustBe pptPrimaryContactAddress.addressLine1
-    subscription.businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2.getOrElse(
-      ""
-    )
-    subscription.businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
-    subscription.businessCorrespondenceDetails.addressLine4 mustBe Some(
-      pptPrimaryContactAddress.townOrCity
-    )
-    subscription.businessCorrespondenceDetails.postalCode mustBe pptPrimaryContactAddress.postCode
-    subscription.businessCorrespondenceDetails.countryCode mustBe pptPrimaryContactAddress.countryCode
-  }
+  private def mustHaveValidBusinessCorrespondenceDetails(
+    subscription: Subscription,
+    isPartnership: Boolean = false
+  ) =
+    if (isPartnership) {
+      val nominatedPartnerContactAddress = aUkCompanyPartner().contactDetails.get.address.get
+      val expectedBusinessCorrespondenceDetails = BusinessCorrespondenceDetails(
+        nominatedPartnerContactAddress
+      )
+
+      subscription.businessCorrespondenceDetails mustBe expectedBusinessCorrespondenceDetails
+    } else {
+      subscription.businessCorrespondenceDetails.addressLine1 mustBe pptPrimaryContactAddress.addressLine1
+      subscription.businessCorrespondenceDetails.addressLine2 mustBe pptPrimaryContactAddress.addressLine2.getOrElse(
+        ""
+      )
+      subscription.businessCorrespondenceDetails.addressLine3 mustBe pptPrimaryContactAddress.addressLine3
+      subscription.businessCorrespondenceDetails.addressLine4 mustBe Some(
+        pptPrimaryContactAddress.townOrCity
+      )
+      subscription.businessCorrespondenceDetails.postalCode mustBe pptPrimaryContactAddress.postCode
+      subscription.businessCorrespondenceDetails.countryCode mustBe pptPrimaryContactAddress.countryCode
+    }
 
   private def mustHaveValidIncorporationLegalEntityDetails(
     subscription: Subscription,
@@ -200,7 +230,7 @@ class SubscriptionSpec
 
     subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
     subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
-      pptGeneralPartnershipDetails.organisationType.get.toString
+      pptGeneralPartnershipDetails.partnershipDetails.get.partnershipType.toString
     )
     subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipName.get
     subscription.legalEntityDetails.customerDetails.individualDetails mustBe None
@@ -220,7 +250,7 @@ class SubscriptionSpec
 
     subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
     subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
-      pptScottishPartnershipDetails.organisationType.get.toString
+      pptScottishPartnershipDetails.partnershipDetails.get.partnershipType.toString
     )
     subscription.legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipName.get
     subscription.legalEntityDetails.customerDetails.individualDetails mustBe None
@@ -242,18 +272,61 @@ class SubscriptionSpec
 
   }
 
-  private def mustHaveValidPrimaryContactDetails(subscription: Subscription) = {
-    subscription.primaryContactDetails.name mustBe pptPrimaryContactDetails.name.get
-    subscription.primaryContactDetails.positionInCompany mustBe pptPrimaryContactDetails.jobTitle.get
-    subscription.primaryContactDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
-    subscription.primaryContactDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
-    subscription.primaryContactDetails.contactDetails.mobileNumber mustBe None
-  }
+  private def mustHaveValidPrimaryContactDetails(
+    subscription: Subscription,
+    isPartnership: Boolean = false
+  ) =
+    if (isPartnership) {
+      val nominatedPartner = aUkCompanyPartner()
+      subscription.primaryContactDetails.name mustBe
+        s"${nominatedPartner.contactDetails.get.firstName.get} ${nominatedPartner.contactDetails.get.lastName.get}"
+      subscription.primaryContactDetails.positionInCompany mustBe "Nominated Partner"
+      subscription.primaryContactDetails.contactDetails.email mustBe nominatedPartner.contactDetails.get.emailAddress.get
+      subscription.primaryContactDetails.contactDetails.telephone mustBe nominatedPartner.contactDetails.get.phoneNumber.get
+      subscription.primaryContactDetails.contactDetails.mobileNumber mustBe None
+    } else {
+      subscription.primaryContactDetails.name mustBe pptPrimaryContactDetails.name.get
+      subscription.primaryContactDetails.positionInCompany mustBe pptPrimaryContactDetails.jobTitle.get
+      subscription.primaryContactDetails.contactDetails.email mustBe pptPrimaryContactDetails.email.get
+      subscription.primaryContactDetails.contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
+      subscription.primaryContactDetails.contactDetails.mobileNumber mustBe None
+    }
 
   private def mustHaveValidGroupPartnershipSubscription(subscription: Subscription) = {
     subscription.groupPartnershipSubscription.get.representativeControl mustBe true
     subscription.groupPartnershipSubscription.get.allMembersControl mustBe true
     subscription.groupPartnershipSubscription.get.groupPartnershipDetails.size mustBe 2
+  }
+
+  private def mustHaveValidPartners(subscription: Subscription, partners: Seq[Partner]) = {
+    subscription.groupPartnershipSubscription.get.representativeControl mustBe true
+    subscription.groupPartnershipSubscription.get.allMembersControl mustBe true
+    subscription.groupPartnershipSubscription.get.groupPartnershipDetails.size mustBe partners.size
+    (partners zip subscription.groupPartnershipSubscription.get.groupPartnershipDetails).foreach {
+      case (partner, groupPartnership) =>
+        groupPartnership.relationship mustBe "Partner"
+        groupPartnership.customerIdentification1 mustBe partner.customerIdentification1
+        groupPartnership.customerIdentification2 mustBe partner.customerIdentification2
+        groupPartnership.organisationDetails.organisationType mustBe partner.partnerType.map(
+          _.toString
+        )
+        groupPartnership.organisationDetails.organisationName mustBe partner.name
+        groupPartnership.individualDetails.firstName mustBe partner.contactDetails.flatMap(
+          _.firstName
+        ).get
+        groupPartnership.individualDetails.lastName mustBe partner.contactDetails.flatMap(
+          _.lastName
+        ).get
+        groupPartnership.addressDetails mustBe partner.contactDetails.map(
+          cd => AddressDetails(cd.address.get)
+        ).get
+        groupPartnership.contactDetails.email mustBe partner.contactDetails.flatMap(
+          _.emailAddress
+        ).get
+        groupPartnership.contactDetails.telephone mustBe partner.contactDetails.flatMap(
+          _.phoneNumber
+        ).get
+    }
   }
 
 }

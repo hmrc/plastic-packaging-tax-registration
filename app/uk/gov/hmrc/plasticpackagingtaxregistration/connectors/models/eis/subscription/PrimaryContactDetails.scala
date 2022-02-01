@@ -18,6 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  Registration,
   PrimaryContactDetails => PPTPrimaryContactDetails
 }
 
@@ -30,14 +31,41 @@ case class PrimaryContactDetails(
 object PrimaryContactDetails {
   implicit val format: OFormat[PrimaryContactDetails] = Json.format[PrimaryContactDetails]
 
-  def apply(pptPrimaryContactDetails: PPTPrimaryContactDetails): PrimaryContactDetails =
-    PrimaryContactDetails(
-      name =
-        pptPrimaryContactDetails.name.getOrElse(throw new Exception("'Name' is required")),
-      positionInCompany =
-        pptPrimaryContactDetails.jobTitle.getOrElse(throw new Exception("'Job Title' is required")),
-      contactDetails =
-        ContactDetails(pptPrimaryContactDetails)
-    )
+  def apply(registration: Registration): PrimaryContactDetails =
+    if (registration.isPartnershipWithPartnerCollection) {
+      val nominatedPartner = registration.organisationDetails.partnershipDetails.flatMap(
+        _.partners.headOption
+      ).getOrElse(throw new IllegalStateException("Nominated partner absent"))
+
+      val nominatedPartnerContactDetails = nominatedPartner.contactDetails.getOrElse(
+        throw new IllegalStateException("Nominated partner contact details absent")
+      )
+
+      val nominatedPartnerContactFirstName = nominatedPartnerContactDetails.firstName.getOrElse(
+        throw new IllegalStateException("Nominated partner contact first name absent")
+      )
+      val nominatedPartnerContactLastName = nominatedPartnerContactDetails.lastName.getOrElse(
+        throw new IllegalStateException("Nominated partner contact last name absent")
+      )
+
+      PrimaryContactDetails(
+        name =
+          s"${nominatedPartnerContactFirstName} ${nominatedPartnerContactLastName}",
+        positionInCompany = "Nominated Partner",
+        contactDetails = ContactDetails(nominatedPartnerContactDetails)
+      )
+    } else
+      PrimaryContactDetails(
+        name =
+          registration.primaryContactDetails.name.getOrElse(
+            throw new IllegalStateException("Primary contact name absent")
+          ),
+        positionInCompany =
+          registration.primaryContactDetails.jobTitle.getOrElse(
+            throw new IllegalStateException("Primary contact job title absent")
+          ),
+        contactDetails =
+          ContactDetails(registration.primaryContactDetails)
+      )
 
 }

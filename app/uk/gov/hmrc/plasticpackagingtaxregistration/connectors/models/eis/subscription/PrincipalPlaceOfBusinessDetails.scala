@@ -27,13 +27,35 @@ case class PrincipalPlaceOfBusinessDetails(
 object PrincipalPlaceOfBusinessDetails {
   implicit val format = Json.format[PrincipalPlaceOfBusinessDetails]
 
-  def apply(registration: Registration): PrincipalPlaceOfBusinessDetails =
-    PrincipalPlaceOfBusinessDetails(
-      addressDetails = AddressDetails(registration.organisationDetails.registeredBusinessAddress),
-      contactDetails = ContactDetails(registration.primaryContactDetails.email.getOrElse(""),
-                                      telephone =
-                                        registration.primaryContactDetails.phoneNumber.getOrElse("")
-      )
+  def apply(registration: Registration): PrincipalPlaceOfBusinessDetails = {
+    val registeredBusinessAddress = registration.organisationDetails.registeredBusinessAddress
+    val emailAddress              = getEmailAddress(registration)
+    val phoneNumber               = getPhoneNumber(registration)
+
+    PrincipalPlaceOfBusinessDetails(addressDetails = AddressDetails(registeredBusinessAddress),
+                                    contactDetails =
+                                      ContactDetails(email = emailAddress, telephone = phoneNumber)
     )
+  }
+
+  private def getEmailAddress(registration: Registration): String =
+    if (registration.isPartnershipWithPartnerCollection)
+      registration.organisationDetails.partnershipDetails.flatMap(
+        _.partners.headOption.flatMap(_.contactDetails.flatMap(_.emailAddress))
+      ).getOrElse(throw new IllegalStateException("Nominated partner email address absent"))
+    else
+      registration.primaryContactDetails.email.getOrElse(
+        throw new IllegalStateException("Primary contact details email address absent")
+      )
+
+  private def getPhoneNumber(registration: Registration): String =
+    if (registration.isPartnershipWithPartnerCollection)
+      registration.organisationDetails.partnershipDetails.flatMap(
+        _.partners.headOption.flatMap(_.contactDetails.flatMap(_.phoneNumber))
+      ).getOrElse(throw new IllegalStateException("Nominated partner phone number absent"))
+    else
+      registration.primaryContactDetails.phoneNumber.getOrElse(
+        throw new IllegalStateException("Primary contact details phone number absent")
+      )
 
 }

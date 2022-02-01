@@ -51,7 +51,7 @@ case class OrganisationDetails(
 
   def registeredBusinessAddress: PPTAddress =
     businessRegisteredAddress.getOrElse(
-      throw InternalError(s"The legal entity registered address is required.")
+      throw new IllegalStateException(s"The legal entity registered address is required.")
     )
 
 }

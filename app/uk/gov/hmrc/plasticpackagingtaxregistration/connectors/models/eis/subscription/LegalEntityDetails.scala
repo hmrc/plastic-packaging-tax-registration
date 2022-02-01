@@ -23,6 +23,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
   OrgType,
+  PartnershipBusinessDetails,
   OrganisationDetails => PPTOrganisationDetails
 }
 
@@ -69,9 +70,12 @@ object LegalEntityDetails {
         pptOrganisationDetails.partnershipDetails match {
           case Some(partnershipDetails) =>
             partnershipDetails.partnershipBusinessDetails.map { details =>
-              updateLegalEntityDetails(customerIdentification1 = details.sautr,
-                                       customerIdentification2 = Some(details.postcode),
-                                       pptOrganisationDetails = pptOrganisationDetails
+              updateLegalEntityDetails(customerIdentification1 =
+                                         getCustomerIdentification1(details),
+                                       customerIdentification2 =
+                                         Some(getCustomerIdentification2(details)),
+                                       pptOrganisationDetails = pptOrganisationDetails,
+                                       isPartnership = partnershipDetails.partners.nonEmpty
               )
             }.getOrElse(
               throw new IllegalStateException("Incorporated partnership details are required")
@@ -89,6 +93,21 @@ object LegalEntityDetails {
         }.getOrElse(throw new IllegalStateException("Incorporation details are required"))
     }
 
+  private def getCustomerIdentification1(
+    partnershipBusinessDetails: PartnershipBusinessDetails
+  ): String =
+    partnershipBusinessDetails.sautr
+
+  private def getCustomerIdentification2(
+    partnershipBusinessDetails: PartnershipBusinessDetails
+  ): String = {
+    val companyNumber = partnershipBusinessDetails.companyProfile.map(_.companyNumber)
+    companyNumber match {
+      case Some(companyNumber) => companyNumber
+      case _                   => partnershipBusinessDetails.postcode
+    }
+  }
+
   private def getDateOfApplication: String =
     ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 
@@ -96,7 +115,8 @@ object LegalEntityDetails {
     customerIdentification1: String,
     customerIdentification2: Option[String],
     pptOrganisationDetails: PPTOrganisationDetails,
-    isGroup: Boolean = false
+    isGroup: Boolean = false,
+    isPartnership: Boolean = false
   ): LegalEntityDetails =
     LegalEntityDetails(dateOfApplication = getDateOfApplication,
                        customerIdentification1 = customerIdentification1,
@@ -104,6 +124,7 @@ object LegalEntityDetails {
                          customerIdentification2,
                        customerDetails = CustomerDetails(pptOrganisationDetails),
                        groupSubscriptionFlag = isGroup,
+                       partnershipSubscriptionFlag = isPartnership,
                        regWithoutIDFlag = pptOrganisationDetails.regWithoutIDFlag
     )
 

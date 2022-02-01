@@ -21,24 +21,94 @@ import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 
 class ContactDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
-  "ContactDetails" should {
-    "map from PPT PrimaryContactDetails" in {
-      val contactDetails = ContactDetails(pptPrimaryContactDetails)
-      contactDetails.email mustBe pptPrimaryContactDetails.email.get
-      contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
-      contactDetails.mobileNumber mustBe None
-    }
-
-    "throw exception " when {
-      "'email' is not available " in {
-        intercept[Exception] {
-          ContactDetails(pptPrimaryContactDetails.copy(email = None))
-        }
+  "ContactDetails" when {
+    "built from primary contact details (single entity registration)" should {
+      "map from PPT PrimaryContactDetails" in {
+        val contactDetails = ContactDetails(pptPrimaryContactDetails)
+        contactDetails.email mustBe pptPrimaryContactDetails.email.get
+        contactDetails.telephone mustBe pptPrimaryContactDetails.phoneNumber.get
+        contactDetails.mobileNumber mustBe None
       }
 
-      "'PhoneNumber' is not available " in {
-        intercept[Exception] {
-          ContactDetails(pptPrimaryContactDetails.copy(phoneNumber = None))
+      "throw exception " when {
+        "'email' is not available " in {
+          intercept[IllegalStateException] {
+            ContactDetails(pptPrimaryContactDetails.copy(email = None))
+          }
+        }
+
+        "'PhoneNumber' is not available " in {
+          intercept[IllegalStateException] {
+            ContactDetails(pptPrimaryContactDetails.copy(phoneNumber = None))
+          }
+        }
+      }
+    }
+
+    "built from group registration" should {
+      "map from group member contact details" in {
+        val groupMember = aGroupMember()
+
+        val contactDetails = ContactDetails(groupMember.contactDetails.get)
+
+        contactDetails.email mustBe groupMember.contactDetails.get.email.get
+        contactDetails.telephone mustBe groupMember.contactDetails.get.phoneNumber.get
+        contactDetails.mobileNumber mustBe None
+      }
+
+      "throw exception " when {
+        "'email' is not available " in {
+          intercept[IllegalStateException] {
+            ContactDetails(
+              aGroupMember().copy(contactDetails =
+                aGroupMember().contactDetails.map(_.copy(email = None))
+              ).contactDetails.get
+            )
+          }
+        }
+
+        "'PhoneNumber' is not available " in {
+          intercept[IllegalStateException] {
+            ContactDetails(
+              aGroupMember().copy(contactDetails =
+                aGroupMember().contactDetails.map(_.copy(phoneNumber = None))
+              ).contactDetails.get
+            )
+          }
+        }
+      }
+    }
+
+    "built from partnership registration" should {
+      "map from partner contact details" in {
+        val partner = aUkCompanyPartner()
+
+        val contactDetails = ContactDetails(partner.contactDetails.get)
+
+        contactDetails.email mustBe partner.contactDetails.get.emailAddress.get
+        contactDetails.telephone mustBe partner.contactDetails.get.phoneNumber.get
+        contactDetails.mobileNumber mustBe None
+      }
+
+      "throw exception " when {
+        "'email' is not available " in {
+          intercept[IllegalStateException] {
+            ContactDetails(
+              aUkCompanyPartner().copy(contactDetails =
+                aUkCompanyPartner().contactDetails.map(_.copy(emailAddress = None))
+              ).contactDetails.get
+            )
+          }
+        }
+
+        "'PhoneNumber' is not available " in {
+          intercept[IllegalStateException] {
+            ContactDetails(
+              aUkCompanyPartner().copy(contactDetails =
+                aUkCompanyPartner().contactDetails.map(_.copy(phoneNumber = None))
+              ).contactDetails.get
+            )
+          }
         }
       }
     }

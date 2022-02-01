@@ -19,6 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.GroupMemberContactDetails
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  PartnerContactDetails,
   PrimaryContactDetails => PPTPrimaryContactDetails
 }
 
@@ -29,17 +30,31 @@ object ContactDetails {
 
   def apply(pptPrimaryContactDetails: PPTPrimaryContactDetails): ContactDetails =
     ContactDetails(
-      email = pptPrimaryContactDetails.email.getOrElse(throw new Exception("Email is required")),
+      email = pptPrimaryContactDetails.email.getOrElse(
+        throw new IllegalStateException("Email is required")
+      ),
       telephone = pptPrimaryContactDetails.phoneNumber.getOrElse(
-        throw new Exception("Phone Number is required")
+        throw new IllegalStateException("Phone Number is required")
       )
     )
 
   def apply(groupMemberContactDetails: GroupMemberContactDetails): ContactDetails =
     ContactDetails(
-      email = groupMemberContactDetails.email.getOrElse(throw new Exception("Email is required")),
+      email = groupMemberContactDetails.email.getOrElse(
+        throw new IllegalStateException("Email is required")
+      ),
       telephone = groupMemberContactDetails.phoneNumber.getOrElse(
-        throw new Exception("Phone Number is required")
+        throw new IllegalStateException("Phone Number is required")
+      )
+    )
+
+  def apply(partnerContactDetails: PartnerContactDetails): ContactDetails =
+    ContactDetails(
+      email = partnerContactDetails.emailAddress.getOrElse(
+        throw new IllegalStateException("Email is required")
+      ),
+      telephone = partnerContactDetails.phoneNumber.getOrElse(
+        throw new IllegalStateException("Phone Number is required")
       )
     )
 

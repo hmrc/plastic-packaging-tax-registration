@@ -27,9 +27,9 @@ case class PartnershipDetails(
   inflightPartner: Option[Partner] = None // Scratch area for newly added partner
 ) {
 
-  val partnershipOrCompanyName: Option[String] = partnershipName match {
+  lazy val name: Option[String] = partnershipName match {
     case Some(name) => Some(name)
-    case _          => partnershipBusinessDetails.flatMap(_.companyName)
+    case _          => partnershipBusinessDetails.flatMap(_.name)
   }
 
 }
@@ -55,7 +55,7 @@ case class PartnershipBusinessDetails(
   override val registration: Option[RegistrationDetails]
 ) extends HasRegistrationDetails {
 
-  def companyName: Option[String] = companyProfile.map(_.companyName)
+  lazy val name: Option[String] = companyProfile.map(_.companyName)
 
 }
 
@@ -70,7 +70,14 @@ case class PartnerPartnershipDetails(
   partnershipType: PartnerTypeEnum,
   partnershipName: Option[String] = None,
   partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None
-)
+) {
+
+  lazy val name: Option[String] = partnershipName match {
+    case Some(name) => Some(name)
+    case _          => partnershipBusinessDetails.flatMap(_.name)
+  }
+
+}
 
 object PartnerPartnershipDetails {
   implicit val format: OFormat[PartnerPartnershipDetails] = Json.format[PartnerPartnershipDetails]

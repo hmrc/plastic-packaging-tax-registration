@@ -48,9 +48,10 @@ object CustomerDetails {
                           organisationDetails = Some(
                             OrganisationDetails(
                               organisationType =
-                                Some(OrgType.PARTNERSHIP.toString),
-                              // TODO: can we do this? I think partnership names might be optional, especially for general partnerships.
-                              organisationName = details.partnershipOrCompanyName.getOrElse("")
+                                Some(details.partnershipType.toString),
+                              organisationName = details.name.getOrElse(
+                                throw new IllegalStateException("Partnership name absent")
+                              )
                             )
                           ),
                           individualDetails = None
