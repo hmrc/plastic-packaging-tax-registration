@@ -78,7 +78,7 @@ class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTes
         customerDetails.individualDetails mustBe None
 
         customerDetails.organisationDetails.get.organisationType mustBe Some(
-          pptLimitedLiabilityPartnershipDetails.organisationType.get.toString
+          pptLimitedLiabilityPartnershipDetails.partnershipDetails.get.partnershipType.toString
         )
         customerDetails.organisationDetails.get.organisationName mustBe "Test Company"
       }
