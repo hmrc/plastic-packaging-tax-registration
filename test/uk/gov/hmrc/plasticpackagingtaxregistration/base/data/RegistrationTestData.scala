@@ -282,6 +282,32 @@ trait RegistrationTestData {
             )
     )
 
+  protected val pptLimitedLiabilityPartnershipDetails: OrganisationDetails = OrganisationDetails(
+    organisationType = Some(OrgType.PARTNERSHIP),
+    businessRegisteredAddress = Some(pptBusinessAddress),
+    safeNumber = Some("1234567890"),
+    partnershipDetails = Some(
+      PartnershipDetails(partnershipType = LIMITED_LIABILITY_PARTNERSHIP,
+                         partnershipName = None,
+                         partnershipBusinessDetails = Some(
+                           PartnershipBusinessDetails(sautr = "1435676545",
+                                                      postcode = "BB1 1BB",
+                                                      registration =
+                                                        Some(registrationDetails),
+                                                      companyProfile = Some(
+                                                        CompanyProfile(
+                                                          companyNumber = "154648",
+                                                          companyName = "Test Company",
+                                                          companyAddress =
+                                                            IncorporationAddressDetails()
+                                                        )
+                                                      )
+                           )
+                         )
+      )
+    )
+  )
+
   protected val pptLiabilityDetails: LiabilityDetails = LiabilityDetails(
     weight = Some(LiabilityWeight(Some(10000))),
     startDate = Some(Date(day = Some(6), month = Some(4), year = Some(2022)))

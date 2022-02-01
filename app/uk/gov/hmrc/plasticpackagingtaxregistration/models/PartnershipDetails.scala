@@ -17,11 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{Format, Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
-  GENERAL_PARTNERSHIP,
-  PartnerTypeEnum,
-  SCOTTISH_PARTNERSHIP
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.PartnerTypeEnum
 
 case class PartnershipDetails(
   partnershipType: PartnerTypeEnum,
@@ -31,9 +27,9 @@ case class PartnershipDetails(
   inflightPartner: Option[Partner] = None // Scratch area for newly added partner
 ) {
 
-  lazy val name: Option[String] = partnershipType match {
-    case GENERAL_PARTNERSHIP | SCOTTISH_PARTNERSHIP => partnershipName
-    case _                                          => partnershipBusinessDetails.flatMap(_.companyProfile.map(_.companyName))
+  lazy val name: Option[String] = partnershipName match {
+    case Some(name) => Some(name)
+    case _          => partnershipBusinessDetails.flatMap(_.name)
   }
 
 }
@@ -57,7 +53,11 @@ case class PartnershipBusinessDetails(
   postcode: String,
   companyProfile: Option[CompanyProfile],
   override val registration: Option[RegistrationDetails]
-) extends HasRegistrationDetails
+) extends HasRegistrationDetails {
+
+  lazy val name: Option[String] = companyProfile.map(_.companyName)
+
+}
 
 object PartnershipBusinessDetails {
 
@@ -72,9 +72,9 @@ case class PartnerPartnershipDetails(
   partnershipBusinessDetails: Option[PartnershipBusinessDetails] = None
 ) {
 
-  lazy val name: Option[String] = partnershipType match {
-    case GENERAL_PARTNERSHIP | SCOTTISH_PARTNERSHIP => partnershipName
-    case _                                          => partnershipBusinessDetails.flatMap(_.companyProfile.map(_.companyName))
+  lazy val name: Option[String] = partnershipName match {
+    case Some(name) => Some(name)
+    case _          => partnershipBusinessDetails.flatMap(_.name)
   }
 
 }

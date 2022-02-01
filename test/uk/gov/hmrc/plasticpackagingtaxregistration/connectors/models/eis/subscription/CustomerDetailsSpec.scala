@@ -70,6 +70,18 @@ class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTes
         )
         customerDetails.organisationDetails.get.organisationName mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipName.get
       }
+
+      "subscripting a limited liability partnership" in {
+        val customerDetails = CustomerDetails(pptLimitedLiabilityPartnershipDetails)
+        customerDetails.customerType mustBe CustomerType.Organisation
+
+        customerDetails.individualDetails mustBe None
+
+        customerDetails.organisationDetails.get.organisationType mustBe Some(
+          pptLimitedLiabilityPartnershipDetails.organisationType.get.toString
+        )
+        customerDetails.organisationDetails.get.organisationName mustBe "Test Company"
+      }
     }
 
     "throw an exception" when {
