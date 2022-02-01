@@ -242,29 +242,32 @@ trait RegistrationTestData {
   protected def aPartnershipPartner(): Partner =
     Partner(partnerType = Some(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP),
             partnerPartnershipDetails = Some(
-              PartnerPartnershipDetails(
-                partnershipType = PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP,
-                partnershipName = None,
-                partnershipBusinessDetails = Some(
-                  PartnershipBusinessDetails(sautr = "876DFS629HGE",
-                                             postcode = "LS1 1AA",
-                                             companyProfile = Some(
-                                               CompanyProfile(companyNumber = "87654321",
-                                                              companyName = "Partners in Plastic",
-                                                              companyAddress =
-                                                                IncorporationAddressDetails()
-                                               )
-                                             ),
-                                             registration = Some(
-                                               RegistrationDetails(
-                                                 identifiersMatch = true,
-                                                 verificationStatus = Some("VERIFIED"),
-                                                 registrationStatus = "REGISTERED",
-                                                 registeredBusinessPartnerId = Some("XM123456")
-                                               )
-                                             )
-                  )
-                )
+              PartnerPartnershipDetails(partnershipName = None,
+                                        partnershipBusinessDetails = Some(
+                                          PartnershipBusinessDetails(sautr = "876DFS629HGE",
+                                                                     postcode = "LS1 1AA",
+                                                                     companyProfile = Some(
+                                                                       CompanyProfile(
+                                                                         companyNumber = "87654321",
+                                                                         companyName =
+                                                                           "Partners in Plastic",
+                                                                         companyAddress =
+                                                                           IncorporationAddressDetails()
+                                                                       )
+                                                                     ),
+                                                                     registration = Some(
+                                                                       RegistrationDetails(
+                                                                         identifiersMatch = true,
+                                                                         verificationStatus =
+                                                                           Some("VERIFIED"),
+                                                                         registrationStatus =
+                                                                           "REGISTERED",
+                                                                         registeredBusinessPartnerId =
+                                                                           Some("XM123456")
+                                                                       )
+                                                                     )
+                                          )
+                                        )
               )
             ),
             contactDetails = Some(
