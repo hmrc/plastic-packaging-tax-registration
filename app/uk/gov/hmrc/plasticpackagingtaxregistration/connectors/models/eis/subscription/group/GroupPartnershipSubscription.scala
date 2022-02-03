@@ -126,15 +126,9 @@ object GroupPartnershipSubscription {
   ): GroupPartnershipDetails =
     GroupPartnershipDetails(relationship = "Representative",
                             customerIdentification1 =
-                              organisationDetails.incorporationDetails.map(
-                                details => details.companyNumber
-                              ).getOrElse(
-                                throw new IllegalStateException(
-                                  "Incorporation details are required for group representative"
-                                )
-                              ),
+                              organisationDetails.customerIdentification1,
                             customerIdentification2 =
-                              organisationDetails.incorporationDetails.map(_.ctutr),
+                              organisationDetails.customerIdentification2,
                             organisationDetails = toGroupOrganisationDetails(organisationDetails),
                             individualDetails = toIndividualDetails(primaryContactDetails),
                             addressDetails =
@@ -172,13 +166,7 @@ object GroupPartnershipSubscription {
     regOrgDetails: RegistrationOrganisationDetails
   ): SubscriptionOrganisationDetails =
     SubscriptionOrganisationDetails(regOrgDetails.organisationType.map(orgType => orgType.toString),
-                                    regOrgDetails.incorporationDetails.map { details =>
-                                      details.companyName
-                                    }.getOrElse(
-                                      throw new IllegalStateException(
-                                        "Incorporation details are required for group representative"
-                                      )
-                                    )
+                                    regOrgDetails.name
     )
 
   private def toIndividualDetails(primary: GroupMemberContactDetails): IndividualDetails = {

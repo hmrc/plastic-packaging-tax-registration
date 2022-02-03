@@ -73,8 +73,11 @@ object LegalEntityDetails {
               updateLegalEntityDetails(customerIdentification1 =
                                          getCustomerIdentification1(details),
                                        customerIdentification2 =
-                                         Some(getCustomerIdentification2(details)),
+                                         Some(
+                                           partnershipDetails.getCustomerIdentification2(details)
+                                         ),
                                        pptOrganisationDetails = pptOrganisationDetails,
+                                       isGroup = isGroup,
                                        isPartnership = partnershipDetails.partners.nonEmpty
               )
             }.getOrElse(
@@ -97,16 +100,6 @@ object LegalEntityDetails {
     partnershipBusinessDetails: PartnershipBusinessDetails
   ): String =
     partnershipBusinessDetails.sautr
-
-  private def getCustomerIdentification2(
-    partnershipBusinessDetails: PartnershipBusinessDetails
-  ): String = {
-    val companyNumber = partnershipBusinessDetails.companyProfile.map(_.companyNumber)
-    companyNumber match {
-      case Some(companyNumber) => companyNumber
-      case _                   => partnershipBusinessDetails.postcode
-    }
-  }
 
   private def getDateOfApplication: String =
     ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))

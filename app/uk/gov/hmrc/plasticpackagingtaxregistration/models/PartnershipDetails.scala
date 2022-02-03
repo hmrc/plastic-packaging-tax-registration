@@ -32,6 +32,14 @@ case class PartnershipDetails(
     case _          => partnershipBusinessDetails.flatMap(_.name)
   }
 
+  def getCustomerIdentification2(partnershipBusinessDetails: PartnershipBusinessDetails): String = {
+    val companyNumber = partnershipBusinessDetails.companyProfile.map(_.companyNumber)
+    companyNumber match {
+      case Some(companyNumber) => companyNumber
+      case _                   => partnershipBusinessDetails.postcode
+    }
+  }
+
 }
 
 object PartnershipDetails {

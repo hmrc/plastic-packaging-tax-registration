@@ -31,7 +31,7 @@ class GroupPartnershipSubscriptionSpec
 
   "A GroupPartnershipSubscription" when {
     "building group subscription" should {
-      "transform as expected" in {
+      "transform as expected for UK Company" in {
         val groupRegistration =
           aRegistration(withOrganisationDetails(pptIncorporationDetails),
                         withPrimaryContactDetails(pptPrimaryContactDetails),
@@ -44,6 +44,24 @@ class GroupPartnershipSubscriptionSpec
         groupSubscription.representativeControl mustBe true
 
         assertRepresentativeDetails(groupSubscription.groupPartnershipDetails.head)
+        assertMemberDetails(groupSubscription.groupPartnershipDetails(1))
+      }
+
+      "transform as expected for Limited Liability Partnership" in {
+        val groupRegistration =
+          aRegistration(withOrganisationDetails(pptLimitedLiabilityPartnershipDetails),
+            withPrimaryContactDetails(pptPrimaryContactDetails),
+            withLiabilityDetails(pptLiabilityDetails),
+            withGroupDetail(groupDetail)
+          )
+
+        val groupSubscription = GroupPartnershipSubscription(groupRegistration).get
+        groupSubscription.allMembersControl mustBe true
+        groupSubscription.representativeControl mustBe true
+
+        val representativeMember = groupSubscription.groupPartnershipDetails.head
+        representativeMember.organisationDetails.organisationType mustBe Some("Partnership")
+        representativeMember.relationship mustBe "Representative"
         assertMemberDetails(groupSubscription.groupPartnershipDetails(1))
       }
 
