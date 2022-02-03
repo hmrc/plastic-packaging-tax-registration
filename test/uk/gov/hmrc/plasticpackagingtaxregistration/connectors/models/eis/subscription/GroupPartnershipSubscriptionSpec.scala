@@ -50,9 +50,9 @@ class GroupPartnershipSubscriptionSpec
       "transform as expected for Limited Liability Partnership" in {
         val groupRegistration =
           aRegistration(withOrganisationDetails(pptLimitedLiabilityPartnershipDetails),
-            withPrimaryContactDetails(pptPrimaryContactDetails),
-            withLiabilityDetails(pptLiabilityDetails),
-            withGroupDetail(groupDetail)
+                        withPrimaryContactDetails(pptPrimaryContactDetails),
+                        withLiabilityDetails(pptLiabilityDetails),
+                        withGroupDetail(groupDetail)
           )
 
         val groupSubscription = GroupPartnershipSubscription(groupRegistration).get
