@@ -73,9 +73,7 @@ object LegalEntityDetails {
               updateLegalEntityDetails(customerIdentification1 =
                                          getCustomerIdentification1(details),
                                        customerIdentification2 =
-                                         Some(
-                                           partnershipDetails.getCustomerIdentification2(details)
-                                         ),
+                                         partnershipDetails.customerIdentification2,
                                        pptOrganisationDetails = pptOrganisationDetails,
                                        isGroup = isGroup,
                                        isPartnership = partnershipDetails.partners.nonEmpty

@@ -68,16 +68,8 @@ case class OrganisationDetails(
     ).getOrElse(throw new IllegalStateException("First identifier is absent"))
 
   lazy val customerIdentification2: Option[String] =
-    extractData(
-      partnershipDetails =>
-        Some(
-          partnershipDetails.getCustomerIdentification2(
-            partnershipDetails.partnershipBusinessDetails.getOrElse(
-              throw new IllegalStateException("No Business details present")
-            )
-          )
-        ),
-      incorpDetails => Some(incorpDetails.ctutr)
+    extractData(partnershipDetails => partnershipDetails.customerIdentification2,
+                incorpDetails => Some(incorpDetails.ctutr)
     )
 
   lazy val name: String = extractData(partnershipDetails => partnershipDetails.name,

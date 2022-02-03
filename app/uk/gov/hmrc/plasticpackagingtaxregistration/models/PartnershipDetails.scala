@@ -32,11 +32,11 @@ case class PartnershipDetails(
     case _          => partnershipBusinessDetails.flatMap(_.name)
   }
 
-  def getCustomerIdentification2(partnershipBusinessDetails: PartnershipBusinessDetails): String = {
-    val companyNumber = partnershipBusinessDetails.companyProfile.map(_.companyNumber)
+  lazy val customerIdentification2: Option[String] = {
+    val companyNumber: Option[String] = partnershipBusinessDetails.flatMap(_.companyNumber)
     companyNumber match {
-      case Some(companyNumber) => companyNumber
-      case _                   => partnershipBusinessDetails.postcode
+      case Some(companyNumber) => Some(companyNumber)
+      case _                   => partnershipBusinessDetails.map(_.postcode)
     }
   }
 
@@ -64,6 +64,8 @@ case class PartnershipBusinessDetails(
 ) extends HasRegistrationDetails {
 
   lazy val name: Option[String] = companyProfile.map(_.companyName)
+
+  lazy val companyNumber: Option[String] = companyProfile.map(_.companyNumber)
 
 }
 
