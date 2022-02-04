@@ -45,7 +45,10 @@ object GroupPartnershipSubscription {
   implicit val format: OFormat[GroupPartnershipSubscription] =
     Json.format[GroupPartnershipSubscription]
 
-  def apply(registration: Registration): Option[GroupPartnershipSubscription] = {
+  def apply(
+    registration: Registration,
+    isUpdate: Boolean = false
+  ): Option[GroupPartnershipSubscription] = {
     val groupReg   = isGroupRegistration(registration)
     val partnerReg = isPartnershipWithDefinedPartnerDetailRegistration(registration)
 
@@ -54,8 +57,8 @@ object GroupPartnershipSubscription {
         GroupPartnershipSubscription(representativeControl = true,
                                      allMembersControl = true,
                                      groupPartnershipDetails =
-                                       if (groupReg) createGroupDetails(registration)
-                                       else createPartnersDetails(registration)
+                                       if (groupReg) createGroupDetails(registration, isUpdate)
+                                       else createPartnersDetails(registration, isUpdate)
         )
       )
     else
@@ -67,31 +70,38 @@ object GroupPartnershipSubscription {
   private def isPartnershipWithDefinedPartnerDetailRegistration(registration: Registration) =
     registration.organisationDetails.partnershipDetails.exists(_.partners.nonEmpty)
 
-  private def createGroupDetails(registration: Registration): Seq[GroupPartnershipDetails] = {
+  private def createGroupDetails(
+    registration: Registration,
+    isUpdate: Boolean
+  ): Seq[GroupPartnershipDetails] = {
 
     if (registration.groupDetail.nonEmpty && registration.groupDetail.get.members.isEmpty)
       throw new IllegalStateException("Group must have members")
 
     createRepresentative(registration.organisationDetails,
-                         registration.primaryContactDetails
+                         registration.primaryContactDetails,
+                         isUpdate
     ) +: registration.groupDetail.map {
       groupDetail =>
         groupDetail.members.map { member =>
-          createMember(member)
+          createMember(member, isUpdate)
         }
     }.get
   }
 
-  private def createPartnersDetails(registration: Registration): Seq[GroupPartnershipDetails] =
+  private def createPartnersDetails(
+    registration: Registration,
+    isUpdate: Boolean
+  ): Seq[GroupPartnershipDetails] =
     registration.organisationDetails.partnershipDetails.map(
-      _.partners.map(partner => createPartner(partner))
+      _.partners.map(partner => createPartner(partner, isUpdate))
     ).getOrElse(
       throw new IllegalStateException(
         "Partner details are required for non-corp partnership subscriptions"
       )
     )
 
-  private def createPartner(partner: Partner): GroupPartnershipDetails =
+  private def createPartner(partner: Partner, isUpdate: Boolean): GroupPartnershipDetails =
     GroupPartnershipDetails(relationship = "Partner",
                             customerIdentification1 = partner.customerIdentification1,
                             customerIdentification2 = partner.customerIdentification2,
@@ -117,12 +127,16 @@ object GroupPartnershipSubscription {
                               partner.contactDetails.getOrElse(
                                 throw new IllegalStateException("Partner contact details absent")
                               )
-                            )
+                            ),
+                            regWithoutIDFlag =
+                              if (isUpdate) Some(false)
+                              else None // TODO: should this flag be added to Partner
     )
 
   private def createRepresentative(
     organisationDetails: RegistrationOrganisationDetails,
-    primaryContactDetails: PrimaryContactDetails
+    primaryContactDetails: PrimaryContactDetails,
+    isUpdate: Boolean
   ): GroupPartnershipDetails =
     GroupPartnershipDetails(relationship = "Representative",
                             customerIdentification1 =
@@ -140,10 +154,13 @@ object GroupPartnershipSubscription {
                             addressDetails =
                               AddressDetails(organisationDetails.registeredBusinessAddress),
                             contactDetails = ContactDetails(primaryContactDetails),
-                            regWithoutIDFlag = organisationDetails.regWithoutIDFlag
+                            regWithoutIDFlag =
+                              if (isUpdate)
+                                Some(organisationDetails.regWithoutIDFlag.getOrElse(false))
+                              else organisationDetails.regWithoutIDFlag
     )
 
-  private def createMember(member: GroupMember): GroupPartnershipDetails = {
+  private def createMember(member: GroupMember, isUpdate: Boolean): GroupPartnershipDetails = {
     val groupMemberContactDetails =
       member.contactDetails.getOrElse(
         throw new IllegalStateException("Contact details are required for group member")
@@ -164,7 +181,9 @@ object GroupPartnershipSubscription {
                               toIndividualDetails(groupMemberContactDetails),
                             addressDetails = AddressDetails(member.addressDetails),
                             contactDetails = ContactDetails(groupMemberContactDetails),
-                            regWithoutIDFlag = member.regWithoutIDFlag
+                            regWithoutIDFlag =
+                              if (isUpdate) Some(member.regWithoutIDFlag.getOrElse(false))
+                              else member.regWithoutIDFlag
     )
   }
 

@@ -82,7 +82,7 @@ class SubscriptionController @Inject() (
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
         val updatedRegistration: Registration = request.body.toRegistration(request.registrationId)
-        val updatedSubscription: Subscription = Subscription(updatedRegistration)
+        val updatedSubscription: Subscription = Subscription(updatedRegistration, isUpdate = true)
         subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
           case response @ SubscriptionSuccessfulResponse(pptReferenceNumber, _, formBundleNumber) =>
             for {
@@ -117,7 +117,7 @@ class SubscriptionController @Inject() (
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
         val pptRegistration = request.body.toRegistration(request.registrationId)
-        val pptSubscription = Subscription(pptRegistration)
+        val pptSubscription = Subscription(pptRegistration, isUpdate = false)
         logPayload(s"PPT Subscription Create request for safeId $safeId ", pptSubscription)
 
         subscriptionsConnector.submitSubscription(safeId, pptSubscription)
