@@ -35,29 +35,32 @@ class SubscriptionSpec
           aRegistration(withOrganisationDetails(pptIncorporationDetails),
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails)
-          )
+          ),
+          isSubscriptionUpdate = false
         )
         assertCommonDetails(subscription, Some(10000))
         mustHaveValidIncorporationLegalEntityDetails(subscription)
       }
       "UK Limited Company with no liability weight" in {
-        val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptIncorporationDetails),
-                        withPrimaryContactDetails(pptPrimaryContactDetails),
-                        withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
+        val subscription =
+          Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                                     withPrimaryContactDetails(pptPrimaryContactDetails),
+                                     withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
+                       ),
+                       isSubscriptionUpdate = false
           )
-        )
         assertCommonDetails(subscription, None)
         mustHaveValidIncorporationLegalEntityDetails(subscription)
       }
       "Group" in {
-        val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptIncorporationDetails),
-                        withPrimaryContactDetails(pptPrimaryContactDetails),
-                        withLiabilityDetails(pptLiabilityDetails),
-                        withGroupDetail(groupDetail)
+        val subscription =
+          Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                                     withPrimaryContactDetails(pptPrimaryContactDetails),
+                                     withLiabilityDetails(pptLiabilityDetails),
+                                     withGroupDetail(groupDetail)
+                       ),
+                       isSubscriptionUpdate = false
           )
-        )
 
         subscription.groupPartnershipSubscription.get.groupPartnershipDetails.size mustBe 2
         subscription.declaration.declarationBox1 mustBe true
@@ -75,7 +78,8 @@ class SubscriptionSpec
           aRegistration(withOrganisationDetails(pptSoleTraderDetails),
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails)
-          )
+          ),
+          isSubscriptionUpdate = false
         )
         assertCommonDetails(subscription, Some(10000))
         mustHaveValidIndividualLegalEntityDetails(subscription)
@@ -85,7 +89,7 @@ class SubscriptionSpec
                                          withLiabilityDetails(pptLiabilityDetails)
         )
 
-        val subscription = Subscription(registration)
+        val subscription = Subscription(registration, isSubscriptionUpdate = false)
 
         assertCommonDetails(subscription, Some(10000), isPartnership = true)
         mustHaveValidGeneralPartnershipLegalEntityDetails(subscription)
@@ -98,7 +102,7 @@ class SubscriptionSpec
                                          withLiabilityDetails(pptLiabilityDetails)
         )
 
-        val subscription = Subscription(registration)
+        val subscription = Subscription(registration, isSubscriptionUpdate = false)
 
         assertCommonDetails(subscription, Some(10000), isPartnership = true)
         mustHaveValidScottishPartnershipLegalEntityDetails(subscription)
@@ -107,12 +111,13 @@ class SubscriptionSpec
         )
       }
       "We have expected plastic packaging weight" in {
-        val subscription = Subscription(
-          aRegistration(withOrganisationDetails(pptIncorporationDetails),
-                        withPrimaryContactDetails(pptPrimaryContactDetails),
-                        withLiabilityDetails(pptLiabilityDetailsWithExpectedWeight)
+        val subscription =
+          Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                                     withPrimaryContactDetails(pptPrimaryContactDetails),
+                                     withLiabilityDetails(pptLiabilityDetailsWithExpectedWeight)
+                       ),
+                       isSubscriptionUpdate = false
           )
-        )
         assertCommonDetails(subscription, Some(20000))
       }
     }
@@ -120,11 +125,13 @@ class SubscriptionSpec
     "throw an exception" when {
       "no liability start date has been provided" in {
         intercept[Exception] {
-          Subscription(
-            aRegistration(withOrganisationDetails(pptIncorporationDetails),
-                          withPrimaryContactDetails(pptPrimaryContactDetails),
-                          withLiabilityDetails(pptLiabilityDetails.copy(startDate = None))
-            )
+          Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                                     withPrimaryContactDetails(pptPrimaryContactDetails),
+                                     withLiabilityDetails(
+                                       pptLiabilityDetails.copy(startDate = None)
+                                     )
+                       ),
+                       isSubscriptionUpdate = false
           )
         }
       }

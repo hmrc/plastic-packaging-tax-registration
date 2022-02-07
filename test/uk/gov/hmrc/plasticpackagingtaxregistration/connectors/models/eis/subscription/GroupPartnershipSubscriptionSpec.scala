@@ -110,6 +110,19 @@ class GroupPartnershipSubscriptionSpec
         group.groupPartnershipDetails(1).individualDetails.lastName mustBe "User"
       }
 
+      "add missing regWithoutIDFlags on updates" in {
+        val registration =
+          aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                        withPrimaryContactDetails(pptPrimaryContactDetails),
+                        withLiabilityDetails(pptLiabilityDetails),
+                        withGroupDetail(groupDetail)
+          )
+
+        val group = GroupPartnershipSubscription(registration, isSubscriptionUpdate = true).get
+
+        group.groupPartnershipDetails.seq.foreach(gpd => gpd.regWithoutIDFlag mustBe Some(false))
+      }
+
       "throw an exception" when {
         "group detail members is empty" in {
           val registration: Registration =
