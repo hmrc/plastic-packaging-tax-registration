@@ -118,7 +118,7 @@ class GroupPartnershipSubscriptionSpec
                         withGroupDetail(groupDetail)
           )
 
-        val group = GroupPartnershipSubscription(registration, isUpdate = true).get
+        val group = GroupPartnershipSubscription(registration, isSubscriptionUpdate = true).get
 
         group.groupPartnershipDetails.seq.foreach(gpd => gpd.regWithoutIDFlag mustBe Some(false))
       }

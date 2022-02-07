@@ -44,7 +44,7 @@ object Subscription {
       case None       => throw new Exception("A PPT liability Start date is required")
     }
 
-  def apply(registration: Registration, isUpdate: Boolean): Subscription =
+  def apply(registration: Registration, isSubscriptionUpdate: Boolean): Subscription =
     Subscription(changeOfCircumstanceDetails = registration.changeOfCircumstanceDetails,
                  processingDate = registration.processingDate,
                  legalEntityDetails =
@@ -56,7 +56,8 @@ object Subscription {
                  taxObligationStartDate = registration.liabilityDetails.startDate,
                  last12MonthTotalTonnageAmt =
                    registration.liabilityDetails.liabilityWeight.getOrElse(0),
-                 groupPartnershipSubscription = GroupPartnershipSubscription(registration, isUpdate)
+                 groupPartnershipSubscription =
+                   GroupPartnershipSubscription(registration, isSubscriptionUpdate)
     )
 
   private def isGroup(registration: Registration): Boolean =

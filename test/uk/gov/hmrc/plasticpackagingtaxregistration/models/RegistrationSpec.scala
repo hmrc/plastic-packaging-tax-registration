@@ -55,7 +55,7 @@ class RegistrationSpec
         )
       val rehydratedRegistration = Registration(amendedGroupSubscription)
 
-      val updatedSubscription = Subscription(rehydratedRegistration, isUpdate = false)
+      val updatedSubscription = Subscription(rehydratedRegistration, isSubscriptionUpdate = false)
 
       updatedSubscription mustBe amendedGroupSubscription
 
@@ -146,11 +146,11 @@ class RegistrationSpec
     }
 
     def assertConversion(registration: Registration) = {
-      val existingSubscription = Subscription(registration, isUpdate = false)
+      val existingSubscription = Subscription(registration, isSubscriptionUpdate = false)
 
       val rehydratedRegistration = Registration(existingSubscription)
 
-      val updatedSubscription = Subscription(rehydratedRegistration, isUpdate = false)
+      val updatedSubscription = Subscription(rehydratedRegistration, isSubscriptionUpdate = false)
 
       updatedSubscription mustBe existingSubscription
     }

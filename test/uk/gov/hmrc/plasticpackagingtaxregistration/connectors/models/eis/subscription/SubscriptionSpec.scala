@@ -36,7 +36,7 @@ class SubscriptionSpec
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails)
           ),
-          isUpdate = false
+          isSubscriptionUpdate = false
         )
         assertCommonDetails(subscription, Some(10000))
         mustHaveValidIncorporationLegalEntityDetails(subscription)
@@ -47,7 +47,7 @@ class SubscriptionSpec
                                      withPrimaryContactDetails(pptPrimaryContactDetails),
                                      withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
                        ),
-                       isUpdate = false
+                       isSubscriptionUpdate = false
           )
         assertCommonDetails(subscription, None)
         mustHaveValidIncorporationLegalEntityDetails(subscription)
@@ -59,7 +59,7 @@ class SubscriptionSpec
                                      withLiabilityDetails(pptLiabilityDetails),
                                      withGroupDetail(groupDetail)
                        ),
-                       isUpdate = false
+                       isSubscriptionUpdate = false
           )
 
         subscription.groupPartnershipSubscription.get.groupPartnershipDetails.size mustBe 2
@@ -79,7 +79,7 @@ class SubscriptionSpec
                         withPrimaryContactDetails(pptPrimaryContactDetails),
                         withLiabilityDetails(pptLiabilityDetails)
           ),
-          isUpdate = false
+          isSubscriptionUpdate = false
         )
         assertCommonDetails(subscription, Some(10000))
         mustHaveValidIndividualLegalEntityDetails(subscription)
@@ -89,7 +89,7 @@ class SubscriptionSpec
                                          withLiabilityDetails(pptLiabilityDetails)
         )
 
-        val subscription = Subscription(registration, isUpdate = false)
+        val subscription = Subscription(registration, isSubscriptionUpdate = false)
 
         assertCommonDetails(subscription, Some(10000), isPartnership = true)
         mustHaveValidGeneralPartnershipLegalEntityDetails(subscription)
@@ -102,7 +102,7 @@ class SubscriptionSpec
                                          withLiabilityDetails(pptLiabilityDetails)
         )
 
-        val subscription = Subscription(registration, isUpdate = false)
+        val subscription = Subscription(registration, isSubscriptionUpdate = false)
 
         assertCommonDetails(subscription, Some(10000), isPartnership = true)
         mustHaveValidScottishPartnershipLegalEntityDetails(subscription)
@@ -116,7 +116,7 @@ class SubscriptionSpec
                                      withPrimaryContactDetails(pptPrimaryContactDetails),
                                      withLiabilityDetails(pptLiabilityDetailsWithExpectedWeight)
                        ),
-                       isUpdate = false
+                       isSubscriptionUpdate = false
           )
         assertCommonDetails(subscription, Some(20000))
       }
@@ -131,7 +131,7 @@ class SubscriptionSpec
                                        pptLiabilityDetails.copy(startDate = None)
                                      )
                        ),
-                       isUpdate = false
+                       isSubscriptionUpdate = false
           )
         }
       }
