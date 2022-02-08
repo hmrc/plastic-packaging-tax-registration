@@ -31,6 +31,7 @@ object PartnerTypeEnum extends Enumeration {
   type PartnerTypeEnum = Value
   val SOLE_TRADER: Value                          = Value("SoleTrader")
   val UK_COMPANY: Value                           = Value("UkCompany")
+  val REGISTERED_SOCIETY: Value                   = Value("RegisteredSociety")
   val GENERAL_PARTNERSHIP: Value                  = Value("GeneralPartnership")
   val LIMITED_LIABILITY_PARTNERSHIP: Value        = Value("LimitedLiabilityPartnership")
   val LIMITED_PARTNERSHIP: Value                  = Value("LimitedPartnership")
