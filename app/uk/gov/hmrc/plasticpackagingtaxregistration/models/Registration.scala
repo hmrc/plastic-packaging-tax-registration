@@ -41,6 +41,7 @@ import java.util.UUID
 
 case class Registration(
   id: String,
+  dateOfRegistration: LocalDate = LocalDate.now(),
   registrationType: Option[RegType] = None,
   groupDetail: Option[GroupDetail] = None,
   incorpJourneyId: Option[String] = None,
@@ -232,6 +233,8 @@ object Registration {
         None
 
     Registration(id = "UPDATE",
+                 dateOfRegistration =
+                   LocalDate.parse(subscription.legalEntityDetails.dateOfApplication),
                  registrationType = regType,
                  groupDetail = groupDetail,
                  incorpJourneyId = None,

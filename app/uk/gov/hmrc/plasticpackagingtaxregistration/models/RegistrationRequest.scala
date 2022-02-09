@@ -18,7 +18,10 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 
+import java.time.LocalDate
+
 case class RegistrationRequest(
+  dateOfRegistration: LocalDate = LocalDate.now(),
   registrationType: Option[RegType] = None,
   groupDetail: Option[GroupDetail] = None,
   incorpJourneyId: Option[String],
@@ -31,6 +34,7 @@ case class RegistrationRequest(
 
   def toRegistration(providerId: String): Registration =
     Registration(id = providerId,
+                 dateOfRegistration = this.dateOfRegistration,
                  registrationType = this.registrationType,
                  groupDetail = this.groupDetail,
                  incorpJourneyId = this.incorpJourneyId,
