@@ -21,7 +21,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 import java.time.LocalDate
 
 case class RegistrationRequest(
-  dateOfRegistration: LocalDate = LocalDate.now(),
+  dateOfRegistration: Option[LocalDate] = Some(LocalDate.now()),
   registrationType: Option[RegType] = None,
   groupDetail: Option[GroupDetail] = None,
   incorpJourneyId: Option[String],
