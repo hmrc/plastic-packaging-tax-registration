@@ -132,19 +132,21 @@ class RegistrationSpec
 //    }
 
     "convert partnership details when mapping from a subscription" in {
-      val generalPartnershipRegistration =
-        aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
+      val partnershipDetails = pptGeneralPartnershipDetails.partnershipDetails.map(_.copy(partnershipType = PartnerTypeEnum.SCOTTISH_PARTNERSHIP))  // To force out hardcoded GENERAL_PARTNERSHIP
+      val partnershipRegistration = {
+        aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails.copy(partnershipDetails = partnershipDetails)),
                       withPrimaryContactDetails(pptPrimaryContactDetails),
                       withLiabilityDetails(pptLiabilityDetails)
         )
+      }
 
-      generalPartnershipRegistration.organisationDetails.organisationType mustBe Some(
+      partnershipRegistration.organisationDetails.organisationType mustBe Some(
         OrgType.PARTNERSHIP
       )
-      generalPartnershipRegistration.organisationDetails.partnershipDetails.map(
+      partnershipRegistration.organisationDetails.partnershipDetails.map(
         _.partnershipType
-      ) mustBe Some(PartnerTypeEnum.GENERAL_PARTNERSHIP)
-      val existingSubscription = Subscription(generalPartnershipRegistration)
+      ) mustBe Some(PartnerTypeEnum.SCOTTISH_PARTNERSHIP)
+      val existingSubscription = Subscription(partnershipRegistration)
 
       val rehydratedRegistration = Registration(existingSubscription)
 
@@ -153,17 +155,18 @@ class RegistrationSpec
       val rehydratedPartnershipDetails =
         rehydratedRegistration.organisationDetails.partnershipDetails.get
 
-      rehydratedPartnershipDetails.partners.size mustBe generalPartnershipRegistration.organisationDetails.partnershipDetails.get.partners.size
+      rehydratedPartnershipDetails.partnershipType mustBe PartnerTypeEnum.SCOTTISH_PARTNERSHIP
+      rehydratedPartnershipDetails.partners.size mustBe partnershipRegistration.organisationDetails.partnershipDetails.get.partners.size
       rehydratedPartnershipDetails.partners.map(
         _.partnerType
-      ) mustBe generalPartnershipRegistration.organisationDetails.partnershipDetails.get.partners.map(
+      ) mustBe partnershipRegistration.organisationDetails.partnershipDetails.get.partners.map(
         _.partnerType
       )
 
       val rehydratedNominatedPartner               = rehydratedPartnershipDetails.partners.head
       val rehydratedNominatedPartnerContactDetails = rehydratedNominatedPartner.contactDetails
       val nominatedPartner =
-        generalPartnershipRegistration.organisationDetails.partnershipDetails.get.partners.head
+        partnershipRegistration.organisationDetails.partnershipDetails.get.partners.head
       rehydratedNominatedPartnerContactDetails mustBe nominatedPartner.contactDetails
 
       rehydratedNominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
