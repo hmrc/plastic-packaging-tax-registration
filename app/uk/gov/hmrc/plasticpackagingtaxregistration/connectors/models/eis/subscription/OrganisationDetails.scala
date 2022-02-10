@@ -17,8 +17,22 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, PartnerTypeEnum}
 
-case class OrganisationDetails(organisationType: Option[String] = None, organisationName: String)
+case class OrganisationDetails(organisationType: Option[String] = None, organisationName: String) {
+
+  def organisationTypeDisplayName(isGroup: Boolean): OrgType =
+    organisationType match {
+      case Some(organisationType)
+          if isGroup && organisationType.equals(
+            PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP.toString
+          ) =>
+        OrgType.PARTNERSHIP
+      case Some(organisationType) => OrgType.withName(organisationType)
+    }
+
+}
 
 object OrganisationDetails {
   implicit val format: OFormat[OrganisationDetails] = Json.format[OrganisationDetails]
