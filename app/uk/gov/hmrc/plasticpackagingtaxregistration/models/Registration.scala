@@ -17,28 +17,11 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  ChangeOfCircumstanceDetails,
-  CustomerType,
-  Subscription
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
-  OVERSEAS_COMPANY_UK_BRANCH,
-  OrgType,
-  REGISTERED_SOCIETY,
-  SOLE_TRADER,
-  UK_COMPANY
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
-  GENERAL_PARTNERSHIP,
-  PartnerTypeEnum
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{OVERSEAS_COMPANY_UK_BRANCH, OrgType, REGISTERED_SOCIETY, SOLE_TRADER, UK_COMPANY}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.PartnerTypeEnum
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
-  GroupMember,
-  GroupMemberContactDetails,
-  OrganisationDetails => GroupDetails
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -224,26 +207,34 @@ object Registration {
           )
         }
 
+        val maybePartnershipTypeField =
+          subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
+            _.organisationType
+          )
+        val partnershipType = maybePartnershipTypeField.map { t =>
+          PartnerTypeEnum.withName(t)
+        }.getOrElse {
+          illegalState("Missing partnershipType")
+        }
+
         Some(
-          PartnershipDetails(
-            partnershipType = GENERAL_PARTNERSHIP, //TODO - how to work out other partnership types?
-            partnershipName =
-              subscription.legalEntityDetails.customerDetails.organisationDetails.map(
-                _.organisationName
-              ),
-            partnershipBusinessDetails = Some(
-              PartnershipBusinessDetails(
-                sautr = subscription.legalEntityDetails.customerIdentification1,
-                postcode =
-                  subscription.legalEntityDetails.customerIdentification2.getOrElse(
-                    illegalState("Missing partnership postcode")
-                  ),
-                registration = None,
-                companyProfile = None
-              )
-            ),
-            // TODO: rehydrate partners from subscription
-            partners = partners
+          PartnershipDetails(partnershipType = partnershipType,
+                             subscription.legalEntityDetails.customerDetails.organisationDetails.map(
+                               _.organisationName
+                             ),
+                             partnershipBusinessDetails = Some(
+                               PartnershipBusinessDetails(
+                                 sautr = subscription.legalEntityDetails.customerIdentification1,
+                                 postcode =
+                                   subscription.legalEntityDetails.customerIdentification2.getOrElse(
+                                     illegalState("Missing partnership postcode")
+                                   ),
+                                 registration = None,
+                                 companyProfile = None
+                               )
+                             ),
+                             // TODO: rehydrate partners from subscription
+                             partners = partners
           )
         )
       case _ => None

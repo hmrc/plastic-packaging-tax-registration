@@ -132,17 +132,19 @@ class RegistrationSpec
 //    }
 
     "convert partnership details when mapping from a subscription" in {
-      val partnershipDetails = pptGeneralPartnershipDetails.partnershipDetails.map(_.copy(partnershipType = PartnerTypeEnum.SCOTTISH_PARTNERSHIP))  // To force out hardcoded GENERAL_PARTNERSHIP
-      val partnershipRegistration = {
-        aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails.copy(partnershipDetails = partnershipDetails)),
-                      withPrimaryContactDetails(pptPrimaryContactDetails),
-                      withLiabilityDetails(pptLiabilityDetails)
+      val partnershipDetails = pptGeneralPartnershipDetails.partnershipDetails.map(
+        _.copy(partnershipType = PartnerTypeEnum.SCOTTISH_PARTNERSHIP)
+      ) // To force out hardcoded GENERAL_PARTNERSHIP
+      val partnershipRegistration =
+        aRegistration(
+          withOrganisationDetails(
+            pptGeneralPartnershipDetails.copy(partnershipDetails = partnershipDetails)
+          ),
+          withPrimaryContactDetails(pptPrimaryContactDetails),
+          withLiabilityDetails(pptLiabilityDetails)
         )
-      }
 
-      partnershipRegistration.organisationDetails.organisationType mustBe Some(
-        OrgType.PARTNERSHIP
-      )
+      partnershipRegistration.organisationDetails.organisationType mustBe Some(OrgType.PARTNERSHIP)
       partnershipRegistration.organisationDetails.partnershipDetails.map(
         _.partnershipType
       ) mustBe Some(PartnerTypeEnum.SCOTTISH_PARTNERSHIP)
