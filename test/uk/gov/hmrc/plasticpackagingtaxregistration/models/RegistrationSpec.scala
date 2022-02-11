@@ -226,9 +226,10 @@ class RegistrationSpec
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyName) mustBe
         partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyName)
 
-      // TODO postcode and companyNumber probably overwrite each other in the id2 field; can't be round tripped
+      // TODO For a partnership customerIdentification1 is the partnershipBusinessDetails.sautr and customerIdentification2 is the partnershipBusinessDetails.postcode
+      // Company number and not be recovered from the Subscription.
       //rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber) mustBe
-     //   partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber)
+      //  partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber)
 
       // None of these partners have RegistrationDetails set because we think this field is just
       // an artifact of top level entire classes been reused to represent partner details.

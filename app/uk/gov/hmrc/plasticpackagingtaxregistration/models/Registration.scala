@@ -226,7 +226,7 @@ object Registration {
                       companyName = subscriptionPartner.organisationDetails.organisationName,
                       companyAddress = IncorporationAddressDetails(),
                     )),
-                    registration = None    // TODO Unsure what todo about registration
+                    registration = None
                   )
                 )
               )
