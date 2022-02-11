@@ -115,10 +115,28 @@ object Registration {
     )
     val organisationType = subscription.legalEntityDetails.customerDetails.customerType match {
       case CustomerType.Individual => SOLE_TRADER
-      case CustomerType.Organisation =>
+      /* case CustomerType.Organisation =>
         subscription.legalEntityDetails.customerDetails.organisationDetails.map(
           _.organisationTypeDisplayName(regType.exists(_.equals(RegType.GROUP)))
         ).getOrElse(illegalState("Missing organisation type"))
+       */
+      case CustomerType.Organisation =>
+        subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
+          _.organisationType
+        ).flatMap { organisationTypeString =>
+          // If OrgType was PARTNERSHIP during registration then Subscription / CustomerDetails.apply has written
+          // the String value of a PartnerTypeEnum here; not an OrgType.
+          // We need to try to map back from PartnerTypeEnum to OrgType
+          // As the names of these enums overlap the only way we can guess if this was a partnership
+          // is to try and match on the partnershipType.
+          val partnerTypeNames =
+            PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.map(_.toString)
+          if (partnerTypeNames.contains(organisationTypeString))
+            Some(OrgType.PARTNERSHIP)
+          else
+            OrgType.values.find(_.toString == organisationTypeString)
+
+        }.getOrElse(illegalState("Missing organisation type"))
     }
 
     val incorporationDetails = organisationType match {
