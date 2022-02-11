@@ -169,16 +169,19 @@ object Registration {
 
           val isIncorporatedType = PartnerTypeEnum.partnerTypesWhichMightContainIncorporationDetails.contains(partnerType)
           val customerIdentification1 = subscriptionPartner.customerIdentification1
-          val customerIdentification2: Option[String] = subscriptionPartner.customerIdentification2
+          val mayBeCustomerIdentification2 = subscriptionPartner.customerIdentification2
 
           val partnerIncorporationDetails = if(isIncorporatedType) {
+            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse{
+              throw new IllegalStateException("Incorporation details required customerIdentification2 which was absent")
+            }
             Some(
               IncorporationDetails(
                 companyNumber = customerIdentification1,
                 companyName =
                   subscriptionPartner.organisationDetails.organisationName,
                 ctutr =
-                  customerIdentification2.get, // TODO Naked get
+                  customerIdentification2,
                 companyAddress = IncorporationAddressDetails(),
                 registration = None
               )
@@ -205,14 +208,17 @@ object Registration {
 
           val isPartnershipType = PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.contains(partnerType)
           val partnerPartnershipDetails = if (isPartnershipType) {
+            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse{
+              throw new IllegalStateException("Partner Partnership details required customerIdentification2 which was absent")
+            }
             Some(
               PartnerPartnershipDetails(
                 partnershipName = None,  // Not set in test data; is it used?,
                 partnershipBusinessDetails = Some(
-                  PartnershipBusinessDetails(postcode = customerIdentification2.get, // TODO Naked get,
+                  PartnershipBusinessDetails(postcode = customerIdentification2,
                     sautr = customerIdentification1,
                     companyProfile = Some(CompanyProfile(
-                      companyNumber =  customerIdentification2.get,  // TODO Naked get,
+                      companyNumber =  customerIdentification2,
                       companyName = subscriptionPartner.organisationDetails.organisationName,
                       companyAddress = IncorporationAddressDetails(),
                     )),
