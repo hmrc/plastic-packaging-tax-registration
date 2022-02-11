@@ -132,6 +132,22 @@ class RegistrationSpec
 //
 //    }
 
+    "convert partnership details when mapping from a subscription" in {
+      val generalPartnershipRegistration =
+             aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
+                           withPrimaryContactDetails(pptPrimaryContactDetails),
+                           withLiabilityDetails(pptLiabilityDetails)
+           )
+
+      generalPartnershipRegistration.organisationDetails.organisationType mustBe Some(OrgType.PARTNERSHIP)
+      generalPartnershipRegistration.organisationDetails.partnershipDetails.map(_.partnershipType) mustBe Some(PartnerTypeEnum.GENERAL_PARTNERSHIP)
+      val existingSubscription = Subscription(generalPartnershipRegistration)
+
+      val rehydratedRegistration = Registration(existingSubscription)
+
+      rehydratedRegistration.isPartnership mustBe true
+    }
+
     "convert from UK company group subscription" in {
 
       val ukCompanyGroupRegistration =
