@@ -180,7 +180,7 @@ object Registration {
                                   address = Some(PPTAddress(subscriptionPartner.addressDetails))
             )
 
-          val isIncorporatedType = partnerType == PartnerTypeEnum.UK_COMPANY // TODO This is awful
+          val isIncorporatedType = partnerType == PartnerTypeEnum.UK_COMPANY // TODO This is awful; and comprehensive
           val partnerIncorporationDetails = if(isIncorporatedType) {
             Some(
               IncorporationDetails(
@@ -213,7 +213,7 @@ object Registration {
             None
           }
 
-          val isPartnershipType = partnerType == PartnerTypeEnum.GENERAL_PARTNERSHIP || partnerType == PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP // TODO Awful
+          val isPartnershipType = PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.contains(partnerType)
           val partnerPartnershipDetails = if (isPartnershipType) {
             Some(
               PartnerPartnershipDetails(
