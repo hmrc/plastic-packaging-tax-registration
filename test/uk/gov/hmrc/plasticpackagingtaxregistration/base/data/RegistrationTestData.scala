@@ -211,7 +211,7 @@ trait RegistrationTestData {
             soleTraderDetails = Some(
               SoleTraderIncorporationDetails(firstName = "Steve",
                                              lastName = "Knight",
-                                             dateOfBirth = None,
+                                             dateOfBirth = Some("1971-02-03"),
                                              ninoOrTrn = "1234567890XYZ",
                                              sautr = Some("123ABC456DEF"),
                                              registration = Some(

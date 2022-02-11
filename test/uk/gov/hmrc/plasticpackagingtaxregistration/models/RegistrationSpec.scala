@@ -165,18 +165,58 @@ class RegistrationSpec
         _.partnerType
       )
 
-      val rehydratedNominatedPartner               = rehydratedPartnershipDetails.partners.head
-      val rehydratedNominatedPartnerContactDetails = rehydratedNominatedPartner.contactDetails
+      // Check the first partner in detail
       val nominatedPartner =
         partnershipRegistration.organisationDetails.partnershipDetails.get.partners.head
-      rehydratedNominatedPartnerContactDetails mustBe nominatedPartner.contactDetails
+      val rehydratedNominatedPartner               = rehydratedPartnershipDetails.partners.head
 
+      // Partner type
+      rehydratedNominatedPartner.partnerType mustBe Some(PartnerTypeEnum.UK_COMPANY)
+      // Partner contact details
+      rehydratedNominatedPartner.contactDetails mustBe nominatedPartner.contactDetails
+
+      // Need to understand what is mapped into the optional nested fields.
+      // incorporationDetails, partnerPartnershipDetails soleTraderDetails.
+
+      // Incorporated entities will have populated the incorporationDetails field.
+      rehydratedNominatedPartner.incorporationDetails.nonEmpty mustBe true
+      rehydratedNominatedPartner.incorporationDetails.map(_.companyName) mustBe nominatedPartner.incorporationDetails.map(_.companyName)
+      rehydratedNominatedPartner.incorporationDetails.map(_.companyNumber) mustBe nominatedPartner.incorporationDetails.map(_.companyNumber)
+      rehydratedNominatedPartner.incorporationDetails.map(_.ctutr) mustBe nominatedPartner.incorporationDetails.map(_.ctutr)
+
+      // IncorporationAddressDetails does not appear to be mapped to Subscription; or used for anything in the backend
+      nominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
       rehydratedNominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
+
+      // TODO IncorporationDetails.Registration does what?
       rehydratedNominatedPartner.incorporationDetails.get.registration mustBe None
 
-      rehydratedNominatedPartner.partnerPartnershipDetails.flatMap(_.partnershipName) mustBe Some(
-        nominatedPartner.name
-      )
+      //  Incorporated entities will not have populated the soleTraderDetails or partnerPartnershipDetails fields.
+      rehydratedNominatedPartner.soleTraderDetails mustBe None
+      rehydratedNominatedPartner.partnerPartnershipDetails mustBe None
+
+      // Examine a rehydrated sole trader
+      // We should assert all of the sole trade details fields here
+      val soleTraderPartner =  partnershipRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.SOLE_TRADER)).get
+      val rehydratedSoleTraderPartner =  rehydratedRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.SOLE_TRADER)).get
+
+      rehydratedSoleTraderPartner.soleTraderDetails.nonEmpty mustBe true
+      rehydratedSoleTraderPartner.soleTraderDetails.map(_.firstName) mustBe soleTraderPartner.soleTraderDetails.map(_.firstName)
+      rehydratedSoleTraderPartner.soleTraderDetails.map(_.lastName) mustBe soleTraderPartner.soleTraderDetails.map(_.lastName)
+
+      // There is no where map date of birth on individualDetails so it cannot be round tripped
+      soleTraderPartner.soleTraderDetails.flatMap(_.dateOfBirth).nonEmpty mustBe true
+      rehydratedSoleTraderPartner.soleTraderDetails.flatMap(_.dateOfBirth).isEmpty mustBe true
+
+      rehydratedSoleTraderPartner.soleTraderDetails.map(_.ninoOrTrn) mustBe soleTraderPartner.soleTraderDetails.map(_.ninoOrTrn)
+      rehydratedSoleTraderPartner.soleTraderDetails.map(_.sautr) mustBe soleTraderPartner.soleTraderDetails.map(_.sautr)
+
+      // TODO We don't know what todo about Registration
+      rehydratedSoleTraderPartner.soleTraderDetails.flatMap(_.registration) mustBe None
+
+      //rehydratedNominatedPartner.partnerPartnershipDetails.flatMap(_.partnershipName) mustBe Some(
+       // nominatedPartner.name
+     // )
     }
 
     "convert from UK company group subscription" in {

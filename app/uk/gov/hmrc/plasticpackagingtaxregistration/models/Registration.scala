@@ -165,6 +165,11 @@ object Registration {
           _.groupPartnershipDetails
         ).getOrElse(Seq.empty)
         val partners = subscriptionPartners.map { subscriptionPartner =>
+
+          val partnerType = subscriptionPartner.organisationDetails.organisationType.map(
+            PartnerTypeEnum.withName
+          ).get // TODO Naked get
+
           val partnerContactDetails =
             PartnerContactDetails(firstName =
                                     Option(subscriptionPartner.individualDetails.firstName),
@@ -175,45 +180,59 @@ object Registration {
                                   address = Some(PPTAddress(subscriptionPartner.addressDetails))
             )
 
-          val partnerIncorporationDetails = Some(
-            IncorporationDetails( // TODO this is conditional on something
-                                 companyNumber = subscriptionPartner.customerIdentification1,
-                                 companyName =
-                                   subscriptionPartner.organisationDetails.organisationName,
-                                 ctutr =
-                                   subscriptionPartner.customerIdentification2.get, // TODO Naked get
-                                 companyAddress = IncorporationAddressDetails(),
-                                 registration = None
+          val isIncorporatedType = partnerType == PartnerTypeEnum.UK_COMPANY // TODO This is awful
+          val partnerIncorporationDetails = if(isIncorporatedType) {
+            Some(
+              IncorporationDetails(
+                companyNumber = subscriptionPartner.customerIdentification1,
+                companyName =
+                  subscriptionPartner.organisationDetails.organisationName,
+                ctutr =
+                  subscriptionPartner.customerIdentification2.get, // TODO Naked get
+                companyAddress = IncorporationAddressDetails(),
+                registration = None
+              )
             )
-          )
+          } else {
+            None
+          }
 
-          val partnerSoleTraderDetails = Some(
-            SoleTraderIncorporationDetails(firstName = "TODO",
-                                           lastName = "TODO",
-                                           dateOfBirth = Some("TODO"),
-                                           ninoOrTrn = "TODO",
-                                           sautr = Some("TODO"),
-                                           registration = None
+          val isSoleTraderType = partnerType == PartnerTypeEnum.SOLE_TRADER
+          val partnerSoleTraderDetails = if (isSoleTraderType) {
+            Some(
+              SoleTraderIncorporationDetails(
+                firstName = subscriptionPartner.individualDetails.firstName,
+                lastName = subscriptionPartner.individualDetails.lastName,
+                dateOfBirth = None, // Not persisted on Subscription; cannot be be round tripped
+                ninoOrTrn = subscriptionPartner.customerIdentification1,
+                sautr = subscriptionPartner.customerIdentification2,
+                registration = None
+              )
             )
-          ) // TODO this is conditional on something
+          } else {
+            None
+          }
 
-          val partnerPartnershipDetails = Some(
-            PartnerPartnershipDetails(
-              partnershipName = Option(subscriptionPartner.organisationDetails.organisationName),
-              partnershipBusinessDetails = Some(
-                PartnershipBusinessDetails(postcode = "TODO",     // TODO
-                                           sautr = "TODO",        // TODO
-                                           companyProfile = None, // TODO
-                                           registration = None    // TODO
+          val isPartnershipType = partnerType == PartnerTypeEnum.GENERAL_PARTNERSHIP // TODO Awful
+          val partnerPartnershipDetails = if (isPartnershipType) {
+            Some(
+              PartnerPartnershipDetails(
+                partnershipName = Option(subscriptionPartner.organisationDetails.organisationName),
+                partnershipBusinessDetails = Some(
+                  PartnershipBusinessDetails(postcode = "TODO",     // TODO
+                    sautr = "TODO",        // TODO
+                    companyProfile = None, // TODO
+                    registration = None    // TODO
+                  )
                 )
               )
             )
-          ) // TODO
+          }  else {
+            None
+          }
 
-          Partner(id = "TODO Partner.id is not mapped in Subscription",
-                  partnerType = subscriptionPartner.organisationDetails.organisationType.map(
-                    PartnerTypeEnum.withName
-                  ),
+          Partner(id = UUID.randomUUID().toString, // TODO Partner.id is not mapped in Subscription so no stable ids or urls
+                  partnerType = Some(partnerType),
                   contactDetails = Some(partnerContactDetails),
                   incorporationDetails = partnerIncorporationDetails,
                   soleTraderDetails = partnerSoleTraderDetails,
