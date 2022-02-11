@@ -17,11 +17,25 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{OVERSEAS_COMPANY_UK_BRANCH, OrgType, REGISTERED_SOCIETY, SOLE_TRADER, UK_COMPANY}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstanceDetails,
+  CustomerType,
+  Subscription
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
+  OVERSEAS_COMPANY_UK_BRANCH,
+  OrgType,
+  REGISTERED_SOCIETY,
+  SOLE_TRADER,
+  UK_COMPANY
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.PartnerTypeEnum
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  GroupMember,
+  GroupMemberContactDetails,
+  OrganisationDetails => GroupDetails
+}
 
 import java.time.LocalDate
 import java.util.UUID
