@@ -189,7 +189,7 @@ class RegistrationSpec
       rehydratedNominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
 
       // TODO IncorporationDetails.Registration does what?
-      rehydratedNominatedPartner.incorporationDetails.get.registration mustBe None
+      rehydratedNominatedPartner.incorporationDetails.flatMap(_.registration) mustBe None
 
       //  Incorporated entities will not have populated the soleTraderDetails or partnerPartnershipDetails fields.
       rehydratedNominatedPartner.soleTraderDetails mustBe None
@@ -214,9 +214,31 @@ class RegistrationSpec
       // TODO We don't know what todo about Registration
       rehydratedSoleTraderPartner.soleTraderDetails.flatMap(_.registration) mustBe None
 
-      //rehydratedNominatedPartner.partnerPartnershipDetails.flatMap(_.partnershipName) mustBe Some(
-       // nominatedPartner.name
-     // )
+      // Examine a partner type partner to investigate the mapping of partnerPartnershipDetails.
+      val partnershipPartner =  partnershipRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)).get
+      val rehydratedPartnershipPartnerPartner =  rehydratedRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)).get
+
+      println(partnershipPartner.partnerPartnershipDetails)
+      println(rehydratedPartnershipPartnerPartner.partnerPartnershipDetails)
+
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.nonEmpty mustBe true
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).nonEmpty mustBe true
+
+
+      // partnershipBusinessDetails
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.postcode) mustBe
+        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.postcode)
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.sautr) mustBe
+        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.sautr)
+
+      // partnershipBusinessDetails / companyProfile
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).nonEmpty mustBe true
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyName) mustBe
+        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyName)
+
+      // TODO postcode and companyNumber probably overwrite each other in the id2 field; can't be round tripped
+      //rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber) mustBe
+     //   partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber)
     }
 
     "convert from UK company group subscription" in {
