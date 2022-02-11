@@ -213,16 +213,20 @@ object Registration {
             None
           }
 
-          val isPartnershipType = partnerType == PartnerTypeEnum.GENERAL_PARTNERSHIP // TODO Awful
+          val isPartnershipType = partnerType == PartnerTypeEnum.GENERAL_PARTNERSHIP || partnerType == PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP // TODO Awful
           val partnerPartnershipDetails = if (isPartnershipType) {
             Some(
               PartnerPartnershipDetails(
-                partnershipName = Option(subscriptionPartner.organisationDetails.organisationName),
+                partnershipName = None,  // Not set in test data; is it used?,
                 partnershipBusinessDetails = Some(
-                  PartnershipBusinessDetails(postcode = "TODO",     // TODO
-                    sautr = "TODO",        // TODO
-                    companyProfile = None, // TODO
-                    registration = None    // TODO
+                  PartnershipBusinessDetails(postcode = subscriptionPartner.customerIdentification2.get, // TODO Naked get,
+                    sautr = subscriptionPartner.customerIdentification1,
+                    companyProfile = Some(CompanyProfile(
+                      companyNumber =  subscriptionPartner.customerIdentification2.get,  // TODO Naked get,
+                      companyName = subscriptionPartner.organisationDetails.organisationName,
+                      companyAddress = IncorporationAddressDetails(),
+                    )),
+                    registration = None    // TODO Unsure what todo about registration
                   )
                 )
               )
