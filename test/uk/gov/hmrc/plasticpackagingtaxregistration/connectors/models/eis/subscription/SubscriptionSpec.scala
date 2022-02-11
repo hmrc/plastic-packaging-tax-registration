@@ -94,7 +94,9 @@ class SubscriptionSpec
         assertCommonDetails(subscription, Some(10000), isPartnership = true)
 
         subscription.legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
-        subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(_.organisationType) mustBe Some("GeneralPartnership")
+        subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
+          _.organisationType
+        ) mustBe Some("GeneralPartnership")
 
         mustHaveValidGeneralPartnershipLegalEntityDetails(subscription)
         mustHaveValidPartners(subscription,

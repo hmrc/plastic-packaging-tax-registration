@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import org.scalatest.Ignore
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
@@ -134,18 +133,45 @@ class RegistrationSpec
 
     "convert partnership details when mapping from a subscription" in {
       val generalPartnershipRegistration =
-             aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
-                           withPrimaryContactDetails(pptPrimaryContactDetails),
-                           withLiabilityDetails(pptLiabilityDetails)
-           )
+        aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
+                      withPrimaryContactDetails(pptPrimaryContactDetails),
+                      withLiabilityDetails(pptLiabilityDetails)
+        )
 
-      generalPartnershipRegistration.organisationDetails.organisationType mustBe Some(OrgType.PARTNERSHIP)
-      generalPartnershipRegistration.organisationDetails.partnershipDetails.map(_.partnershipType) mustBe Some(PartnerTypeEnum.GENERAL_PARTNERSHIP)
+      generalPartnershipRegistration.organisationDetails.organisationType mustBe Some(
+        OrgType.PARTNERSHIP
+      )
+      generalPartnershipRegistration.organisationDetails.partnershipDetails.map(
+        _.partnershipType
+      ) mustBe Some(PartnerTypeEnum.GENERAL_PARTNERSHIP)
       val existingSubscription = Subscription(generalPartnershipRegistration)
 
       val rehydratedRegistration = Registration(existingSubscription)
 
       rehydratedRegistration.isPartnership mustBe true
+      rehydratedRegistration.organisationDetails.partnershipDetails.nonEmpty mustBe true
+      val rehydratedPartnershipDetails =
+        rehydratedRegistration.organisationDetails.partnershipDetails.get
+
+      rehydratedPartnershipDetails.partners.size mustBe generalPartnershipRegistration.organisationDetails.partnershipDetails.get.partners.size
+      rehydratedPartnershipDetails.partners.map(
+        _.partnerType
+      ) mustBe generalPartnershipRegistration.organisationDetails.partnershipDetails.get.partners.map(
+        _.partnerType
+      )
+
+      val rehydratedNominatedPartner               = rehydratedPartnershipDetails.partners.head
+      val rehydratedNominatedPartnerContactDetails = rehydratedNominatedPartner.contactDetails
+      val nominatedPartner =
+        generalPartnershipRegistration.organisationDetails.partnershipDetails.get.partners.head
+      rehydratedNominatedPartnerContactDetails mustBe nominatedPartner.contactDetails
+
+      rehydratedNominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
+      rehydratedNominatedPartner.incorporationDetails.get.registration mustBe None
+
+      rehydratedNominatedPartner.partnerPartnershipDetails.flatMap(_.partnershipName) mustBe Some(
+        nominatedPartner.name
+      )
     }
 
     "convert from UK company group subscription" in {

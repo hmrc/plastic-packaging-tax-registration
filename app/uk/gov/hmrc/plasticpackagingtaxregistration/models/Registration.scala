@@ -24,11 +24,15 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
   OVERSEAS_COMPANY_UK_BRANCH,
+  OrgType,
   REGISTERED_SOCIETY,
   SOLE_TRADER,
   UK_COMPANY
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.GENERAL_PARTNERSHIP
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
+  GENERAL_PARTNERSHIP,
+  PartnerTypeEnum
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
   GroupMember,
@@ -157,29 +161,89 @@ object Registration {
         )
       case _ => None
     }
-    // TODO: reintroduce coverage on this class once partnership rehydration has been completed
     val partnershipDetails = organisationType match {
       case OrgType.PARTNERSHIP =>
+        // Subscription presents Partners on the groupPartnershipDetails field
+        val subscriptionPartners = subscription.groupPartnershipSubscription.map(
+          _.groupPartnershipDetails
+        ).getOrElse(Seq.empty)
+        val partners = subscriptionPartners.map { subscriptionPartner =>
+          val partnerContactDetails =
+            PartnerContactDetails(firstName =
+                                    Option(subscriptionPartner.individualDetails.firstName),
+                                  lastName = Option(subscriptionPartner.individualDetails.lastName),
+                                  emailAddress = Option(subscriptionPartner.contactDetails.email),
+                                  phoneNumber =
+                                    Option(subscriptionPartner.contactDetails.telephone),
+                                  address = Some(PPTAddress(subscriptionPartner.addressDetails))
+            )
+
+          val partnerIncorporationDetails = Some(
+            IncorporationDetails( // TODO this is conditional on something
+                                 companyNumber = subscriptionPartner.customerIdentification1,
+                                 companyName =
+                                   subscriptionPartner.organisationDetails.organisationName,
+                                 ctutr =
+                                   subscriptionPartner.customerIdentification2.get, // TODO Naked get
+                                 companyAddress = IncorporationAddressDetails(),
+                                 registration = None
+            )
+          )
+
+          val partnerSoleTraderDetails = Some(
+            SoleTraderIncorporationDetails(firstName = "TODO",
+                                           lastName = "TODO",
+                                           dateOfBirth = Some("TODO"),
+                                           ninoOrTrn = "TODO",
+                                           sautr = Some("TODO"),
+                                           registration = None
+            )
+          ) // TODO this is conditional on something
+
+          val partnerPartnershipDetails = Some(
+            PartnerPartnershipDetails(
+              partnershipName = Option(subscriptionPartner.organisationDetails.organisationName),
+              partnershipBusinessDetails = Some(
+                PartnershipBusinessDetails(postcode = "TODO",     // TODO
+                                           sautr = "TODO",        // TODO
+                                           companyProfile = None, // TODO
+                                           registration = None    // TODO
+                )
+              )
+            )
+          ) // TODO
+
+          Partner(id = "TODO Partner.id is not mapped in Subscription",
+                  partnerType = subscriptionPartner.organisationDetails.organisationType.map(
+                    PartnerTypeEnum.withName
+                  ),
+                  contactDetails = Some(partnerContactDetails),
+                  incorporationDetails = partnerIncorporationDetails,
+                  soleTraderDetails = partnerSoleTraderDetails,
+                  partnerPartnershipDetails = partnerPartnershipDetails
+          )
+        }
+
         Some(
-          //TODO - how to work out other partnership types?
-          PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
-                             partnershipName =
-                               subscription.legalEntityDetails.customerDetails.organisationDetails.map(
-                                 _.organisationName
-                               ),
-                             partnershipBusinessDetails = Some(
-                               PartnershipBusinessDetails(
-                                 sautr = subscription.legalEntityDetails.customerIdentification1,
-                                 postcode =
-                                   subscription.legalEntityDetails.customerIdentification2.getOrElse(
-                                     illegalState("Missing partnership postcode")
-                                   ),
-                                 registration = None,
-                                 companyProfile = None
-                               )
-                             ),
-                             // TODO: rehydrate partners from subscription
-                             partners = Seq()
+          PartnershipDetails(
+            partnershipType = GENERAL_PARTNERSHIP, //TODO - how to work out other partnership types?
+            partnershipName =
+              subscription.legalEntityDetails.customerDetails.organisationDetails.map(
+                _.organisationName
+              ),
+            partnershipBusinessDetails = Some(
+              PartnershipBusinessDetails(
+                sautr = subscription.legalEntityDetails.customerIdentification1,
+                postcode =
+                  subscription.legalEntityDetails.customerIdentification2.getOrElse(
+                    illegalState("Missing partnership postcode")
+                  ),
+                registration = None,
+                companyProfile = None
+              )
+            ),
+            // TODO: rehydrate partners from subscription
+            partners = partners
           )
         )
       case _ => None
