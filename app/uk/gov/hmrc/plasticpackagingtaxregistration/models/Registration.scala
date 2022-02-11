@@ -114,13 +114,12 @@ object Registration {
                                                )
     )
     val organisationType = subscription.legalEntityDetails.customerDetails.customerType match {
-      case CustomerType.Individual => SOLE_TRADER
-      /* case CustomerType.Organisation =>
+      case CustomerType.Individual   => SOLE_TRADER
+      case CustomerType.Organisation =>
+        /*
         subscription.legalEntityDetails.customerDetails.organisationDetails.map(
           _.organisationTypeDisplayName(regType.exists(_.equals(RegType.GROUP)))
-        ).getOrElse(illegalState("Missing organisation type"))
-       */
-      case CustomerType.Organisation =>
+         */
         subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
           _.organisationType
         ).flatMap { organisationTypeString =>
