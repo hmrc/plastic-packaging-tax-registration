@@ -17,10 +17,23 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{OVERSEAS_COMPANY_UK_BRANCH, REGISTERED_SOCIETY, SOLE_TRADER, UK_COMPANY}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstanceDetails,
+  CustomerType,
+  Subscription
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
+  OVERSEAS_COMPANY_UK_BRANCH,
+  REGISTERED_SOCIETY,
+  SOLE_TRADER,
+  UK_COMPANY
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  GroupMember,
+  GroupMemberContactDetails,
+  OrganisationDetails => GroupDetails
+}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -150,10 +163,9 @@ object Registration {
           _.groupPartnershipDetails
         ).getOrElse(Seq.empty)
         val partners = subscriptionPartners.map { subscriptionPartner =>
-
           val partnerType = subscriptionPartner.organisationDetails.organisationType.map(
             PartnerTypeEnum.withName
-          ).getOrElse{
+          ).getOrElse {
             throw new IllegalStateException("Partner partner type absent")
           }
 
@@ -167,76 +179,84 @@ object Registration {
                                   address = Some(PPTAddress(subscriptionPartner.addressDetails))
             )
 
-          val isIncorporatedType = PartnerTypeEnum.partnerTypesWhichMightContainIncorporationDetails.contains(partnerType)
-          val customerIdentification1 = subscriptionPartner.customerIdentification1
+          val isIncorporatedType =
+            PartnerTypeEnum.partnerTypesWhichMightContainIncorporationDetails.contains(partnerType)
+          val customerIdentification1      = subscriptionPartner.customerIdentification1
           val mayBeCustomerIdentification2 = subscriptionPartner.customerIdentification2
 
-          val partnerIncorporationDetails = if(isIncorporatedType) {
-            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse{
-              throw new IllegalStateException("Incorporation details required customerIdentification2 which was absent")
+          val partnerIncorporationDetails = if (isIncorporatedType) {
+            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse {
+              throw new IllegalStateException(
+                "Incorporation details required customerIdentification2 which was absent"
+              )
             }
             Some(
-              IncorporationDetails(
-                companyNumber = customerIdentification1,
-                companyName =
-                  subscriptionPartner.organisationDetails.organisationName,
-                ctutr =
-                  customerIdentification2,
-                companyAddress = IncorporationAddressDetails(),
-                registration = None
+              IncorporationDetails(companyNumber = customerIdentification1,
+                                   companyName =
+                                     subscriptionPartner.organisationDetails.organisationName,
+                                   ctutr =
+                                     customerIdentification2,
+                                   companyAddress = IncorporationAddressDetails(),
+                                   registration = None
               )
             )
-          } else {
+          } else
             None
-          }
 
           val isSoleTraderType = partnerType == PartnerTypeEnum.SOLE_TRADER
-          val partnerSoleTraderDetails = if (isSoleTraderType) {
-            Some(
-              SoleTraderIncorporationDetails(
-                firstName = subscriptionPartner.individualDetails.firstName,
-                lastName = subscriptionPartner.individualDetails.lastName,
-                dateOfBirth = None, // Not persisted on Subscription; cannot be be round tripped
-                ninoOrTrn = customerIdentification1,
-                sautr = subscriptionPartner.customerIdentification2,
-                registration = None
+          val partnerSoleTraderDetails =
+            if (isSoleTraderType)
+              Some(
+                SoleTraderIncorporationDetails(
+                  firstName = subscriptionPartner.individualDetails.firstName,
+                  lastName = subscriptionPartner.individualDetails.lastName,
+                  dateOfBirth = None, // Not persisted on Subscription; cannot be be round tripped
+                  ninoOrTrn = customerIdentification1,
+                  sautr = subscriptionPartner.customerIdentification2,
+                  registration = None
+                )
               )
-            )
-          } else {
-            None
-          }
+            else
+              None
 
-          val isPartnershipType = PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.contains(partnerType)
+          val isPartnershipType =
+            PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.contains(partnerType)
           val partnerPartnershipDetails = if (isPartnershipType) {
-            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse{
-              throw new IllegalStateException("Partner Partnership details required customerIdentification2 which was absent")
+            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse {
+              throw new IllegalStateException(
+                "Partner Partnership details required customerIdentification2 which was absent"
+              )
             }
             Some(
               PartnerPartnershipDetails(
-                partnershipName = None,  // Not set in test data; is it used?,
+                partnershipName = None, // Not set in test data; is it used?,
                 partnershipBusinessDetails = Some(
                   PartnershipBusinessDetails(postcode = customerIdentification2,
-                    sautr = customerIdentification1,
-                    companyProfile = Some(CompanyProfile(
-                      companyNumber =  customerIdentification2,
-                      companyName = subscriptionPartner.organisationDetails.organisationName,
-                      companyAddress = IncorporationAddressDetails(),
-                    )),
-                    registration = None
+                                             sautr = customerIdentification1,
+                                             companyProfile = Some(
+                                               CompanyProfile(
+                                                 companyNumber = customerIdentification2,
+                                                 companyName =
+                                                   subscriptionPartner.organisationDetails.organisationName,
+                                                 companyAddress = IncorporationAddressDetails()
+                                               )
+                                             ),
+                                             registration = None
                   )
                 )
               )
             )
-          }  else {
+          } else
             None
-          }
 
-          Partner(id = UUID.randomUUID().toString, // TODO Partner.id is not mapped in Subscription so no stable ids or urls
-                  partnerType = Some(partnerType),
-                  contactDetails = Some(partnerContactDetails),
-                  incorporationDetails = partnerIncorporationDetails,
-                  soleTraderDetails = partnerSoleTraderDetails,
-                  partnerPartnershipDetails = partnerPartnershipDetails
+          Partner(
+            id =
+              UUID.randomUUID().toString, // TODO Partner.id is not mapped in Subscription so no stable ids or urls
+            partnerType = Some(partnerType),
+            contactDetails = Some(partnerContactDetails),
+            incorporationDetails = partnerIncorporationDetails,
+            soleTraderDetails = partnerSoleTraderDetails,
+            partnerPartnershipDetails = partnerPartnershipDetails
           )
         }
 

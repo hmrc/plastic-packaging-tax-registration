@@ -134,7 +134,7 @@ class RegistrationSpec
     "convert partnership details when mapping from a subscription" in {
       val partnershipDetails = pptGeneralPartnershipDetails.partnershipDetails.map(
         _.copy(partnershipType = PartnerTypeEnum.SCOTTISH_PARTNERSHIP)
-      ) // To force out hardcoded GENERAL_PARTNERSHIP
+      )
       val partnershipRegistration =
         aRegistration(
           withOrganisationDetails(
@@ -148,7 +148,7 @@ class RegistrationSpec
       partnershipRegistration.organisationDetails.partnershipDetails.map(
         _.partnershipType
       ) mustBe Some(PartnerTypeEnum.SCOTTISH_PARTNERSHIP)
-      val existingSubscription = Subscription(partnershipRegistration)
+      val existingSubscription = Subscription(partnershipRegistration, false)
 
       val rehydratedRegistration = Registration(existingSubscription)
 
@@ -168,7 +168,7 @@ class RegistrationSpec
       // Check the first partner in detail
       val nominatedPartner =
         partnershipRegistration.organisationDetails.partnershipDetails.get.partners.head
-      val rehydratedNominatedPartner               = rehydratedPartnershipDetails.partners.head
+      val rehydratedNominatedPartner = rehydratedPartnershipDetails.partners.head
 
       // Partner type
       rehydratedNominatedPartner.partnerType mustBe Some(PartnerTypeEnum.UK_COMPANY)
@@ -177,12 +177,18 @@ class RegistrationSpec
 
       // Incorporated entities will have populated the incorporationDetails field.
       rehydratedNominatedPartner.incorporationDetails.nonEmpty mustBe true
-      rehydratedNominatedPartner.incorporationDetails.map(_.companyName) mustBe nominatedPartner.incorporationDetails.map(_.companyName)
-      rehydratedNominatedPartner.incorporationDetails.map(_.companyNumber) mustBe nominatedPartner.incorporationDetails.map(_.companyNumber)
-      rehydratedNominatedPartner.incorporationDetails.map(_.ctutr) mustBe nominatedPartner.incorporationDetails.map(_.ctutr)
+      rehydratedNominatedPartner.incorporationDetails.map(
+        _.companyName
+      ) mustBe nominatedPartner.incorporationDetails.map(_.companyName)
+      rehydratedNominatedPartner.incorporationDetails.map(
+        _.companyNumber
+      ) mustBe nominatedPartner.incorporationDetails.map(_.companyNumber)
+      rehydratedNominatedPartner.incorporationDetails.map(
+        _.ctutr
+      ) mustBe nominatedPartner.incorporationDetails.map(_.ctutr)
 
       // IncorporationAddressDetails does not appear to be mapped to Subscription; or used for anything in the backend
-      nominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
+      nominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails()           // Subscription does not map anything into these fields
       rehydratedNominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
 
       //  Incorporated entities will not have populated the soleTraderDetails or partnerPartnershipDetails fields.
@@ -191,40 +197,76 @@ class RegistrationSpec
 
       // Examine a rehydrated sole trader
       // We should assert all of the sole trade details fields here
-      val soleTraderPartner =  partnershipRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.SOLE_TRADER)).get
-      val rehydratedSoleTraderPartner =  rehydratedRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.SOLE_TRADER)).get
+      val soleTraderPartner =
+        partnershipRegistration.organisationDetails.partnershipDetails.get.partners.find(
+          _.partnerType.contains(PartnerTypeEnum.SOLE_TRADER)
+        ).get
+      val rehydratedSoleTraderPartner =
+        rehydratedRegistration.organisationDetails.partnershipDetails.get.partners.find(
+          _.partnerType.contains(PartnerTypeEnum.SOLE_TRADER)
+        ).get
 
       rehydratedSoleTraderPartner.soleTraderDetails.nonEmpty mustBe true
-      rehydratedSoleTraderPartner.soleTraderDetails.map(_.firstName) mustBe soleTraderPartner.soleTraderDetails.map(_.firstName)
-      rehydratedSoleTraderPartner.soleTraderDetails.map(_.lastName) mustBe soleTraderPartner.soleTraderDetails.map(_.lastName)
+      rehydratedSoleTraderPartner.soleTraderDetails.map(
+        _.firstName
+      ) mustBe soleTraderPartner.soleTraderDetails.map(_.firstName)
+      rehydratedSoleTraderPartner.soleTraderDetails.map(
+        _.lastName
+      ) mustBe soleTraderPartner.soleTraderDetails.map(_.lastName)
 
       // There is no where map date of birth on individualDetails so it cannot be round tripped
       soleTraderPartner.soleTraderDetails.flatMap(_.dateOfBirth).nonEmpty mustBe true
       rehydratedSoleTraderPartner.soleTraderDetails.flatMap(_.dateOfBirth).isEmpty mustBe true
 
-      rehydratedSoleTraderPartner.soleTraderDetails.map(_.ninoOrTrn) mustBe soleTraderPartner.soleTraderDetails.map(_.ninoOrTrn)
-      rehydratedSoleTraderPartner.soleTraderDetails.map(_.sautr) mustBe soleTraderPartner.soleTraderDetails.map(_.sautr)
+      rehydratedSoleTraderPartner.soleTraderDetails.map(
+        _.ninoOrTrn
+      ) mustBe soleTraderPartner.soleTraderDetails.map(_.ninoOrTrn)
+      rehydratedSoleTraderPartner.soleTraderDetails.map(
+        _.sautr
+      ) mustBe soleTraderPartner.soleTraderDetails.map(_.sautr)
 
       // Examine a partner type partner to investigate the mapping of partnerPartnershipDetails.
-      val partnershipPartner =  partnershipRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)).get
-      val rehydratedPartnershipPartnerPartner =  rehydratedRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)).get
+      val partnershipPartner =
+        partnershipRegistration.organisationDetails.partnershipDetails.get.partners.find(
+          _.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)
+        ).get
+      val rehydratedPartnershipPartnerPartner =
+        rehydratedRegistration.organisationDetails.partnershipDetails.get.partners.find(
+          _.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)
+        ).get
 
       println(partnershipPartner.partnerPartnershipDetails)
       println(rehydratedPartnershipPartnerPartner.partnerPartnershipDetails)
 
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.nonEmpty mustBe true
-      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).nonEmpty mustBe true
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
+        _.partnershipBusinessDetails
+      ).nonEmpty mustBe true
 
       // partnershipBusinessDetails
-      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.postcode) mustBe
-        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.postcode)
-      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.sautr) mustBe
-        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.sautr)
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
+        _.partnershipBusinessDetails
+      ).map(_.postcode) mustBe
+        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(
+          _.postcode
+        )
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
+        _.partnershipBusinessDetails
+      ).map(_.sautr) mustBe
+        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(
+          _.sautr
+        )
 
       // partnershipBusinessDetails / companyProfile
-      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).nonEmpty mustBe true
-      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyName) mustBe
-        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyName)
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
+        _.partnershipBusinessDetails
+      ).flatMap(_.companyProfile).nonEmpty mustBe true
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
+        _.partnershipBusinessDetails
+      ).flatMap(_.companyProfile).map(_.companyName) mustBe
+        partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(
+          _.companyProfile
+        ).map(_.companyName)
 
       // TODO For a partnership customerIdentification1 is the partnershipBusinessDetails.sautr and customerIdentification2 is the partnershipBusinessDetails.postcode
       // Company number and not be recovered from the Subscription.
