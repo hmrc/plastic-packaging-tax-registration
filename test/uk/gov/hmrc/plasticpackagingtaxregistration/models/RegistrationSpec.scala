@@ -175,9 +175,6 @@ class RegistrationSpec
       // Partner contact details
       rehydratedNominatedPartner.contactDetails mustBe nominatedPartner.contactDetails
 
-      // Need to understand what is mapped into the optional nested fields.
-      // incorporationDetails, partnerPartnershipDetails soleTraderDetails.
-
       // Incorporated entities will have populated the incorporationDetails field.
       rehydratedNominatedPartner.incorporationDetails.nonEmpty mustBe true
       rehydratedNominatedPartner.incorporationDetails.map(_.companyName) mustBe nominatedPartner.incorporationDetails.map(_.companyName)
@@ -187,9 +184,6 @@ class RegistrationSpec
       // IncorporationAddressDetails does not appear to be mapped to Subscription; or used for anything in the backend
       nominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
       rehydratedNominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
-
-      // TODO IncorporationDetails.Registration does what?
-      rehydratedNominatedPartner.incorporationDetails.flatMap(_.registration) mustBe None
 
       //  Incorporated entities will not have populated the soleTraderDetails or partnerPartnershipDetails fields.
       rehydratedNominatedPartner.soleTraderDetails mustBe None
@@ -211,9 +205,6 @@ class RegistrationSpec
       rehydratedSoleTraderPartner.soleTraderDetails.map(_.ninoOrTrn) mustBe soleTraderPartner.soleTraderDetails.map(_.ninoOrTrn)
       rehydratedSoleTraderPartner.soleTraderDetails.map(_.sautr) mustBe soleTraderPartner.soleTraderDetails.map(_.sautr)
 
-      // TODO We don't know what todo about Registration
-      rehydratedSoleTraderPartner.soleTraderDetails.flatMap(_.registration) mustBe None
-
       // Examine a partner type partner to investigate the mapping of partnerPartnershipDetails.
       val partnershipPartner =  partnershipRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)).get
       val rehydratedPartnershipPartnerPartner =  rehydratedRegistration.organisationDetails.partnershipDetails.get.partners.find(_.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)).get
@@ -223,7 +214,6 @@ class RegistrationSpec
 
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.nonEmpty mustBe true
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).nonEmpty mustBe true
-
 
       // partnershipBusinessDetails
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).map(_.postcode) mustBe
@@ -239,6 +229,15 @@ class RegistrationSpec
       // TODO postcode and companyNumber probably overwrite each other in the id2 field; can't be round tripped
       //rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber) mustBe
      //   partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber)
+
+      // None of these partners have RegistrationDetails set because we think this field is just
+      // an artifact of top level entire classes been reused to represent partner details.
+      // Therefore none of these partners will have RegistrationDetails set.
+      // These classes could be replaced with a partner specific class to remove this confusion
+      // Explicit gets to confirm we're asserting in the right fields for each partner class
+      rehydratedNominatedPartner.incorporationDetails.get.registration mustBe None
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.get.partnershipBusinessDetails.get.registration mustBe None
+      rehydratedSoleTraderPartner.soleTraderDetails.get.registration mustBe None
     }
 
     "convert from UK company group subscription" in {
