@@ -51,6 +51,10 @@ object PartnerTypeEnum extends Enumeration {
     SCOTTISH_LIMITED_PARTNERSHIP
   )
 
+  val partnerTypesWhichMightContainIncorporationDetails = Seq(
+    UK_COMPANY, OVERSEAS_COMPANY_UK_BRANCH, OVERSEAS_COMPANY_NO_UK_BRANCH
+  )
+
 }
 
 case class Partner(

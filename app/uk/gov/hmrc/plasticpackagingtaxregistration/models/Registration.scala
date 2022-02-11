@@ -180,7 +180,7 @@ object Registration {
                                   address = Some(PPTAddress(subscriptionPartner.addressDetails))
             )
 
-          val isIncorporatedType = partnerType == PartnerTypeEnum.UK_COMPANY // TODO This is awful; and comprehensive
+          val isIncorporatedType = PartnerTypeEnum.partnerTypesWhichMightContainIncorporationDetails.contains(partnerType)
           val partnerIncorporationDetails = if(isIncorporatedType) {
             Some(
               IncorporationDetails(
@@ -270,7 +270,6 @@ object Registration {
                                  companyProfile = None
                                )
                              ),
-                             // TODO: rehydrate partners from subscription
                              partners = partners
           )
         )
