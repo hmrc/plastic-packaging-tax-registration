@@ -17,25 +17,10 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  ChangeOfCircumstanceDetails,
-  CustomerType,
-  Subscription
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
-  OVERSEAS_COMPANY_UK_BRANCH,
-  OrgType,
-  REGISTERED_SOCIETY,
-  SOLE_TRADER,
-  UK_COMPANY
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.PartnerTypeEnum
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{OVERSEAS_COMPANY_UK_BRANCH, REGISTERED_SOCIETY, SOLE_TRADER, UK_COMPANY}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
-  GroupMember,
-  GroupMemberContactDetails,
-  OrganisationDetails => GroupDetails
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -168,7 +153,9 @@ object Registration {
 
           val partnerType = subscriptionPartner.organisationDetails.organisationType.map(
             PartnerTypeEnum.withName
-          ).get // TODO Naked get
+          ).getOrElse{
+            throw new IllegalStateException("Partner partner type absent")
+          }
 
           val partnerContactDetails =
             PartnerContactDetails(firstName =
@@ -181,14 +168,17 @@ object Registration {
             )
 
           val isIncorporatedType = PartnerTypeEnum.partnerTypesWhichMightContainIncorporationDetails.contains(partnerType)
+          val customerIdentification1 = subscriptionPartner.customerIdentification1
+          val customerIdentification2: Option[String] = subscriptionPartner.customerIdentification2
+
           val partnerIncorporationDetails = if(isIncorporatedType) {
             Some(
               IncorporationDetails(
-                companyNumber = subscriptionPartner.customerIdentification1,
+                companyNumber = customerIdentification1,
                 companyName =
                   subscriptionPartner.organisationDetails.organisationName,
                 ctutr =
-                  subscriptionPartner.customerIdentification2.get, // TODO Naked get
+                  customerIdentification2.get, // TODO Naked get
                 companyAddress = IncorporationAddressDetails(),
                 registration = None
               )
@@ -204,7 +194,7 @@ object Registration {
                 firstName = subscriptionPartner.individualDetails.firstName,
                 lastName = subscriptionPartner.individualDetails.lastName,
                 dateOfBirth = None, // Not persisted on Subscription; cannot be be round tripped
-                ninoOrTrn = subscriptionPartner.customerIdentification1,
+                ninoOrTrn = customerIdentification1,
                 sautr = subscriptionPartner.customerIdentification2,
                 registration = None
               )
@@ -219,10 +209,10 @@ object Registration {
               PartnerPartnershipDetails(
                 partnershipName = None,  // Not set in test data; is it used?,
                 partnershipBusinessDetails = Some(
-                  PartnershipBusinessDetails(postcode = subscriptionPartner.customerIdentification2.get, // TODO Naked get,
-                    sautr = subscriptionPartner.customerIdentification1,
+                  PartnershipBusinessDetails(postcode = customerIdentification2.get, // TODO Naked get,
+                    sautr = customerIdentification1,
                     companyProfile = Some(CompanyProfile(
-                      companyNumber =  subscriptionPartner.customerIdentification2.get,  // TODO Naked get,
+                      companyNumber =  customerIdentification2.get,  // TODO Naked get,
                       companyName = subscriptionPartner.organisationDetails.organisationName,
                       companyAddress = IncorporationAddressDetails(),
                     )),
