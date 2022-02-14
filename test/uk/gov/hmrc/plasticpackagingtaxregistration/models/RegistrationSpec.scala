@@ -118,6 +118,18 @@ class RegistrationSpec
 
     }
 
+    "convert from general partner subscription" in {
+
+      val generalPartnershipRegistration =
+        aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
+                      withPrimaryContactDetails(pptPrimaryContactDetails),
+                      withLiabilityDetails(pptLiabilityDetails)
+        )
+
+      assertConversion(generalPartnershipRegistration)
+
+    }
+
     "convert partnership details when mapping from a subscription" in {
       val partnershipDetails = pptGeneralPartnershipDetails.partnershipDetails.map(
         _.copy(partnershipType = PartnerTypeEnum.SCOTTISH_PARTNERSHIP)
@@ -284,11 +296,10 @@ class RegistrationSpec
     }
 
     def assertConversion(registration: Registration) = {
-      val existingSubscription = Subscription(registration, isSubscriptionUpdate = false)
 
+      val existingSubscription   = Subscription(registration, isSubscriptionUpdate = false)
       val rehydratedRegistration = Registration(existingSubscription)
-
-      val updatedSubscription = Subscription(rehydratedRegistration, isSubscriptionUpdate = false)
+      val updatedSubscription    = Subscription(rehydratedRegistration, isSubscriptionUpdate = false)
 
       updatedSubscription mustBe existingSubscription
     }
