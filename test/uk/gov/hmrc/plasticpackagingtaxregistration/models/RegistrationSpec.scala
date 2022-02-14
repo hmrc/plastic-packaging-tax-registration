@@ -227,7 +227,9 @@ class RegistrationSpec
         _.partnershipBusinessDetails
       ).nonEmpty mustBe true
 
-      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipName) mustBe Some("Partners in Plastic")
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
+        _.partnershipName
+      ) mustBe Some("Partners in Plastic")
 
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
         _.partnershipBusinessDetails
