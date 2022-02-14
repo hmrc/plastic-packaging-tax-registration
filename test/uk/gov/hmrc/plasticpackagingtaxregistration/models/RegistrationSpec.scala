@@ -118,19 +118,6 @@ class RegistrationSpec
 
     }
 
-    // TODO: reintroduce when we can deal with partnership registration -> subscription -> registration
-//    "convert from general partner subscription" in {
-//
-//      val generalPartnershipRegistration =
-//        aRegistration(withOrganisationDetails(pptGeneralPartnershipDetails),
-//                      withPrimaryContactDetails(pptPrimaryContactDetails),
-//                      withLiabilityDetails(pptLiabilityDetails)
-//        )
-//
-//      assertConversion(generalPartnershipRegistration)
-//
-//    }
-
     "convert partnership details when mapping from a subscription" in {
       val partnershipDetails = pptGeneralPartnershipDetails.partnershipDetails.map(
         _.copy(partnershipType = PartnerTypeEnum.SCOTTISH_PARTNERSHIP)
