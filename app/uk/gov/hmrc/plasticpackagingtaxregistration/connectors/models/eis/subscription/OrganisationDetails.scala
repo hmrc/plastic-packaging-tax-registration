@@ -36,7 +36,6 @@ case class OrganisationDetails(organisationType: Option[String] = None, organisa
           val partnerTypeNames =
             PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.map(_.toString)
 
-          println(organisationType)
           if (partnerTypeNames.contains(organisationType))
             OrgType.PARTNERSHIP
           else
