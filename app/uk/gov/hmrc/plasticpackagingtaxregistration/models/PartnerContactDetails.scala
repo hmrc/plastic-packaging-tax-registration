@@ -23,7 +23,8 @@ case class PartnerContactDetails(
   lastName: Option[String] = None,
   emailAddress: Option[String] = None,
   phoneNumber: Option[String] = None,
-  address: Option[PPTAddress] = None
+  address: Option[PPTAddress] = None,
+  jobTitle: Option[String] = None
 )
 
 object PartnerContactDetails {
