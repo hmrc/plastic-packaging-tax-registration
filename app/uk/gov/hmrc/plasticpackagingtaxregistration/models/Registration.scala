@@ -227,9 +227,10 @@ object Registration {
                 "Partner Partnership details required customerIdentification2 which was absent"
               )
             }
+
             Some(
               PartnerPartnershipDetails(
-                partnershipName = None, // Does not appear to be persisted on subscription
+                partnershipName = Some(subscriptionPartner.organisationDetails.organisationName),
                 partnershipBusinessDetails = Some(
                   PartnershipBusinessDetails(postcode = customerIdentification2,
                                              sautr = customerIdentification1,

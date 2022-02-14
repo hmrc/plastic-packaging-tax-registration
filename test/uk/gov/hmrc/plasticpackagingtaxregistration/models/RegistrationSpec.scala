@@ -222,15 +222,13 @@ class RegistrationSpec
           _.partnerType.contains(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP)
         ).get
 
-      println(partnershipPartner.partnerPartnershipDetails)
-      println(rehydratedPartnershipPartnerPartner.partnerPartnershipDetails)
-
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.nonEmpty mustBe true
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
         _.partnershipBusinessDetails
       ).nonEmpty mustBe true
 
-      // partnershipBusinessDetails
+      rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipName) mustBe Some("Partners in Plastic")
+
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(
         _.partnershipBusinessDetails
       ).map(_.postcode) mustBe
