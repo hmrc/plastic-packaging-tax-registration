@@ -24,12 +24,31 @@ case class OrganisationDetails(organisationType: Option[String] = None, organisa
 
   def organisationTypeDisplayName(isGroup: Boolean): OrgType =
     organisationType match {
-      case Some(organisationType)
-          if isGroup && organisationType.equals(
+      case Some(organisationType) =>
+          if (isGroup && organisationType.equals(
             PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP.toString
-          ) =>
-        OrgType.PARTNERSHIP
-      case Some(organisationType) => OrgType.withName(organisationType)
+          )) {
+            OrgType.PARTNERSHIP
+
+          } else {
+            // If OrgType was PARTNERSHIP during registration then Subscription / CustomerDetails.apply has written
+            // the String value of a PartnerTypeEnum here; not an OrgType.
+            // We need to try to map back from PartnerTypeEnum to OrgType
+            val partnerTypeNames =
+            PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.map(_.toString)
+
+            println(organisationType)
+            if (partnerTypeNames.contains(organisationType)) {
+              OrgType.PARTNERSHIP
+
+            } else {
+              OrgType.withName(organisationType)
+
+            }
+          }
+
+      case None =>
+        throw new IllegalStateException("Organisation type absent")
     }
 
 }

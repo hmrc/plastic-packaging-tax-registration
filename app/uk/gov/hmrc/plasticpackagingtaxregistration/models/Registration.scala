@@ -116,26 +116,8 @@ object Registration {
     val organisationType = subscription.legalEntityDetails.customerDetails.customerType match {
       case CustomerType.Individual   => SOLE_TRADER
       case CustomerType.Organisation =>
-        /*
         subscription.legalEntityDetails.customerDetails.organisationDetails.map(
-          _.organisationTypeDisplayName(regType.exists(_.equals(RegType.GROUP)))
-         */
-        subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
-          _.organisationType
-        ).flatMap { organisationTypeString =>
-          // If OrgType was PARTNERSHIP during registration then Subscription / CustomerDetails.apply has written
-          // the String value of a PartnerTypeEnum here; not an OrgType.
-          // We need to try to map back from PartnerTypeEnum to OrgType
-          // As the names of these enums overlap the only way we can guess if this was a partnership
-          // is to try and match on the partnershipType.
-          val partnerTypeNames =
-            PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.map(_.toString)
-          if (partnerTypeNames.contains(organisationTypeString))
-            Some(OrgType.PARTNERSHIP)
-          else
-            OrgType.values.find(_.toString == organisationTypeString)
-
-        }.getOrElse(illegalState("Missing organisation type"))
+          _.organisationTypeDisplayName(regType.exists(_.equals(RegType.GROUP)))).getOrElse(illegalState("Missing organisation type"))
     }
 
     val incorporationDetails = organisationType match {
@@ -175,7 +157,7 @@ object Registration {
     }
     val partnershipDetails = organisationType match {
       case OrgType.PARTNERSHIP =>
-        // Subscription presents Partners on the groupPartnershipDetails field
+        // Subscription partners are stored on the groupPartnershipDetails field
         val subscriptionPartners = subscription.groupPartnershipSubscription.map(
           _.groupPartnershipDetails
         ).getOrElse(Seq.empty)
@@ -246,7 +228,7 @@ object Registration {
             }
             Some(
               PartnerPartnershipDetails(
-                partnershipName = None, // Not set in test data; is it used?,
+                partnershipName = None, // TODO Not set in test data; is it used?,
                 partnershipBusinessDetails = Some(
                   PartnershipBusinessDetails(postcode = customerIdentification2,
                                              sautr = customerIdentification1,
