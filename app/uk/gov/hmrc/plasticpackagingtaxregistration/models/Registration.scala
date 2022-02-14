@@ -228,7 +228,7 @@ object Registration {
             }
             Some(
               PartnerPartnershipDetails(
-                partnershipName = None, // TODO Not set in test data; is it used?,
+                partnershipName = None, // Does not appear to be persisted on subscription
                 partnershipBusinessDetails = Some(
                   PartnershipBusinessDetails(postcode = customerIdentification2,
                                              sautr = customerIdentification1,
@@ -250,7 +250,7 @@ object Registration {
 
           Partner(
             id =
-              UUID.randomUUID().toString, // TODO Partner.id is not mapped in Subscription so no stable ids or urls
+              UUID.randomUUID().toString, // Partner.id is not mapped in Subscription so ids and urls will not be stable
             partnerType = Some(partnerType),
             contactDetails = Some(partnerContactDetails),
             incorporationDetails = partnerIncorporationDetails,
