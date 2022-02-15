@@ -213,7 +213,7 @@ class RegistrationSpec
         _.lastName
       ) mustBe soleTraderPartner.soleTraderDetails.map(_.lastName)
 
-      // There is no where map date of birth on individualDetails so it cannot be round tripped
+      // There is no way to map date of birth on individualDetails so it cannot be round tripped
       soleTraderPartner.soleTraderDetails.flatMap(_.dateOfBirth).nonEmpty mustBe true
       rehydratedSoleTraderPartner.soleTraderDetails.flatMap(_.dateOfBirth).isEmpty mustBe true
 
@@ -267,15 +267,9 @@ class RegistrationSpec
           _.companyProfile
         ).map(_.companyName)
 
-      // TODO For a partnership customerIdentification1 is the partnershipBusinessDetails.sautr and customerIdentification2 is the partnershipBusinessDetails.postcode
-      // Company number and not be recovered from the Subscription.
-      //rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber) mustBe
-      //  partnershipPartner.partnerPartnershipDetails.flatMap(_.partnershipBusinessDetails).flatMap(_.companyProfile).map(_.companyNumber)
-
       // None of these partners have RegistrationDetails set because we think this field is just
       // an artifact of top level entire classes been reused to represent partner details.
       // Therefore none of these partners will have RegistrationDetails set.
-      // These classes could be replaced with a partner specific class to remove this confusion
       // Explicit gets to confirm we're asserting in the right fields for each partner class
       rehydratedNominatedPartner.incorporationDetails.get.registration mustBe None
       rehydratedPartnershipPartnerPartner.partnerPartnershipDetails.get.partnershipBusinessDetails.get.registration mustBe None
