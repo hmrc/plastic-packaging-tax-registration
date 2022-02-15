@@ -172,6 +172,8 @@ class RegistrationSpec
       // Partner type
       rehydratedNominatedPartner.partnerType mustBe Some(PartnerTypeEnum.UK_COMPANY)
       // Partner contact details
+
+      rehydratedNominatedPartner.contactDetails.flatMap(_.jobTitle) mustBe Some("Director")
       rehydratedNominatedPartner.contactDetails mustBe nominatedPartner.contactDetails
 
       // Incorporated entities will have populated the incorporationDetails field.

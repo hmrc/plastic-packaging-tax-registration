@@ -288,7 +288,7 @@ class SubscriptionSpec
       val nominatedPartner = aUkCompanyPartner()
       subscription.primaryContactDetails.name mustBe
         s"${nominatedPartner.contactDetails.get.firstName.get} ${nominatedPartner.contactDetails.get.lastName.get}"
-      subscription.primaryContactDetails.positionInCompany mustBe "Nominated Partner"
+      subscription.primaryContactDetails.positionInCompany mustBe "Director"
       subscription.primaryContactDetails.contactDetails.email mustBe nominatedPartner.contactDetails.get.emailAddress.get
       subscription.primaryContactDetails.contactDetails.telephone mustBe nominatedPartner.contactDetails.get.phoneNumber.get
       subscription.primaryContactDetails.contactDetails.mobileNumber mustBe None

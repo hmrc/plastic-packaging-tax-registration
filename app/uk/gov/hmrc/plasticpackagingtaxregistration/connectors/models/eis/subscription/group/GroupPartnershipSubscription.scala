@@ -121,7 +121,8 @@ object GroupPartnershipSubscription {
                               ),
                               lastName = partner.contactDetails.flatMap(_.lastName).getOrElse(
                                 throw new IllegalStateException("Partner contact last name absent")
-                              )
+                              ),
+                              title = partner.contactDetails.flatMap(_.jobTitle)
                             ),
                             addressDetails = AddressDetails(
                               partner.contactDetails.flatMap(_.address).getOrElse(

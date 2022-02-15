@@ -176,7 +176,8 @@ object Registration {
                                   emailAddress = Option(subscriptionPartner.contactDetails.email),
                                   phoneNumber =
                                     Option(subscriptionPartner.contactDetails.telephone),
-                                  address = Some(PPTAddress(subscriptionPartner.addressDetails))
+                                  address = Some(PPTAddress(subscriptionPartner.addressDetails)),
+                                  jobTitle = subscriptionPartner.individualDetails.title
             )
 
           val isIncorporatedType =
