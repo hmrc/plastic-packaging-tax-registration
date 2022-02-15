@@ -123,7 +123,11 @@ trait RegistrationTestData {
                            )
                          ),
                          partners =
-                           Seq(aUkCompanyPartner(), aSoleTraderPartner(), aPartnershipPartner())
+                           Seq(aUkCompanyPartner(),
+                               aSoleTraderPartner(),
+                               aPartnershipPartner(),
+                               aNonIncorpPartnershipPartner()
+                           )
       )
     )
   )
@@ -144,7 +148,11 @@ trait RegistrationTestData {
                            )
                          ),
                          partners =
-                           Seq(aUkCompanyPartner(), aSoleTraderPartner(), aPartnershipPartner())
+                           Seq(aUkCompanyPartner(),
+                               aSoleTraderPartner(),
+                               aPartnershipPartner(),
+                               aNonIncorpPartnershipPartner()
+                           )
       )
     )
   )
@@ -211,7 +219,7 @@ trait RegistrationTestData {
             soleTraderDetails = Some(
               SoleTraderIncorporationDetails(firstName = "Steve",
                                              lastName = "Knight",
-                                             dateOfBirth = None,
+                                             dateOfBirth = Some("1971-02-03"),
                                              ninoOrTrn = "1234567890XYZ",
                                              sautr = Some("123ABC456DEF"),
                                              registration = Some(
@@ -279,6 +287,44 @@ trait RegistrationTestData {
                                       PPTAddress(addressLine1 = "12 New Lane",
                                                  townOrCity = "Leeds",
                                                  postCode = Some("LS1 1RE")
+                                      )
+                                    )
+              )
+            )
+    )
+
+  protected def aNonIncorpPartnershipPartner(): Partner =
+    Partner(partnerType = Some(PartnerTypeEnum.SCOTTISH_PARTNERSHIP),
+            partnerPartnershipDetails = Some(
+              PartnerPartnershipDetails(partnershipName = Some("Scottish Plastic Partners"),
+                                        partnershipBusinessDetails = Some(
+                                          PartnershipBusinessDetails(sautr = "23947GDFD22",
+                                                                     postcode = "HD1 7TE",
+                                                                     companyProfile = None,
+                                                                     registration = Some(
+                                                                       RegistrationDetails(
+                                                                         identifiersMatch = true,
+                                                                         verificationStatus =
+                                                                           Some("VERIFIED"),
+                                                                         registrationStatus =
+                                                                           "REGISTERED",
+                                                                         registeredBusinessPartnerId =
+                                                                           Some("XM454345")
+                                                                       )
+                                                                     )
+                                          )
+                                        )
+              )
+            ),
+            contactDetails = Some(
+              PartnerContactDetails(firstName = Some("Jonas"),
+                                    lastName = Some("Jenkson"),
+                                    emailAddress = Some("jonas@spp.com"),
+                                    phoneNumber = Some("0765123765"),
+                                    address = Some(
+                                      PPTAddress(addressLine1 = "The Big House",
+                                                 townOrCity = "Huddersfield",
+                                                 postCode = Some("HD2 2JD")
                                       )
                                     )
               )

@@ -92,6 +92,7 @@ class SubscriptionSpec
         val subscription = Subscription(registration, isSubscriptionUpdate = false)
 
         assertCommonDetails(subscription, Some(10000), isPartnership = true)
+
         mustHaveValidGeneralPartnershipLegalEntityDetails(subscription)
         mustHaveValidPartners(subscription,
                               registration.organisationDetails.partnershipDetails.get.partners

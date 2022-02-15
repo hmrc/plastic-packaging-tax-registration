@@ -28,7 +28,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
   SOLE_TRADER,
   UK_COMPANY
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.GENERAL_PARTNERSHIP
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
   GroupMember,
@@ -157,16 +156,126 @@ object Registration {
         )
       case _ => None
     }
-    // TODO: reintroduce coverage on this class once partnership rehydration has been completed
     val partnershipDetails = organisationType match {
       case OrgType.PARTNERSHIP =>
+        // Subscription partners are stored on the groupPartnershipDetails field
+        val subscriptionPartners = subscription.groupPartnershipSubscription.map(
+          _.groupPartnershipDetails
+        ).getOrElse(Seq.empty)
+        val partners = subscriptionPartners.map { subscriptionPartner =>
+          val partnerType = subscriptionPartner.organisationDetails.organisationType.map(
+            PartnerTypeEnum.withName
+          ).getOrElse {
+            throw new IllegalStateException("Partner partner type absent")
+          }
+
+          val partnerContactDetails =
+            PartnerContactDetails(firstName =
+                                    Option(subscriptionPartner.individualDetails.firstName),
+                                  lastName = Option(subscriptionPartner.individualDetails.lastName),
+                                  emailAddress = Option(subscriptionPartner.contactDetails.email),
+                                  phoneNumber =
+                                    Option(subscriptionPartner.contactDetails.telephone),
+                                  address = Some(PPTAddress(subscriptionPartner.addressDetails))
+            )
+
+          val isIncorporatedType =
+            PartnerTypeEnum.partnerTypesWhichMightContainIncorporationDetails.contains(partnerType)
+          val customerIdentification1      = subscriptionPartner.customerIdentification1
+          val mayBeCustomerIdentification2 = subscriptionPartner.customerIdentification2
+
+          val partnerIncorporationDetails = if (isIncorporatedType) {
+            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse {
+              throw new IllegalStateException(
+                "Incorporation details required customerIdentification2 which was absent"
+              )
+            }
+            Some(
+              IncorporationDetails(companyNumber = customerIdentification1,
+                                   companyName =
+                                     subscriptionPartner.organisationDetails.organisationName,
+                                   ctutr =
+                                     customerIdentification2,
+                                   companyAddress = IncorporationAddressDetails(),
+                                   registration = None
+              )
+            )
+          } else
+            None
+
+          val isSoleTraderType = partnerType == PartnerTypeEnum.SOLE_TRADER
+          val partnerSoleTraderDetails =
+            if (isSoleTraderType)
+              Some(
+                SoleTraderIncorporationDetails(
+                  firstName = subscriptionPartner.individualDetails.firstName,
+                  lastName = subscriptionPartner.individualDetails.lastName,
+                  dateOfBirth = None, // Not persisted on Subscription; cannot be be round tripped
+                  ninoOrTrn = customerIdentification1,
+                  sautr = subscriptionPartner.customerIdentification2,
+                  registration = None
+                )
+              )
+            else
+              None
+
+          val isPartnershipType =
+            PartnerTypeEnum.partnerTypesWhichRepresentPartnerships.contains(partnerType)
+          val partnerPartnershipDetails = if (isPartnershipType) {
+            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse {
+              throw new IllegalStateException(
+                "Partner Partnership details required customerIdentification2 which was absent"
+              )
+            }
+
+            Some(
+              PartnerPartnershipDetails(
+                partnershipName = Some(subscriptionPartner.organisationDetails.organisationName),
+                partnershipBusinessDetails = Some(
+                  PartnershipBusinessDetails(postcode = customerIdentification2,
+                                             sautr = customerIdentification1,
+                                             companyProfile = Some(
+                                               CompanyProfile(
+                                                 companyNumber = customerIdentification2,
+                                                 companyName =
+                                                   subscriptionPartner.organisationDetails.organisationName,
+                                                 companyAddress = IncorporationAddressDetails()
+                                               )
+                                             ),
+                                             registration = None
+                  )
+                )
+              )
+            )
+          } else
+            None
+
+          Partner(
+            id =
+              UUID.randomUUID().toString, // Partner.id is not mapped in Subscription so ids and urls will not be stable
+            partnerType = Some(partnerType),
+            contactDetails = Some(partnerContactDetails),
+            incorporationDetails = partnerIncorporationDetails,
+            soleTraderDetails = partnerSoleTraderDetails,
+            partnerPartnershipDetails = partnerPartnershipDetails
+          )
+        }
+
+        val maybePartnershipTypeField =
+          subscription.legalEntityDetails.customerDetails.organisationDetails.flatMap(
+            _.organisationType
+          )
+        val partnershipType = maybePartnershipTypeField.map { t =>
+          PartnerTypeEnum.withName(t)
+        }.getOrElse {
+          illegalState("Missing partnershipType")
+        }
+
         Some(
-          //TODO - how to work out other partnership types?
-          PartnershipDetails(partnershipType = GENERAL_PARTNERSHIP,
-                             partnershipName =
-                               subscription.legalEntityDetails.customerDetails.organisationDetails.map(
-                                 _.organisationName
-                               ),
+          PartnershipDetails(partnershipType = partnershipType,
+                             subscription.legalEntityDetails.customerDetails.organisationDetails.map(
+                               _.organisationName
+                             ),
                              partnershipBusinessDetails = Some(
                                PartnershipBusinessDetails(
                                  sautr = subscription.legalEntityDetails.customerIdentification1,
@@ -178,8 +287,7 @@ object Registration {
                                  companyProfile = None
                                )
                              ),
-                             // TODO: rehydrate partners from subscription
-                             partners = Seq()
+                             partners = partners
           )
         )
       case _ => None

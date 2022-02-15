@@ -44,6 +44,16 @@ object PartnerTypeEnum extends Enumeration {
   implicit val format: Format[PartnerTypeEnum] =
     Format(Reads.enumNameReads(PartnerTypeEnum), Writes.enumNameWrites)
 
+  val partnerTypesWhichRepresentPartnerships = Seq(GENERAL_PARTNERSHIP,
+                                                   LIMITED_PARTNERSHIP,
+                                                   LIMITED_LIABILITY_PARTNERSHIP,
+                                                   SCOTTISH_PARTNERSHIP,
+                                                   SCOTTISH_LIMITED_PARTNERSHIP
+  )
+
+  val partnerTypesWhichMightContainIncorporationDetails =
+    Seq(UK_COMPANY, OVERSEAS_COMPANY_UK_BRANCH, OVERSEAS_COMPANY_NO_UK_BRANCH)
+
 }
 
 case class Partner(
