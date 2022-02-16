@@ -172,7 +172,17 @@ class RegistrationSpec
       // Partner type
       rehydratedNominatedPartner.partnerType mustBe Some(PartnerTypeEnum.UK_COMPANY)
       // Partner contact details
+
+      rehydratedNominatedPartner.contactDetails.flatMap(_.jobTitle) mustBe Some("Director")
       rehydratedNominatedPartner.contactDetails mustBe nominatedPartner.contactDetails
+
+      // As we are storing job title on subscription primary contact details, we can only keep
+      // one value; we should apply this to the nominated partner; all other partners have no job title.
+      val rehydratedNonNominatedPartners =
+        rehydratedPartnershipDetails.partners.find(_.id != rehydratedNominatedPartner.id)
+      rehydratedNonNominatedPartners.forall(
+        _.contactDetails.flatMap(_.jobTitle).isEmpty
+      ) mustBe true
 
       // Incorporated entities will have populated the incorporationDetails field.
       rehydratedNominatedPartner.incorporationDetails.nonEmpty mustBe true

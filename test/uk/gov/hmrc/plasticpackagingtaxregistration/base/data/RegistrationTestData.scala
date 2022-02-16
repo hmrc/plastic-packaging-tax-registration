@@ -209,7 +209,8 @@ trait RegistrationTestData {
                                                  townOrCity = "Leeds",
                                                  postCode = Some("LS1 1HS")
                                       )
-                                    )
+                                    ),
+                                    jobTitle = Some("Director")
               )
             )
     )

@@ -17,10 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  Registration,
-  PrimaryContactDetails => PPTPrimaryContactDetails
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration
 
 case class PrimaryContactDetails(
   name: String,
@@ -50,8 +47,9 @@ object PrimaryContactDetails {
 
       PrimaryContactDetails(
         name =
-          s"${nominatedPartnerContactFirstName} ${nominatedPartnerContactLastName}",
-        positionInCompany = "Nominated Partner",
+          s"$nominatedPartnerContactFirstName $nominatedPartnerContactLastName",
+        positionInCompany =
+          nominatedPartner.contactDetails.flatMap(_.jobTitle).getOrElse("Nominated Partner"),
         contactDetails = ContactDetails(nominatedPartnerContactDetails)
       )
     } else

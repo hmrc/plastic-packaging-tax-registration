@@ -76,7 +76,7 @@ class PrimaryContactDetailsSpec
 
         primaryContactDetails.name mustBe
           s"${nominatedPartner.contactDetails.get.firstName.get} ${nominatedPartner.contactDetails.get.lastName.get}"
-        primaryContactDetails.positionInCompany mustBe "Nominated Partner"
+        primaryContactDetails.positionInCompany mustBe "Director"
         primaryContactDetails.contactDetails.email mustBe nominatedPartner.contactDetails.get.emailAddress.get
         primaryContactDetails.contactDetails.telephone mustBe nominatedPartner.contactDetails.get.phoneNumber.get
         primaryContactDetails.contactDetails.mobileNumber mustBe None
