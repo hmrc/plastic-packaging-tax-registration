@@ -169,6 +169,13 @@ object Registration {
             throw new IllegalStateException("Partner partner type absent")
           }
 
+          val isNominatedPartner = subscriptionPartner == subscriptionPartners.head
+          val positionInCompany =
+            if (isNominatedPartner)
+              Some(contact.positionInCompany)
+            else
+              None
+
           val partnerContactDetails =
             PartnerContactDetails(firstName =
                                     Option(subscriptionPartner.individualDetails.firstName),
@@ -177,7 +184,7 @@ object Registration {
                                   phoneNumber =
                                     Option(subscriptionPartner.contactDetails.telephone),
                                   address = Some(PPTAddress(subscriptionPartner.addressDetails)),
-                                  jobTitle = subscriptionPartner.individualDetails.title
+                                  jobTitle = positionInCompany
             )
 
           val isIncorporatedType =

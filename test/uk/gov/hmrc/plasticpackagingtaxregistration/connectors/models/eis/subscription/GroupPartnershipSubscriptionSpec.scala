@@ -308,7 +308,7 @@ class GroupPartnershipSubscriptionSpec
         groupPartner.organisationDetails.organisationType mustBe partner.partnerType.map(_.toString)
         groupPartner.organisationDetails.organisationName mustBe partner.name
 
-        groupPartner.individualDetails.title mustBe partner.contactDetails.flatMap(_.jobTitle)
+        groupPartner.individualDetails.title mustBe None
         groupPartner.individualDetails.middleName mustBe None
         groupPartner.individualDetails.firstName mustBe partner.contactDetails.flatMap(
           _.firstName
