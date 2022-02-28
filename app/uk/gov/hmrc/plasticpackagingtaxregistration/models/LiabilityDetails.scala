@@ -17,7 +17,6 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import java.time.LocalDate
-
 import play.api.libs.json.{Json, OFormat}
 
 case class LiabilityWeight(totalKg: Option[Long])
@@ -51,11 +50,19 @@ object Date {
 }
 
 case class LiabilityDetails(
-  weight: Option[LiabilityWeight] = None,
+  // Pre-launch - remove after launch
   expectedWeight: Option[LiabilityExpectedWeight] = None,
+  // Old Post-launch - remove after launch
+  weight: Option[LiabilityWeight] = None,
+  // New Post-launch
+  exceededThresholdWeight: Option[Boolean] = None,
+  dateExceededThresholdWeight: Option[Date] = None,
+  expectToExceedThresholdWeight: Option[Boolean] = None,
+  dateRealisedExpectedToExceedThresholdWeight: Option[Date] = None,
+  expectedWeightNext12m: Option[LiabilityWeight] = None,
+  // Derived fields - not directly input by user
   startDate: Option[Date] = None,
-  isLiable: Option[Boolean] = None,
-  expectToExceedThresholdWeight: Option[Boolean] = None
+  isLiable: Option[Boolean] = None
 ) {
 
   def liabilityWeight: Option[Long] =
