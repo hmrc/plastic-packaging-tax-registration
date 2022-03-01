@@ -27,7 +27,9 @@ case class PrimaryContactDetails(
   phoneNumber: Option[String] = None,
   useRegisteredAddress: Option[Boolean] = None,
   address: Option[PPTAddress] = None,
-  journeyId: Option[String] = None
+  // The following fields are used for email verification only
+  journeyId: Option[String] = None,
+  prospectiveEmail: Option[String] = None
 )
 
 object PrimaryContactDetails {
