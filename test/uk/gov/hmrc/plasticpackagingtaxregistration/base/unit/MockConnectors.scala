@@ -87,10 +87,10 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
     )
 
   protected def mockGetSubscriptionStatus(
-    subscription: SubscriptionStatusResponse
-  ): OngoingStubbing[Future[SubscriptionStatusResponse]] =
+    subscriptionStatusResponse: SubscriptionStatusResponse
+  ): OngoingStubbing[Future[Either[Int, SubscriptionStatusResponse]]] =
     when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any())).thenReturn(
-      Future.successful(subscription)
+      Future.successful(Right(subscriptionStatusResponse))
     )
 
   protected def mockGetSubscription(
