@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import java.time.{ZoneOffset, ZonedDateTime}
-import java.util.UUID
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, put}
 import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
@@ -44,6 +42,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
 import java.time.{ZoneOffset, ZonedDateTime}
+import java.util.UUID
 
 class SubscriptionsConnectorISpec
     extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData {
