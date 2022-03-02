@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
-import java.time.{ZoneOffset, ZonedDateTime}
-import java.util.UUID
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, put}
 import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
@@ -44,6 +42,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
 import java.time.{ZoneOffset, ZonedDateTime}
+import java.util.UUID
 
 class SubscriptionsConnectorISpec
     extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData {
@@ -73,7 +72,7 @@ class SubscriptionsConnectorISpec
             )
         )
 
-        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
+        val res = await(connector.getSubscriptionStatus(safeNumber)).right.get
 
         res.status mustBe NOT_SUBSCRIBED
         res.pptReference mustBe Some("XXPPTP" + safeNumber + "789")
@@ -90,8 +89,8 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
 
-        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
-        res mustBe SubscriptionStatusResponse(UNKNOWN)
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        res mustBe Status.BAD_REQUEST
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
@@ -106,8 +105,8 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
 
-        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
-        res mustBe SubscriptionStatusResponse(UNKNOWN)
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        res mustBe Status.NOT_FOUND
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
@@ -121,8 +120,8 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.INTERNAL_SERVER_ERROR, errors = errors)
 
-        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
-        res mustBe SubscriptionStatusResponse(UNKNOWN)
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        res mustBe Status.INTERNAL_SERVER_ERROR
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
@@ -136,8 +135,8 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
 
-        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
-        res mustBe SubscriptionStatusResponse(UNKNOWN)
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        res mustBe Status.BAD_GATEWAY
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
@@ -151,8 +150,8 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
 
-        val res: SubscriptionStatusResponse = await(connector.getSubscriptionStatus(safeNumber))
-        res mustBe SubscriptionStatusResponse(UNKNOWN)
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        res mustBe Status.SERVICE_UNAVAILABLE
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }

@@ -22,7 +22,13 @@ import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{
+  HeaderCarrier,
+  HttpClient,
+  HttpResponse,
+  NotFoundException,
+  UpstreamErrorResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
@@ -54,8 +60,7 @@ class SubscriptionsConnector @Inject() (
 
   def getSubscriptionStatus(
     safeId: String
-  )(implicit hc: HeaderCarrier): Future[SubscriptionStatusResponse] = {
-
+  )(implicit hc: HeaderCarrier): Future[Either[Int, SubscriptionStatusResponse]] = {
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
@@ -65,14 +70,28 @@ class SubscriptionsConnector @Inject() (
       logger.info(
         s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and safeId [$safeId] had response payload ${toJson(etmpResponse)}"
       )
-      SubscriptionStatusResponse.fromETMPResponse(etmpResponse)
+      Right(SubscriptionStatusResponse.fromETMPResponse(etmpResponse))
     }
       .recover {
-        case e =>
+        case httpEx: UpstreamErrorResponse =>
+          httpEx.statusCode match {
+            case _ =>
+              // Upstream errors should be echoed to the frontend so that user facing error handling is aware of them
+              logger.warn(
+                s"Upstream error returned from get subscription status with correlationId [${correlationIdHeader._2}] and " +
+                  s"safeId [$safeId], status: ${httpEx.statusCode}, body: ${httpEx.getMessage()}"
+              )
+              Left(httpEx.statusCode)
+          }
+
+        case ex: Exception =>
+          // Hard internal errors which are not from upstream are signalled with a 500.
           logger.warn(
-            s"Get subscription status failed for correlationId [${correlationIdHeader._2}] and safeId [$safeId] - ${e.getMessage}"
+            s"Get subscription status failed with correlationId [${correlationIdHeader._2}] and " +
+              s"safeId [$safeId] is currently unavailable due to exception [${ex.getMessage}]",
+            ex
           )
-          SubscriptionStatusResponse(SubscriptionStatus.UNKNOWN)
+          Left(Status.INTERNAL_SERVER_ERROR)
       }
       .andThen { case _ => timer.stop() }
   }

@@ -73,6 +73,20 @@ class SubscriptionControllerSpec
       )
     }
 
+    "echo status codes from unsuccessful upstream calls" in {
+      withAuthorizedUser()
+      mockGetSubscriptionStatus(subscriptionStatusResponse)
+      mockNonRepudiationSubmission(NonRepudiationSubmissionAccepted(UUID.randomUUID().toString))
+
+      when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any())).thenReturn(
+        Future.successful(Left(418))
+      )
+
+      val result = route(app, subscriptionStatusResponse_HttpGet).get
+
+      status(result) mustBe 418
+    }
+
     "return 401" when {
       "user not authorized" in {
         withUnauthorizedUser(InsufficientEnrolments())
