@@ -75,11 +75,8 @@ class SubscriptionsConnector @Inject() (
       .recover {
         case httpEx: UpstreamErrorResponse =>
           httpEx.statusCode match {
-            case 404 =>
-              // Make an allowance for upstream to use HTTP 404 to indicate an unregistered organisation
-              Right(SubscriptionStatusResponse(SubscriptionStatus.UNKNOWN))
             case _ =>
-              // Hard upstream errors should be echoed to the frontend so that user facing error handling is aware of them
+              // Upstream errors should be echoed to the frontend so that user facing error handling is aware of them
               logger.warn(
                 s"Upstream error returned from get subscription status with correlationId [${correlationIdHeader._2}] and " +
                   s"safeId [$safeId], status: ${httpEx.statusCode}, body: ${httpEx.getMessage()}"

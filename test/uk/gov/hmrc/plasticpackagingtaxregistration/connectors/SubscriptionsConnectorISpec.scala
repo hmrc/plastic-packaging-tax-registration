@@ -105,8 +105,8 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
 
-        val res = await(connector.getSubscriptionStatus(safeNumber)).right.get
-        res mustBe SubscriptionStatusResponse(UNKNOWN)
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        res mustBe Status.NOT_FOUND
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
