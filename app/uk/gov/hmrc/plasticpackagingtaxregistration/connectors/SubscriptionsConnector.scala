@@ -54,7 +54,7 @@ class SubscriptionsConnector @Inject() (
 
   def getSubscriptionStatus(
     safeId: String
-  )(implicit hc: HeaderCarrier): Future[SubscriptionStatusResponse] = {
+  )(implicit hc: HeaderCarrier): Future[Either[Int, SubscriptionStatusResponse]] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
@@ -65,14 +65,14 @@ class SubscriptionsConnector @Inject() (
       logger.info(
         s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and safeId [$safeId] had response payload ${toJson(etmpResponse)}"
       )
-      SubscriptionStatusResponse.fromETMPResponse(etmpResponse)
+      Right(SubscriptionStatusResponse.fromETMPResponse(etmpResponse))
     }
       .recover {
         case e =>
           logger.warn(
             s"Get subscription status failed for correlationId [${correlationIdHeader._2}] and safeId [$safeId] - ${e.getMessage}"
           )
-          SubscriptionStatusResponse(SubscriptionStatus.UNKNOWN)
+          Right(SubscriptionStatusResponse(SubscriptionStatus.UNKNOWN))
       }
       .andThen { case _ => timer.stop() }
   }

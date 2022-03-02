@@ -65,8 +65,9 @@ class SubscriptionController @Inject() (
   def getStatus(safeNumber: String): Action[AnyContent] =
     authenticator.authorisedAction(parse.default) { implicit request =>
       subscriptionsConnector.getSubscriptionStatus(safeNumber).map { response =>
-        logPayload(s"PPT Subscription status response for safeId $safeNumber ", response)
-        Ok(response)
+        val payload = response.left.get
+        logPayload(s"PPT Subscription status response for safeId $safeNumber ", payload)
+        Ok(payload)
       }
     }
 
