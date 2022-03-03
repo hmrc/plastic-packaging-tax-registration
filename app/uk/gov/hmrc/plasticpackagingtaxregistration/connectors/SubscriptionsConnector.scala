@@ -22,13 +22,7 @@ import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{
-  HeaderCarrier,
-  HttpClient,
-  HttpResponse,
-  NotFoundException,
-  UpstreamErrorResponse
-}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
@@ -39,7 +33,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
   ETMPSubscriptionStatusResponse,
-  SubscriptionStatus,
   SubscriptionStatusResponse
 }
 
@@ -184,21 +177,11 @@ class SubscriptionsConnector @Inject() (
   def updateSubscription(pptReference: String, subscription: Subscription)(implicit
     hc: HeaderCarrier
   ): Future[SubscriptionResponse] = {
-
-    // A mandatory field is required when calling the subscription variation API
-    val updateToDetailsChangeOfCircumstance = subscription.changeOfCircumstanceDetails.getOrElse(
-      ChangeOfCircumstanceDetails(changeOfCircumstance =
-        ChangeOfCircumstance.UPDATE_TO_DETAILS.toString
-      )
-    ).copy(changeOfCircumstance = ChangeOfCircumstance.UPDATE_TO_DETAILS.toString)
-    val updatedSubscription =
-      subscription.copy(changeOfCircumstanceDetails = Some(updateToDetailsChangeOfCircumstance))
-
     val timer: Timer.Context = metrics.defaultRegistry.timer("ppt.subscription.update.timer").time()
     val correlationIdHeader: (String, String) =
       correlationIdHeaderName -> UUID.randomUUID().toString
     httpClient.PUT[Subscription, HttpResponse](url = appConfig.subscriptionUpdateUrl(pptReference),
-                                               body = updatedSubscription,
+                                               body = subscription,
                                                headers = headers :+ correlationIdHeader
     )
       .andThen { case _ => timer.stop() }
