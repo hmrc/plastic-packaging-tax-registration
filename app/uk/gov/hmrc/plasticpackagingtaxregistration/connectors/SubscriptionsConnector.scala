@@ -184,11 +184,21 @@ class SubscriptionsConnector @Inject() (
   def updateSubscription(pptReference: String, subscription: Subscription)(implicit
     hc: HeaderCarrier
   ): Future[SubscriptionResponse] = {
+
+    // A mandatory field is required when calling the subscription variation API
+    val updateToDetailsChangeOfCircumstance = subscription.changeOfCircumstanceDetails.getOrElse(
+      ChangeOfCircumstanceDetails(changeOfCircumstance =
+        ChangeOfCircumstance.UPDATE_TO_DETAILS.toString
+      )
+    ).copy(changeOfCircumstance = ChangeOfCircumstance.UPDATE_TO_DETAILS.toString)
+    val updatedSubscription =
+      subscription.copy(changeOfCircumstanceDetails = Some(updateToDetailsChangeOfCircumstance))
+
     val timer: Timer.Context = metrics.defaultRegistry.timer("ppt.subscription.update.timer").time()
     val correlationIdHeader: (String, String) =
       correlationIdHeaderName -> UUID.randomUUID().toString
     httpClient.PUT[Subscription, HttpResponse](url = appConfig.subscriptionUpdateUrl(pptReference),
-                                               body = subscription,
+                                               body = updatedSubscription,
                                                headers = headers :+ correlationIdHeader
     )
       .andThen { case _ => timer.stop() }
