@@ -22,13 +22,7 @@ import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{
-  HeaderCarrier,
-  HttpClient,
-  HttpResponse,
-  NotFoundException,
-  UpstreamErrorResponse
-}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
@@ -39,7 +33,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
   ETMPSubscriptionStatusResponse,
-  SubscriptionStatus,
   SubscriptionStatusResponse
 }
 
