@@ -44,8 +44,19 @@ object Subscription {
       case None       => throw new Exception("A PPT liability Start date is required")
     }
 
-  def apply(registration: Registration, isSubscriptionUpdate: Boolean): Subscription =
-    Subscription(changeOfCircumstanceDetails = registration.changeOfCircumstanceDetails,
+  def apply(registration: Registration, isSubscriptionUpdate: Boolean): Subscription = {
+    val changeOfCircumstanceDetails = if (isSubscriptionUpdate) {
+      // A mandatory field is required when calling the subscription variation API
+      val updateToDetailsChangeOfCircumstance = registration.changeOfCircumstanceDetails.getOrElse(
+        ChangeOfCircumstanceDetails(changeOfCircumstance =
+          ChangeOfCircumstance.UPDATE_TO_DETAILS.toString
+        )
+      ).copy(changeOfCircumstance = ChangeOfCircumstance.UPDATE_TO_DETAILS.toString)
+      Some(updateToDetailsChangeOfCircumstance)
+    } else
+      registration.changeOfCircumstanceDetails
+
+    Subscription(changeOfCircumstanceDetails = changeOfCircumstanceDetails,
                  processingDate = registration.processingDate,
                  legalEntityDetails =
                    LegalEntityDetails(registration.organisationDetails, isGroup(registration)),
@@ -59,6 +70,7 @@ object Subscription {
                  groupPartnershipSubscription =
                    GroupPartnershipSubscription(registration, isSubscriptionUpdate)
     )
+  }
 
   private def isGroup(registration: Registration): Boolean =
     registration.registrationType.isDefined && registration.registrationType.get == RegType.GROUP

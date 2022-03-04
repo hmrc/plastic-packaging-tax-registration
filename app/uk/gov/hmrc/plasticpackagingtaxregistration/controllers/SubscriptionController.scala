@@ -22,11 +22,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  ChangeOfCircumstance,
-  ChangeOfCircumstanceDetails,
-  Subscription
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
   SubscriptionFailureResponseWithStatusCode,
@@ -87,25 +83,10 @@ class SubscriptionController @Inject() (
   def update(pptReference: String): Action[RegistrationRequest] =
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
-        val updatedRegistration = request.body.toRegistration(request.registrationId)
-
-        val updatedSubscription = Subscription(updatedRegistration, isSubscriptionUpdate = true)
-
-        // A mandatory field is required when calling the subscription variation API
-        val updateToDetailsChangeOfCircumstance =
-          updatedSubscription.changeOfCircumstanceDetails.getOrElse(
-            ChangeOfCircumstanceDetails(changeOfCircumstance =
-              ChangeOfCircumstance.UPDATE_TO_DETAILS.toString
-            )
-          ).copy(changeOfCircumstance = ChangeOfCircumstance.UPDATE_TO_DETAILS.toString)
-        val updatedSubscriptionWithChangeOfCircumstance =
-          updatedSubscription.copy(changeOfCircumstanceDetails =
-            Some(updateToDetailsChangeOfCircumstance)
-          )
-
-        subscriptionsConnector.updateSubscription(pptReference,
-                                                  updatedSubscriptionWithChangeOfCircumstance
-        ).flatMap {
+        val updatedRegistration: Registration = request.body.toRegistration(request.registrationId)
+        val updatedSubscription: Subscription =
+          Subscription(updatedRegistration, isSubscriptionUpdate = true)
+        subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
           case response @ SubscriptionSuccessfulResponse(pptReferenceNumber, _, formBundleNumber) =>
             for {
               nrsResponse <- notifyNRS(request, updatedRegistration, response)
