@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
-import org.mockito.{ArgumentMatchers, Mockito}
+import org.mockito.{ArgumentCaptor, ArgumentMatchers, Mockito}
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
@@ -31,6 +31,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
   RegistrationRequestBuilder
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
   SubscriptionFailureResponse,
@@ -281,6 +282,29 @@ class SubscriptionControllerSpec
     )
 
     "update details" when {
+
+      "should decorate updates with change of circumstances details" in {
+        withAuthorizedUser(user = newUser())
+        val nrSubmissionId = "nrSubmissionId"
+        when(
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+        ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
+        mockSubscriptionUpdate(subscriptionSuccessfulResponse)
+
+        def theUpdatedSubscription = {
+          val captor: ArgumentCaptor[Subscription] = ArgumentCaptor.forClass(classOf[Subscription])
+          verify(mockSubscriptionsConnector).updateSubscription(any(), captor.capture())(any())
+          captor.getValue
+        }
+
+        await(route(app, subscriptionResponse_HttpPut.withJsonBody(toJson(request))).get)
+
+        theUpdatedSubscription.changeOfCircumstanceDetails.nonEmpty mustBe true
+        theUpdatedSubscription.changeOfCircumstanceDetails.map(_.changeOfCircumstance) mustBe Some(
+          "Update to details"
+        )
+      }
+
       "EIS/IF subscription is successful" when {
         " NRS submission is successful" in {
           val nrSubmissionId = "nrSubmissionId"
