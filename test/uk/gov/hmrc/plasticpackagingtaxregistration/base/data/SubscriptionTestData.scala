@@ -131,7 +131,8 @@ trait SubscriptionTestData {
     OrganisationDetails(Some("UkCompany"), "Plastics Ltd"),
     IndividualDetails(None, "Kevin", None, "Durant"),
     AddressDetails("2-3 Scala Street", "London", None, None, Some("W1T 2HN"), "GB"),
-    ContactDetails("test@test.com", "02034567890", None)
+    ContactDetails("test@test.com", "02034567890", None),
+    regWithoutIDFlag = Some(false)
   )
 
   protected val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
@@ -147,7 +148,8 @@ trait SubscriptionTestData {
                    Some("postcode"),
                    "GB"
     ),
-    ContactDetails("member@email.com", "0987-456789", None)
+    ContactDetails("member@email.com", "0987-456789", None),
+    regWithoutIDFlag = Some(true)
   )
 
   protected val groupPartnershipSubscription: GroupPartnershipSubscription =

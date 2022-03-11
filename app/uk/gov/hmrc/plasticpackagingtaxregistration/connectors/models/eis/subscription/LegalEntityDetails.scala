@@ -56,14 +56,16 @@ object LegalEntityDetails {
 
   implicit def apply(
     pptOrganisationDetails: PPTOrganisationDetails,
-    isGroup: Boolean
+    isGroup: Boolean,
+    isUpdate: Boolean
   ): LegalEntityDetails =
     pptOrganisationDetails.organisationType match {
       case Some(OrgType.SOLE_TRADER) =>
         pptOrganisationDetails.soleTraderDetails.map { details =>
           updateLegalEntityDetails(customerIdentification1 = details.ninoOrTrn,
                                    customerIdentification2 = details.sautr,
-                                   pptOrganisationDetails = pptOrganisationDetails
+                                   pptOrganisationDetails = pptOrganisationDetails,
+                                   isUpdate = isUpdate
           )
         }.getOrElse(throw new Exception("Individual details are required"))
       case Some(OrgType.PARTNERSHIP) =>
@@ -75,6 +77,7 @@ object LegalEntityDetails {
                                        customerIdentification2 =
                                          partnershipDetails.customerIdentification2,
                                        pptOrganisationDetails = pptOrganisationDetails,
+                                       isUpdate = isUpdate,
                                        isGroup = isGroup,
                                        isPartnership = partnershipDetails.partners.nonEmpty
               )
@@ -88,7 +91,8 @@ object LegalEntityDetails {
           updateLegalEntityDetails(customerIdentification1 = details.companyNumber,
                                    customerIdentification2 = Some(details.ctutr),
                                    pptOrganisationDetails = pptOrganisationDetails,
-                                   isGroup
+                                   isUpdate = isUpdate,
+                                   isGroup = isGroup
           )
 
         }.getOrElse(throw new IllegalStateException("Incorporation details are required"))
@@ -106,6 +110,7 @@ object LegalEntityDetails {
     customerIdentification1: String,
     customerIdentification2: Option[String],
     pptOrganisationDetails: PPTOrganisationDetails,
+    isUpdate: Boolean,
     isGroup: Boolean = false,
     isPartnership: Boolean = false
   ): LegalEntityDetails =
@@ -116,7 +121,9 @@ object LegalEntityDetails {
                        customerDetails = CustomerDetails(pptOrganisationDetails),
                        groupSubscriptionFlag = isGroup,
                        partnershipSubscriptionFlag = isPartnership,
-                       regWithoutIDFlag = pptOrganisationDetails.regWithoutIDFlag
+                       regWithoutIDFlag =
+                         if (isUpdate && isGroup) Some(true)
+                         else pptOrganisationDetails.regWithoutIDFlag
     )
 
 }
