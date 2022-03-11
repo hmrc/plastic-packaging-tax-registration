@@ -59,7 +59,10 @@ object Subscription {
     Subscription(changeOfCircumstanceDetails = changeOfCircumstanceDetails,
                  processingDate = registration.processingDate,
                  legalEntityDetails =
-                   LegalEntityDetails(registration.organisationDetails, isGroup(registration)),
+                   LegalEntityDetails(registration.organisationDetails,
+                                      isGroup = isGroup(registration),
+                                      isUpdate = isSubscriptionUpdate
+                   ),
                  principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration),
                  primaryContactDetails = PrimaryContactDetails(registration),
                  businessCorrespondenceDetails = BusinessCorrespondenceDetails(registration),

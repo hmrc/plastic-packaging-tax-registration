@@ -57,7 +57,7 @@ class RegistrationSpec
         )
       val rehydratedRegistration = Registration(amendedGroupSubscription)
 
-      val updatedSubscription = Subscription(rehydratedRegistration, isSubscriptionUpdate = false)
+      val updatedSubscription = Subscription(rehydratedRegistration, isSubscriptionUpdate = true)
 
       updatedSubscription mustBe amendedGroupSubscription
 

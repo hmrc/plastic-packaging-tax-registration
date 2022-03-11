@@ -120,7 +120,8 @@ class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTes
                 )
               )
             ),
-            isGroup = false
+            isGroup = false,
+            isUpdate = false
           )
         }
       }
@@ -135,7 +136,8 @@ class CustomerDetailsSpec extends AnyWordSpec with Matchers with RegistrationTes
                 )
               )
             ),
-            isGroup = false
+            isGroup = false,
+            isUpdate = false
           )
         }
       }

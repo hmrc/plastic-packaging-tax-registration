@@ -27,8 +27,9 @@ import java.time.format.DateTimeFormatter
 class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
   "LegalEntityDetails" should {
     "build successfully" when {
-      "subscribing an organisation" in {
-        val legalEntityDetails = LegalEntityDetails(pptIncorporationDetails, false)
+      "subscribing a single entity" in {
+        val legalEntityDetails =
+          LegalEntityDetails(pptIncorporationDetails, isGroup = false, isUpdate = false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
@@ -47,12 +48,14 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
       }
 
       "subscribing a group" in {
-        val legalEntityDetails = LegalEntityDetails(pptIncorporationDetails, true)
+        val legalEntityDetails =
+          LegalEntityDetails(pptIncorporationDetails, isGroup = true, isUpdate = false)
         legalEntityDetails.groupSubscriptionFlag mustBe true
       }
 
       "subscribing an individual" in {
-        val legalEntityDetails = LegalEntityDetails(pptSoleTraderDetails, false)
+        val legalEntityDetails =
+          LegalEntityDetails(pptSoleTraderDetails, isGroup = false, isUpdate = false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
@@ -70,7 +73,8 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
         legalEntityDetails.customerDetails.individualDetails.get.middleName mustBe None
       }
       "subscribing a general partnership" in {
-        val legalEntityDetails = LegalEntityDetails(pptGeneralPartnershipDetails, false)
+        val legalEntityDetails =
+          LegalEntityDetails(pptGeneralPartnershipDetails, isGroup = false, isUpdate = false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
@@ -90,7 +94,8 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
         legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipName.get
       }
       "subscribing a scottish partnership" in {
-        val legalEntityDetails = LegalEntityDetails(pptScottishPartnershipDetails, false)
+        val legalEntityDetails =
+          LegalEntityDetails(pptScottishPartnershipDetails, isGroup = false, isUpdate = false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
@@ -110,7 +115,8 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
         legalEntityDetails.customerDetails.organisationDetails.get.organisationName mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipName.get
       }
       "subscribing a limited liability partnership" in {
-        val legalEntityDetails = LegalEntityDetails(pptLimitedLiabilityDetails, false)
+        val legalEntityDetails =
+          LegalEntityDetails(pptLimitedLiabilityDetails, isGroup = false, isUpdate = false)
         legalEntityDetails.dateOfApplication mustBe now(UTC).format(
           DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
@@ -131,6 +137,20 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
       }
     }
 
+    "do NOT set regWithoutIDFlag on group registration creation" in {
+      LegalEntityDetails(pptIncorporationDetails,
+                         isGroup = true,
+                         isUpdate = false
+      ).regWithoutIDFlag mustBe None
+    }
+
+    "always set regWithoutIDFlag to true on group registration update (variation)" in {
+      LegalEntityDetails(pptIncorporationDetails,
+                         isGroup = true,
+                         isUpdate = true
+      ).regWithoutIDFlag mustBe Some(true)
+    }
+
     "throw an exception" when {
       "organisation type is 'None'" in {
         intercept[Exception] {
@@ -140,19 +160,28 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
 
       "corporate and incorporation details are missing" in {
         intercept[Exception] {
-          LegalEntityDetails(pptIncorporationDetails.copy(incorporationDetails = None), false)
+          LegalEntityDetails(pptIncorporationDetails.copy(incorporationDetails = None),
+                             isGroup = false,
+                             isUpdate = false
+          )
         }
       }
 
       "sole trader and sole trader details are missing" in {
         intercept[Exception] {
-          LegalEntityDetails(pptSoleTraderDetails.copy(soleTraderDetails = None), false)
+          LegalEntityDetails(pptSoleTraderDetails.copy(soleTraderDetails = None),
+                             isGroup = false,
+                             isUpdate = false
+          )
         }
       }
 
       "partnership and partnership details are missing" in {
         intercept[Exception] {
-          LegalEntityDetails(pptGeneralPartnershipDetails.copy(partnershipDetails = None), false)
+          LegalEntityDetails(pptGeneralPartnershipDetails.copy(partnershipDetails = None),
+                             isGroup = false,
+                             isUpdate = false
+          )
         }
       }
 
@@ -167,7 +196,8 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
                 )
               )
             ),
-            false
+            isGroup = false,
+            isUpdate = false
           )
         }
       }
@@ -182,7 +212,8 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
                 )
               )
             ),
-            false
+            isGroup = false,
+            isUpdate = false
           )
         }
       }
