@@ -41,7 +41,10 @@ class RegistrationSpec
       val amendedGroupSubscription =
         ukLimitedCompanySubscription.copy(
           legalEntityDetails =
-            ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = true),
+            ukLimitedCompanySubscription.legalEntityDetails.copy(
+              groupSubscriptionFlag = true,
+              regWithoutIDFlag = Some(true) // Always true for group subscriptions
+            ),
           groupPartnershipSubscription =
             Some(groupPartnershipSubscription),
           changeOfCircumstanceDetails =
@@ -306,6 +309,38 @@ class RegistrationSpec
       val updatedSubscription    = Subscription(rehydratedRegistration, isSubscriptionUpdate = false)
 
       updatedSubscription mustBe existingSubscription
+    }
+
+    "propagate regWithoutId flags through a subscription variation as expected" in {
+      val groupSubscription = ukLimitedCompanySubscription.copy(
+        legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(
+          groupSubscriptionFlag = true,
+          regWithoutIDFlag = Some(true) // Always true for group subscriptions
+        ),
+        groupPartnershipSubscription = Some(groupPartnershipSubscription)
+      )
+
+      groupSubscription.groupPartnershipSubscription.get.groupPartnershipDetails.head.regWithoutIDFlag mustBe Some(
+        false
+      )
+      groupSubscription.groupPartnershipSubscription.get.groupPartnershipDetails(
+        1
+      ).regWithoutIDFlag mustBe Some(true)
+
+      val rehydratedRegistration = Registration(groupSubscription)
+
+      val variationSubscription = Subscription(rehydratedRegistration, isSubscriptionUpdate = true)
+
+      variationSubscription.legalEntityDetails.regWithoutIDFlag mustBe
+        groupSubscription.legalEntityDetails.regWithoutIDFlag
+      variationSubscription.groupPartnershipSubscription.get.groupPartnershipDetails.head.regWithoutIDFlag mustBe
+        groupSubscription.groupPartnershipSubscription.get.groupPartnershipDetails.head.regWithoutIDFlag
+      variationSubscription.groupPartnershipSubscription.get.groupPartnershipDetails(
+        1
+      ).regWithoutIDFlag mustBe
+        groupSubscription.groupPartnershipSubscription.get.groupPartnershipDetails(
+          1
+        ).regWithoutIDFlag
     }
   }
 }

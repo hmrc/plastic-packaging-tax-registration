@@ -300,6 +300,10 @@ object Registration {
         )
       case _ => None
     }
+
+    def isGroupSubscription(subscription: Subscription) =
+      subscription.legalEntityDetails.groupSubscriptionFlag
+
     val organisationDetails = OrganisationDetails(organisationType = Some(organisationType),
                                                   businessRegisteredAddress =
                                                     Some(
@@ -312,7 +316,15 @@ object Registration {
                                                   partnershipDetails = partnershipDetails,
                                                   incorporationDetails = incorporationDetails,
                                                   subscriptionStatus = None,
-                                                  regWithoutIDFlag =
+                                                  regWithoutIDFlag = if (
+                                                    isGroupSubscription(subscription)
+                                                  )
+                                                    subscription.groupPartnershipSubscription.flatMap(
+                                                      _.groupPartnershipDetails.headOption.flatMap(
+                                                        _.regWithoutIDFlag
+                                                      )
+                                                    )
+                                                  else
                                                     subscription.legalEntityDetails.regWithoutIDFlag
     )
     val liabilityDetails = LiabilityDetails(

@@ -116,7 +116,8 @@ object LegalEntityDetails {
                        customerDetails = CustomerDetails(pptOrganisationDetails),
                        groupSubscriptionFlag = isGroup,
                        partnershipSubscriptionFlag = isPartnership,
-                       regWithoutIDFlag = pptOrganisationDetails.regWithoutIDFlag
+                       regWithoutIDFlag =
+                         if (isGroup) Some(true) else pptOrganisationDetails.regWithoutIDFlag
     )
 
 }
