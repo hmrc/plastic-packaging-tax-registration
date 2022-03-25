@@ -16,17 +16,18 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base
 
-import org.mockito.ArgumentMatchers
+import org.mockito.{ArgumentMatcher, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Logger
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{internalId, _}
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrieval, _}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.SignedInUser
 import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService.NonRepudiationIdentityRetrievals
 
@@ -37,22 +38,46 @@ trait AuthTestSupport extends MockitoSugar {
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
   lazy val mockLogger: Logger               = mock[Logger]
 
-  val userInternalId      = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
-  val userGroupIdentifier = "testGroupId-419b91bc-8f97-4b5e-85ef-d58d4cfd4bb8"
-  val userCredentialsId   = "12342370495723"
+  val userInternalId           = "Int-ba17b467-90f3-42b6-9570-73be7b78eb2b"
+  val userGroupIdentifier      = "testGroupId-419b91bc-8f97-4b5e-85ef-d58d4cfd4bb8"
+  val userCredentialsId        = "12342370495723"
+  val userEnrolledPptReference = "XMPPT00000000001"
 
   def withAuthorizedUser(
     user: SignedInUser = newUser(),
     userGroup: Option[String] = Some(userGroupIdentifier),
-    userCredentials: Option[Credentials] = Some(Credentials(userCredentialsId, "GovernmentGateway"))
-  ): Unit =
+    userCredentials: Option[Credentials] = Some(
+      Credentials(userCredentialsId, "GovernmentGateway")
+    ),
+    userPptReference: Option[String] = None
+  ): Unit = {
+
+    def enrolmentWithDelegatedAuth(pptReference: String) =
+      Enrolment(KeyValue.pptServiceName).withIdentifier(KeyValue.etmpPptReferenceKey,
+                                                        pptReference
+      ).withDelegatedAuthRule("ppt-auth")
+
+    def pptEnrollmentMatcherFor(pptReference: String): ArgumentMatcher[Predicate] = {
+      (p: Predicate) =>
+        p == enrolmentWithDelegatedAuth(pptReference) && user.enrolments.getEnrolment(
+          KeyValue.pptServiceName
+        ).isDefined
+    }
+
+    val expectedAuthPredicateMatcher = userPptReference.map { pptReference =>
+      ArgumentMatchers.argThat(pptEnrollmentMatcherFor(pptReference))
+    }.getOrElse {
+      ArgumentMatchers.eq(EmptyPredicate)
+    }
+
     when(
       mockAuthConnector.authorise(
-        any(),
+        expectedAuthPredicateMatcher,
         ArgumentMatchers.eq(internalId and credentials and groupIdentifier)
       )(any(), any())
     )
       .thenReturn(Future.successful(new ~(new ~(user.internalId, userCredentials), userGroup)))
+  }
 
   def withUnauthorizedUser(error: Throwable): Unit =
     when(mockAuthConnector.authorise(any(), any())(any(), any())).thenReturn(Future.failed(error))
@@ -66,6 +91,14 @@ trait AuthTestSupport extends MockitoSugar {
                  Some(AffinityGroup.Organisation),
                  enrolments.getOrElse(Enrolments(Set()))
     )
+
+  def newEnrolledUser(): SignedInUser = {
+    def pptEnrolment(pptEnrolmentId: String) =
+      newEnrolments(
+        newEnrolment(KeyValue.pptServiceName, KeyValue.etmpPptReferenceKey, pptEnrolmentId)
+      )
+    newUser(enrolments = Some(pptEnrolment(userEnrolledPptReference)))
+  }
 
   def newEnrolments(enrolment: Enrolment*): Enrolments =
     Enrolments(enrolment.toSet)

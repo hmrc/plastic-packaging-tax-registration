@@ -16,12 +16,9 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
-import java.time.ZoneOffset.UTC
-import java.time.ZonedDateTime.now
-import java.time.format.DateTimeFormatter
-
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
@@ -40,11 +37,15 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType
 
-trait SubscriptionTestData {
+import java.time.ZoneOffset.UTC
+import java.time.ZonedDateTime.now
+import java.time.format.DateTimeFormatter
+
+trait SubscriptionTestData extends AuthTestSupport {
 
   protected val safeNumber   = "123456"
   protected val idType       = "ZPPT"
-  protected val pptReference = "XMPPT0000000001"
+  protected val pptReference = userEnrolledPptReference
 
   protected val subscriptionStatusResponse_HttpGet: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest("GET", "/subscriptions/status/" + safeNumber)

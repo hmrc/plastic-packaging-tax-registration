@@ -35,11 +35,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   SubscriptionSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.{
-  NOT_SUBSCRIBED,
-  UNKNOWN
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID

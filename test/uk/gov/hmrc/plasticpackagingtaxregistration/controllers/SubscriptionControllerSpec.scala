@@ -236,7 +236,9 @@ class SubscriptionControllerSpec
 
   "Get subscription" should {
     "return expected details" in {
-      withAuthorizedUser()
+      withAuthorizedUser(user = newEnrolledUser(),
+                         userPptReference = Some(userEnrolledPptReference)
+      )
       mockGetSubscription(ukLimitedCompanySubscription)
 
       val result: Future[Result] = route(app, subscriptionResponse_HttpGet).get
@@ -259,7 +261,9 @@ class SubscriptionControllerSpec
 
     "pass through exceptions" when {
       "an exception occurs during the subscription call" in {
-        withAuthorizedUser()
+        withAuthorizedUser(user = newEnrolledUser(),
+                           userPptReference = Some(userEnrolledPptReference)
+        )
         mockGetSubscriptionFailure(new IllegalStateException("BANG!"))
 
         val result: Future[Result] = route(app, subscriptionResponse_HttpGet).get
@@ -284,7 +288,9 @@ class SubscriptionControllerSpec
     "update details" when {
 
       "should decorate updates with change of circumstances details" in {
-        withAuthorizedUser(user = newUser())
+        withAuthorizedUser(user = newEnrolledUser(),
+                           userPptReference = Some(userEnrolledPptReference)
+        )
         val nrSubmissionId = "nrSubmissionId"
         when(
           mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
@@ -394,7 +400,9 @@ class SubscriptionControllerSpec
 
     "return 500" when {
       "EIS/IF subscription call returns an exception" in {
-        withAuthorizedUser()
+        withAuthorizedUser(user = newEnrolledUser(),
+                           userPptReference = Some(userEnrolledPptReference)
+        )
         mockSubscriptionUpdateFailure(new RuntimeException("error"))
         intercept[Exception] {
           val result: Future[Result] =

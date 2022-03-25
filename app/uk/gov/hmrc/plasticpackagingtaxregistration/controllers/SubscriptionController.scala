@@ -73,7 +73,7 @@ class SubscriptionController @Inject() (
     }
 
   def get(pptReference: String): Action[AnyContent] =
-    authenticator.authorisedAction(parse.default) { implicit request =>
+    authenticator.authorisedAction(parse.default, Some(pptReference)) { implicit request =>
       subscriptionsConnector.getSubscription(pptReference).map {
         case Right(response)       => Ok(Registration(response))
         case Left(errorStatusCode) => new Status(errorStatusCode)
@@ -81,7 +81,9 @@ class SubscriptionController @Inject() (
     }
 
   def update(pptReference: String): Action[RegistrationRequest] =
-    authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
+    authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest],
+                                   Some(pptReference)
+    ) {
       implicit request =>
         val updatedRegistration: Registration = request.body.toRegistration(request.registrationId)
         val updatedSubscription: Subscription =
