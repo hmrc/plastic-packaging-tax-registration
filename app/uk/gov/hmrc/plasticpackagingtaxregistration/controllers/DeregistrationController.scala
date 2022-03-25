@@ -29,7 +29,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResp
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.DeregistrationReason.DeregistrationReason
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -72,7 +72,7 @@ class DeregistrationController @Inject() (
                                     deregistrationDetails = Some(
                                       DeregistrationDetails(
                                         deregistrationReason = deregistrationReason.toString,
-                                        deregistrationDate = LocalDate.now().toString,
+                                        deregistrationDate = LocalDate.now(ZoneOffset.UTC).toString,
                                         deregistrationDeclarationBox1 = true
                                       )
                                     )
