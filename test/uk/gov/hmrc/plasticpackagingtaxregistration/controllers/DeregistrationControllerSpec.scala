@@ -25,7 +25,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.DeregistrationReason
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
 class DeregistrationControllerSpec extends ControllerSpec {
@@ -60,7 +60,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
 
       val deregistrationDetails = changeOfCircumstanceDetails.deregistrationDetails.get
       deregistrationDetails.deregistrationReason mustBe DeregistrationReason.CeasedTrading.toString
-      deregistrationDetails.deregistrationDate mustBe LocalDate.now().toString
+      deregistrationDetails.deregistrationDate mustBe LocalDate.now(ZoneOffset.UTC).toString
       deregistrationDetails.deregistrationDeclarationBox1 mustBe true
     }
 
