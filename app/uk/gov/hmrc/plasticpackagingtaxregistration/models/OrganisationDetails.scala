@@ -17,17 +17,8 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json._
-import uk.gov.hmrc.auth.core.InternalError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.Status
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{OrgType, PARTNERSHIP}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
-  LIMITED_LIABILITY_PARTNERSHIP,
-  SCOTTISH_LIMITED_PARTNERSHIP,
-  SCOTTISH_PARTNERSHIP,
-  SOLE_TRADER
-}
-
-import java.io
 
 object OrgType extends Enumeration {
   type OrgType = Value

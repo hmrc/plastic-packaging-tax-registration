@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.actions
 
-import org.scalatest.EitherValues
+import org.mockito.Mockito.reset
+import org.scalatest.{BeforeAndAfterEach, EitherValues}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
@@ -32,7 +33,7 @@ import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 import scala.concurrent.ExecutionContext
 
 class AuthenticatorSpec
-    extends AnyWordSpec with Matchers with MockitoSugar with AuthTestSupport
+    extends AnyWordSpec with Matchers with MockitoSugar with AuthTestSupport with BeforeAndAfterEach
     with DefaultAwaitTimeout with EitherValues {
 
   private val mcc           = stubMessagesControllerComponents()
@@ -40,12 +41,17 @@ class AuthenticatorSpec
   private val request       = FakeRequest()
   private val authenticator = new Authenticator(mockAuthConnector, mcc)(ExecutionContext.global)
 
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockAuthConnector)
+  }
+
   "Authenticator" should {
     "return 401 unauthorised " when {
       "if user is not authorised" in {
         withUnauthorizedUser(InsufficientConfidenceLevel("User not authorised"))
 
-        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier(hc, request))
+        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier()(hc, request))
 
         result.left.value.statusCode mustBe UNAUTHORIZED
       }
@@ -55,7 +61,7 @@ class AuthenticatorSpec
       "when returning the InternalId results in an exception" in {
         withUnauthorizedUser(new Exception("Something went wrong"))
 
-        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier(hc, request))
+        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier()(hc, request))
 
         result.left.value.statusCode mustBe INTERNAL_SERVER_ERROR
       }
@@ -65,14 +71,14 @@ class AuthenticatorSpec
       "user group not available" in {
         withAuthorizedUser(newUser(), userGroup = None)
 
-        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier(hc, request))
+        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier()(hc, request))
 
         result.left.value.statusCode mustBe UNAUTHORIZED
       }
       "user credentials not available" in {
         withAuthorizedUser(newUser(), userCredentials = None)
 
-        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier(hc, request))
+        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier()(hc, request))
 
         result.left.value.statusCode mustBe UNAUTHORIZED
       }
@@ -82,13 +88,29 @@ class AuthenticatorSpec
       "internalId, credentials and group identifier is available" in {
         withAuthorizedUser(newUser())
 
-        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier(hc, request))
+        val result = await(authenticator.authorisedWithInternalIdAndGroupIdentifier()(hc, request))
 
         result.value.registrationId mustBe userInternalId
         result.value.userId mustBe userCredentialsId
         result.value.groupId mustBe userGroupIdentifier
       }
+
+      "has requested ppt enrolment, internalId, credentials and group identifier is available" in {
+        withAuthorizedUser(newEnrolledUser(), userPptReference = Some(userEnrolledPptReference))
+
+        val result = await(
+          authenticator.authorisedWithInternalIdAndGroupIdentifier(pptReference =
+            Some(userEnrolledPptReference)
+          )(hc, request)
+        )
+
+        result.value.registrationId mustBe userInternalId
+        result.value.userId mustBe userCredentialsId
+        result.value.groupId mustBe userGroupIdentifier
+      }
+
     }
+
   }
 
 }

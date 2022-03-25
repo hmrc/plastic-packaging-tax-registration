@@ -21,9 +21,11 @@ import play.api.Logger
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
 
@@ -48,11 +50,11 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
       }
     }
 
-  def authorisedAction[A](
-    bodyParser: BodyParser[A]
-  )(body: AuthorizedRequest[A] => Future[Result]): Action[A] =
+  def authorisedAction[A](bodyParser: BodyParser[A], pptReference: Option[String] = None)(
+    body: AuthorizedRequest[A] => Future[Result]
+  ): Action[A] =
     Action.async(bodyParser) { implicit request =>
-      authorisedWithInternalIdAndGroupIdentifier.flatMap {
+      authorisedWithInternalIdAndGroupIdentifier(pptReference).flatMap {
         case Right(authorisedRequest) =>
           logger.info(s"Authorised request for ${authorisedRequest.registrationId}")
           body(authorisedRequest)
@@ -62,11 +64,19 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
       }
     }
 
-  def authorisedWithInternalIdAndGroupIdentifier[A](implicit
+  def authorisedWithInternalIdAndGroupIdentifier[A](pptReference: Option[String] = None)(implicit
     hc: HeaderCarrier,
     request: Request[A]
-  ): Future[Either[ErrorResponse, AuthorizedRequest[A]]] =
-    authorised().retrieve(internalId and credentials and groupIdentifier) {
+  ): Future[Either[ErrorResponse, AuthorizedRequest[A]]] = {
+
+    val enrolmentPredicate = pptReference.map { pptReference =>
+      Enrolment(KeyValue.pptServiceName).withDelegatedAuthRule("ppt-auth").withIdentifier(
+        KeyValue.etmpPptReferenceKey,
+        pptReference
+      )
+    }.getOrElse(EmptyPredicate)
+
+    authorised(enrolmentPredicate).retrieve(internalId and credentials and groupIdentifier) {
       case Some(internalId) ~ Some(credentials) ~ Some(groupIdentifier) =>
         Future.successful(
           Right(AuthorizedRequest(internalId, credentials.providerId, groupIdentifier, request))
@@ -84,6 +94,7 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
         logger.error(msg)
         Left(ErrorResponse(INTERNAL_SERVER_ERROR, msg))
     }
+  }
 
 }
 
