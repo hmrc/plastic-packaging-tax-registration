@@ -58,6 +58,9 @@ trait SubscriptionTestData {
   protected val subscriptionCreate_HttpPost: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest("POST", "/subscriptions/" + safeNumber)
 
+  protected val subscriptionDelete_HttpDelete: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("DELETE", "/subscriptions/" + pptReference)
+
   protected val etmpSubscriptionStatusResponse: ETMPSubscriptionStatusResponse =
     ETMPSubscriptionStatusResponse(subscriptionStatus =
                                      Some(ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND),
