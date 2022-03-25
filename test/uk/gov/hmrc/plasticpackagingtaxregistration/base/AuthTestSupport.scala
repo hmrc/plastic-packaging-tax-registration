@@ -70,8 +70,6 @@ trait AuthTestSupport extends MockitoSugar {
       ArgumentMatchers.eq(EmptyPredicate)
     }
 
-    println(expectedAuthPredicateMatcher)
-
     when(
       mockAuthConnector.authorise(
         expectedAuthPredicateMatcher,
@@ -99,10 +97,7 @@ trait AuthTestSupport extends MockitoSugar {
       newEnrolments(
         newEnrolment(KeyValue.pptServiceName, KeyValue.etmpPptReferenceKey, pptEnrolmentId)
       )
-
-    val user = newUser(enrolments = Some(pptEnrolment(userEnrolledPptReference)))
-    println("!!!!!!!!E " + user)
-    user
+    newUser(enrolments = Some(pptEnrolment(userEnrolledPptReference)))
   }
 
   def newEnrolments(enrolment: Enrolment*): Enrolments =
