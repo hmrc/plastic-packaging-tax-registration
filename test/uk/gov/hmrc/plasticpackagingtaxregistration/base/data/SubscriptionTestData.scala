@@ -59,8 +59,8 @@ trait SubscriptionTestData extends AuthTestSupport {
   protected val subscriptionCreate_HttpPost: FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest("POST", "/subscriptions/" + safeNumber)
 
-  protected val subscriptionDelete_HttpDelete: FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest("DELETE", "/subscriptions/" + pptReference)
+  protected val subscriptionDeregister_HttpPUT: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("PUT", "/subscriptions/deregister/" + pptReference)
 
   protected val etmpSubscriptionStatusResponse: ETMPSubscriptionStatusResponse =
     ETMPSubscriptionStatusResponse(subscriptionStatus =

@@ -13,7 +13,7 @@ POST        /subscriptions/:safeNumber           uk.gov.hmrc.plasticpackagingtax
 GET         /subscriptions/:pptReference   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.get(pptReference: String)
 PUT         /subscriptions/:pptReference   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.update(pptReference: String)
 
-DELETE      /subscriptions/:pptReference   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.DeregistrationController.deregister(pptReference: String)
+PUT         /subscriptions/deregister/:pptReference   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.DeregistrationController.deregister(pptReference: String)
 
 # User Enrolment
 POST        /enrolment                         uk.gov.hmrc.plasticpackagingtaxregistration.controllers.UserEnrolmentController.enrol()
