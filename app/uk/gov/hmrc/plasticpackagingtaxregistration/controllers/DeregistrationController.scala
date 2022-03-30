@@ -17,8 +17,17 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
 import play.api.Logger
+import play.api.libs.json.Json.toJson
+import play.api.libs.json.Writes
 import play.api.mvc._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
   ChangeOfCircumstanceDetails,
   DeregistrationDetails,
@@ -27,16 +36,20 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.DeregistrationReason.DeregistrationReason
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
+import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class DeregistrationController @Inject() (
   subscriptionsConnector: SubscriptionsConnector,
   authenticator: Authenticator,
+  nonRepudiationService: NonRepudiationService,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
@@ -46,17 +59,45 @@ class DeregistrationController @Inject() (
   def deregister(pptReference: String): Action[DeregistrationReason] =
     authenticator.authorisedAction(authenticator.parsingJson[DeregistrationReason]) {
       implicit request =>
-        val deregistrationReason = request.body
+        val deregistrationReason: DeregistrationReason = request.body
         logger.info(s"Request to deregister $pptReference, reason = $deregistrationReason")
 
         subscriptionsConnector.getSubscription(pptReference).flatMap {
           case Right(subscription) =>
-            subscriptionsConnector.updateSubscription(pptReference,
-                                                      deregisterSubscription(subscription,
-                                                                             deregistrationReason
-                                                      )
-            ).map { _ =>
-              Ok
+            val updatedSubscription = deregisterSubscription(subscription, deregistrationReason)
+            subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
+              case response @ SubscriptionSuccessfulResponse(pptReferenceNumber,
+                                                             _,
+                                                             formBundleNumber
+                  ) =>
+                for {
+                  nrsResponse <- notifyNRS(updatedSubscription, response)
+                } yield Ok(
+                  SubscriptionUpdateWithNrsStatusResponse(
+                    pptReference =
+                      response.pptReferenceNumber,
+                    processingDate = response.processingDate,
+                    formBundleNumber =
+                      response.formBundleNumber,
+                    nrsNotifiedSuccessfully =
+                      nrsResponse.isSuccess,
+                    nrsSubmissionId =
+                      nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
+                    nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None)
+                  )
+                )
+              case SubscriptionFailureResponseWithStatusCode(failedSubscriptionResponse,
+                                                             statusCode
+                  ) =>
+                val firstError: EISError = failedSubscriptionResponse.failures.head
+                logPayload(
+                  s"PPT Subscription deregistration failed for pptReference $pptReference ",
+                  failedSubscriptionResponse
+                )
+                logger.warn(
+                  s"Failed PPT update deregistration for pptReference $pptReference - ${firstError.reason}"
+                )
+                Future.successful(Status(statusCode)(failedSubscriptionResponse))
             }
           case Left(errorCode) => Future.successful(new Status(errorCode))
         }
@@ -79,5 +120,37 @@ class DeregistrationController @Inject() (
         )
       )
     )
+
+  private def notifyNRS(
+    subscription: Subscription,
+    subscriptionResponse: SubscriptionSuccessfulResponse
+  )(implicit hc: HeaderCarrier): Future[Try[NonRepudiationSubmissionAccepted]] =
+    nonRepudiationService.submitNonRepudiation(payloadString = toJson(subscription).toString,
+                                               submissionTimestamp =
+                                                 subscriptionResponse.processingDate,
+                                               pptReference =
+                                                 subscriptionResponse.pptReferenceNumber,
+                                               userHeaders =
+                                                 Map.empty
+    )
+      .map {
+        resp =>
+          logger.info(
+            s"Successful NRS submission for PPT Reference [${subscriptionResponse.pptReferenceNumber}]"
+          )
+          Success(resp)
+      }
+      .recover {
+        case e =>
+          logger.warn(
+            s"Failed NRS submission for PPT Reference [${subscriptionResponse.pptReferenceNumber}] - ${e.getMessage}"
+          )
+          Failure(e)
+      }
+
+  private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
+    logger.debug(s"$prefix payload: ${toJson(payload)}")
+    payload
+  }
 
 }
