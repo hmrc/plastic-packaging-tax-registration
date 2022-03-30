@@ -48,7 +48,7 @@ class DeregistrationReasonSpec extends AnyWordSpec {
       "key is absent" when {
         "accessing deregistration reason" in {
           intercept[IllegalStateException] {
-            DeregistrationReason.apply("Below de-minimus")
+            DeregistrationReason.apply("XXX")
           }
         }
       }

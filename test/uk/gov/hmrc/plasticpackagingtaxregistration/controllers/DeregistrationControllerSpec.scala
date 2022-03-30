@@ -91,7 +91,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
       deregistrationDetails.deregistrationDeclarationBox1 mustBe true
     }
 
-    "EIS/IF subscription is successful" when {
+    "return expected deregistration response " when {
       " NRS submission is successful" in {
         val nrSubmissionId = "nrSubmissionId"
         withAuthorizedUser(user = newUser())
