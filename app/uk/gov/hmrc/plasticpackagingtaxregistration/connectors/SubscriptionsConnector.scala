@@ -104,9 +104,6 @@ class SubscriptionsConnector @Inject() (
         (appConfig.subscriptionCreateWithoutSafeIdUrl(), s"$msgCommon no safeId")
       else (appConfig.subscriptionCreateUrl(safeNumber), s"$msgCommon safeId [$safeNumber]")
 
-    logger.info("\n\n*******\n")
-    logger.info(Json.toJson(subscription).toString)
-
     httpClient.POST[Subscription, HttpResponse](url = createUrl,
                                                 body = subscription,
                                                 headers = headers :+ correlationIdHeader
