@@ -359,7 +359,7 @@ trait RegistrationTestData {
   )
 
   protected val pptLiabilityDetails: LiabilityDetails = LiabilityDetails(
-    weight = Some(LiabilityWeight(Some(10000))),
+    expectedWeightNext12m = Some(LiabilityWeight(Some(10000))),
     startDate = Some(OldDate(day = Some(6), month = Some(4), year = Some(2022)))
   )
 
@@ -394,7 +394,7 @@ trait RegistrationTestData {
 
   protected val pptLiabilityDetailsWithExpectedWeight: LiabilityDetails = LiabilityDetails(
     weight = None,
-    expectedWeight = Some(LiabilityExpectedWeight(Some(true), Some(20000))),
+    expectedWeightNext12m = Some(LiabilityWeight(Some(20000))),
     startDate = Some(OldDate(day = Some(6), month = Some(4), year = Some(2022)))
   )
 

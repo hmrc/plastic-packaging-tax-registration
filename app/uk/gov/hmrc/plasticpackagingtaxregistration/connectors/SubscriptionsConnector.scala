@@ -21,20 +21,13 @@ import com.kenshoo.play.metrics.Metrics
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.Json._
+import play.libs.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
-  SubscriptionFailureResponse,
-  SubscriptionFailureResponseWithStatusCode,
-  SubscriptionResponse,
-  SubscriptionSuccessfulResponse
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
-  ETMPSubscriptionStatusResponse,
-  SubscriptionStatusResponse
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
@@ -102,6 +95,9 @@ class SubscriptionsConnector @Inject() (
       if (subscription.legalEntityDetails.groupSubscriptionFlag)
         (appConfig.subscriptionCreateWithoutSafeIdUrl(), s"$msgCommon no safeId")
       else (appConfig.subscriptionCreateUrl(safeNumber), s"$msgCommon safeId [$safeNumber]")
+
+    logger.info("\n\n*******\n")
+    logger.info(Json.toJson(subscription).toString)
 
     httpClient.POST[Subscription, HttpResponse](url = createUrl,
                                                 body = subscription,

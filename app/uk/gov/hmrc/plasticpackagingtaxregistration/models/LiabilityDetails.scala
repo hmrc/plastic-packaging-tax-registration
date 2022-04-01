@@ -71,9 +71,15 @@ case class LiabilityDetails(
   isLiable: Option[Boolean] = None
 ) {
 
-  def liabilityWeight: Option[Long] =
-    expectedWeight.flatMap(_.totalKg).orElse(weight.flatMap(_.totalKg))
-
+  def liabilityWeight: Long = {
+    expectedWeightNext12m match {
+      case Some(x) => x.totalKg match {
+        case Some(y) => y
+        case _ => throw new IllegalStateException("Missing expectedWeightNext12m.totalKg field")
+      }
+      case _ => throw new IllegalStateException("Missing expectedWeightNext12m field")
+    }
+  }
 }
 
 object LiabilityDetails {
