@@ -20,7 +20,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.Partner
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{LiabilityWeight, Partner}
 
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter
 class SubscriptionSpec
     extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
   "Subscription" should {
+
     "build successfully" when {
       "UK Limited Company" in {
         val subscription = Subscription(
@@ -41,15 +42,19 @@ class SubscriptionSpec
         assertCommonDetails(subscription, Some(10000))
         mustHaveValidIncorporationLegalEntityDetails(subscription)
       }
-      "UK Limited Company with no liability weight" in {
+      "UK Limited Company with minimum of 1kg" in {
         val subscription =
           Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
                                      withPrimaryContactDetails(pptPrimaryContactDetails),
-                                     withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
+                                     withLiabilityDetails(
+                                       pptLiabilityDetails.copy(expectedWeightNext12m =
+                                         Some(LiabilityWeight(Some(1)))
+                                       )
+                                     )
                        ),
                        isSubscriptionUpdate = false
           )
-        assertCommonDetails(subscription, None)
+        assertCommonDetails(subscription, Some(1))
         mustHaveValidIncorporationLegalEntityDetails(subscription)
       }
       "Group" in {
@@ -136,6 +141,35 @@ class SubscriptionSpec
           )
         }
       }
+
+      "the expectedWeightNext12m field is None" in {
+        intercept[Exception] {
+          Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                                     withPrimaryContactDetails(pptPrimaryContactDetails),
+                                     withLiabilityDetails(
+                                       pptLiabilityDetails.copy(expectedWeightNext12m = None)
+                                     )
+                       ),
+                       isSubscriptionUpdate = false
+          )
+        }
+      }
+
+      "the expectedWeightNext12m.totalKg field is None" in {
+        intercept[Exception] {
+          Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                                     withPrimaryContactDetails(pptPrimaryContactDetails),
+                                     withLiabilityDetails(
+                                       pptLiabilityDetails.copy(expectedWeightNext12m =
+                                         Some(LiabilityWeight(None))
+                                       )
+                                     )
+                       ),
+                       isSubscriptionUpdate = false
+          )
+        }
+      }
+
     }
   }
 

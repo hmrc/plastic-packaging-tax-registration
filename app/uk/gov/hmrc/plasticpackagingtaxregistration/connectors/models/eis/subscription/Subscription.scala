@@ -69,7 +69,7 @@ object Subscription {
                  declaration = Declaration(true),
                  taxObligationStartDate = registration.liabilityDetails.startDate,
                  last12MonthTotalTonnageAmt =
-                   registration.liabilityDetails.liabilityWeight.getOrElse(0),
+                   registration.liabilityDetails.liabilityWeight,
                  groupPartnershipSubscription =
                    GroupPartnershipSubscription(registration, isSubscriptionUpdate)
     )
