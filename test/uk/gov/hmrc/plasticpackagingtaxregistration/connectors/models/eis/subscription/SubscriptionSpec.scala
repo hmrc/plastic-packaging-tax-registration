@@ -46,7 +46,11 @@ class SubscriptionSpec
         val subscription =
           Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
                                      withPrimaryContactDetails(pptPrimaryContactDetails),
-                                     withLiabilityDetails(pptLiabilityDetails.copy(expectedWeightNext12m = Some(LiabilityWeight(Some(1)))))
+                                     withLiabilityDetails(
+                                       pptLiabilityDetails.copy(expectedWeightNext12m =
+                                         Some(LiabilityWeight(Some(1)))
+                                       )
+                                     )
                        ),
                        isSubscriptionUpdate = false
           )
@@ -141,12 +145,12 @@ class SubscriptionSpec
       "the expectedWeightNext12m field is None" in {
         intercept[Exception] {
           Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
-            withPrimaryContactDetails(pptPrimaryContactDetails),
-            withLiabilityDetails(
-              pptLiabilityDetails.copy(expectedWeightNext12m = None)
-            )
-          ),
-            isSubscriptionUpdate = false
+                                     withPrimaryContactDetails(pptPrimaryContactDetails),
+                                     withLiabilityDetails(
+                                       pptLiabilityDetails.copy(expectedWeightNext12m = None)
+                                     )
+                       ),
+                       isSubscriptionUpdate = false
           )
         }
       }
@@ -154,12 +158,14 @@ class SubscriptionSpec
       "the expectedWeightNext12m.totalKg field is None" in {
         intercept[Exception] {
           Subscription(aRegistration(withOrganisationDetails(pptIncorporationDetails),
-            withPrimaryContactDetails(pptPrimaryContactDetails),
-            withLiabilityDetails(
-              pptLiabilityDetails.copy(expectedWeightNext12m = Some(LiabilityWeight(None)))
-            )
-          ),
-            isSubscriptionUpdate = false
+                                     withPrimaryContactDetails(pptPrimaryContactDetails),
+                                     withLiabilityDetails(
+                                       pptLiabilityDetails.copy(expectedWeightNext12m =
+                                         Some(LiabilityWeight(None))
+                                       )
+                                     )
+                       ),
+                       isSubscriptionUpdate = false
           )
         }
       }
