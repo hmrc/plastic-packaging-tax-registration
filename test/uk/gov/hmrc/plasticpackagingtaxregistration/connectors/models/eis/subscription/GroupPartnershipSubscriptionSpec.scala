@@ -20,11 +20,8 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{
-  GroupPartnershipDetails,
-  GroupPartnershipSubscription
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{GroupDetail, Partner, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{GroupPartnershipDetails, GroupPartnershipSubscription}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{GroupDetail, Partner, PostCodeCleaner, Registration}
 
 class GroupPartnershipSubscriptionSpec
     extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
@@ -262,7 +259,7 @@ class GroupPartnershipSubscriptionSpec
     representative.addressDetails.addressLine2 mustBe "Some Place"
     representative.addressDetails.addressLine3 mustBe Some("Some Area")
     representative.addressDetails.addressLine4 mustBe Some("Leeds")
-    representative.addressDetails.postalCode mustBe Some("LS1 1AA")
+    representative.addressDetails.postalCode mustBe Some(PostCodeCleaner("LS11AA"))
     representative.addressDetails.countryCode mustBe "GB"
 
     representative.contactDetails.email mustBe "some@test"
@@ -287,7 +284,7 @@ class GroupPartnershipSubscriptionSpec
     member.addressDetails.addressLine2 mustBe "Line 2"
     member.addressDetails.addressLine3 mustBe Some("Line 3")
     member.addressDetails.addressLine4 mustBe Some("Line 4")
-    member.addressDetails.postalCode mustBe Some("postcode")
+    member.addressDetails.postalCode mustBe Some(PostCodeCleaner("postcode"))
     member.addressDetails.countryCode mustBe "GB"
 
     member.contactDetails.email mustBe "some@test"

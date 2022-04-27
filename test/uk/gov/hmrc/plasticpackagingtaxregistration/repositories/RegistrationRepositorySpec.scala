@@ -33,11 +33,14 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.implicitConversions
 
 class RegistrationRepositorySpec
     extends AnyWordSpec with DefaultPlayMongoRepositorySupport[Registration] with Matchers
     with ScalaFutures with DefaultAwaitTimeout with BeforeAndAfterEach with MockitoSugar
     with RegistrationBuilder {
+
+  implicit def toPostcode(value: String): PostCodeCleaner = PostCodeCleaner(value)
 
   private val injector = {
     SharedMetricRegistries.clear()

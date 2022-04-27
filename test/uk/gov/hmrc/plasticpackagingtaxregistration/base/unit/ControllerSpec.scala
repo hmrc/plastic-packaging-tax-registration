@@ -29,17 +29,9 @@ import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  NrsTestData,
-  RegistrationTestData,
-  SubscriptionTestData
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
-  EnrolmentStoreProxyConnector,
-  NonRepudiationConnector,
-  SubscriptionsConnector,
-  TaxEnrolmentsConnector
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{NrsTestData, RegistrationTestData, SubscriptionTestData}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{EnrolmentStoreProxyConnector, NonRepudiationConnector, SubscriptionsConnector, TaxEnrolmentsConnector}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PostCodeCleaner
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
 
@@ -51,6 +43,7 @@ trait ControllerSpec
     with RegistrationTestData with SubscriptionTestData with NrsTestData {
 
   SharedMetricRegistries.clear()
+  override implicit def toPostcode(value: String): PostCodeCleaner = PostCodeCleaner(value)
   protected implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   protected implicit val hc: HeaderCarrier =

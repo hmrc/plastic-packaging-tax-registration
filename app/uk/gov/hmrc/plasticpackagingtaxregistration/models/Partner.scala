@@ -73,7 +73,7 @@ case class Partner(
 
   lazy val customerIdentification2: Option[String] =
     extractData(soleTraderDetails => soleTraderDetails.sautr,
-                partnershipDetails => partnershipDetails.partnershipBusinessDetails.map(_.postcode),
+                partnershipDetails => partnershipDetails.partnershipBusinessDetails.map(_.postcode.postcode),
                 incorpDetails => Some(incorpDetails.ctutr)
     )
 

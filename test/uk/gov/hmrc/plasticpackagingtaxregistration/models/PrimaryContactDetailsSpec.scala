@@ -18,10 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
 
 class PrimaryContactDetailsSpec extends AnyWordSpec with Matchers with SubscriptionTestData {
 

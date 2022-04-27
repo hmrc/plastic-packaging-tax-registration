@@ -18,7 +18,6 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 
 class DeregistrationReasonSpec extends AnyWordSpec {
 

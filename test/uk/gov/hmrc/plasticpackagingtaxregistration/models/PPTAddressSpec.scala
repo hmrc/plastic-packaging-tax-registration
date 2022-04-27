@@ -18,12 +18,13 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  AddressDetails,
-  BusinessCorrespondenceDetails
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{AddressDetails, BusinessCorrespondenceDetails}
+
+import scala.language.implicitConversions
 
 class PPTAddressSpec extends AnyWordSpec {
+
+  implicit def toPostcode(value: String): PostCodeCleaner = PostCodeCleaner(value)
 
   "PPTAddress" should {
 

@@ -27,7 +27,7 @@ case class PPTAddress(
   addressLine2: Option[String] = None,
   addressLine3: Option[String] = None,
   townOrCity: String,
-  postCode: Option[String],
+  postCode: Option[PostCodeCleaner],
   countryCode: String = "GB"
 ) {
 
@@ -65,7 +65,7 @@ object PPTAddress {
     PPTAddress(lines, addressDetail.postalCode, addressDetail.countryCode)
   }
 
-  private def apply(lines: Seq[String], postCode: Option[String], countryCode: String): PPTAddress =
+  private def apply(lines: Seq[String], postCode: Option[PostCodeCleaner], countryCode: String): PPTAddress =
     PPTAddress(addressLine1 = lines.head,
                addressLine2 =
                  if (lines.size > 2) lines.lift(1) else None,

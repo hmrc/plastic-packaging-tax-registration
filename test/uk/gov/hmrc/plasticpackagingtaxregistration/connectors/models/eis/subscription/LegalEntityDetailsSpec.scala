@@ -81,7 +81,7 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
 
         legalEntityDetails.customerIdentification1 mustBe pptGeneralPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.sautr
         legalEntityDetails.customerIdentification2 mustBe Some(
-          pptGeneralPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.postcode
+          pptGeneralPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.postcode.postcode
         )
 
         legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
@@ -102,7 +102,7 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
 
         legalEntityDetails.customerIdentification1 mustBe pptScottishPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.sautr
         legalEntityDetails.customerIdentification2 mustBe Some(
-          pptScottishPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.postcode
+          pptScottishPartnershipDetails.partnershipDetails.get.partnershipBusinessDetails.get.postcode.postcode
         )
 
         legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation

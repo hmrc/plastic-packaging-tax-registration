@@ -240,7 +240,7 @@ object Registration {
               PartnerPartnershipDetails(
                 partnershipName = Some(subscriptionPartner.organisationDetails.organisationName),
                 partnershipBusinessDetails = Some(
-                  PartnershipBusinessDetails(postcode = customerIdentification2,
+                  PartnershipBusinessDetails(postcode = PostCodeCleaner(customerIdentification2),
                                              sautr = customerIdentification1,
                                              companyProfile = Some(
                                                CompanyProfile(
@@ -288,9 +288,9 @@ object Registration {
                                PartnershipBusinessDetails(
                                  sautr = subscription.legalEntityDetails.customerIdentification1,
                                  postcode =
-                                   subscription.legalEntityDetails.customerIdentification2.getOrElse(
+                                   PostCodeCleaner(subscription.legalEntityDetails.customerIdentification2.getOrElse(
                                      illegalState("Missing partnership postcode")
-                                   ),
+                                   )),
                                  registration = None,
                                  companyProfile = None
                                )

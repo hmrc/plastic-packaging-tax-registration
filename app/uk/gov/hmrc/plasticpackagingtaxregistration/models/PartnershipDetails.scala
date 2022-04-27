@@ -36,7 +36,7 @@ case class PartnershipDetails(
     val companyNumber: Option[String] = partnershipBusinessDetails.flatMap(_.companyNumber)
     companyNumber match {
       case Some(companyNumber) => Some(companyNumber)
-      case _                   => partnershipBusinessDetails.map(_.postcode)
+      case _                   => partnershipBusinessDetails.map(_.postcode.postcode)
     }
   }
 
@@ -58,7 +58,7 @@ object CompanyProfile {
 
 case class PartnershipBusinessDetails(
   sautr: String,
-  postcode: String,
+  postcode: PostCodeCleaner,
   companyProfile: Option[CompanyProfile],
   override val registration: Option[RegistrationDetails]
 ) extends HasRegistrationDetails {
