@@ -37,13 +37,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   SubscriptionFailureResponse,
   SubscriptionFailureResponseWithStatusCode
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.partnerTypesWhichRepresentPartnerships
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  MetaData,
-  Registration,
-  RegistrationRequest
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -122,6 +120,48 @@ class SubscriptionControllerSpec
                                        ),
                                        withUserHeaders(pptUserHeaders)
     )
+
+    "EIS receive subscription with clean postcode" when {
+      "create a subscription for a partnership" in {
+        val regRequest =
+          aRegistrationRequest(withOrganisationDetailsRequest(pptGeneralPartnershipDetails),
+                               withPrimaryContactDetailsRequest(pptPrimaryContactDetails),
+                               withLiabilityDetailsRequest(pptLiabilityDetails)
+          )
+
+        withAuthorizedUser(user = newUser())
+        mockGetSubscriptionCreate(subscriptionSuccessfulResponse)
+        when(
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+        ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted("nrSubmissionId")))
+        mockEnrolmentSuccess()
+
+        await(route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(regRequest))).get)
+
+        assertSubscriptionResults(verifyAndCaptureSubscription, assertPartners)
+      }
+
+      "create a subscription for a group" in {
+
+        val regRequest =
+          aRegistrationRequest(withOrganisationDetailsRequest(pptGeneralPartnershipDetails),
+                               withPrimaryContactDetailsRequest(pptPrimaryContactDetails),
+                               withLiabilityDetailsRequest(pptLiabilityDetails),
+                               withGroupDetailsRequest(groupDetail)
+          )
+
+        withAuthorizedUser(user = newUser())
+        mockGetSubscriptionCreate(subscriptionSuccessfulResponse)
+        when(
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+        ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted("nrSubmissionId")))
+        mockEnrolmentSuccess()
+
+        await(route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(regRequest))).get)
+
+        assertSubscriptionResults(verifyAndCaptureSubscription, assertPartnershipMembers)
+      }
+    }
 
     "return expected details" when {
       "EIS/IF subscription is successful" when {
@@ -235,6 +275,7 @@ class SubscriptionControllerSpec
   }
 
   "Get subscription" should {
+
     "return expected details" in {
       withAuthorizedUser(user = newEnrolledUser(),
                          userPptReference = Some(userEnrolledPptReference)
@@ -471,6 +512,49 @@ class SubscriptionControllerSpec
       ArgumentMatchers.eq(subscriptionSuccessfulResponse.pptReferenceNumber),
       ArgumentMatchers.eq(pptUserHeaders)
     )(any[HeaderCarrier])
+  }
+
+  private def verifyAndCaptureSubscription: Subscription = {
+    val captor: ArgumentCaptor[Subscription] = ArgumentCaptor.forClass(classOf[Subscription])
+
+    verify(mockSubscriptionsConnector)
+      .submitSubscription(any(), captor.capture())(any())
+
+    captor.getValue
+  }
+
+  private def assertSubscriptionResults(
+    subscription: Subscription,
+    assertF: (Subscription) => Unit
+  ): Unit = {
+    subscription.legalEntityDetails.customerIdentification2 mustBe Some("AA11AA")
+    subscription.principalPlaceOfBusinessDetails.addressDetails.postalCode.get.postcode mustBe "LS11AA"
+    subscription.businessCorrespondenceDetails.postalCode.get.postcode mustBe "LS11HS"
+
+    assertF(subscription)
+  }
+
+  private def assertPartners(subscription: Subscription) = {
+    val partners: Seq[GroupPartnershipDetails] =
+      subscription.groupPartnershipSubscription.get.groupPartnershipDetails
+        .filter { o =>
+          partnerTypesWhichRepresentPartnerships.contains(
+            PartnerTypeEnum.withName(o.organisationDetails.organisationType.get)
+          )
+        }
+
+    partners(0).customerIdentification2 mustBe Some("LS11AA")
+    partners(1).addressDetails.postalCode.get.postcode mustBe "HD22JD"
+  }
+
+  private def assertPartnershipMembers(actual: Subscription): Unit = {
+    val partners: Seq[GroupPartnershipDetails] =
+      actual.groupPartnershipSubscription.get.groupPartnershipDetails
+        .filter { o =>
+          OrgType.PARTNERSHIP.equals(OrgType.withName(o.organisationDetails.organisationType.get))
+        }
+
+    partners(0).customerIdentification2 mustBe Some("AA11AA")
   }
 
 }

@@ -19,7 +19,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, PostCodeCleaner}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, PostCodeWithoutSpaces}
 
 import scala.language.implicitConversions
 
@@ -38,7 +38,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
         addressDetails.addressLine2 mustBe "Town"
         addressDetails.addressLine3 mustBe None
         addressDetails.addressLine4 mustBe None
-        addressDetails.postalCode mustBe Some(PostCodeCleaner("PostCode"))
+        addressDetails.postalCode mustBe Some(PostCodeWithoutSpaces("PostCode"))
       }
 
       "only 'addressLine1', 'addressLine2', 'townOrCity' and 'PostCode' are available" in {
@@ -53,7 +53,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
         addressDetails.addressLine2 mustBe "addressLine2"
         addressDetails.addressLine3 mustBe Some("Town")
         addressDetails.addressLine4 mustBe None
-        addressDetails.postalCode mustBe Some(PostCodeCleaner("PostCode"))
+        addressDetails.postalCode mustBe Some(PostCodeWithoutSpaces("PostCode"))
       }
 
       "all  PPT address fields are available" in {
@@ -62,14 +62,14 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
                      addressLine2 = Some("addressLine2"),
                      addressLine3 = Some("addressLine3"),
                      townOrCity = "Town",
-                     postCode = Some(PostCodeCleaner("PostCode"))
+                     postCode = Some(PostCodeWithoutSpaces("PostCode"))
           )
         val addressDetails = AddressDetails(pptAddress)
         addressDetails.addressLine1 mustBe "addressLine1"
         addressDetails.addressLine2 mustBe "addressLine2"
         addressDetails.addressLine3 mustBe Some("addressLine3")
         addressDetails.addressLine4 mustBe Some("Town")
-        addressDetails.postalCode mustBe Some(PostCodeCleaner("PostCode"))
+        addressDetails.postalCode mustBe Some(PostCodeWithoutSpaces("PostCode"))
       }
     }
 

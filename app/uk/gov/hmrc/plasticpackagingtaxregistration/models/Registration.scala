@@ -240,17 +240,17 @@ object Registration {
               PartnerPartnershipDetails(
                 partnershipName = Some(subscriptionPartner.organisationDetails.organisationName),
                 partnershipBusinessDetails = Some(
-                  PartnershipBusinessDetails(postcode = PostCodeCleaner(customerIdentification2),
-                                             sautr = customerIdentification1,
-                                             companyProfile = Some(
-                                               CompanyProfile(
-                                                 companyNumber = customerIdentification2,
-                                                 companyName =
-                                                   subscriptionPartner.organisationDetails.organisationName,
-                                                 companyAddress = IncorporationAddressDetails()
-                                               )
-                                             ),
-                                             registration = None
+                  PartnershipBusinessDetails(
+                    postcode = PostCodeWithoutSpaces(customerIdentification2),
+                    sautr = customerIdentification1,
+                    companyProfile = Some(
+                      CompanyProfile(companyNumber = customerIdentification2,
+                                     companyName =
+                                       subscriptionPartner.organisationDetails.organisationName,
+                                     companyAddress = IncorporationAddressDetails()
+                      )
+                    ),
+                    registration = None
                   )
                 )
               )
@@ -288,9 +288,11 @@ object Registration {
                                PartnershipBusinessDetails(
                                  sautr = subscription.legalEntityDetails.customerIdentification1,
                                  postcode =
-                                   PostCodeCleaner(subscription.legalEntityDetails.customerIdentification2.getOrElse(
-                                     illegalState("Missing partnership postcode")
-                                   )),
+                                   PostCodeWithoutSpaces(
+                                     subscription.legalEntityDetails.customerIdentification2.getOrElse(
+                                       illegalState("Missing partnership postcode")
+                                     )
+                                   ),
                                  registration = None,
                                  companyProfile = None
                                )

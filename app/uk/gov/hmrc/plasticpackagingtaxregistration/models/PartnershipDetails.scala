@@ -58,7 +58,7 @@ object CompanyProfile {
 
 case class PartnershipBusinessDetails(
   sautr: String,
-  postcode: PostCodeCleaner,
+  postcode: PostCodeWithoutSpaces,
   companyProfile: Option[CompanyProfile],
   override val registration: Option[RegistrationDetails]
 ) extends HasRegistrationDetails {

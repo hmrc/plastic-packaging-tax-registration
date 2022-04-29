@@ -21,13 +21,28 @@ import org.mockito.Mockito.{verify, when}
 import org.mockito.{ArgumentCaptor, ArgumentMatchers, Mockito}
 import play.api.libs.json.Json.toJson
 import play.api.mvc.Result
-import play.api.test.Helpers.{OK, SERVICE_UNAVAILABLE, await, contentAsJson, route, status, writeableOf_AnyContentAsJson}
+import play.api.test.Helpers.{
+  await,
+  contentAsJson,
+  route,
+  status,
+  writeableOf_AnyContentAsJson,
+  OK,
+  SERVICE_UNAVAILABLE
+}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{ChangeOfCircumstanceDetails, DeregistrationDetails, Subscription}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstanceDetails,
+  DeregistrationDetails,
+  Subscription
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.DeregistrationReason
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
 

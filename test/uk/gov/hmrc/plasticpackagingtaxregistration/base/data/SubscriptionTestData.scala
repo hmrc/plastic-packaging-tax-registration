@@ -21,11 +21,21 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionSuccessfulResponse}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{GroupPartnershipDetails, GroupPartnershipSubscription}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponse,
+  SubscriptionSuccessfulResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{
+  GroupPartnershipDetails,
+  GroupPartnershipSubscription
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{ETMPSubscriptionStatus, ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, PostCodeCleaner}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
+  ETMPSubscriptionStatus,
+  ETMPSubscriptionStatusResponse,
+  SubscriptionStatusResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, PostCodeWithoutSpaces}
 
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
@@ -34,7 +44,7 @@ import scala.language.implicitConversions
 
 trait SubscriptionTestData extends AuthTestSupport {
 
-  implicit def toPostcode(value: String): PostCodeCleaner = PostCodeCleaner(value)
+  implicit def toPostcode(value: String): PostCodeWithoutSpaces = PostCodeWithoutSpaces(value)
 
   protected val safeNumber   = "123456"
   protected val idType       = "ZPPT"

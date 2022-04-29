@@ -19,31 +19,33 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsString, Json}
 
-class PostCodeSpaceTrimmerSpec extends PlaySpec {
+class PostCodeWithoutSpacesSpec extends PlaySpec {
 
   "apply" should {
     "return postcode without space " in {
-      PostCodeCleaner("GH76HJ").postcode mustBe "GH76HJ"
+      PostCodeWithoutSpaces("GH76HJ").postcode mustBe "GH76HJ"
     }
 
     "remove spaces from a postcode" in {
-      PostCodeCleaner("GH7  6HJ").postcode mustBe "GH76HJ"
+      PostCodeWithoutSpaces("GH7  6HJ").postcode mustBe "GH76HJ"
     }
 
     "trim white spaces" in {
-      PostCodeCleaner(" GH7  6HJ ").postcode mustBe "GH76HJ"
+      PostCodeWithoutSpaces(" GH7  6HJ ").postcode mustBe "GH76HJ"
     }
   }
 
   "jsonWrite" should {
     "return postcode as json string" in {
-      Json.toJson(PostCodeCleaner("GH76HJ")) mustBe JsString("GH76HJ")
+      Json.toJson(PostCodeWithoutSpaces("GH76HJ")) mustBe JsString("GH76HJ")
     }
   }
 
   "jsonReads" should {
     "read postcode as string" in {
-      Json.parse(JsString("GH76HJ").toString()).as[PostCodeCleaner] mustBe PostCodeCleaner("GH76HJ")
+      Json.parse(JsString("GH76HJ").toString()).as[
+        PostCodeWithoutSpaces
+      ] mustBe PostCodeWithoutSpaces("GH76HJ")
     }
   }
 }

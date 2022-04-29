@@ -16,15 +16,23 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{GENERAL_PARTNERSHIP, LIMITED_LIABILITY_PARTNERSHIP, SCOTTISH_PARTNERSHIP}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
+  GENERAL_PARTNERSHIP,
+  LIMITED_LIABILITY_PARTNERSHIP,
+  SCOTTISH_PARTNERSHIP
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupOrganisationDetails}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  GroupMember,
+  GroupMemberContactDetails,
+  OrganisationDetails => GroupOrganisationDetails
+}
 
 import scala.language.implicitConversions
 
 trait RegistrationTestData {
 
-  implicit def toPostcode(value: String): PostCodeCleaner = PostCodeCleaner(value)
+  implicit def toPostcode(value: String): PostCodeWithoutSpaces = PostCodeWithoutSpaces(value)
 
   protected val pptBusinessAddress: PPTAddress =
     PPTAddress(addressLine1 = "1 Some Street",
@@ -363,7 +371,7 @@ trait RegistrationTestData {
                                                              addressLine2 = Some("Line 2"),
                                                              addressLine3 = Some("Line 3"),
                                                              townOrCity = "Line 4",
-                                                             Some("postcode"),
+                                                             Some("post code"),
                                                              "GB"
   )
 

@@ -36,7 +36,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{CREATED, UNAUTHORIZED, contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{RegistrationBuilder, RegistrationRequestBuilder}
+import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
+  RegistrationBuilder,
+  RegistrationRequestBuilder
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 
@@ -48,7 +51,7 @@ class RegistrationControllerSpec
     with ScalaFutures with Matchers with RegistrationBuilder with RegistrationRequestBuilder {
 
   SharedMetricRegistries.clear()
-  implicit def toPostcode(value: String): PostCodeCleaner = PostCodeCleaner(value)
+  implicit def toPostcode(value: String): PostCodeWithoutSpaces = PostCodeWithoutSpaces(value)
 
   override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[AuthConnector].to(mockAuthConnector),

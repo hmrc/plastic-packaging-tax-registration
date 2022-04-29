@@ -17,15 +17,15 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, PostCodeCleaner}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, PostCodeWithoutSpaces}
 
 case class AddressDetails(
-                           addressLine1: String,
-                           addressLine2: String,
-                           addressLine3: Option[String] = None,
-                           addressLine4: Option[String] = None,
-                           postalCode: Option[PostCodeCleaner] = None,
-                           countryCode: String
+  addressLine1: String,
+  addressLine2: String,
+  addressLine3: Option[String] = None,
+  addressLine4: Option[String] = None,
+  postalCode: Option[PostCodeWithoutSpaces] = None,
+  countryCode: String
 )
 
 object AddressDetails {

@@ -40,7 +40,7 @@ class RegistrationRepositorySpec
     with ScalaFutures with DefaultAwaitTimeout with BeforeAndAfterEach with MockitoSugar
     with RegistrationBuilder {
 
-  implicit def toPostcode(value: String): PostCodeCleaner = PostCodeCleaner(value)
+  implicit def toPostcode(value: String): PostCodeWithoutSpaces = PostCodeWithoutSpaces(value)
 
   private val injector = {
     SharedMetricRegistries.clear()

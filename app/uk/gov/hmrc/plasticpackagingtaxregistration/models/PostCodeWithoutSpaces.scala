@@ -18,17 +18,18 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import play.api.libs.json.{JsPath, JsString, JsValue, Reads, Writes}
 
-final case class PostCodeCleaner private(postcode: String)
+final case class PostCodeWithoutSpaces private (postcode: String)
 
-object PostCodeCleaner {
+object PostCodeWithoutSpaces {
+
   def apply(postcode: String) =
-    new PostCodeCleaner(postcode.replaceAll(" ", ""))
+    new PostCodeWithoutSpaces(postcode.replaceAll(" ", ""))
 
-  implicit val jsonWrites: Writes[PostCodeCleaner] = new Writes[PostCodeCleaner] {
-    def writes(self: PostCodeCleaner): JsValue = JsString(self.postcode)
+  implicit val jsonWrites: Writes[PostCodeWithoutSpaces] = new Writes[PostCodeWithoutSpaces] {
+    def writes(self: PostCodeWithoutSpaces): JsValue = JsString(self.postcode)
   }
 
-  implicit val jsonReads: Reads[PostCodeCleaner] =
-    (JsPath).read[String].map(PostCodeCleaner.apply)
+  implicit val jsonReads: Reads[PostCodeWithoutSpaces] =
+    JsPath.read[String].map(PostCodeWithoutSpaces.apply)
 
 }

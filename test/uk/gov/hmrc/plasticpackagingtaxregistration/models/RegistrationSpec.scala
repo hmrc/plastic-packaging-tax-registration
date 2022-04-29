@@ -35,7 +35,8 @@ class RegistrationSpec
     extends AnyWordSpec with RegistrationTestData with RegistrationBuilder
     with SubscriptionTestData {
 
-  override implicit def toPostcode(value: String): PostCodeCleaner = PostCodeCleaner(value)
+  override implicit def toPostcode(value: String): PostCodeWithoutSpaces =
+    PostCodeWithoutSpaces(value)
 
   "Registration" should {
 
