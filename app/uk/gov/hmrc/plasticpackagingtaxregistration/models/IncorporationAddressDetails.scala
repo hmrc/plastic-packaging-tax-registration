@@ -24,7 +24,7 @@ case class IncorporationAddressDetails(
   locality: Option[String] = None,
   care_of: Option[String] = None,
   po_box: Option[String] = None,
-  postal_code: Option[String] = None,
+  postal_code: Option[PostCodeWithoutSpaces] = None,
   premises: Option[String] = None,
   region: Option[String] = None,
   country: Option[String] = None
