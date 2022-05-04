@@ -28,13 +28,12 @@ class BusinessCorrespondenceDetailsSpec
   "BusinessCorrespondenceDetails" when {
     "provided with some empty strings" in {
       val details = BusinessCorrespondenceDetails(
-        PPTAddress(
-          addressLine1 = "Line 1",
-          addressLine2 = Some(""),
-          addressLine3 = Some("Line 3"),
-          townOrCity = "",
-          postCode = Some(""),
-          countryCode = "GB"
+        PPTAddress(addressLine1 = "Line 1",
+                   addressLine2 = Some(""),
+                   addressLine3 = Some("Line 3"),
+                   townOrCity = "",
+                   postCode = Some(""),
+                   countryCode = "GB"
         )
       )
 
@@ -48,14 +47,14 @@ class BusinessCorrespondenceDetailsSpec
 
     "provided with all empty strings" in {
       val details = BusinessCorrespondenceDetails(
-        PPTAddress(
-          addressLine1 = "",
-          addressLine2 = Some(""),
-          addressLine3 = Some(""),
-          townOrCity = "",
-          postCode = Some(""),
-          countryCode = "GB"
-        ))
+        PPTAddress(addressLine1 = "",
+                   addressLine2 = Some(""),
+                   addressLine3 = Some(""),
+                   townOrCity = "",
+                   postCode = Some(""),
+                   countryCode = "GB"
+        )
+      )
 
       details.addressLine1 mustBe " "
       details.addressLine2 mustBe " "

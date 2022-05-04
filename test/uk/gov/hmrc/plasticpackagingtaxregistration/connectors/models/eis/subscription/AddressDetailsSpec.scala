@@ -27,13 +27,12 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
     "map from PPT Address" when {
       "provided with missing town or city" in {
         val addressDetails = AddressDetails(
-          PPTAddress(
-            addressLine1 = "Line 1",
-            addressLine2 = None,
-            addressLine3 = Some("Basingstoke"),
-            townOrCity = "",
-            postCode = Some("ZZ1 1ZZ"),
-            countryCode = "GB"
+          PPTAddress(addressLine1 = "Line 1",
+                     addressLine2 = None,
+                     addressLine3 = Some("Basingstoke"),
+                     townOrCity = "",
+                     postCode = Some("ZZ1 1ZZ"),
+                     countryCode = "GB"
           )
         )
 
@@ -45,16 +44,14 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
         addressDetails.countryCode mustBe "GB"
       }
 
-
       "provided with some empty strings" in {
         val addressDetails = AddressDetails(
-          PPTAddress(
-            addressLine1 = "Line 1",
-            addressLine2 = Some(""),
-            addressLine3 = Some("Line 3"),
-            townOrCity = "",
-            postCode = Some(""),
-            countryCode = "GB"
+          PPTAddress(addressLine1 = "Line 1",
+                     addressLine2 = Some(""),
+                     addressLine3 = Some("Line 3"),
+                     townOrCity = "",
+                     postCode = Some(""),
+                     countryCode = "GB"
           )
         )
 
@@ -68,14 +65,14 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
 
       "provided with all empty strings" in {
         val addressDetails = AddressDetails(
-          PPTAddress(
-            addressLine1 = "",
-            addressLine2 = Some(""),
-            addressLine3 = Some(""),
-            townOrCity = "",
-            postCode = Some(""),
-            countryCode = "GB"
-          ))
+          PPTAddress(addressLine1 = "",
+                     addressLine2 = Some(""),
+                     addressLine3 = Some(""),
+                     townOrCity = "",
+                     postCode = Some(""),
+                     countryCode = "GB"
+          )
+        )
 
         addressDetails.addressLine1 mustBe " "
         addressDetails.addressLine2 mustBe " "
