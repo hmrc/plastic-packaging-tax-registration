@@ -29,6 +29,7 @@ class PPTAddressSpec extends AnyWordSpec {
 
     "convert from AddressDetails" when {
 
+
       "address has 2 lines" in {
 
         val addr = PPTAddress(
