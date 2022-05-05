@@ -32,8 +32,12 @@ case class PPTAddress(
 ) {
 
   val eisAddressLines: (String, String, Option[String], Option[String]) = {
-    val list = Seq(Some(addressLine1), addressLine2, addressLine3, Some(townOrCity)).flatten
-    (list.head, list(1), list.lift(2), list.lift(3))
+    val list: Seq[String] =
+      Seq(Some(addressLine1), addressLine2, addressLine3, Some(townOrCity)).collect {
+        case Some(x) if x.trim != "" => Some(x)
+      }.flatten
+
+    (list.lift(0).getOrElse(" "), list.lift(1).getOrElse(" "), list.lift(2), list.lift(3))
   }
 
 }

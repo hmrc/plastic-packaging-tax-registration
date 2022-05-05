@@ -26,6 +26,44 @@ class BusinessCorrespondenceDetailsSpec
     extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
 
   "BusinessCorrespondenceDetails" when {
+    "provided with some empty strings" in {
+      val details = BusinessCorrespondenceDetails(
+        PPTAddress(addressLine1 = "Line 1",
+                   addressLine2 = Some(""),
+                   addressLine3 = Some("Line 3"),
+                   townOrCity = "",
+                   postCode = Some(""),
+                   countryCode = "GB"
+        )
+      )
+
+      details.addressLine1 mustBe "Line 1"
+      details.addressLine2 mustBe "Line 3"
+      details.addressLine3 mustBe None
+      details.addressLine4 mustBe None
+      details.postalCode mustBe None
+      details.countryCode mustBe "GB"
+    }
+
+    "provided with all empty strings" in {
+      val details = BusinessCorrespondenceDetails(
+        PPTAddress(addressLine1 = "",
+                   addressLine2 = Some(""),
+                   addressLine3 = Some(""),
+                   townOrCity = "",
+                   postCode = Some(""),
+                   countryCode = "GB"
+        )
+      )
+
+      details.addressLine1 mustBe " "
+      details.addressLine2 mustBe " "
+      details.addressLine3 mustBe None
+      details.addressLine4 mustBe None
+      details.postalCode mustBe None
+      details.countryCode mustBe "GB"
+    }
+
     "building from PPTAddress" should {
       "map address with one line" in {
 

@@ -25,6 +25,63 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
 
   "AddressDetails" should {
     "map from PPT Address" when {
+      "provided with missing town or city" in {
+        val addressDetails = AddressDetails(
+          PPTAddress(addressLine1 = "Line 1",
+                     addressLine2 = None,
+                     addressLine3 = Some("Basingstoke"),
+                     townOrCity = "",
+                     postCode = Some("ZZ1 1ZZ"),
+                     countryCode = "GB"
+          )
+        )
+
+        addressDetails.addressLine1 mustBe "Line 1"
+        addressDetails.addressLine2 mustBe "Basingstoke"
+        addressDetails.addressLine3 mustBe None
+        addressDetails.addressLine4 mustBe None
+        addressDetails.postalCode mustBe Some("ZZ1 1ZZ")
+        addressDetails.countryCode mustBe "GB"
+      }
+
+      "provided with some empty strings" in {
+        val addressDetails = AddressDetails(
+          PPTAddress(addressLine1 = "Line 1",
+                     addressLine2 = Some(""),
+                     addressLine3 = Some("Line 3"),
+                     townOrCity = "",
+                     postCode = Some(""),
+                     countryCode = "GB"
+          )
+        )
+
+        addressDetails.addressLine1 mustBe "Line 1"
+        addressDetails.addressLine2 mustBe "Line 3"
+        addressDetails.addressLine3 mustBe None
+        addressDetails.addressLine4 mustBe None
+        addressDetails.postalCode mustBe None
+        addressDetails.countryCode mustBe "GB"
+      }
+
+      "provided with all empty strings" in {
+        val addressDetails = AddressDetails(
+          PPTAddress(addressLine1 = "",
+                     addressLine2 = Some(""),
+                     addressLine3 = Some(""),
+                     townOrCity = "",
+                     postCode = Some(""),
+                     countryCode = "GB"
+          )
+        )
+
+        addressDetails.addressLine1 mustBe " "
+        addressDetails.addressLine2 mustBe " "
+        addressDetails.addressLine3 mustBe None
+        addressDetails.addressLine4 mustBe None
+        addressDetails.postalCode mustBe None
+        addressDetails.countryCode mustBe "GB"
+      }
+
       "only 'addressLine1', 'townOrCity' and 'PostCode' are available" in {
         val pptAddress =
           PPTAddress(addressLine1 = "addressLine1",
