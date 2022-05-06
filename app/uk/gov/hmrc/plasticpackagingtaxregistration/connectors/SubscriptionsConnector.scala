@@ -21,7 +21,6 @@ import com.kenshoo.play.metrics.Metrics
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.Json._
-import play.libs.Json
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig

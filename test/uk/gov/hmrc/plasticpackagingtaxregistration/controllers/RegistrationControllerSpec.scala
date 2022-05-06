@@ -44,12 +44,14 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 class RegistrationControllerSpec
     extends AnyWordSpec with GuiceOneAppPerSuite with AuthTestSupport with BeforeAndAfterEach
     with ScalaFutures with Matchers with RegistrationBuilder with RegistrationRequestBuilder {
 
   SharedMetricRegistries.clear()
+  implicit def toPostcode(value: String): PostCodeWithoutSpaces = PostCodeWithoutSpaces(value)
 
   override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[AuthConnector].to(mockAuthConnector),

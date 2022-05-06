@@ -20,7 +20,9 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PPTAddress
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, PostCodeWithoutSpaces}
+
+import scala.language.implicitConversions
 
 class BusinessCorrespondenceDetailsSpec
     extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
@@ -74,7 +76,7 @@ class BusinessCorrespondenceDetailsSpec
         businessCorrespondenceDetails.addressLine2 mustBe "town"
         businessCorrespondenceDetails.addressLine3 mustBe None
         businessCorrespondenceDetails.addressLine4 mustBe None
-        businessCorrespondenceDetails.postalCode mustBe Some("postcode")
+        businessCorrespondenceDetails.postalCode mustBe Some(PostCodeWithoutSpaces("postcode"))
         businessCorrespondenceDetails.countryCode mustBe "GB" // default
 
       }
@@ -92,7 +94,7 @@ class BusinessCorrespondenceDetailsSpec
         businessCorrespondenceDetails.addressLine2 mustBe "line2"
         businessCorrespondenceDetails.addressLine3 mustBe Some("town")
         businessCorrespondenceDetails.addressLine4 mustBe None
-        businessCorrespondenceDetails.postalCode mustBe Some("postcode")
+        businessCorrespondenceDetails.postalCode mustBe Some(PostCodeWithoutSpaces("postcode"))
         businessCorrespondenceDetails.countryCode mustBe "GB" // default
 
       }
@@ -111,7 +113,7 @@ class BusinessCorrespondenceDetailsSpec
         businessCorrespondenceDetails.addressLine2 mustBe "line2"
         businessCorrespondenceDetails.addressLine3 mustBe Some("line3")
         businessCorrespondenceDetails.addressLine4 mustBe Some("town")
-        businessCorrespondenceDetails.postalCode mustBe Some("postcode")
+        businessCorrespondenceDetails.postalCode mustBe Some(PostCodeWithoutSpaces("postcode"))
         businessCorrespondenceDetails.countryCode mustBe "GB" // default
 
       }

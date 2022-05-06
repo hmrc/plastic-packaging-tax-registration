@@ -35,13 +35,16 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   ETMPSubscriptionStatusResponse,
   SubscriptionStatusResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, PostCodeWithoutSpaces}
 
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now
 import java.time.format.DateTimeFormatter
+import scala.language.implicitConversions
 
 trait SubscriptionTestData extends AuthTestSupport {
+
+  implicit def toPostcode(value: String): PostCodeWithoutSpaces = PostCodeWithoutSpaces(value)
 
   protected val safeNumber   = "123456"
   protected val idType       = "ZPPT"

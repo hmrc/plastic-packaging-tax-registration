@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
+import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, not}
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
   RegistrationTestData,
@@ -34,6 +34,9 @@ import java.time.{ZoneOffset, ZonedDateTime}
 class RegistrationSpec
     extends AnyWordSpec with RegistrationTestData with RegistrationBuilder
     with SubscriptionTestData {
+
+  override implicit def toPostcode(value: String): PostCodeWithoutSpaces =
+    PostCodeWithoutSpaces(value)
 
   "Registration" should {
 
@@ -342,5 +345,54 @@ class RegistrationSpec
           1
         ).regWithoutIDFlag
     }
+
+    "contain post code without spaces" when {
+      "registration is a partnership" in {
+        val reg = aRegistration(
+          withOrganisationDetails(
+            pptGeneralPartnershipDetails.copy(incorporationDetails =
+              Some(
+                IncorporationDetails(companyNumber = "1234567890",
+                                     companyName = "Plastic Limited",
+                                     ctutr = "987654321",
+                                     companyAddress = IncorporationAddressDetails(postal_code =
+                                       Some("  VR3 6JK ")
+                                     ),
+                                     registration = Some(registrationDetails)
+                )
+              )
+            )
+          ),
+          withPrimaryContactDetails(pptPrimaryContactDetails),
+          withLiabilityDetails(pptLiabilityDetails)
+        )
+
+        reg.primaryContactDetails.address.get.postCode.get.postcode.postcode must not contain ' '
+        assertPostCodeInOrgDetails(reg.organisationDetails)
+        reg.primaryContactDetails.address.get.postCode.get.postcode must not contain ' '
+      }
+
+      "registration is a group membership" in {
+        val reg =
+          aRegistration(withOrganisationDetails(pptIncorporationDetails),
+                        withGroupDetail(groupDetail)
+          )
+
+        reg.groupDetail.get.members.foreach { o =>
+          o.contactDetails.get.address.get.postCode.get.postcode must not contain ' '
+          o.addressDetails.postCode.get.postcode must not contain ' '
+        }
+      }
+    }
   }
+
+  private def assertPostCodeInOrgDetails(orgDetails: OrganisationDetails) = {
+    orgDetails.businessRegisteredAddress.get.postCode.get.postcode must not contain ' '
+    orgDetails.partnershipDetails.get.partnershipBusinessDetails.get.postcode.postcode must not contain ' '
+    orgDetails.partnershipDetails.get.partners.foreach(
+      _.contactDetails.get.address.get.postCode.get.postcode must not contain ' '
+    )
+    orgDetails.incorporationDetails.get.companyAddress.postal_code.get.postcode must not contain ' '
+  }
+
 }

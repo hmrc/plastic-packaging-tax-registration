@@ -17,6 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  GroupDetail,
   LiabilityDetails,
   MetaData,
   OrganisationDetails,
@@ -56,5 +57,8 @@ trait RegistrationRequestBuilder {
 
   def withUserHeaders(headers: Map[String, String]): RegistrationModifier =
     _.copy(userHeaders = Some(headers))
+
+  def withGroupDetailsRequest(groupDetail: GroupDetail): RegistrationModifier =
+    _.copy(groupDetail = Some(groupDetail))
 
 }

@@ -23,7 +23,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
   BusinessCorrespondenceDetails
 }
 
+import scala.language.implicitConversions
+
 class PPTAddressSpec extends AnyWordSpec {
+
+  implicit def toPostcode(value: String): PostCodeWithoutSpaces = PostCodeWithoutSpaces(value)
 
   "PPTAddress" should {
 

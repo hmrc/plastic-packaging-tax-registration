@@ -17,14 +17,18 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  PPTAddress,
+  PostCodeWithoutSpaces,
+  Registration
+}
 
 case class BusinessCorrespondenceDetails(
   addressLine1: String,
   addressLine2: String,
   addressLine3: Option[String] = None,
   addressLine4: Option[String] = None,
-  postalCode: Option[String] = None,
+  postalCode: Option[PostCodeWithoutSpaces] = None,
   countryCode: String
 )
 

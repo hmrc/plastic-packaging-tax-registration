@@ -40,6 +40,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
   SubscriptionsConnector,
   TaxEnrolmentsConnector
 }
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PostCodeWithoutSpaces
 import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
 import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
 
@@ -51,6 +52,10 @@ trait ControllerSpec
     with RegistrationTestData with SubscriptionTestData with NrsTestData {
 
   SharedMetricRegistries.clear()
+
+  override implicit def toPostcode(value: String): PostCodeWithoutSpaces =
+    PostCodeWithoutSpaces(value)
+
   protected implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   protected implicit val hc: HeaderCarrier =
