@@ -43,7 +43,7 @@ class BusinessCorrespondenceDetailsSpec
       details.addressLine2 mustBe "Line 3"
       details.addressLine3 mustBe None
       details.addressLine4 mustBe None
-      details.postalCode mustBe None
+      details.postalCode.get.postcode mustBe ""
       details.countryCode mustBe "GB"
     }
 
@@ -53,7 +53,7 @@ class BusinessCorrespondenceDetailsSpec
                    addressLine2 = Some(""),
                    addressLine3 = Some(""),
                    townOrCity = "",
-                   postCode = Some(""),
+                   postCode = None,
                    countryCode = "GB"
         )
       )

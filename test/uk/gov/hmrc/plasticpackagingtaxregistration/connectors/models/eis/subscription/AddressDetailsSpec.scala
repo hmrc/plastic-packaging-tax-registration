@@ -42,7 +42,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
         addressDetails.addressLine2 mustBe "Basingstoke"
         addressDetails.addressLine3 mustBe None
         addressDetails.addressLine4 mustBe None
-        addressDetails.postalCode mustBe Some("ZZ1 1ZZ")
+        addressDetails.postalCode.get.postcode mustBe "ZZ11ZZ"
         addressDetails.countryCode mustBe "GB"
       }
 
@@ -52,7 +52,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
                      addressLine2 = Some(""),
                      addressLine3 = Some("Line 3"),
                      townOrCity = "",
-                     postCode = Some(""),
+                     postCode = Some(PostCodeWithoutSpaces("")),
                      countryCode = "GB"
           )
         )
@@ -61,7 +61,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
         addressDetails.addressLine2 mustBe "Line 3"
         addressDetails.addressLine3 mustBe None
         addressDetails.addressLine4 mustBe None
-        addressDetails.postalCode mustBe None
+        addressDetails.postalCode.get.postcode mustBe ""
         addressDetails.countryCode mustBe "GB"
       }
 
@@ -71,7 +71,7 @@ class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTest
                      addressLine2 = Some(""),
                      addressLine3 = Some(""),
                      townOrCity = "",
-                     postCode = Some(""),
+                     postCode = None,
                      countryCode = "GB"
           )
         )

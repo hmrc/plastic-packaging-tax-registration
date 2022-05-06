@@ -36,7 +36,7 @@ object AddressDetails {
                    addressLine2 = address.eisAddressLines._2,
                    addressLine3 = address.eisAddressLines._3,
                    addressLine4 = address.eisAddressLines._4,
-                   postalCode = address.postCode.filter(_.trim != ""),
+                   postalCode = address.postCode,
                    countryCode = address.countryCode
     )
 
