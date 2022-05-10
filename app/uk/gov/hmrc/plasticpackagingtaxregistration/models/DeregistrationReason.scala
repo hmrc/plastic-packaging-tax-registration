@@ -21,10 +21,10 @@ import play.api.libs.json.{Format, Reads, Writes}
 object DeregistrationReason extends Enumeration {
   type DeregistrationReason = Value
 
-  val RegisteredIncorrectly               = Value("Registered Incorrectly")
-  val CeasedTrading                       = Value("Ceased Trading")
-  val NotMetAndDoNotExpectToMeetThreshold = Value("Below De-minimus")
-  val WantToRegisterAsGroup               = Value("Taken into Group Registration")
+  val RegisteredIncorrectly               = Value(1, "Registered Incorrectly")
+  val CeasedTrading                       = Value(2, "Ceased Trading")
+  val NotMetAndDoNotExpectToMeetThreshold = Value(3, "Below De-minimus")
+  val WantToRegisterAsGroup               = Value(4, "Taken into Group Registration")
 
   implicit val format: Format[DeregistrationReason] =
     Format(Reads.enumNameReads(DeregistrationReason), Writes.enumNameWrites)

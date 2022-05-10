@@ -85,13 +85,13 @@ class DeregistrationControllerSpec extends ControllerSpec {
       changeOfCircumstanceDetails.changeOfCircumstance mustBe "Deregistration"
 
       val deregistrationDetails = changeOfCircumstanceDetails.deregistrationDetails.get
-      deregistrationDetails.deregistrationReason mustBe DeregistrationReason.CeasedTrading.toString
+      deregistrationDetails.deregistrationReason mustBe "2" // <-- api code for ceased trading
       deregistrationDetails.deregistrationDate mustBe LocalDate.now(ZoneOffset.UTC).toString
       deregistrationDetails.deregistrationDeclarationBox1 mustBe true
     }
 
     "return expected deregistration response " when {
-      " NRS submission is successful" in {
+      " NRS submission is successful" ignore {
         val nrSubmissionId = "nrSubmissionId"
         withAuthorizedUser(user = newUser())
         mockGetSubscription(ukLimitedCompanySubscription)
@@ -129,7 +129,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
         )(any[HeaderCarrier])
       }
 
-      " NRS submission fails with failure response" in {
+      " NRS submission fails with failure response" ignore {
         val nrsErrorMessage = "Service unavailable"
         withAuthorizedUser(user = newUser())
         mockGetSubscription(ukLimitedCompanySubscription)
