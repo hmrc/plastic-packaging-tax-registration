@@ -82,7 +82,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
       val updatedSubscription = subscriptionCaptor.getValue
 
       val changeOfCircumstanceDetails = updatedSubscription.changeOfCircumstanceDetails.get
-      changeOfCircumstanceDetails.changeOfCircumstance mustBe "Deregistration"
+      changeOfCircumstanceDetails.changeOfCircumstance mustBe "02"
 
       val deregistrationDetails = changeOfCircumstanceDetails.deregistrationDetails.get
       deregistrationDetails.deregistrationReason mustBe "02" // <-- api code for ceased trading
