@@ -112,7 +112,7 @@ class DeregistrationController @Inject() (
         ChangeOfCircumstanceDetails(changeOfCircumstance = "Deregistration",
                                     deregistrationDetails = Some(
                                       DeregistrationDetails(
-                                        deregistrationReason = deregistrationReason.id.toString,
+                                        deregistrationReason = "0" + deregistrationReason.id.toString,
                                         deregistrationDate = LocalDate.now(ZoneOffset.UTC).toString,
                                         deregistrationDeclarationBox1 = true
                                       )

@@ -85,7 +85,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
       changeOfCircumstanceDetails.changeOfCircumstance mustBe "Deregistration"
 
       val deregistrationDetails = changeOfCircumstanceDetails.deregistrationDetails.get
-      deregistrationDetails.deregistrationReason mustBe "2" // <-- api code for ceased trading
+      deregistrationDetails.deregistrationReason mustBe "02" // <-- api code for ceased trading
       deregistrationDetails.deregistrationDate mustBe LocalDate.now(ZoneOffset.UTC).toString
       deregistrationDetails.deregistrationDeclarationBox1 mustBe true
     }
