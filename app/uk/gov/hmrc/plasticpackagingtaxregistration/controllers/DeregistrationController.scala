@@ -109,10 +109,10 @@ class DeregistrationController @Inject() (
   ) =
     subscription.copy(changeOfCircumstanceDetails =
       Some(
-        ChangeOfCircumstanceDetails(changeOfCircumstance = "02", // <-- api code for deregistration
+        ChangeOfCircumstanceDetails(changeOfCircumstance = "Deregistration",
                                     deregistrationDetails = Some(
                                       DeregistrationDetails(
-                                        deregistrationReason = "0" + deregistrationReason.id.toString,
+                                        deregistrationReason = deregistrationReason.toString,
                                         deregistrationDate = LocalDate.now(ZoneOffset.UTC).toString,
                                         deregistrationDeclarationBox1 = true
                                       )
