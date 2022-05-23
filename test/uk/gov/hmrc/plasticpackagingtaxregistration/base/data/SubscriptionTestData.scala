@@ -131,6 +131,51 @@ trait SubscriptionTestData extends AuthTestSupport {
     groupPartnershipSubscription = None
   )
 
+    protected val ukLimitedCompanySubscriptionInvalid: Subscription = Subscription(
+    legalEntityDetails =
+      LegalEntityDetails(dateOfApplication =
+                           "foo",
+                         customerIdentification1 = "123456789",
+                         customerIdentification2 = Some("1234567890"),
+                         customerDetails = CustomerDetails(customerType = CustomerType.Organisation,
+                                                           organisationDetails =
+                                                             Some(
+                                                               OrganisationDetails(
+                                                                 organisationType = Some(
+                                                                   OrgType.UK_COMPANY.toString
+                                                                 ),
+                                                                 organisationName = "Plastics Ltd"
+                                                               )
+                                                             )
+                         ),
+                         groupSubscriptionFlag = false
+      ),
+    principalPlaceOfBusinessDetails =
+      PrincipalPlaceOfBusinessDetails(
+        addressDetails = AddressDetails(addressLine1 = "2-3 Scala Street",
+                                        addressLine2 = "London",
+                                        postalCode = Some("W1T 2HN"),
+                                        countryCode = "GB"
+        ),
+        contactDetails = ContactDetails(email = "test@test.com", telephone = "02034567890")
+      ),
+    primaryContactDetails =
+      PrimaryContactDetails(name = "Kevin Durant",
+                            contactDetails =
+                              ContactDetails(email = "test@test.com", telephone = "02034567890"),
+                            positionInCompany = "Director"
+      ),
+    businessCorrespondenceDetails = BusinessCorrespondenceDetails(addressLine1 = "2-3 Scala Street",
+                                                                  addressLine2 = "London",
+                                                                  postalCode = Some("W1T 2HN"),
+                                                                  countryCode = "GB"
+    ),
+    taxObligationStartDate = now(UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+    last12MonthTotalTonnageAmt = 15000,
+    declaration = Declaration(declarationBox1 = true),
+    groupPartnershipSubscription = None
+  )
+
   private val groupPartnershipDetailsRep: GroupPartnershipDetails = GroupPartnershipDetails(
     "Representative",
     "123456789",

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+package uk.gov.hmrc.plasticpackagingtaxregistration.validators
+
 import com.eclipsesource.schema.drafts.Version7._
 import com.eclipsesource.schema.{SchemaType, SchemaValidator}
 import java.io.InputStream
 import play.api.libs.json.{JsResult, JsValue, Json}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 
-class SchemaValidator {
+class PptSchemaValidator {
   
       def validate(schemaFile: String, requestPayload: JsValue): JsResult[JsValue] = {
 
