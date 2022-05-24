@@ -18,20 +18,39 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.validators
 
 import com.eclipsesource.schema.drafts.Version7._
 import com.eclipsesource.schema.{SchemaType, SchemaValidator}
+import play.api.Logger
+
 import java.io.InputStream
 import play.api.libs.json.{JsResult, JsValue, Json}
 
 class PptSchemaValidator {
-  
-      def validate(schemaFile: String, requestPayload: JsValue): JsResult[JsValue] = {
 
-      val stream: InputStream     = getClass.getResourceAsStream(schemaFile)
-      val lines: Iterator[String] = scala.io.Source.fromInputStream(stream).getLines
-      val linesString: String     = lines.foldLeft[String]("")((x, y) => x.trim ++ y.trim)
+  private val logger = Logger(this.getClass)
 
-      SchemaValidator(Some(com.eclipsesource.schema.drafts.Version7))
-        .validate(Json.fromJson[SchemaType](Json.parse(linesString.trim)).get, requestPayload)
+  def validate(schemaFile: String, requestPayload: JsValue): JsResult[JsValue] = {
 
-    }
+    val stream: InputStream = getClass.getResourceAsStream(schemaFile)
+    val lines: Iterator[String] = scala.io.Source.fromInputStream(stream).getLines
+    val linesString: String = lines.foldLeft[String]("")((x, y) => x.trim ++ y.trim)
+
+    val res = SchemaValidator(Some(com.eclipsesource.schema.drafts.Version7))
+      .validate(Json.fromJson[SchemaType](Json.parse(linesString.trim)).get, requestPayload)
+
+    res.fold(
+      errors => {
+
+        val asJson: JsValue = errors.flatMap(x => x._2).head.args.head.asInstanceOf[JsValue]
+        val validationErrors = (asJson \ "errors").get
+
+        logger.warn(
+          s"PptSchemaValidator:$schemaFile: - Schema validation errors: $validationErrors"
+        )
+
+      },
+      _ => logger.info(s"PptSchemaValidator:$schemaFile: - Schema validation success"))
+
+    res
+
+  }
 
 }

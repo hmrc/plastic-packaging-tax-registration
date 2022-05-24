@@ -15,19 +15,13 @@
  */
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.validators
-
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
-import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.libs.json.Json
 import play.api.libs.json.{JsResult, JsValue}
-import play.api.libs.json.JsString
-import play.api.libs.json.{JsPath, JsonValidationError}
-import play.api.libs.json.JsArray
-import scala.collection.mutable.WrappedArray
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.validation.JsonSchemaError
 
-class PptSchemaValidatorSpec extends ScalaFutures with SubscriptionTestData with AnyWordSpecLike {
+class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with SubscriptionTestData {
 
     "validate" when {
 
@@ -41,14 +35,14 @@ class PptSchemaValidatorSpec extends ScalaFutures with SubscriptionTestData with
 
                 val response = sv.validate("/api-docs/api-1711-ppt-subscription-create-1.6.0.json", jsonRequest)
 
-                println(response)
+                response.isSuccess mustBe true
 
             }
 
         }
 
 
-        "given an ivalid create" should {
+        "given an invalid create" should {
 
             "return failure" in {
 
@@ -58,24 +52,11 @@ class PptSchemaValidatorSpec extends ScalaFutures with SubscriptionTestData with
 
                 val response: JsResult[JsValue] = sv.validate("/api-docs/api-1711-ppt-subscription-create-1.6.0.json", jsonRequest)
 
-               response.fold(
-                 errors => {
-                   val asJson: JsValue = errors.flatMap(x => x._2).head.args.head.asInstanceOf[JsValue]
-
-                   val foo = (asJson \ "errors").get
-
-                   //val bar =  Json.fromJson[JsonSchemaError](foo)
-
-                   println(foo)
-
-                 },
-                 clean => println("clean")
-               )
-
+                response.isSuccess mustBe false
             }
 
         }
 
     }
-  
+
 }
