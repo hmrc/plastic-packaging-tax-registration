@@ -265,6 +265,7 @@ class SubscriptionControllerSpec
       val rawResp = route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
       status(rawResp) mustBe 422
+      val str = contentAsString(rawResp)
       val resp = contentAsJson(rawResp).as[SubscriptionFailureResponse]
       resp.failures mustBe List(
         EISError("ACTIVE_SUBSCRIPTION_EXISTS",

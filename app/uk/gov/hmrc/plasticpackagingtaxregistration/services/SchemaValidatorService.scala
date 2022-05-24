@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
+package uk.gov.hmrc.plasticpackagingtaxregistration.services
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 
-case class SubscriptionFailureResponse(failures: Seq[EISError]) extends SubscriptionResponse
+import com.google.inject.Inject
 
-object SubscriptionFailureResponse {
-
-  implicit val format: OFormat[SubscriptionFailureResponse] =
-    Json.format[SubscriptionFailureResponse]
+class SchemaValidatorService @Inject() {
 
 }

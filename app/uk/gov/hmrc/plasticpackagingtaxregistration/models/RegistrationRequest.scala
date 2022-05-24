@@ -32,6 +32,9 @@ case class RegistrationRequest(
   userHeaders: Option[Map[String, String]] = None
 ) {
 
+  // TODO: Why do we hava an Option of a map anyway?
+  lazy val sensibleUserHeaders = userHeaders.getOrElse(Map.empty)
+
   def toRegistration(providerId: String): Registration =
     Registration(id = providerId,
                  dateOfRegistration = this.dateOfRegistration,

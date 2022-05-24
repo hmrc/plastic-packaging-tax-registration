@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
+package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
-import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{LiabilityDetails, OrganisationDetails, PPTAddress, PrimaryContactDetails}
 
-case class SubscriptionFailureResponseWithStatusCode(
-  failureResponse: SubscriptionFailureResponse,
-  statusCode: Int
-) extends SubscriptionResponse
 
-object SubscriptionFailureResponseWithStatusCode {
 
-  implicit val format: OFormat[SubscriptionFailureResponseWithStatusCode] =
-    Json.format[SubscriptionFailureResponseWithStatusCode]
 
+
+trait PPTAddressBuilder {
+  private type Modifier = PPTAddress => PPTAddress
+
+  private val baseModel: PPTAddress = PPTAddress(
+    addressLine1 = "",
+    addressLine2 = None,
+    addressLine3 = None,
+    townOrCity = "",
+    postCode = None,
+    countryCode = ""
+  )
+
+  def anAddress(modifiers: Modifier*): PPTAddress = modifiers.foldLeft(baseModel)((acc, next) => next(acc))
 }

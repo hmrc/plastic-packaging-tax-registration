@@ -117,7 +117,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
           Some(
             ChangeOfCircumstanceDetails(
               "Deregistration",
-              Some(DeregistrationDetails("Ceased Trading", LocalDate.now().toString, true))
+              Some(DeregistrationDetails("Ceased Trading", LocalDate.now(ZoneOffset.UTC).toString, true))
             )
           )
         )
@@ -155,7 +155,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
           Some(
             ChangeOfCircumstanceDetails(
               "Deregistration",
-              Some(DeregistrationDetails("Ceased Trading", LocalDate.now().toString, true))
+              Some(DeregistrationDetails("Ceased Trading", LocalDate.now(ZoneOffset.UTC).toString, true))
             )
           )
         )

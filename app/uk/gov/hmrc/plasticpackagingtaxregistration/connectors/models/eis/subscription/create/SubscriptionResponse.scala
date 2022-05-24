@@ -16,4 +16,44 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
 
-trait SubscriptionResponse
+import java.time.ZonedDateTime
+
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
+
+sealed trait SubscriptionResponse
+
+case class SubscriptionFailureResponse(failures: Seq[EISError]) extends SubscriptionResponse
+
+object SubscriptionFailureResponse {
+
+  implicit val format: OFormat[SubscriptionFailureResponse] =
+    Json.format[SubscriptionFailureResponse]
+
+}
+
+case class SubscriptionFailureResponseWithStatusCode(
+                                                      failureResponse: SubscriptionFailureResponse,
+                                                      statusCode: Int
+                                                    ) extends SubscriptionResponse
+
+object SubscriptionFailureResponseWithStatusCode {
+
+  implicit val format: OFormat[SubscriptionFailureResponseWithStatusCode] =
+    Json.format[SubscriptionFailureResponseWithStatusCode]
+
+}
+
+
+case class SubscriptionSuccessfulResponse(
+                                           pptReferenceNumber: String,
+                                           processingDate: ZonedDateTime,
+                                           formBundleNumber: String
+                                         ) extends SubscriptionResponse
+
+object SubscriptionSuccessfulResponse {
+
+  implicit val format: OFormat[SubscriptionSuccessfulResponse] =
+    Json.format[SubscriptionSuccessfulResponse]
+
+}
