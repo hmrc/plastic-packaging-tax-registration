@@ -21,9 +21,10 @@ import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationRequestBuilder
 
-class RegistrationRequestSpec extends AnyWordSpec with must.Matchers with RegistrationRequestBuilder{
- "can parse from a request with UserHeaders" in {
-   val jsonWithUserHeaders = """{
+class RegistrationRequestSpec
+    extends AnyWordSpec with must.Matchers with RegistrationRequestBuilder {
+  "can parse from a request with UserHeaders" in {
+    val jsonWithUserHeaders = """{
                 |  "dateOfRegistration" : "2022-05-27",
                 |  "incorpJourneyId" : "f368e653-790a-4a95-af62-4132f0ffd433",
                 |  "liabilityDetails" : { },
@@ -38,8 +39,10 @@ class RegistrationRequestSpec extends AnyWordSpec with must.Matchers with Regist
                 |    "header" : "value"
                 |  }
                 |}""".stripMargin
-   Json.parse(jsonWithUserHeaders).as[RegistrationRequest].userHeaders  mustBe (Map("header" -> "value"))
- }
+    Json.parse(jsonWithUserHeaders).as[RegistrationRequest].userHeaders mustBe (Map(
+      "header" -> "value"
+    ))
+  }
 
   "can parse from a request without UserHeaders" in {
     val jsonWithoutUserHeaders = """{
@@ -54,13 +57,13 @@ class RegistrationRequestSpec extends AnyWordSpec with must.Matchers with Regist
                                 |    "verifiedEmails" : [ ]
                                 |  }
                                 |}""".stripMargin
-    Json.parse(jsonWithoutUserHeaders).as[RegistrationRequest].userHeaders  mustBe (Map.empty)
+    Json.parse(jsonWithoutUserHeaders).as[RegistrationRequest].userHeaders mustBe (Map.empty)
   }
 
   "excludes field when serialised to Json with no userHeaders" in {
     val registrationRequest = aRegistrationRequest(withNoUserHeaders())
     Json.toJson(registrationRequest).as[JsObject]
-      .fields.map{_._1} must not(contain("userHeaders"))
+      .fields.map(_._1) must not(contain("userHeaders"))
   }
 
   "Can roundtrip through Json" in {

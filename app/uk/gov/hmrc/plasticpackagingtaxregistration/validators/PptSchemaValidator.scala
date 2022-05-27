@@ -26,48 +26,46 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models.validation.SchemaError
 
 import scala.annotation.tailrec
 
-
 class PptSchemaValidator(schemaFile: String) {
 
   private val logger = Logger(this.getClass)
 
   lazy val schema: SchemaType = {
-    val stream: InputStream     = getClass.getResourceAsStream(schemaFile)
-    val linesString: String     = scala.io.Source.fromInputStream(stream).mkString
-    val json = Json.parse(linesString.trim).as[JsObject]
+    val stream: InputStream = getClass.getResourceAsStream(schemaFile)
+    val linesString: String = scala.io.Source.fromInputStream(stream).mkString
+    val json                = Json.parse(linesString.trim).as[JsObject]
     json.as[SchemaType]
   }
 
   @tailrec
-  private def buildSchemaError(x: Any, acc: Seq[SchemaError]): Seq[SchemaError] = {
+  private def buildSchemaError(x: Any, acc: Seq[SchemaError]): Seq[SchemaError] =
     x match {
-      case jsons:Seq[Any] =>
+      case jsons: Seq[Any] =>
         val fromHead = jsons.headOption match {
-          case Some(js:JsValue) => js.validate[SchemaError].asOpt.toSeq
-          case _ => Nil
+          case Some(js: JsValue) => js.validate[SchemaError].asOpt.toSeq
+          case _                 => Nil
         }
 
         buildSchemaError(jsons(0), acc ++ fromHead)
 
-      case json:JsValue =>
+      case json: JsValue =>
         acc ++ json.validate[SchemaError].asOpt.toSeq
 
       case _ => Seq.empty
     }
-  }
 
   def validate[T](data: T)(implicit writes: Writes[T]): JsResult[JsValue] = {
     val requestPayload = Json.toJson(data)
 
     val res: JsResult[JsValue] = SchemaValidator(Some(com.eclipsesource.schema.drafts.Version7))
-                                    .validate(schema, requestPayload)
+      .validate(schema, requestPayload)
 
     res.fold(
       (errors: Seq[(JsPath, Seq[JsonValidationError])]) => {
         val report: Seq[(String, SchemaError)] = for {
-          (path, errorList) <- errors
+          (path, errorList)   <- errors
           jsonValidationError <- errorList
-          schemaError <- buildSchemaError(jsonValidationError.args, Seq.empty)
+          schemaError         <- buildSchemaError(jsonValidationError.args, Seq.empty)
         } yield (jsonValidationError.message, schemaError)
 
         val errorObjects = Json.toJson(report)
@@ -75,13 +73,18 @@ class PptSchemaValidator(schemaFile: String) {
           s"PptSchemaValidator:$schemaFile: - Schema validation errors: ${Json.prettyPrint(errorObjects)}"
         )
       },
-      _ =>
-        logger.info(s"PptSchemaValidator:$schemaFile: - Schema validation success"))
+      _ => logger.info(s"PptSchemaValidator:$schemaFile: - Schema validation success")
+    )
 
     res
   }
+
 }
 
 object PptSchemaValidator {
-  lazy val subscriptionValidator = new PptSchemaValidator("/api-docs/api-1711-ppt-subscription-create-1.6.0.json")
+
+  lazy val subscriptionValidator = new PptSchemaValidator(
+    "/api-docs/api-1711-ppt-subscription-create-1.6.0.json"
+  )
+
 }

@@ -24,7 +24,10 @@ import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
@@ -74,7 +77,10 @@ class SubscriptionController @Inject() (
         subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
           case response @ SubscriptionSuccessfulResponse(pptReferenceNumber, _, formBundleNumber) =>
             for {
-              nrsResponse <- subscriptionService.notifyNRS(updatedRegistration, response, request.body.userHeaders)
+              nrsResponse <- subscriptionService.notifyNRS(updatedRegistration,
+                                                           response,
+                                                           request.body.userHeaders
+              )
             } yield Ok(
               SubscriptionUpdateWithNrsStatusResponse(
                 pptReference =
@@ -107,10 +113,9 @@ class SubscriptionController @Inject() (
         val pptRegistration = request.body.toRegistration(request.registrationId)
         subscriptionService.submit(pptRegistration, safeId, request.body.userHeaders) map {
           case Right(value) => Ok(value)
-          case Left(value) => Status(value.statusCode)(value.failureResponse)
+          case Left(value)  => Status(value.statusCode)(value.failureResponse)
         }
     }
-
 
   private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
     logger.debug(s"$prefix payload: ${toJson(payload)}")

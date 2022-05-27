@@ -23,15 +23,16 @@ trait PrimaryContactDetailsBuilder {
 
   private val baseModel: PrimaryContactDetails = PrimaryContactDetails()
 
-  def somePrimaryContactDetails(modifiers: Modifier*): PrimaryContactDetails = modifiers.foldLeft(baseModel)((acc, next) => next(acc))
+  def somePrimaryContactDetails(modifiers: Modifier*): PrimaryContactDetails =
+    modifiers.foldLeft(baseModel)((acc, next) => next(acc))
 
   def withEmailAddress(email: String): Modifier = _.copy(email = Some(email))
 
-  def withPhoneNumber(no: String):Modifier = _.copy(phoneNumber = Some(no))
+  def withPhoneNumber(no: String): Modifier = _.copy(phoneNumber = Some(no))
 
   def withName(name: String): Modifier = _.copy(name = Some(name))
 
-  def  withJobTitle(jobTitle: String): Modifier = _.copy(jobTitle = Some(jobTitle))
+  def withJobTitle(jobTitle: String): Modifier = _.copy(jobTitle = Some(jobTitle))
 
   def withAddress(address: PPTAddress): Modifier = _.copy(address = Some(address))
 }

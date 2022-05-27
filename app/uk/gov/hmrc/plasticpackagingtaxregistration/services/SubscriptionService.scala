@@ -21,9 +21,16 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionCreateWithEnrolmentAndNrsStatusesResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{SubscriptionsConnector, TaxEnrolmentsConnector}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  SubscriptionsConnector,
+  TaxEnrolmentsConnector
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
@@ -35,58 +42,75 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.validators.PptSchemaValidator
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class SubscriptionService @Inject()(subscriptionsConnector: SubscriptionsConnector,
-                                    enrolmentConnector: TaxEnrolmentsConnector,
-                                    repository: RegistrationRepository,
-                                    nonRepudiationService: NonRepudiationService)(
-                                   implicit ec: ExecutionContext) extends JSONResponses{
+class SubscriptionService @Inject() (
+  subscriptionsConnector: SubscriptionsConnector,
+  enrolmentConnector: TaxEnrolmentsConnector,
+  repository: RegistrationRepository,
+  nonRepudiationService: NonRepudiationService
+)(implicit ec: ExecutionContext)
+    extends JSONResponses {
   private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
 
-  def submit(pptRegistration: Registration, safeId:String, userHeaders: Map[String, String])(implicit hc: HeaderCarrier)
-    : Future[Either[SubscriptionFailureResponseWithStatusCode, SubscriptionCreateWithEnrolmentAndNrsStatusesResponse]]= {
+  def submit(pptRegistration: Registration, safeId: String, userHeaders: Map[String, String])(
+    implicit hc: HeaderCarrier
+  ): Future[Either[
+    SubscriptionFailureResponseWithStatusCode,
+    SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+  ]] = {
     val pptSubscription = Subscription(pptRegistration, isSubscriptionUpdate = false)
     PptSchemaValidator.subscriptionValidator.validate(pptSubscription)
     subscriptionsConnector.submitSubscription(safeId, pptSubscription).flatMap {
-        case subscriptionResponse @ SubscriptionSuccessfulResponse(pptReferenceNumber, _, formBundleNumber) =>
-          logger.info(
-            s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated}, " +
-              s"PPT Reference [${pptReferenceNumber.obfuscated}] FormBundleId [${formBundleNumber.obfuscated}]"
-          )
-          handleSuccessfulSubscription(subscriptionResponse, safeId, pptRegistration, userHeaders).map(Right.apply _)
+      case subscriptionResponse @ SubscriptionSuccessfulResponse(pptReferenceNumber,
+                                                                 _,
+                                                                 formBundleNumber
+          ) =>
+        logger.info(
+          s"Successful PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated}, " +
+            s"PPT Reference [${pptReferenceNumber.obfuscated}] FormBundleId [${formBundleNumber.obfuscated}]"
+        )
+        handleSuccessfulSubscription(subscriptionResponse,
+                                     safeId,
+                                     pptRegistration,
+                                     userHeaders
+        ).map(Right.apply _)
 
-        case subscriptionResponse @ SubscriptionFailureResponseWithStatusCode(failedSubscriptionResponse, _) =>
-          val reasons = failedSubscriptionResponse.failures.map(_.reason)
-          logger.error(
-            s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated} - ${reasons.mkString("; ")}"
-          )
-          Future.successful(Left(subscriptionResponse))
-      }
-  }
-
-  private def handleSuccessfulSubscription(subscriptionResponse: SubscriptionSuccessfulResponse,
-                                           safeId: String,
-                                           pptRegistration: Registration,
-                                           userHeaders: Map[String, String])
-                                          (implicit hc:HeaderCarrier): Future[SubscriptionCreateWithEnrolmentAndNrsStatusesResponse] = {
-    for {
-      enrolmentResponse <- enrolUser(subscriptionResponse.pptReferenceNumber, safeId, subscriptionResponse.formBundleNumber)
-      nrsResponse       <- notifyNRS(pptRegistration, subscriptionResponse, userHeaders)
-      _                 <- deleteRegistration(pptRegistration.id)
-    } yield {
-      SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
-        pptReference = subscriptionResponse.pptReferenceNumber,
-        processingDate = subscriptionResponse.processingDate,
-        formBundleNumber = subscriptionResponse.formBundleNumber,
-        nrsNotifiedSuccessfully = nrsResponse.isSuccess,
-        nrsSubmissionId = nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
-        nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None),
-        enrolmentInitiatedSuccessfully = enrolmentResponse.isSuccess
-      )
+      case subscriptionResponse @ SubscriptionFailureResponseWithStatusCode(
+            failedSubscriptionResponse,
+            _
+          ) =>
+        val reasons = failedSubscriptionResponse.failures.map(_.reason)
+        logger.error(
+          s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated} - ${reasons.mkString("; ")}"
+        )
+        Future.successful(Left(subscriptionResponse))
     }
   }
 
+  private def handleSuccessfulSubscription(
+    subscriptionResponse: SubscriptionSuccessfulResponse,
+    safeId: String,
+    pptRegistration: Registration,
+    userHeaders: Map[String, String]
+  )(implicit hc: HeaderCarrier): Future[SubscriptionCreateWithEnrolmentAndNrsStatusesResponse] =
+    for {
+      enrolmentResponse <- enrolUser(subscriptionResponse.pptReferenceNumber,
+                                     safeId,
+                                     subscriptionResponse.formBundleNumber
+      )
+      nrsResponse <- notifyNRS(pptRegistration, subscriptionResponse, userHeaders)
+      _           <- deleteRegistration(pptRegistration.id)
+    } yield SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(
+      pptReference = subscriptionResponse.pptReferenceNumber,
+      processingDate = subscriptionResponse.processingDate,
+      formBundleNumber = subscriptionResponse.formBundleNumber,
+      nrsNotifiedSuccessfully = nrsResponse.isSuccess,
+      nrsSubmissionId = nrsResponse.fold(_ => None, nrsResponse => Some(nrsResponse.submissionId)),
+      nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None),
+      enrolmentInitiatedSuccessfully = enrolmentResponse.isSuccess
+    )
+
   private def enrolUser(pptReference: String, safeId: String, formBundleId: String)(implicit
-                                                                                    hc: HeaderCarrier
+    hc: HeaderCarrier
   ): Future[Try[TaxEnrolmentsResponse]] =
     enrolmentConnector.submitEnrolment(pptReference, safeId, formBundleId)
       .map {
@@ -111,16 +135,17 @@ class SubscriptionService @Inject()(subscriptionsConnector: SubscriptionsConnect
           Failure(e)
       }
 
-  def notifyNRS(registration: Registration,
-                         subscriptionResponse: SubscriptionSuccessfulResponse,
-                         userHeaders: Map[String, String]
-                       )(implicit hc: HeaderCarrier): Future[Try[NonRepudiationSubmissionAccepted]] =
+  def notifyNRS(
+    registration: Registration,
+    subscriptionResponse: SubscriptionSuccessfulResponse,
+    userHeaders: Map[String, String]
+  )(implicit hc: HeaderCarrier): Future[Try[NonRepudiationSubmissionAccepted]] =
     nonRepudiationService.submitNonRepudiation(payloadString = toJson(registration).toString,
-      submissionTimestamp =
-        subscriptionResponse.processingDate,
-      pptReference =
-        subscriptionResponse.pptReferenceNumber,
-      userHeaders = userHeaders
+                                               submissionTimestamp =
+                                                 subscriptionResponse.processingDate,
+                                               pptReference =
+                                                 subscriptionResponse.pptReferenceNumber,
+                                               userHeaders = userHeaders
     )
       .map {
         resp =>

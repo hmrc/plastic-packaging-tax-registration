@@ -16,13 +16,18 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{IncorporationAddressDetails, IncorporationDetails}
-
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  IncorporationAddressDetails,
+  IncorporationDetails
+}
 
 trait IncorporationDetailsBuilder {
   private type Modifier = IncorporationDetails => IncorporationDetails
 
-  private val baseModel: IncorporationDetails = IncorporationDetails("", "", "", IncorporationAddressDetails(), None)
+  private val baseModel: IncorporationDetails =
+    IncorporationDetails("", "", "", IncorporationAddressDetails(), None)
 
-  def someIncorporationDetails(modifiers: Modifier*): IncorporationDetails = modifiers.foldLeft(baseModel)((acc, next) => next(acc))
+  def someIncorporationDetails(modifiers: Modifier*): IncorporationDetails =
+    modifiers.foldLeft(baseModel)((acc, next) => next(acc))
+
 }

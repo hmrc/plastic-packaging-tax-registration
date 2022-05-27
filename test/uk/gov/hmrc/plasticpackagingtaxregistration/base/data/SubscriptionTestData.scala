@@ -131,7 +131,7 @@ trait SubscriptionTestData extends AuthTestSupport {
     groupPartnershipSubscription = None
   )
 
-    protected val ukLimitedCompanySubscriptionInvalid: Subscription = Subscription(
+  protected val ukLimitedCompanySubscriptionInvalid: Subscription = Subscription(
     legalEntityDetails =
       LegalEntityDetails(dateOfApplication =
                            "foo",

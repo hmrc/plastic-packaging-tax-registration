@@ -33,8 +33,8 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
   EISSubscriptionFailureResponse,
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
   SubscriptionFailureResponseWithStatusCode
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
@@ -265,7 +265,7 @@ class SubscriptionControllerSpec
       val rawResp = route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
       status(rawResp) mustBe 422
-      val str = contentAsString(rawResp)
+      val str  = contentAsString(rawResp)
       val resp = contentAsJson(rawResp).as[EISSubscriptionFailureResponse]
       resp.failures mustBe List(
         EISError("ACTIVE_SUBSCRIPTION_EXISTS",

@@ -19,9 +19,11 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.util
 import org.scalatest.matchers.must
 import org.scalatest.wordspec.AnyWordSpec
 
-class ObfuscationSpec extends AnyWordSpec with must.Matchers{
+class ObfuscationSpec extends AnyWordSpec with must.Matchers {
   "obfuscating as string leads to another string" in {
-    Obfuscation.obfuscate("the quick brown fox jumps over the lazy dog") must not(be("the quick brown fox jumps over the lazy dog"))
+    Obfuscation.obfuscate("the quick brown fox jumps over the lazy dog") must not(
+      be("the quick brown fox jumps over the lazy dog")
+    )
   }
 
   "obfuscating the same string twice leads to the same result" in {

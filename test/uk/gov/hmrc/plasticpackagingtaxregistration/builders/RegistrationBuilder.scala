@@ -22,15 +22,14 @@ import java.util.UUID
 import org.joda.time.DateTime
 import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
-
-
-
-
 //noinspection ScalaStyle
-trait RegistrationBuilder extends OrganisationDetailsBuilder with IncorporationDetailsBuilder with PPTAddressBuilder with PrimaryContactDetailsBuilder with LiabilityDetailsBuilder {
+trait RegistrationBuilder
+    extends OrganisationDetailsBuilder with IncorporationDetailsBuilder with PPTAddressBuilder
+    with PrimaryContactDetailsBuilder with LiabilityDetailsBuilder {
   private type RegistrationModifier = Registration => Registration
 
-  private val modelWithDefaults: Registration = Registration(id = "id", incorpJourneyId = Some(UUID.randomUUID().toString))
+  private val modelWithDefaults: Registration =
+    Registration(id = "id", incorpJourneyId = Some(UUID.randomUUID().toString))
 
   def aRegistration(modifiers: RegistrationModifier*): Registration =
     modifiers.foldLeft(modelWithDefaults)((current, nextFunction) => nextFunction(current))
@@ -38,32 +37,26 @@ trait RegistrationBuilder extends OrganisationDetailsBuilder with IncorporationD
   def aValidRegistration(modifiers: RegistrationModifier*): Registration = {
     val baseModifiers = Seq(
       withOrganisationDetails(
-        anOrganisation(
-          withBusinessRegisteredAddress(anAddress()),
-          withIncorporationDetails(someIncorporationDetails()),
-          withOrganisationType(OrgType.UK_COMPANY)
+        anOrganisation(withBusinessRegisteredAddress(anAddress()),
+                       withIncorporationDetails(someIncorporationDetails()),
+                       withOrganisationType(OrgType.UK_COMPANY)
         )
       ),
       withPrimaryContactDetails(
-        somePrimaryContactDetails(
-          withJobTitle("JOB_TITLE"),
-          withName("NAME"),
-          withEmailAddress("EMAIL_ADDRESS"),
-          withPhoneNumber("PHONE_NUMBER"),
-          withAddress(anAddress())
+        somePrimaryContactDetails(withJobTitle("JOB_TITLE"),
+                                  withName("NAME"),
+                                  withEmailAddress("EMAIL_ADDRESS"),
+                                  withPhoneNumber("PHONE_NUMBER"),
+                                  withAddress(anAddress())
         )
       ),
       withLiabilityDetails(
-        aLiability(
-          withStartDate(LocalDate.of(0,1,1)),
-          withExpectedWeightNext12m(0)
-        )
+        aLiability(withStartDate(LocalDate.of(0, 1, 1)), withExpectedWeightNext12m(0))
       )
     )
 
-    aRegistration(baseModifiers ++ modifiers:_*)
+    aRegistration(baseModifiers ++ modifiers: _*)
   }
-
 
   def withId(id: String): RegistrationModifier = _.copy(id = id)
 

@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.services
 
-
 import com.google.inject.Inject
 
-class SchemaValidatorService @Inject() {
-
-}
+class SchemaValidatorService @Inject() {}

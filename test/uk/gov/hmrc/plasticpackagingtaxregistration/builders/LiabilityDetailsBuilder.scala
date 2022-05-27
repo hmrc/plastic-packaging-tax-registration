@@ -18,16 +18,23 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import java.time.LocalDate
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{LiabilityDetails, LiabilityWeight, OldDate}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  LiabilityDetails,
+  LiabilityWeight,
+  OldDate
+}
 
 trait LiabilityDetailsBuilder {
   private type Modifier = LiabilityDetails => LiabilityDetails
 
   private val baseModel: LiabilityDetails = LiabilityDetails()
 
-  def aLiability(modifiers: Modifier*): LiabilityDetails = modifiers.foldLeft(baseModel)((acc, next) => next(acc))
+  def aLiability(modifiers: Modifier*): LiabilityDetails =
+    modifiers.foldLeft(baseModel)((acc, next) => next(acc))
 
-  def  withStartDate(startDate: LocalDate): Modifier = _.copy(startDate = Some(OldDate(startDate)))
+  def withStartDate(startDate: LocalDate): Modifier = _.copy(startDate = Some(OldDate(startDate)))
 
-  def withExpectedWeightNext12m(weightInKg: Long):Modifier = _.copy(expectedWeightNext12m = Some(LiabilityWeight(Some(weightInKg))))
+  def withExpectedWeightNext12m(weightInKg: Long): Modifier =
+    _.copy(expectedWeightNext12m = Some(LiabilityWeight(Some(weightInKg))))
+
 }

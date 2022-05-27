@@ -34,6 +34,7 @@ object Obfuscation {
   }
 
   implicit class StringObfuscationOps(inner: String) {
-    def obfuscated : String = Obfuscation.obfuscate(inner)
+    def obfuscated: String = Obfuscation.obfuscate(inner)
   }
+
 }

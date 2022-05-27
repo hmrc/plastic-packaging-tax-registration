@@ -15,27 +15,32 @@
  */
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.validators
+
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
 
 class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with SubscriptionTestData {
 
-    "validate" when {
-        "given a valid create" should {
-            "return success" in {
-                PptSchemaValidator.subscriptionValidator.validate(ukLimitedCompanySubscription).isSuccess mustBe true
-            }
-
-        }
-
-        "given an invalid create" should {
-            "return failure" in {
-                PptSchemaValidator.subscriptionValidator.validate(ukLimitedCompanySubscriptionInvalid).isSuccess mustBe false
-            }
-
-        }
+  "validate" when {
+    "given a valid create" should {
+      "return success" in {
+        PptSchemaValidator.subscriptionValidator.validate(
+          ukLimitedCompanySubscription
+        ).isSuccess mustBe true
+      }
 
     }
+
+    "given an invalid create" should {
+      "return failure" in {
+        PptSchemaValidator.subscriptionValidator.validate(
+          ukLimitedCompanySubscriptionInvalid
+        ).isSuccess mustBe false
+      }
+
+    }
+
+  }
 
 }

@@ -23,9 +23,9 @@ import play.api.libs.json.{Json, OFormat}
 sealed trait SubscriptionResponse
 
 case class SubscriptionFailureResponseWithStatusCode(
-                                                      failureResponse: EISSubscriptionFailureResponse,
-                                                      statusCode: Int
-                                                    ) extends SubscriptionResponse
+  failureResponse: EISSubscriptionFailureResponse,
+  statusCode: Int
+) extends SubscriptionResponse
 
 object SubscriptionFailureResponseWithStatusCode {
 
@@ -34,12 +34,11 @@ object SubscriptionFailureResponseWithStatusCode {
 
 }
 
-
 case class SubscriptionSuccessfulResponse(
-                                           pptReferenceNumber: String,
-                                           processingDate: ZonedDateTime,
-                                           formBundleNumber: String
-                                         ) extends SubscriptionResponse
+  pptReferenceNumber: String,
+  processingDate: ZonedDateTime,
+  formBundleNumber: String
+) extends SubscriptionResponse
 
 object SubscriptionSuccessfulResponse {
 

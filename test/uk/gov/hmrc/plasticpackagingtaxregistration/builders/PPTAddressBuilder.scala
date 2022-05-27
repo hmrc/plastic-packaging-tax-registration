@@ -18,21 +18,18 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.PPTAddress
 
-
-
-
-
 trait PPTAddressBuilder {
   private type Modifier = PPTAddress => PPTAddress
 
-  private val baseModel: PPTAddress = PPTAddress(
-    addressLine1 = "",
-    addressLine2 = None,
-    addressLine3 = None,
-    townOrCity = "",
-    postCode = None,
-    countryCode = ""
+  private val baseModel: PPTAddress = PPTAddress(addressLine1 = "",
+                                                 addressLine2 = None,
+                                                 addressLine3 = None,
+                                                 townOrCity = "",
+                                                 postCode = None,
+                                                 countryCode = ""
   )
 
-  def anAddress(modifiers: Modifier*): PPTAddress = modifiers.foldLeft(baseModel)((acc, next) => next(acc))
+  def anAddress(modifiers: Modifier*): PPTAddress =
+    modifiers.foldLeft(baseModel)((acc, next) => next(acc))
+
 }

@@ -23,10 +23,10 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.models
 object DeregistrationReason extends Enumeration {
   type DeregistrationReason = Value
 
-  val RegisteredIncorrectly = Value(1, "Registered Incorrectly")
-  val CeasedTrading = Value(2, "Ceased Trading")
+  val RegisteredIncorrectly               = Value(1, "Registered Incorrectly")
+  val CeasedTrading                       = Value(2, "Ceased Trading")
   val NotMetAndDoNotExpectToMeetThreshold = Value(3, "Below De-minimus")
-  val WantToRegisterAsGroup = Value(4, "Taken into Group Registration")
+  val WantToRegisterAsGroup               = Value(4, "Taken into Group Registration")
 
   implicit val format: Format[DeregistrationReason] =
     Format(Reads.enumNameReads(DeregistrationReason), Writes.enumNameWrites)

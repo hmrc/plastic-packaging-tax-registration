@@ -17,22 +17,28 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{IncorporationDetails, OrganisationDetails, PPTAddress}
-
-
-
-
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  IncorporationDetails,
+  OrganisationDetails,
+  PPTAddress
+}
 
 trait OrganisationDetailsBuilder {
   private type Modifier = OrganisationDetails => OrganisationDetails
 
   private val baseModel: OrganisationDetails = OrganisationDetails()
 
-  def anOrganisation(modifiers: Modifier*): OrganisationDetails = modifiers.foldLeft(baseModel)((acc, next) => next(acc))
+  def anOrganisation(modifiers: Modifier*): OrganisationDetails =
+    modifiers.foldLeft(baseModel)((acc, next) => next(acc))
 
-  def withIncorporationDetails(incorporationDetails: IncorporationDetails): Modifier = { org => org.copy(incorporationDetails = Some(incorporationDetails)) }
+  def withIncorporationDetails(incorporationDetails: IncorporationDetails): Modifier = { org =>
+    org.copy(incorporationDetails = Some(incorporationDetails))
+  }
 
-  def withOrganisationType(organisationType: OrgType): Modifier = _.copy(organisationType = Some(organisationType))
+  def withOrganisationType(organisationType: OrgType): Modifier =
+    _.copy(organisationType = Some(organisationType))
 
-  def withBusinessRegisteredAddress(address: PPTAddress): Modifier = _.copy(businessRegisteredAddress = Some(address))
+  def withBusinessRegisteredAddress(address: PPTAddress): Modifier =
+    _.copy(businessRegisteredAddress = Some(address))
+
 }
