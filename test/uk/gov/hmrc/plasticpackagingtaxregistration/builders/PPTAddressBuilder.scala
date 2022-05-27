@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{LiabilityDetails, OrganisationDetails, PPTAddress, PrimaryContactDetails}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.PPTAddress
 
 
 

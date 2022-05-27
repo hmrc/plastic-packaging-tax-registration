@@ -17,7 +17,7 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{IncorporationDetails, OrganisationDetails, PPTAddress, PostCodeWithoutSpaces}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{IncorporationDetails, OrganisationDetails, PPTAddress}
 
 
 

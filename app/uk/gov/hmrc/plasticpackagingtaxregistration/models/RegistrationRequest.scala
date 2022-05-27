@@ -29,12 +29,8 @@ case class RegistrationRequest(
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
   organisationDetails: OrganisationDetails = OrganisationDetails(),
   metaData: MetaData = MetaData(),
-  userHeaders: Option[Map[String, String]] = None
+  userHeaders: Map[String, String] = Map.empty
 ) {
-
-  // TODO: Why do we hava an Option of a map anyway?
-  lazy val sensibleUserHeaders = userHeaders.getOrElse(Map.empty)
-
   def toRegistration(providerId: String): Registration =
     Registration(id = providerId,
                  dateOfRegistration = this.dateOfRegistration,
@@ -52,6 +48,24 @@ case class RegistrationRequest(
 object RegistrationRequest {
 
   import play.api.libs.json._
+  import play.api.libs.functional.syntax._
 
-  implicit val format: OFormat[RegistrationRequest] = Json.format[RegistrationRequest]
+  implicit val reads: Reads[RegistrationRequest] =
+    ((__ \ "dateOfRegistration").readNullable[LocalDate] and
+    (__ \ "registrationType").readNullable[RegType] and
+    (__ \ "groupDetail").readNullable[GroupDetail] and
+    (__ \ "incorpJourneyId").readNullable[String] and
+    (__ \ "liabilityDetails").read[LiabilityDetails] and
+    (__ \ "primaryContactDetails").read[PrimaryContactDetails] and
+    (__ \ "organisationDetails").read[OrganisationDetails] and
+    (__ \ "metaData").read[MetaData] and
+    (__ \ "userHeaders").readNullable[Map[String, String]].map {
+      case None => Map.empty[String, String]
+      case Some(x) => x
+    }).apply(RegistrationRequest.apply _)
+
+  implicit val writes = Json.writes[RegistrationRequest].transform{ js:JsObject =>
+    if (js("userHeaders") == JsObject.empty) js - ("userHeaders")
+    else js
+  }
 }

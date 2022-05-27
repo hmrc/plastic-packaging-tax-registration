@@ -18,41 +18,20 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.validators
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
-import play.api.libs.json.Json
-import play.api.libs.json.{JsResult, JsValue}
 
 class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with SubscriptionTestData {
 
     "validate" when {
-
         "given a valid create" should {
-
             "return success" in {
-
-                val jsonRequest = Json.toJson(ukLimitedCompanySubscription)
-
-                val sv = new PptSchemaValidator()
-
-                val response = sv.validate("/api-docs/api-1711-ppt-subscription-create-1.6.0.json", jsonRequest)
-
-                response.isSuccess mustBe true
-
+                PptSchemaValidator.subscriptionValidator.validate(ukLimitedCompanySubscription).isSuccess mustBe true
             }
 
         }
 
-
         "given an invalid create" should {
-
             "return failure" in {
-
-                val jsonRequest = Json.toJson(ukLimitedCompanySubscriptionInvalid)
-
-                val sv = new PptSchemaValidator()
-
-                val response: JsResult[JsValue] = sv.validate("/api-docs/api-1711-ppt-subscription-create-1.6.0.json", jsonRequest)
-
-                response.isSuccess mustBe false
+                PptSchemaValidator.subscriptionValidator.validate(ukLimitedCompanySubscriptionInvalid).isSuccess mustBe false
             }
 
         }

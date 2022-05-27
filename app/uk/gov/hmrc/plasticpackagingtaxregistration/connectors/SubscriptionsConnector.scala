@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
+import java.util.UUID
+
 import com.codahale.metrics.Timer
 import com.kenshoo.play.metrics.Metrics
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status
-import play.api.libs.json.Json
 import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
@@ -29,8 +31,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
 
-import java.util.UUID
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 

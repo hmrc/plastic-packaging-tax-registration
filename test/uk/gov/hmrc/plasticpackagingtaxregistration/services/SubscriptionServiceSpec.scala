@@ -47,43 +47,6 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
 
 class SubscriptionServiceSpec extends AnyWordSpec with RegistrationBuilder with must.Matchers with NrsTestData{
-    trait Fixture {
-      val mockSubscriptionConnector = mock[SubscriptionsConnector]
-      val mockTaxEnrolmentsConnector = mock[TaxEnrolmentsConnector]
-      val mockRegistrationRepository = mock[RegistrationRepository]
-      val mockNonRepudiationConnector = mock[NonRepudiationConnector]
-      val mockAuthConnector = mock[AuthConnector]
-
-      val nonRepudiationService = new NonRepudiationService(mockNonRepudiationConnector, mockAuthConnector)(globalExecutionContext)
-
-      val hc = HeaderCarrier(authorization = Some(Authorization("AUTH_TOKEN")))
-
-      when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
-        Future.successful(Right(SuccessfulTaxEnrolment))
-      )
-
-      when(mockAuthConnector.authorise[NonRepudiationService.NonRepudiationIdentityRetrievals](any(), any())(any(), any())).thenReturn(
-        Future.successful(testAuthRetrievals)
-      )
-
-      when(mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(any[HeaderCarrier])).thenReturn(
-        Future.successful(SubscriptionSuccessfulResponse("PPT_REF", ZonedDateTime.of(2022, 12, 13, 10, 32, 12, 765, ZoneId.of("UTC")), "FORM_BUNDLE_NO"))
-      )
-
-      when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any())).thenReturn(
-        Future.successful(NonRepudiationSubmissionAccepted("NRS_SUBMISSION_ID"))
-      )
-
-      when(mockRegistrationRepository.delete(any())).thenReturn(Future.successful(()))
-
-      val SUT = new SubscriptionService(
-        mockSubscriptionConnector,
-        mockTaxEnrolmentsConnector,
-        mockRegistrationRepository,
-        nonRepudiationService
-      )(globalExecutionContext)
-    }
-
     "SubscriptionService" when {
       "called, submits a subscription to the HOD API" in new Fixture {
         val registration = aValidRegistration()
@@ -208,5 +171,42 @@ class SubscriptionServiceSpec extends AnyWordSpec with RegistrationBuilder with 
                         IM_A_TEAPOT
                       ))
       }
+    }
+
+    trait Fixture {
+      val mockSubscriptionConnector = mock[SubscriptionsConnector]
+      val mockTaxEnrolmentsConnector = mock[TaxEnrolmentsConnector]
+      val mockRegistrationRepository = mock[RegistrationRepository]
+      val mockNonRepudiationConnector = mock[NonRepudiationConnector]
+      val mockAuthConnector = mock[AuthConnector]
+
+      val nonRepudiationService = new NonRepudiationService(mockNonRepudiationConnector, mockAuthConnector)(globalExecutionContext)
+
+      val hc = HeaderCarrier(authorization = Some(Authorization("AUTH_TOKEN")))
+
+      when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
+        Future.successful(Right(SuccessfulTaxEnrolment))
+      )
+
+      when(mockAuthConnector.authorise[NonRepudiationService.NonRepudiationIdentityRetrievals](any(), any())(any(), any())).thenReturn(
+        Future.successful(testAuthRetrievals)
+      )
+
+      when(mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(any[HeaderCarrier])).thenReturn(
+        Future.successful(SubscriptionSuccessfulResponse("PPT_REF", ZonedDateTime.of(2022, 12, 13, 10, 32, 12, 765, ZoneId.of("UTC")), "FORM_BUNDLE_NO"))
+      )
+
+      when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any())).thenReturn(
+        Future.successful(NonRepudiationSubmissionAccepted("NRS_SUBMISSION_ID"))
+      )
+
+      when(mockRegistrationRepository.delete(any())).thenReturn(Future.successful(()))
+
+      val SUT = new SubscriptionService(
+        mockSubscriptionConnector,
+        mockTaxEnrolmentsConnector,
+        mockRegistrationRepository,
+        nonRepudiationService
+      )(globalExecutionContext)
     }
 }

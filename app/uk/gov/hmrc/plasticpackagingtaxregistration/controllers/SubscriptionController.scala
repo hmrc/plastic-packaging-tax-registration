@@ -16,37 +16,28 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.SubscriptionsConnector
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionCreateWithEnrolmentAndNrsStatusesResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{SubscriptionsConnector, TaxEnrolmentsConnector}
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{Authenticator, AuthorizedRequest}
+import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{Registration, RegistrationRequest}
-import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
-import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.plasticpackagingtaxregistration.services.SubscriptionService
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 @Singleton
 class SubscriptionController @Inject() (
   subscriptionsConnector: SubscriptionsConnector,
   authenticator: Authenticator,
-  repository: RegistrationRepository,
-  nonRepudiationService: NonRepudiationService,
-  enrolmentConnector: TaxEnrolmentsConnector,
   subscriptionService: SubscriptionService,
   override val controllerComponents: ControllerComponents
 )(implicit executionContext: ExecutionContext)
@@ -83,7 +74,7 @@ class SubscriptionController @Inject() (
         subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
           case response @ SubscriptionSuccessfulResponse(pptReferenceNumber, _, formBundleNumber) =>
             for {
-              nrsResponse <- subscriptionService.notifyNRS(updatedRegistration, response, request.body.sensibleUserHeaders)
+              nrsResponse <- subscriptionService.notifyNRS(updatedRegistration, response, request.body.userHeaders)
             } yield Ok(
               SubscriptionUpdateWithNrsStatusResponse(
                 pptReference =
@@ -114,7 +105,7 @@ class SubscriptionController @Inject() (
     authenticator.authorisedAction(authenticator.parsingJson[RegistrationRequest]) {
       implicit request =>
         val pptRegistration = request.body.toRegistration(request.registrationId)
-        subscriptionService.submit(pptRegistration, safeId, request.body.sensibleUserHeaders) map {
+        subscriptionService.submit(pptRegistration, safeId, request.body.userHeaders) map {
           case Right(value) => Ok(value)
           case Left(value) => Status(value.statusCode)(value.failureResponse)
         }

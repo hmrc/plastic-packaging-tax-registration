@@ -23,7 +23,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISErro
 
 sealed trait SubscriptionResponse
 
-case class SubscriptionFailureResponse(failures: Seq[EISError]) extends SubscriptionResponse
+case class SubscriptionFailureResponse(failures: Seq[EISError])
 
 object SubscriptionFailureResponse {
 

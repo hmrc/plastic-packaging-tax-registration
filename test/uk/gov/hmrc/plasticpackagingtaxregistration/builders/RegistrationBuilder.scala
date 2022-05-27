@@ -17,10 +17,10 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
 import java.time.LocalDate
+import java.util.UUID
 
 import org.joda.time.DateTime
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{GroupDetail, IncorporationDetails, LiabilityDetails, OrgType, OrganisationDetails, Partner, PrimaryContactDetails, RegType, Registration}
-import java.util.UUID
+import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
 
 
