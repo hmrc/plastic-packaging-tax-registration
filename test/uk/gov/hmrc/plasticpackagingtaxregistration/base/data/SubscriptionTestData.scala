@@ -22,7 +22,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
-  SubscriptionFailureResponse,
+  EISSubscriptionFailureResponse,
   SubscriptionSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{
@@ -81,8 +81,8 @@ trait SubscriptionTestData extends AuthTestSupport {
                                    formBundleNumber = "123456789"
     )
 
-  protected val subscriptionCreateFailureResponse: SubscriptionFailureResponse =
-    SubscriptionFailureResponse(failures =
+  protected val subscriptionCreateFailureResponse: EISSubscriptionFailureResponse =
+    EISSubscriptionFailureResponse(failures =
       Seq(EISError(code = "123", reason = "error"))
     )
 

@@ -34,7 +34,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISErro
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
-  SubscriptionFailureResponse,
+  EISSubscriptionFailureResponse,
   SubscriptionFailureResponseWithStatusCode
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
@@ -251,7 +251,7 @@ class SubscriptionControllerSpec
       withAuthorizedUser()
       mockGetSubscriptionSubmitFailure(
         SubscriptionFailureResponseWithStatusCode(
-          failureResponse = SubscriptionFailureResponse(failures =
+          failureResponse = EISSubscriptionFailureResponse(failures =
             List(
               EISError("ACTIVE_SUBSCRIPTION_EXISTS",
                        "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
@@ -266,7 +266,7 @@ class SubscriptionControllerSpec
 
       status(rawResp) mustBe 422
       val str = contentAsString(rawResp)
-      val resp = contentAsJson(rawResp).as[SubscriptionFailureResponse]
+      val resp = contentAsJson(rawResp).as[EISSubscriptionFailureResponse]
       resp.failures mustBe List(
         EISError("ACTIVE_SUBSCRIPTION_EXISTS",
                  "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
@@ -458,7 +458,7 @@ class SubscriptionControllerSpec
       withAuthorizedUser()
       mockSubscriptionUpdateFailure(
         SubscriptionFailureResponseWithStatusCode(
-          failureResponse = SubscriptionFailureResponse(failures =
+          failureResponse = EISSubscriptionFailureResponse(failures =
             List(
               EISError("ACTIVE_SUBSCRIPTION_EXISTS",
                        "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
@@ -472,7 +472,7 @@ class SubscriptionControllerSpec
       val rawResp = route(app, subscriptionResponse_HttpPut.withJsonBody(toJson(request))).get
 
       status(rawResp) mustBe 422
-      val resp = contentAsJson(rawResp).as[SubscriptionFailureResponse]
+      val resp = contentAsJson(rawResp).as[EISSubscriptionFailureResponse]
       resp.failures mustBe List(
         EISError("ACTIVE_SUBSCRIPTION_EXISTS",
                  "The remote endpoint has indicated that Business Partner already has active subscription for this regime."

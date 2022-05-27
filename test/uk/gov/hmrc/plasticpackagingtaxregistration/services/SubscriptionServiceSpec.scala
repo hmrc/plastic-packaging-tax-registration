@@ -35,7 +35,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.NrsTestData
 import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionCreateWithEnrolmentAndNrsStatusesResponse, SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionCreateWithEnrolmentAndNrsStatusesResponse, EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{NonRepudiationConnector, SubscriptionsConnector, TaxEnrolmentsConnector}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
@@ -146,7 +146,7 @@ class SubscriptionServiceSpec extends AnyWordSpec with RegistrationBuilder with 
 
         when(mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(any[HeaderCarrier])).thenReturn(
           Future.successful(SubscriptionFailureResponseWithStatusCode(
-            SubscriptionFailureResponse(
+            EISSubscriptionFailureResponse(
               Seq(
                 EISError("CODE 1", "Reason 1"),
                 EISError("CODE 2", "Reason 2"),
@@ -162,7 +162,7 @@ class SubscriptionServiceSpec extends AnyWordSpec with RegistrationBuilder with 
 
         val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
         result mustBe Left(SubscriptionFailureResponseWithStatusCode(
-                        SubscriptionFailureResponse(
+                        EISSubscriptionFailureResponse(
                           Seq(
                             EISError("CODE 1", "Reason 1"),
                             EISError("CODE 2", "Reason 2"),

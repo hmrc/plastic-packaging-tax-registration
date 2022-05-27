@@ -30,7 +30,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
-  SubscriptionFailureResponse,
+  EISSubscriptionFailureResponse,
   SubscriptionFailureResponseWithStatusCode,
   SubscriptionSuccessfulResponse
 }
@@ -200,7 +200,7 @@ class SubscriptionsConnectorISpec
             val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
             resp mustBe SubscriptionFailureResponseWithStatusCode(
-              SubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
+              EISSubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
               statusCode
             )
 
@@ -342,7 +342,7 @@ class SubscriptionsConnectorISpec
               await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
 
             resp mustBe SubscriptionFailureResponseWithStatusCode(
-              SubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
+              EISSubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
               statusCode
             )
             getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1

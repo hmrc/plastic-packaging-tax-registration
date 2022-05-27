@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -118,7 +118,7 @@ class SubscriptionsConnector @Inject() (
                 )
             }
           else
-            Try(subscriptionResponse.json.as[SubscriptionFailureResponse]) match {
+            Try(subscriptionResponse.json.as[EISSubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
                 SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
                                                           subscriptionResponse.status
@@ -200,7 +200,7 @@ class SubscriptionsConnector @Inject() (
                 )
             }
           else
-            Try(subscriptionUpdateResponse.json.as[SubscriptionFailureResponse]) match {
+            Try(subscriptionUpdateResponse.json.as[EISSubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
                 SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
                                                           subscriptionUpdateResponse.status

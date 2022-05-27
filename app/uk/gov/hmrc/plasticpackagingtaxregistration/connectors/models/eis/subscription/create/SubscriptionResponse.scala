@@ -19,21 +19,11 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 import java.time.ZonedDateTime
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 
 sealed trait SubscriptionResponse
 
-case class SubscriptionFailureResponse(failures: Seq[EISError])
-
-object SubscriptionFailureResponse {
-
-  implicit val format: OFormat[SubscriptionFailureResponse] =
-    Json.format[SubscriptionFailureResponse]
-
-}
-
 case class SubscriptionFailureResponseWithStatusCode(
-                                                      failureResponse: SubscriptionFailureResponse,
+                                                      failureResponse: EISSubscriptionFailureResponse,
                                                       statusCode: Int
                                                     ) extends SubscriptionResponse
 
