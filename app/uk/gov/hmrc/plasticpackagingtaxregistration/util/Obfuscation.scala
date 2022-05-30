@@ -33,7 +33,7 @@ object Obfuscation {
     result
   }
 
-  implicit class StringObfuscationOps(inner: String) {
+  implicit class StringObfuscationOps(val inner: String) extends AnyVal {
     def obfuscated: String = Obfuscation.obfuscate(inner)
   }
 
