@@ -1,7 +1,7 @@
 {
   "oneOf": [
       { 
-        "description": "0 - Create Subscription with groupSubscriptionFlag and partnershipSubscriptionFlag as true",
+        "description": "0 - Create Subscription with groupSubscriptionFlag as true and partnershipSubscriptionFlag as true",
         "type": "object",
         "properties": {
           "legalEntityDetails": {

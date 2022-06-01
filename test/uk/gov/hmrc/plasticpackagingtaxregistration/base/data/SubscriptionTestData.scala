@@ -176,7 +176,7 @@ trait SubscriptionTestData extends AuthTestSupport {
     groupPartnershipSubscription = None
   )
 
-  private val groupPartnershipDetailsRep: GroupPartnershipDetails = GroupPartnershipDetails(
+  protected val groupPartnershipDetailsRep: GroupPartnershipDetails = GroupPartnershipDetails(
     "Representative",
     "123456789",
     Some("1234567890"),
@@ -189,15 +189,15 @@ trait SubscriptionTestData extends AuthTestSupport {
 
   protected val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
     "Member",
-    "member-1",
-    Some("member-2"),
+    "member1",
+    Some("member2"),
     OrganisationDetails(Some("UkCompany"), "Plastics Member"),
     IndividualDetails(None, "Arthur", None, "Surname"),
     AddressDetails("addressLine1",
                    "addressLine2",
                    Some("addressLine3"),
                    Some("addressLine4"),
-                   Some("postcode"),
+                   Some("ZZ11ZZ"),
                    "GB"
     ),
     ContactDetails("member@email.com", "0987-456789", None),

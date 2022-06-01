@@ -1,0 +1,98 @@
+{
+  "legalEntityDetails" : {
+    "dateOfApplication" : "2022-06-01",
+    "customerIdentification1" : "123456789",
+    "customerIdentification2" : "1234567890",
+    "customerDetails" : {
+      "customerType" : "Organisation",
+      "organisationDetails" : {
+        "organisationType" : "UkCompany",
+        "organisationName" : "Plastics Ltd"
+      }
+    },
+    "groupSubscriptionFlag" : true,
+    "partnershipSubscriptionFlag" : false
+  },
+  "principalPlaceOfBusinessDetails" : {
+    "addressDetails" : {
+      "addressLine1" : "2-3 Scala Street",
+      "addressLine2" : "London",
+      "postalCode" : "W1T2HN",
+      "countryCode" : "GB"
+    },
+    "contactDetails" : {
+      "email" : "test@test.com",
+      "telephone" : "02034567890"
+    }
+  },
+  "primaryContactDetails" : {
+    "name" : "Kevin Durant",
+    "contactDetails" : {
+      "email" : "test@test.com",
+      "telephone" : "02034567890"
+    },
+    "positionInCompany" : "Director"
+  },
+  "businessCorrespondenceDetails" : {
+    "addressLine1" : "2-3 Scala Street",
+    "addressLine2" : "London",
+    "postalCode" : "W1T2HN",
+    "countryCode" : "GB"
+  },
+  "declaration" : {
+    "declarationBox1" : true
+  },
+  "taxObligationStartDate" : "2022-06-01",
+  "last12MonthTotalTonnageAmt" : 15000,
+  "groupPartnershipSubscription" : {
+    "representativeControl" : true,
+    "allMembersControl" : true,
+    "groupPartnershipDetails" : [ {
+      "relationship" : "Representative",
+      "customerIdentification1" : "123456789",
+      "customerIdentification2" : "1234567890",
+      "organisationDetails" : {
+        "organisationType" : "UkCompany",
+        "organisationName" : "Plastics Ltd"
+      },
+      "individualDetails" : {
+        "firstName" : "Kevin",
+        "lastName" : "Durant"
+      },
+      "addressDetails" : {
+        "addressLine1" : "2-3 Scala Street",
+        "addressLine2" : "London",
+        "postalCode" : "W1T2HN",
+        "countryCode" : "GB"
+      },
+      "contactDetails" : {
+        "email" : "test@test.com",
+        "telephone" : "02034567890"
+      }
+    }, {
+      "relationship" : "Member",
+      "customerIdentification1" : "member1",
+      "customerIdentification2" : "member2",
+      "organisationDetails" : {
+        "organisationType" : "UkCompany",
+        "organisationName" : "Plastics Member"
+      },
+      "individualDetails" : {
+        "firstName" : "Arthur",
+        "lastName" : "Surname"
+      },
+      "addressDetails" : {
+        "addressLine1" : "addressLine1",
+        "addressLine2" : "addressLine2",
+        "addressLine3" : "addressLine3",
+        "addressLine4" : "addressLine4",
+        "postalCode" : "ZZ11ZZ",
+        "countryCode" : "GB"
+      },
+      "contactDetails" : {
+        "email" : "member@email.com",
+        "telephone" : "0987-456789"
+      }
+    } ]
+  }
+}

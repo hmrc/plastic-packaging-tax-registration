@@ -18,7 +18,9 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.validators
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.libs.json.Json
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipSubscription
 
 class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with SubscriptionTestData {
 
@@ -27,20 +29,65 @@ class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with Subscription
       "return success" in {
         PptSchemaValidator.subscriptionValidator.validate(
           ukLimitedCompanySubscription
-        ).isSuccess mustBe true
+        ).isRight mustBe true
       }
-
     }
 
     "given an invalid create" should {
       "return failure" in {
         PptSchemaValidator.subscriptionValidator.validate(
           ukLimitedCompanySubscriptionInvalid
-        ).isSuccess mustBe false
+        ).isRight mustBe false
       }
-
     }
 
-  }
+    "creating a subscription with groupSubscriptionFlag as true and partnershipSubscriptionFlag as true" in {
+      val data = ukLimitedCompanySubscription.copy(
+                    legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = true, partnershipSubscriptionFlag = true),
+                    groupPartnershipSubscription = Some(GroupPartnershipSubscription(
+                      representativeControl = true,
+                      allMembersControl = true,
+                      Seq(groupPartnershipDetailsRep, groupPartnershipDetailsMember).map(_.copy(regWithoutIDFlag = None))
+                    ))
+                  )
 
+      PptSchemaValidator.subscriptionValidator.validate(data).isRight mustBe true
+    }
+
+
+    "creating a subscription with groupSubscriptionFlag as true partnershipSubscriptionFlag as false" in {
+      val data = ukLimitedCompanySubscription.copy(
+        legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = true, partnershipSubscriptionFlag = false),
+        groupPartnershipSubscription = Some(GroupPartnershipSubscription(
+          representativeControl = true,
+          allMembersControl = true,
+          Seq(groupPartnershipDetailsRep, groupPartnershipDetailsMember).map(_.copy(regWithoutIDFlag = None))
+        ))
+      )
+
+      PptSchemaValidator.subscriptionValidator.validate(data).isRight mustBe true
+    }
+
+    "creating a subscription with groupSubscriptionFlag as false partnershipSubscriptionFlag as true" in {
+      val data = ukLimitedCompanySubscription.copy(
+        legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = false, partnershipSubscriptionFlag = true),
+        groupPartnershipSubscription = Some(GroupPartnershipSubscription(
+          representativeControl = true,
+          allMembersControl = true,
+          Seq(groupPartnershipDetailsRep, groupPartnershipDetailsMember).map(_.copy(regWithoutIDFlag = None))
+        ))
+      )
+
+      PptSchemaValidator.subscriptionValidator.validate(data).isRight mustBe true
+    }
+
+    "creating a subscription with groupSubscriptionFlag  as false and partnershipSubscriptionFlag as false" in {
+      val data = ukLimitedCompanySubscription.copy(
+        legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = false, partnershipSubscriptionFlag = false),
+        groupPartnershipSubscription = None)
+
+
+      PptSchemaValidator.subscriptionValidator.validate(data).isRight mustBe true
+    }
+  }
 }

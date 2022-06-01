@@ -4,7 +4,10 @@
             <pattern>%date{ISO8601} level=[%level] logger=[%logger] message=[%message] %replace(exception=[%xException]){'^exception=\[\]$',''}%n</pattern>
         </encoder>
     </appender>
-    <root level="INFO">
+
+    <logger name="application.uk.gov.hmrc.plasticpackagingtaxregistration.validators.PptSchemaValidator" level="WARN" />
+
+    <root level="WARN">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

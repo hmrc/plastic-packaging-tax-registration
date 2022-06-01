@@ -18,67 +18,55 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.validators
 
 import java.io.InputStream
 
-import com.eclipsesource.schema.drafts.Version7._
-import com.eclipsesource.schema.{SchemaType, SchemaValidator}
-import play.api.Logger
+import cats.data.NonEmptyList
+import io.circe.schema.ValidationError
+import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.validation.SchemaError
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.validation.JsonSchemaError
 
-import scala.annotation.tailrec
+import scala.util.Try
 
 class PptSchemaValidator(schemaFile: String) {
 
-  private val logger = Logger(this.getClass)
+  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
 
-  lazy val schema: SchemaType = {
-    val stream: InputStream = getClass.getResourceAsStream(schemaFile)
-    val linesString: String = scala.io.Source.fromInputStream(stream).mkString
-    val json                = Json.parse(linesString.trim).as[JsObject]
-    json.as[SchemaType]
-  }
-
-  @tailrec
-  private def buildSchemaError(x: Any, acc: Seq[SchemaError]): Seq[SchemaError] =
-    x match {
-      case jsons: Seq[Any] =>
-        val fromHead = jsons.headOption match {
-          case Some(js: JsValue) => js.validate[SchemaError].asOpt.toSeq
-          case _                 => Nil
-        }
-
-        buildSchemaError(jsons(0), acc ++ fromHead)
-
-      case json: JsValue =>
-        acc ++ json.validate[SchemaError].asOpt.toSeq
-
-      case _ => Seq.empty
+  private lazy val schemaFileAsString: Try[String] = {
+    Try {
+      val stream: InputStream = getClass.getResourceAsStream(schemaFile)
+      scala.io.Source.fromInputStream(stream).mkString
     }
-
-  def validate[T](data: T)(implicit writes: Writes[T]): JsResult[JsValue] = {
-    val requestPayload = Json.toJson(data)
-
-    val res: JsResult[JsValue] = SchemaValidator(Some(com.eclipsesource.schema.drafts.Version7))
-      .validate(schema, requestPayload)
-
-    res.fold(
-      (errors: Seq[(JsPath, Seq[JsonValidationError])]) => {
-        val report: Seq[(String, SchemaError)] = for {
-          (path, errorList)   <- errors
-          jsonValidationError <- errorList
-          schemaError         <- buildSchemaError(jsonValidationError.args, Seq.empty)
-        } yield (jsonValidationError.message, schemaError)
-
-        val errorObjects = Json.toJson(report)
-        logger.warn(
-          s"PptSchemaValidator:$schemaFile: - Schema validation errors: ${Json.prettyPrint(errorObjects)}"
-        )
-      },
-      _ => logger.info(s"PptSchemaValidator:$schemaFile: - Schema validation success")
-    )
-
-    res
   }
 
+  private lazy val circeSchema: Try[io.circe.schema.Schema] = schemaFileAsString.flatMap(io.circe.schema.Schema.loadFromString)
+
+  def buildSchemaError(circeError: ValidationError): JsonSchemaError = {
+    JsonSchemaError(
+      circeError.schemaLocation,
+      circeError.keyword,
+      circeError.location
+
+    )
+  }
+
+  def validate[T](data: T)(implicit writes: Writes[T]) : Either[NonEmptyList[JsonSchemaError], Unit] = {
+    val dataJson = Json.toJson(data).toString()
+    val result = for {
+      js <- io.circe.parser.parse(dataJson).left
+        .map(pf => NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", pf.toString, schemaFile, None)))
+      schema <- circeSchema.toEither.left
+        .map(t => NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", t.getMessage, schemaFile, None)))
+      _ <- schema.validate(js).toEither
+    } yield Unit
+
+    result match {
+      case Left(errs) =>
+        val schemaErrors = errs.map(buildSchemaError)
+        logger.warn(Json.prettyPrint(Json.toJson(schemaErrors.toList)))
+        Left(schemaErrors)
+      case Right(_) =>
+        Right(Unit)
+    }
+  }
 }
 
 object PptSchemaValidator {
