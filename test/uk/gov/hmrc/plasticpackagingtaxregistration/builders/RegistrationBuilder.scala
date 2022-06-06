@@ -16,29 +16,47 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
-import org.joda.time.DateTime
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
-  GroupDetail,
-  LiabilityDetails,
-  OrganisationDetails,
-  Partner,
-  PrimaryContactDetails,
-  RegType,
-  Registration
-}
-
+import java.time.LocalDate
 import java.util.UUID
 
-//noinspection ScalaStyle
-trait RegistrationBuilder {
+import org.joda.time.DateTime
+import uk.gov.hmrc.plasticpackagingtaxregistration.models._
 
+//noinspection ScalaStyle
+trait RegistrationBuilder
+    extends OrganisationDetailsBuilder with IncorporationDetailsBuilder with PPTAddressBuilder
+    with PrimaryContactDetailsBuilder with LiabilityDetailsBuilder {
   private type RegistrationModifier = Registration => Registration
 
-  def aRegistration(modifiers: RegistrationModifier*): Registration =
-    modifiers.foldLeft(modelWithDefaults)((current, modifier) => modifier(current))
-
-  private def modelWithDefaults: Registration =
+  private val modelWithDefaults: Registration =
     Registration(id = "id", incorpJourneyId = Some(UUID.randomUUID().toString))
+
+  def aRegistration(modifiers: RegistrationModifier*): Registration =
+    modifiers.foldLeft(modelWithDefaults)((current, nextFunction) => nextFunction(current))
+
+  def aValidRegistration(modifiers: RegistrationModifier*): Registration = {
+    val baseModifiers = Seq(
+      withOrganisationDetails(
+        anOrganisation(withBusinessRegisteredAddress(anAddress()),
+                       withIncorporationDetails(someIncorporationDetails()),
+                       withOrganisationType(OrgType.UK_COMPANY)
+        )
+      ),
+      withPrimaryContactDetails(
+        somePrimaryContactDetails(withJobTitle("JOB_TITLE"),
+                                  withName("NAME"),
+                                  withEmailAddress("EMAIL_ADDRESS"),
+                                  withPhoneNumber("PHONE_NUMBER"),
+                                  withAddress(anAddress())
+        )
+      ),
+      withLiabilityDetails(
+        aLiability(withStartDate(LocalDate.of(0, 1, 1)), withExpectedWeightNext12m(0))
+      )
+    )
+
+    aRegistration(baseModifiers ++ modifiers: _*)
+  }
 
   def withId(id: String): RegistrationModifier = _.copy(id = id)
 

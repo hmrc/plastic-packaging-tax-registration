@@ -17,7 +17,6 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
 import play.api.Logger
-import play.api.libs.json.{Json, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
@@ -74,8 +73,8 @@ class RegistrationController @Inject() (
         }
     }
 
-  private def logPayload[T](prefix: String, payload: T)(implicit wts: Writes[T]): T = {
-    logger.debug(s"Payload: ${Json.toJson(payload)}")
+  private def logPayload[T](prefix: String, payload: T): T = {
+    logger.debug(s"$prefix payload: $payload")
     payload
   }
 

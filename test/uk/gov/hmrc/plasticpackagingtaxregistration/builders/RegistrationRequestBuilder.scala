@@ -56,7 +56,10 @@ trait RegistrationRequestBuilder {
     _.copy(organisationDetails = organisationDetails)
 
   def withUserHeaders(headers: Map[String, String]): RegistrationModifier =
-    _.copy(userHeaders = Some(headers))
+    _.copy(userHeaders = headers)
+
+  def withNoUserHeaders(): RegistrationModifier =
+    _.copy(userHeaders = Map.empty)
 
   def withGroupDetailsRequest(groupDetail: GroupDetail): RegistrationModifier =
     _.copy(groupDetail = Some(groupDetail))

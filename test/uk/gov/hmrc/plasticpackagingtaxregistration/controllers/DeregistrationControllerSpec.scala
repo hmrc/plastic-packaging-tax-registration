@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
-  SubscriptionFailureResponse,
+  EISSubscriptionFailureResponse,
   SubscriptionFailureResponseWithStatusCode
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
@@ -117,7 +117,12 @@ class DeregistrationControllerSpec extends ControllerSpec {
           Some(
             ChangeOfCircumstanceDetails(
               "Deregistration",
-              Some(DeregistrationDetails("Ceased Trading", LocalDate.now().toString, true))
+              Some(
+                DeregistrationDetails("Ceased Trading",
+                                      LocalDate.now(ZoneOffset.UTC).toString,
+                                      true
+                )
+              )
             )
           )
         )
@@ -155,7 +160,12 @@ class DeregistrationControllerSpec extends ControllerSpec {
           Some(
             ChangeOfCircumstanceDetails(
               "Deregistration",
-              Some(DeregistrationDetails("Ceased Trading", LocalDate.now().toString, true))
+              Some(
+                DeregistrationDetails("Ceased Trading",
+                                      LocalDate.now(ZoneOffset.UTC).toString,
+                                      true
+                )
+              )
             )
           )
         )
@@ -204,7 +214,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
 
         mockSubscriptionUpdateFailure(
           SubscriptionFailureResponseWithStatusCode(
-            failureResponse = SubscriptionFailureResponse(failures =
+            failureResponse = EISSubscriptionFailureResponse(failures =
               List(
                 EISError(
                   "INVALID_PPT_REFERENCE_NUMBER",
@@ -222,7 +232,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
         ).get
 
         status(rawResp) mustBe 422
-        val resp = contentAsJson(rawResp).as[SubscriptionFailureResponse]
+        val resp = contentAsJson(rawResp).as[EISSubscriptionFailureResponse]
         resp.failures mustBe List(
           EISError("INVALID_PPT_REFERENCE_NUMBER",
                    "Submission has not passed validation. Invalid parameter pptReferenceNumber."
