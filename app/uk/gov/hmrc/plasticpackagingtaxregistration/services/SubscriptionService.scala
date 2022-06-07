@@ -49,7 +49,7 @@ class SubscriptionService @Inject() (
   nonRepudiationService: NonRepudiationService
 )(implicit ec: ExecutionContext)
     extends JSONResponses {
-  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
+  private val logger = LoggerFactory.getLogger(getClass.getCanonicalName)
 
   def submit(pptRegistration: Registration, safeId: String, userHeaders: Map[String, String])(
     implicit hc: HeaderCarrier

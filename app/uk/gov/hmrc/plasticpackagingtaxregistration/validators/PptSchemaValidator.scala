@@ -28,7 +28,7 @@ import scala.util.Try
 
 class PptSchemaValidator(schemaFile: String) {
 
-  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
+  private val logger = LoggerFactory.getLogger(getClass.getCanonicalName)
 
   private lazy val schemaFileAsString: Try[String] = {
     Try {
