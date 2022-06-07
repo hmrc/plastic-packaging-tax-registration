@@ -18,14 +18,8 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.models.validation
 
 import play.api.libs.json.{Format, Json}
 
-final case class JsonSchemaError(
-    schemaPath: Option[String],
-    keyword: String,
-    instancePath: String
-  )
+final case class JsonSchemaError(schemaPath: Option[String], keyword: String, instancePath: String)
 
 object JsonSchemaError {
   implicit val formats: Format[JsonSchemaError] = Json.format[JsonSchemaError]
 }
-
-

@@ -28,33 +28,35 @@ import scala.util.Try
 
 class PptSchemaValidator(schemaFile: String) {
 
-  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
+  private val logger = LoggerFactory.getLogger(getClass.getCanonicalName)
 
-  private lazy val schemaFileAsString: Try[String] = {
+  private lazy val schemaFileAsString: Try[String] =
     Try {
       val stream: InputStream = getClass.getResourceAsStream(schemaFile)
       scala.io.Source.fromInputStream(stream).mkString
     }
-  }
 
-  private lazy val circeSchema: Try[io.circe.schema.Schema] = schemaFileAsString.flatMap(io.circe.schema.Schema.loadFromString)
+  private lazy val circeSchema: Try[io.circe.schema.Schema] =
+    schemaFileAsString.flatMap(io.circe.schema.Schema.loadFromString)
 
-  def buildSchemaError(circeError: ValidationError): JsonSchemaError = {
-    JsonSchemaError(
-      circeError.schemaLocation,
-      circeError.keyword,
-      circeError.location
+  def buildSchemaError(circeError: ValidationError): JsonSchemaError =
+    JsonSchemaError(circeError.schemaLocation, circeError.keyword, circeError.location)
 
-    )
-  }
-
-  def validate[T](data: T)(implicit writes: Writes[T]) : Either[NonEmptyList[JsonSchemaError], Unit] = {
+  def validate[T](
+    data: T
+  )(implicit writes: Writes[T]): Either[NonEmptyList[JsonSchemaError], Unit] = {
     val dataJson = Json.toJson(data).toString()
     val result = for {
       js <- io.circe.parser.parse(dataJson).left
-        .map(pf => NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", pf.toString, schemaFile, None)))
+        .map(
+          pf =>
+            NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", pf.toString, schemaFile, None))
+        )
       schema <- circeSchema.toEither.left
-        .map(t => NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", t.getMessage, schemaFile, None)))
+        .map(
+          t =>
+            NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", t.getMessage, schemaFile, None))
+        )
       _ <- schema.validate(js).toEither
     } yield Unit
 
@@ -67,6 +69,7 @@ class PptSchemaValidator(schemaFile: String) {
         Right(Unit)
     }
   }
+
 }
 
 object PptSchemaValidator {

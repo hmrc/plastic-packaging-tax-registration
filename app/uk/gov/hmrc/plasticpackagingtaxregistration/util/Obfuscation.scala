@@ -22,7 +22,7 @@ import java.security.MessageDigest
 import org.slf4j.LoggerFactory
 
 object Obfuscation {
-  private val logger = LoggerFactory.getLogger("application." + getClass.getCanonicalName)
+  private val logger = LoggerFactory.getLogger(getClass.getCanonicalName)
 
   def obfuscate(value: String): String = {
     val result = MessageDigest.getInstance("MD5")
