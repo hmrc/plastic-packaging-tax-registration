@@ -43,26 +43,37 @@ class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with Subscription
 
     "creating a subscription with groupSubscriptionFlag as true and partnershipSubscriptionFlag as true" in {
       val data = ukLimitedCompanySubscription.copy(
-                    legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = true, partnershipSubscriptionFlag = true),
-                    groupPartnershipSubscription = Some(GroupPartnershipSubscription(
-                      representativeControl = true,
-                      allMembersControl = true,
-                      Seq(groupPartnershipDetailsRep, groupPartnershipDetailsMember).map(_.copy(regWithoutIDFlag = None))
-                    ))
-                  )
+        legalEntityDetails =
+          ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = true,
+                                                               partnershipSubscriptionFlag = true
+          ),
+        groupPartnershipSubscription = Some(
+          GroupPartnershipSubscription(representativeControl = true,
+                                       allMembersControl = true,
+                                       Seq(groupPartnershipDetailsRep,
+                                           groupPartnershipDetailsMember
+                                       ).map(_.copy(regWithoutIDFlag = None))
+          )
+        )
+      )
 
       PptSchemaValidator.subscriptionValidator.validate(data).isRight mustBe true
     }
 
-
     "creating a subscription with groupSubscriptionFlag as true partnershipSubscriptionFlag as false" in {
       val data = ukLimitedCompanySubscription.copy(
-        legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = true, partnershipSubscriptionFlag = false),
-        groupPartnershipSubscription = Some(GroupPartnershipSubscription(
-          representativeControl = true,
-          allMembersControl = true,
-          Seq(groupPartnershipDetailsRep, groupPartnershipDetailsMember).map(_.copy(regWithoutIDFlag = None))
-        ))
+        legalEntityDetails =
+          ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = true,
+                                                               partnershipSubscriptionFlag = false
+          ),
+        groupPartnershipSubscription = Some(
+          GroupPartnershipSubscription(representativeControl = true,
+                                       allMembersControl = true,
+                                       Seq(groupPartnershipDetailsRep,
+                                           groupPartnershipDetailsMember
+                                       ).map(_.copy(regWithoutIDFlag = None))
+          )
+        )
       )
 
       PptSchemaValidator.subscriptionValidator.validate(data).isRight mustBe true
@@ -70,12 +81,18 @@ class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with Subscription
 
     "creating a subscription with groupSubscriptionFlag as false partnershipSubscriptionFlag as true" in {
       val data = ukLimitedCompanySubscription.copy(
-        legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = false, partnershipSubscriptionFlag = true),
-        groupPartnershipSubscription = Some(GroupPartnershipSubscription(
-          representativeControl = true,
-          allMembersControl = true,
-          Seq(groupPartnershipDetailsRep, groupPartnershipDetailsMember).map(_.copy(regWithoutIDFlag = None))
-        ))
+        legalEntityDetails =
+          ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = false,
+                                                               partnershipSubscriptionFlag = true
+          ),
+        groupPartnershipSubscription = Some(
+          GroupPartnershipSubscription(representativeControl = true,
+                                       allMembersControl = true,
+                                       Seq(groupPartnershipDetailsRep,
+                                           groupPartnershipDetailsMember
+                                       ).map(_.copy(regWithoutIDFlag = None))
+          )
+        )
       )
 
       PptSchemaValidator.subscriptionValidator.validate(data).isRight mustBe true
@@ -83,9 +100,12 @@ class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with Subscription
 
     "creating a subscription with groupSubscriptionFlag  as false and partnershipSubscriptionFlag as false" in {
       val data = ukLimitedCompanySubscription.copy(
-        legalEntityDetails = ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = false, partnershipSubscriptionFlag = false),
-        groupPartnershipSubscription = None)
-
+        legalEntityDetails =
+          ukLimitedCompanySubscription.legalEntityDetails.copy(groupSubscriptionFlag = false,
+                                                               partnershipSubscriptionFlag = false
+          ),
+        groupPartnershipSubscription = None
+      )
 
       PptSchemaValidator.subscriptionValidator.validate(data).isRight mustBe true
     }
