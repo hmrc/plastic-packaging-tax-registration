@@ -34,6 +34,8 @@ object OrgType extends Enumeration {
   implicit val format: Format[OrgType] =
     Format(Reads.enumNameReads(OrgType), Writes.enumNameWrites)
 
+  def withNameOpt(name: String): Option[Value] = values.find(_.toString == name)
+
 }
 
 case class OrganisationDetails(
