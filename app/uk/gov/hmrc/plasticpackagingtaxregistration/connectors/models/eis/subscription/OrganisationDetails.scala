@@ -39,7 +39,9 @@ case class OrganisationDetails(organisationType: Option[String] = None, organisa
           if (partnerTypeNames.contains(organisationType))
             OrgType.PARTNERSHIP
           else
-            OrgType.withNameOpt(organisationType).getOrElse(OrgType.OVERSEAS_COMPANY_UK_BRANCH)
+            OrgType.withNameOpt(organisationType).getOrElse(
+              throw new IllegalStateException(s"Organisation type $organisationType is not supported")
+            )
         }
 
       case None =>
