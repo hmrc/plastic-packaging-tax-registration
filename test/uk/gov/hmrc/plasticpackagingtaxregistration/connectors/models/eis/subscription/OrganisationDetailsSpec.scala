@@ -34,10 +34,13 @@ class OrganisationDetailsSpec extends AnyWordSpec with Matchers {
       ).organisationTypeDisplayName(isGroup = false) mustBe OrgType.PARTNERSHIP
     }
 
-    "read an organisationType of LIMITED COMPANY as OverseasCompanyUkBranch as fallback for gform reg's" in {
-      OrganisationDetails(organisationType = Some("OverseasCompanyUkBranch"),
+    "throw an illegal state exception when an unsupported organisation type is presented" in {
+      val ex = intercept[IllegalStateException](
+      OrganisationDetails(organisationType = Some("LIMITED COMPANY"),
         organisationName = "My organisation"
-      ).organisationTypeDisplayName(isGroup = false) mustBe OrgType.OVERSEAS_COMPANY_UK_BRANCH
+      ).organisationTypeDisplayName(isGroup = false))
+
+      ex.getMessage mustBe "Organisation type LIMITED COMPANY is not supported"
     }
 
     "return partnership organisation type if a partner type enum string is found instead of an organisation type" in {
