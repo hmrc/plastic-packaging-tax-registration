@@ -39,8 +39,7 @@ case class OrganisationDetails(organisationType: Option[String] = None, organisa
           if (partnerTypeNames.contains(organisationType))
             OrgType.PARTNERSHIP
           else
-            OrgType.withName(organisationType)
-
+            OrgType.withNameOpt(organisationType).getOrElse(OrgType.OVERSEAS_COMPANY_UK_BRANCH)
         }
 
       case None =>
