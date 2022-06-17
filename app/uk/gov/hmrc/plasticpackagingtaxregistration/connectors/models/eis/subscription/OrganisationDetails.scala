@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
 
+import play.api.Logging
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{OVERSEAS_COMPANY_NO_UK_BRANCH, OrgType}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, PartnerTypeEnum}
 
-case class OrganisationDetails(organisationType: Option[String] = None, organisationName: String) {
+case class OrganisationDetails(organisationType: Option[String] = None, organisationName: String) extends Logging {
 
   def organisationTypeDisplayName(isGroup: Boolean): OrgType =
     organisationType match {
@@ -39,9 +40,10 @@ case class OrganisationDetails(organisationType: Option[String] = None, organisa
           if (partnerTypeNames.contains(organisationType))
             OrgType.PARTNERSHIP
           else
-            OrgType.withNameOpt(organisationType).getOrElse(
-              throw new IllegalStateException(s"Organisation type $organisationType is not supported")
-            )
+            OrgType.withNameOpt(organisationType).getOrElse {
+              logger.info(s"Defaulting '$organisationType' to OVERSEAS_COMPANY_NO_UK_BRANCH")
+              OVERSEAS_COMPANY_NO_UK_BRANCH
+            }
         }
 
       case None =>

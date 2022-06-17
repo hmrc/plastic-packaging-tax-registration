@@ -25,7 +25,7 @@ trait IncorporationDetailsBuilder {
   private type Modifier = IncorporationDetails => IncorporationDetails
 
   private val baseModel: IncorporationDetails =
-    IncorporationDetails("", "", "", IncorporationAddressDetails(), None)
+    IncorporationDetails("", "", None, IncorporationAddressDetails(), None)
 
   def someIncorporationDetails(modifiers: Modifier*): IncorporationDetails =
     modifiers.foldLeft(baseModel)((acc, next) => next(acc))

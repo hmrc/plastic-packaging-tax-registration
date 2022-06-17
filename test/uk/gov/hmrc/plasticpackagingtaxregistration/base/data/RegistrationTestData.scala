@@ -90,7 +90,7 @@ trait RegistrationTestData {
     incorporationDetails = Some(
       IncorporationDetails(companyNumber = "1234567890",
                            companyName = "Plastic Limited",
-                           ctutr = "987654321",
+                           ctutr = Some("987654321"),
                            companyAddress = IncorporationAddressDetails(),
                            registration = Some(registrationDetails)
       )
@@ -191,7 +191,7 @@ trait RegistrationTestData {
             incorporationDetails = Some(
               IncorporationDetails(companyNumber = "12345678",
                                    companyName = "Plastics Inc",
-                                   ctutr = "ABC123456",
+                                   ctutr = Some("ABC123456"),
                                    companyAddress = IncorporationAddressDetails(),
                                    registration = Some(
                                      RegistrationDetails(identifiersMatch = true,

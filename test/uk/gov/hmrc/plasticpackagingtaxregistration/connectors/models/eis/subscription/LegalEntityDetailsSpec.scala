@@ -37,7 +37,7 @@ class LegalEntityDetailsSpec extends AnyWordSpec with Matchers with Registration
 
         legalEntityDetails.customerIdentification1 mustBe pptIncorporationDetails.incorporationDetails.get.companyNumber
         legalEntityDetails.customerIdentification2 mustBe Some(
-          pptIncorporationDetails.incorporationDetails.get.ctutr
+          pptIncorporationDetails.incorporationDetails.get.ctutr.get
         )
         legalEntityDetails.customerDetails.customerType mustBe CustomerType.Organisation
         legalEntityDetails.customerDetails.organisationDetails.get.organisationType mustBe Some(
