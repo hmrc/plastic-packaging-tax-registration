@@ -17,23 +17,10 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
-  ChangeOfCircumstanceDetails,
-  CustomerType,
-  Subscription
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
-  OVERSEAS_COMPANY_UK_BRANCH,
-  REGISTERED_SOCIETY,
-  SOLE_TRADER,
-  UK_COMPANY
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{CHARITABLE_INCORPORATED_ORGANISATION, OVERSEAS_COMPANY_NO_UK_BRANCH, OVERSEAS_COMPANY_UK_BRANCH, REGISTERED_SOCIETY, SOLE_TRADER, UK_COMPANY}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
-  GroupMember,
-  GroupMemberContactDetails,
-  OrganisationDetails => GroupDetails
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -122,16 +109,15 @@ object Registration {
     }
 
     val incorporationDetails = organisationType match {
-      case UK_COMPANY | REGISTERED_SOCIETY | OVERSEAS_COMPANY_UK_BRANCH =>
+      case UK_COMPANY | REGISTERED_SOCIETY | OVERSEAS_COMPANY_UK_BRANCH | OVERSEAS_COMPANY_NO_UK_BRANCH |
+           CHARITABLE_INCORPORATED_ORGANISATION | REGISTERED_SOCIETY =>
         Some(
           IncorporationDetails(
             companyNumber = subscription.legalEntityDetails.customerIdentification1,
             companyName = subscription.legalEntityDetails.customerDetails.organisationDetails.map(
               _.organisationName
             ).getOrElse(illegalState("Missing organisation name")),
-            ctutr = subscription.legalEntityDetails.customerIdentification2.getOrElse(
-              illegalState("Missing organisation UTR")
-            ),
+            ctutr = subscription.legalEntityDetails.customerIdentification2,
             companyAddress = IncorporationAddressDetails(),
             registration = None
           )
@@ -193,17 +179,10 @@ object Registration {
           val mayBeCustomerIdentification2 = subscriptionPartner.customerIdentification2
 
           val partnerIncorporationDetails = if (isIncorporatedType) {
-            val customerIdentification2 = mayBeCustomerIdentification2.getOrElse {
-              throw new IllegalStateException(
-                "Incorporation details required customerIdentification2 which was absent"
-              )
-            }
             Some(
               IncorporationDetails(companyNumber = customerIdentification1,
-                                   companyName =
-                                     subscriptionPartner.organisationDetails.organisationName,
-                                   ctutr =
-                                     customerIdentification2,
+                                   companyName = subscriptionPartner.organisationDetails.organisationName,
+                                   ctutr = mayBeCustomerIdentification2,
                                    companyAddress = IncorporationAddressDetails(),
                                    registration = None
               )
@@ -329,12 +308,14 @@ object Registration {
                                                   else
                                                     subscription.legalEntityDetails.regWithoutIDFlag
     )
+
     val liabilityDetails = LiabilityDetails(
       startDate =
         Some(OldDate(LocalDate.parse(subscription.taxObligationStartDate))),
       expectedWeightNext12m =
         Some(LiabilityWeight(Some(subscription.last12MonthTotalTonnageAmt.longValue())))
     )
+
     val groupDetail =
       if (subscription.legalEntityDetails.groupSubscriptionFlag)
         subscription.groupPartnershipSubscription match {

@@ -62,7 +62,7 @@ case class OrganisationDetails(
 
   lazy val customerIdentification2: Option[String] =
     extractData(partnershipDetails => partnershipDetails.customerIdentification2,
-                incorpDetails => Some(incorpDetails.ctutr)
+                incorpDetails => incorpDetails.ctutr
     )
 
   lazy val name: String = extractData(partnershipDetails => partnershipDetails.name,

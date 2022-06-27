@@ -243,7 +243,7 @@ class SubscriptionSpec
   ): Any = {
     subscription.legalEntityDetails.customerIdentification1 mustBe pptIncorporationDetails.incorporationDetails.get.companyNumber
     subscription.legalEntityDetails.customerIdentification2 mustBe Some(
-      pptIncorporationDetails.incorporationDetails.get.ctutr
+      pptIncorporationDetails.incorporationDetails.get.ctutr.get
     )
 
     subscription.legalEntityDetails.dateOfApplication mustBe now(UTC).format(
