@@ -34,6 +34,8 @@ object OrgType extends Enumeration {
   implicit val format: Format[OrgType] =
     Format(Reads.enumNameReads(OrgType), Writes.enumNameWrites)
 
+  def withNameOpt(name: String): Option[Value] = values.find(_.toString == name)
+
 }
 
 case class OrganisationDetails(
@@ -60,7 +62,7 @@ case class OrganisationDetails(
 
   lazy val customerIdentification2: Option[String] =
     extractData(partnershipDetails => partnershipDetails.customerIdentification2,
-                incorpDetails => Some(incorpDetails.ctutr)
+                incorpDetails => incorpDetails.ctutr
     )
 
   lazy val name: String = extractData(partnershipDetails => partnershipDetails.name,

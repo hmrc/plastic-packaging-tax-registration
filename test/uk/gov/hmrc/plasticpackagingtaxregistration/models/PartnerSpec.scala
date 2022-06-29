@@ -44,7 +44,7 @@ class PartnerSpec extends AnyWordSpec with RegistrationTestData {
       "uk company" in {
         val ukCompanyPartner = aUkCompanyPartner()
         ukCompanyPartner.customerIdentification2 mustBe Some(
-          ukCompanyPartner.incorporationDetails.get.ctutr
+          ukCompanyPartner.incorporationDetails.get.ctutr.get
         )
       }
       "partnership" in {

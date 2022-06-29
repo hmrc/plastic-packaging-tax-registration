@@ -16,21 +16,29 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 
+import java.util.UUID
+
 import com.codahale.metrics.Timer
 import com.kenshoo.play.metrics.Metrics
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.http.Status
-import play.api.libs.json.Json
 import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  EISSubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionResponse,
+  SubscriptionSuccessfulResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
+  ETMPSubscriptionStatusResponse,
+  SubscriptionStatusResponse
+}
 
-import java.util.UUID
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
@@ -124,7 +132,7 @@ class SubscriptionsConnector @Inject() (
                 )
             }
           else
-            Try(subscriptionResponse.json.as[SubscriptionFailureResponse]) match {
+            Try(subscriptionResponse.json.as[EISSubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
                 SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
                                                           subscriptionResponse.status
@@ -206,7 +214,7 @@ class SubscriptionsConnector @Inject() (
                 )
             }
           else
-            Try(subscriptionUpdateResponse.json.as[SubscriptionFailureResponse]) match {
+            Try(subscriptionUpdateResponse.json.as[EISSubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
                 SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
                                                           subscriptionUpdateResponse.status

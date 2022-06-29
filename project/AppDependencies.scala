@@ -5,7 +5,9 @@ object AppDependencies {
 
   val compile = Seq("uk.gov.hmrc" %% "bootstrap-backend-play-28" % "5.16.0",
                     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28" % "0.56.0",
-                    "com.typesafe.play" %% "play-json-joda"     % "2.6.14"
+                    "com.typesafe.play" %% "play-json-joda"     % "2.6.14",
+                    "io.circe" %% "circe-parser" % "0.14.1",
+                    "io.circe" %% "circe-json-schema" % "0.2.0"
   )
 
   val test = Seq("uk.gov.hmrc" %% "bootstrap-test-play-28" % "5.16.0" % Test,

@@ -29,7 +29,11 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestDat
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{SubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+  EISSubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
@@ -197,7 +201,7 @@ class SubscriptionsConnectorISpec
             val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
             resp mustBe SubscriptionFailureResponseWithStatusCode(
-              SubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
+              EISSubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
               statusCode
             )
 
@@ -339,7 +343,7 @@ class SubscriptionsConnectorISpec
               await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
 
             resp mustBe SubscriptionFailureResponseWithStatusCode(
-              SubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
+              EISSubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
               statusCode
             )
             getTimer(pptSubscriptionUpdateTimer).getCount mustBe 1

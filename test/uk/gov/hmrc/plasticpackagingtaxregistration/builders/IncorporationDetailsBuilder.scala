@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create
+package uk.gov.hmrc.plasticpackagingtaxregistration.builders
 
-import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+  IncorporationAddressDetails,
+  IncorporationDetails
+}
 
-import java.time.ZonedDateTime
+trait IncorporationDetailsBuilder {
+  private type Modifier = IncorporationDetails => IncorporationDetails
 
-case class SubscriptionSuccessfulResponse(
-  pptReferenceNumber: String,
-  processingDate: ZonedDateTime,
-  formBundleNumber: String
-) extends SubscriptionResponse
+  private val baseModel: IncorporationDetails =
+    IncorporationDetails("", "", None, IncorporationAddressDetails(), None)
 
-object SubscriptionSuccessfulResponse {
-
-  implicit val format: OFormat[SubscriptionSuccessfulResponse] =
-    Json.format[SubscriptionSuccessfulResponse]
+  def someIncorporationDetails(modifiers: Modifier*): IncorporationDetails =
+    modifiers.foldLeft(baseModel)((acc, next) => next(acc))
 
 }

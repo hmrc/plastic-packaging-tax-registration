@@ -22,7 +22,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
-  SubscriptionFailureResponse,
+  EISSubscriptionFailureResponse,
   SubscriptionSuccessfulResponse
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{
@@ -81,8 +81,8 @@ trait SubscriptionTestData extends AuthTestSupport {
                                    formBundleNumber = "123456789"
     )
 
-  protected val subscriptionCreateFailureResponse: SubscriptionFailureResponse =
-    SubscriptionFailureResponse(failures =
+  protected val subscriptionCreateFailureResponse: EISSubscriptionFailureResponse =
+    EISSubscriptionFailureResponse(failures =
       Seq(EISError(code = "123", reason = "error"))
     )
 
@@ -131,7 +131,52 @@ trait SubscriptionTestData extends AuthTestSupport {
     groupPartnershipSubscription = None
   )
 
-  private val groupPartnershipDetailsRep: GroupPartnershipDetails = GroupPartnershipDetails(
+  protected val ukLimitedCompanySubscriptionInvalid: Subscription = Subscription(
+    legalEntityDetails =
+      LegalEntityDetails(dateOfApplication =
+                           "foo",
+                         customerIdentification1 = "123456789",
+                         customerIdentification2 = Some("1234567890"),
+                         customerDetails = CustomerDetails(customerType = CustomerType.Organisation,
+                                                           organisationDetails =
+                                                             Some(
+                                                               OrganisationDetails(
+                                                                 organisationType = Some(
+                                                                   OrgType.UK_COMPANY.toString
+                                                                 ),
+                                                                 organisationName = "Plastics Ltd"
+                                                               )
+                                                             )
+                         ),
+                         groupSubscriptionFlag = false
+      ),
+    principalPlaceOfBusinessDetails =
+      PrincipalPlaceOfBusinessDetails(
+        addressDetails = AddressDetails(addressLine1 = "2-3 Scala Street",
+                                        addressLine2 = "London",
+                                        postalCode = Some("W1T 2HN"),
+                                        countryCode = "GB"
+        ),
+        contactDetails = ContactDetails(email = "test@test.com", telephone = "02034567890")
+      ),
+    primaryContactDetails =
+      PrimaryContactDetails(name = "Kevin Durant",
+                            contactDetails =
+                              ContactDetails(email = "test@test.com", telephone = "02034567890"),
+                            positionInCompany = "Director"
+      ),
+    businessCorrespondenceDetails = BusinessCorrespondenceDetails(addressLine1 = "2-3 Scala Street",
+                                                                  addressLine2 = "London",
+                                                                  postalCode = Some("W1T 2HN"),
+                                                                  countryCode = "GB"
+    ),
+    taxObligationStartDate = now(UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+    last12MonthTotalTonnageAmt = 15000,
+    declaration = Declaration(declarationBox1 = true),
+    groupPartnershipSubscription = None
+  )
+
+  protected val groupPartnershipDetailsRep: GroupPartnershipDetails = GroupPartnershipDetails(
     "Representative",
     "123456789",
     Some("1234567890"),
@@ -144,15 +189,15 @@ trait SubscriptionTestData extends AuthTestSupport {
 
   protected val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
     "Member",
-    "member-1",
-    Some("member-2"),
+    "member1",
+    Some("member2"),
     OrganisationDetails(Some("UkCompany"), "Plastics Member"),
     IndividualDetails(None, "Arthur", None, "Surname"),
     AddressDetails("addressLine1",
                    "addressLine2",
                    Some("addressLine3"),
                    Some("addressLine4"),
-                   Some("postcode"),
+                   Some("ZZ11ZZ"),
                    "GB"
     ),
     ContactDetails("member@email.com", "0987-456789", None),

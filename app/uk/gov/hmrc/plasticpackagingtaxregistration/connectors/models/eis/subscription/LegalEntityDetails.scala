@@ -89,7 +89,7 @@ object LegalEntityDetails {
       case _ =>
         pptOrganisationDetails.incorporationDetails.map { details =>
           updateLegalEntityDetails(customerIdentification1 = details.companyNumber,
-                                   customerIdentification2 = Some(details.ctutr),
+                                   customerIdentification2 = details.ctutr,
                                    pptOrganisationDetails = pptOrganisationDetails,
                                    isUpdate = isUpdate,
                                    isGroup = isGroup

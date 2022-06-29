@@ -25,6 +25,7 @@ precompiled
 /.project
 project/project
 project/target
+project/metals*
 /RUNNING_PID
 server.pid
 /.settings

@@ -75,7 +75,7 @@ case class Partner(
     extractData(soleTraderDetails => soleTraderDetails.sautr,
                 partnershipDetails =>
                   partnershipDetails.partnershipBusinessDetails.map(_.postcode.postcode),
-                incorpDetails => Some(incorpDetails.ctutr)
+                incorpDetails => incorpDetails.ctutr
     )
 
   lazy val name: String = extractData(

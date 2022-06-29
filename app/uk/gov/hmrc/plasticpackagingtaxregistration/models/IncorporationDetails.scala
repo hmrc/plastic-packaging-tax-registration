@@ -21,7 +21,7 @@ import play.api.libs.json.{Format, Json}
 case class IncorporationDetails(
   companyNumber: String,
   companyName: String,
-  ctutr: String,
+  ctutr: Option[String],
   companyAddress: IncorporationAddressDetails,
   override val registration: Option[RegistrationDetails]
 ) extends HasRegistrationDetails

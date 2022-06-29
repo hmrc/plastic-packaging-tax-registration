@@ -354,7 +354,7 @@ class RegistrationSpec
               Some(
                 IncorporationDetails(companyNumber = "1234567890",
                                      companyName = "Plastic Limited",
-                                     ctutr = "987654321",
+                                     ctutr = Some("987654321"),
                                      companyAddress = IncorporationAddressDetails(postal_code =
                                        Some("  VR3 6JK ")
                                      ),
