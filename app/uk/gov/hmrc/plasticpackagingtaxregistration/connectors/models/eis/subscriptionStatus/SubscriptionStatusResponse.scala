@@ -31,6 +31,7 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 case class SubscriptionStatusResponse(status: Status, pptReference: Option[String] = None)
 
 object SubscriptionStatusResponse {
+  
   implicit val format: OFormat[SubscriptionStatusResponse] = Json.format[SubscriptionStatusResponse]
 
   def fromETMPResponse(etmpResponse: ETMPSubscriptionStatusResponse) = {
@@ -48,5 +49,8 @@ object SubscriptionStatusResponse {
 
     SubscriptionStatusResponse(status, pptRef)
   }
+
+  def noneFound: SubscriptionStatusResponse =
+    SubscriptionStatusResponse(NOT_SUBSCRIBED, None)
 
 }
