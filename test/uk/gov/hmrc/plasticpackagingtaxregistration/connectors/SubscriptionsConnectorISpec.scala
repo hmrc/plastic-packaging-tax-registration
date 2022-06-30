@@ -36,7 +36,6 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscri
 }
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
@@ -102,9 +101,9 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
 
-        val res = await(connector.getSubscriptionStatus(safeNumber)).right.get
-        res mustBe SubscriptionStatusResponse(NOT_SUBSCRIBED,None)
-        
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        res mustBe Status.NOT_FOUND
+
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
