@@ -73,7 +73,8 @@ case class LiabilityDetails(
                              // Derived fields - not directly input by user
                              startDate: Option[OldDate] = None,
                              isLiable: Option[Boolean] = None,
-                             isNewLiability: Option[NewLiability.type] = None
+                             newLiabilityFinished: Option[NewLiability.type] = None,
+                             newLiabilityStarted: Option[NewLiability.type] = None
                            ) {
 
   def liabilityWeight: Long =
