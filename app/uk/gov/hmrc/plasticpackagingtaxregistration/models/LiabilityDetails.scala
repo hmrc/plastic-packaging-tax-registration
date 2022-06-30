@@ -55,21 +55,27 @@ object OldDate {
 
 }
 
+case object NewLiability {
+  implicit val format: OFormat[NewLiability.type] = Json.format[NewLiability.type]
+}
+
 case class LiabilityDetails(
-  // Pre-launch - remove after launch
-  expectedWeight: Option[LiabilityExpectedWeight] = None,
-  // Old Post-launch - remove after launch
-  weight: Option[LiabilityWeight] = None,
-  // New Post-launch
-  exceededThresholdWeight: Option[Boolean] = None,
-  dateExceededThresholdWeight: Option[Date] = None,
-  expectToExceedThresholdWeight: Option[Boolean] = None,
-  dateRealisedExpectedToExceedThresholdWeight: Option[Date] = None,
-  expectedWeightNext12m: Option[LiabilityWeight] = None,
-  // Derived fields - not directly input by user
-  startDate: Option[OldDate] = None,
-  isLiable: Option[Boolean] = None
-) {
+                             // Pre-launch - remove after launch
+                             expectedWeight: Option[LiabilityExpectedWeight] = None,
+                             // Old Post-launch - remove after launch
+                             weight: Option[LiabilityWeight] = None,
+                             // New Post-launch
+                             exceededThresholdWeight: Option[Boolean] = None,
+                             dateExceededThresholdWeight: Option[Date] = None,
+                             expectToExceedThresholdWeight: Option[Boolean] = None,
+                             dateRealisedExpectedToExceedThresholdWeight: Option[Date] = None,
+                             expectedWeightNext12m: Option[LiabilityWeight] = None,
+                             // Derived fields - not directly input by user
+                             startDate: Option[OldDate] = None,
+                             isLiable: Option[Boolean] = None,
+                             newLiabilityFinished: Option[NewLiability.type] = None,
+                             newLiabilityStarted: Option[NewLiability.type] = None
+                           ) {
 
   def liabilityWeight: Long =
     expectedWeightNext12m.flatMap(x => x.totalKg) match {
