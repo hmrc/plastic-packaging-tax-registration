@@ -38,8 +38,6 @@ import scala.concurrent.Future
 
 class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData {
 
-  private val unknownPptReference = "XMPPT000000000"
-
   private val post = FakeRequest("POST", "/enrolment")
 
   override def beforeEach(): Unit = {
@@ -105,42 +103,6 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
     }
 
     "return 400" when {
-      "verification fails" in {
-        withAuthorizedUser()
-        val userEnrolment = Json.obj("pptReference" -> unknownPptReference,
-                                     "registrationDate" -> "2021-10-09",
-                                     "postcode"         -> "AB1 2CD"
-        )
-
-        val result: Future[Result] =
-          route(app, post.withJsonBody(toJson(userEnrolment))).get
-
-        status(result) must be(BAD_REQUEST)
-        contentAsJson(result) mustBe Json.obj("pptReference" -> unknownPptReference,
-                                              "failureCode"  -> VerificationFailed
-        )
-      }
-
-      "no known facts returned" in {
-        withAuthorizedUser()
-
-        when(mockEnrolmentStoreProxyConnector.queryKnownFacts(any())(any())).thenReturn(
-          Future.successful(None)
-        )
-
-        val userEnrolment = Json.obj("pptReference" -> knownPptReference,
-                                     "registrationDate" -> "2021-10-09",
-                                     "postcode"         -> "AB1 2CD"
-        )
-
-        val result: Future[Result] =
-          route(app, post.withJsonBody(toJson(userEnrolment))).get
-
-        status(result) must be(BAD_REQUEST)
-        contentAsJson(result) mustBe Json.obj("pptReference" -> knownPptReference,
-                                              "failureCode"  -> VerificationMissing
-        )
-      }
 
       "groups exist with enrolment and user not in group" in {
         withAuthorizedUser()

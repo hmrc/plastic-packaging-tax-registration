@@ -16,34 +16,20 @@
 
 package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
 
-import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
-  AssignEnrolmentToGroupError,
-  AssignEnrolmentToUserError
-}
+import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{AssignEnrolmentToGroupError, AssignEnrolmentToUserError}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode.EnrolmentFailedCode
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
-  EnrolmentFailedCode,
-  UserEnrolmentFailedResponse,
-  UserEnrolmentRequest,
-  UserEnrolmentSuccessResponse
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
-  EnrolmentStoreProxyConnector,
-  TaxEnrolmentsConnector
-}
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{
-  Authenticator,
-  AuthorizedRequest
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{EnrolmentFailedCode, UserEnrolmentFailedResponse, UserEnrolmentRequest, UserEnrolmentSuccessResponse}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{EnrolmentStoreProxyConnector, TaxEnrolmentsConnector}
+import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{Authenticator, AuthorizedRequest}
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -77,31 +63,17 @@ class UserEnrolmentController @Inject() (
           Created(UserEnrolmentSuccessResponse(userEnrolmentRequest.pptReference))
         }
 
-        findEnrolment(userEnrolmentRequest).flatMap {
-          case Success(_) =>
-            getGroupsWithEnrolment(userEnrolmentRequest.pptReference).flatMap { groupIds =>
-              assignEnrolment(userEnrolmentRequest, groupIds).map {
-                case Success(_)                   => successResult()
-                case Failure(e: EnrolmentFailure) => failedResult(e.failureCode)
-                case Failure(_)                   => failedResult(EnrolmentFailedCode.Failed)
-              }
-            }
-          case Failure(e: EnrolmentFailure) => Future.successful(failedResult(e.failureCode))
-          case Failure(_)                   => Future.successful(failedResult(EnrolmentFailedCode.Failed))
+        getGroupsWithEnrolment(userEnrolmentRequest.pptReference).flatMap { groupIds =>
+          assignEnrolment(userEnrolmentRequest, groupIds).map {
+            case Success(_) => successResult()
+            case Failure(e: EnrolmentFailure) => failedResult(e.failureCode)
+            case Failure(_) => failedResult(EnrolmentFailedCode.Failed)
+          }
         }
+
     }
 
   case class EnrolmentFailure(failureCode: EnrolmentFailedCode) extends RuntimeException
-
-  private def findEnrolment(
-    request: UserEnrolmentRequest
-  )(implicit hc: HeaderCarrier): Future[Try[Unit]] =
-    enrolmentStoreProxyConnector.queryKnownFacts(request).map {
-      case Some(facts) if facts.pptEnrolmentReferences.contains(request.pptReference) =>
-        Success(Unit)
-      case Some(_) => Failure(EnrolmentFailure(EnrolmentFailedCode.VerificationFailed))
-      case _       => Failure(EnrolmentFailure(EnrolmentFailedCode.VerificationMissing))
-    }
 
   private def getGroupsWithEnrolment(
     pptReference: String
