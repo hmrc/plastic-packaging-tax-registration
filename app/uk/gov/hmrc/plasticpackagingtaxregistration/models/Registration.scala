@@ -331,7 +331,7 @@ object Registration {
     )
     val liabilityDetails = LiabilityDetails(
       startDate =
-        Some(OldDate(LocalDate.parse(subscription.taxObligationStartDate))),
+        Some(taxStartDate(LocalDate.parse(subscription.taxObligationStartDate))),
       expectedWeightNext12m =
         Some(LiabilityWeight(Some(subscription.last12MonthTotalTonnageAmt.longValue())))
     )

@@ -28,7 +28,9 @@ class PrincipalPlaceOfBusinessDetailsSpec
     "building from non-partnership registration" should {
       val registration = aRegistration(withOrganisationDetails(pptIncorporationDetails),
                                        withPrimaryContactDetails(pptPrimaryContactDetails),
-                                       withLiabilityDetails(pptLiabilityDetails.copy(weight = None))
+                                       withLiabilityDetails(
+                                         pptLiabilityDetails.copy(expectedWeightNext12m = None)
+                                       )
       )
       "build as expected" in {
         val principalPlaceOfBusinessDetails = PrincipalPlaceOfBusinessDetails(registration)

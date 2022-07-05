@@ -40,34 +40,29 @@ object Date {
   implicit val format: OFormat[Date] = Json.format[Date]
 }
 
-case class OldDate(day: Option[Int], month: Option[Int], year: Option[Int]) {
+case class taxStartDate(day: Option[Int], month: Option[Int], year: Option[Int]) {
 
   val pretty: String =
     LocalDate.of(year.getOrElse(0), month.getOrElse(0), day.getOrElse(0)).toString
 
 }
 
-object OldDate {
-  implicit val dateFormat = Json.format[OldDate]
+object taxStartDate {
+  implicit val dateFormat = Json.format[taxStartDate]
 
-  def apply(date: LocalDate): OldDate =
-    OldDate(Some(date.getDayOfMonth), Some(date.getMonthValue), Some(date.getYear))
+  def apply(date: LocalDate): taxStartDate =
+    taxStartDate(Some(date.getDayOfMonth), Some(date.getMonthValue), Some(date.getYear))
 
 }
 
 case class LiabilityDetails(
-  // Pre-launch - remove after launch
-  expectedWeight: Option[LiabilityExpectedWeight] = None,
-  // Old Post-launch - remove after launch
-  weight: Option[LiabilityWeight] = None,
-  // New Post-launch
-  exceededThresholdWeight: Option[Boolean] = None,
-  dateExceededThresholdWeight: Option[Date] = None,
   expectToExceedThresholdWeight: Option[Boolean] = None,
   dateRealisedExpectedToExceedThresholdWeight: Option[Date] = None,
+  exceededThresholdWeight: Option[Boolean] = None,
+  dateExceededThresholdWeight: Option[Date] = None,
   expectedWeightNext12m: Option[LiabilityWeight] = None,
   // Derived fields - not directly input by user
-  startDate: Option[OldDate] = None,
+  startDate: Option[taxStartDate] = None,
   isLiable: Option[Boolean] = None
 ) {
 

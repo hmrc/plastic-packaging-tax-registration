@@ -18,7 +18,7 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipSubscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OldDate, RegType, Registration}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.{taxStartDate, RegType, Registration}
 
 import scala.language.implicitConversions
 
@@ -38,7 +38,7 @@ case class Subscription(
 object Subscription {
   implicit val format: OFormat[Subscription] = Json.format[Subscription]
 
-  implicit def convertDateToString(liabilityDate: Option[OldDate]): String =
+  implicit def convertDateToString(liabilityDate: Option[taxStartDate]): String =
     liabilityDate match {
       case Some(date) => date.pretty
       case None       => throw new Exception("A PPT liability Start date is required")
