@@ -17,10 +17,25 @@
 package uk.gov.hmrc.plasticpackagingtaxregistration.models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{CHARITABLE_INCORPORATED_ORGANISATION, OVERSEAS_COMPANY_NO_UK_BRANCH, OVERSEAS_COMPANY_UK_BRANCH, REGISTERED_SOCIETY, SOLE_TRADER, UK_COMPANY}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+  ChangeOfCircumstanceDetails,
+  CustomerType,
+  Subscription
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
+  CHARITABLE_INCORPORATED_ORGANISATION,
+  OVERSEAS_COMPANY_NO_UK_BRANCH,
+  OVERSEAS_COMPANY_UK_BRANCH,
+  REGISTERED_SOCIETY,
+  SOLE_TRADER,
+  UK_COMPANY
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.RegType.RegType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+  GroupMember,
+  GroupMemberContactDetails,
+  OrganisationDetails => GroupDetails
+}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -109,8 +124,9 @@ object Registration {
     }
 
     val incorporationDetails = organisationType match {
-      case UK_COMPANY | REGISTERED_SOCIETY | OVERSEAS_COMPANY_UK_BRANCH | OVERSEAS_COMPANY_NO_UK_BRANCH |
-           CHARITABLE_INCORPORATED_ORGANISATION | REGISTERED_SOCIETY =>
+      case UK_COMPANY | REGISTERED_SOCIETY | OVERSEAS_COMPANY_UK_BRANCH |
+          OVERSEAS_COMPANY_NO_UK_BRANCH | CHARITABLE_INCORPORATED_ORGANISATION |
+          REGISTERED_SOCIETY =>
         Some(
           IncorporationDetails(
             companyNumber = subscription.legalEntityDetails.customerIdentification1,
@@ -178,17 +194,19 @@ object Registration {
           val customerIdentification1      = subscriptionPartner.customerIdentification1
           val mayBeCustomerIdentification2 = subscriptionPartner.customerIdentification2
 
-          val partnerIncorporationDetails = if (isIncorporatedType) {
-            Some(
-              IncorporationDetails(companyNumber = customerIdentification1,
-                                   companyName = subscriptionPartner.organisationDetails.organisationName,
-                                   ctutr = mayBeCustomerIdentification2,
-                                   companyAddress = IncorporationAddressDetails(),
-                                   registration = None
+          val partnerIncorporationDetails =
+            if (isIncorporatedType)
+              Some(
+                IncorporationDetails(companyNumber = customerIdentification1,
+                                     companyName =
+                                       subscriptionPartner.organisationDetails.organisationName,
+                                     ctutr = mayBeCustomerIdentification2,
+                                     companyAddress = IncorporationAddressDetails(),
+                                     registration = None
+                )
               )
-            )
-          } else
-            None
+            else
+              None
 
           val isSoleTraderType = partnerType == PartnerTypeEnum.SOLE_TRADER
           val partnerSoleTraderDetails =

@@ -69,6 +69,14 @@ class SubscriptionsConnector @Inject() (
       .recover {
         case httpEx: UpstreamErrorResponse =>
           httpEx.statusCode match {
+            case 404 =>
+              // TODO - check for code == NO_DATA_FOUND
+              logger.warn(
+                s"PPT subscription status - 404 returned with correlationId [${correlationIdHeader._2}] and " +
+                  s"payload: ${httpEx.getMessage()}"
+              )
+              Right(SubscriptionStatusResponse.noneFound)
+
             case _ =>
               // Upstream errors should be echoed to the frontend so that user facing error handling is aware of them
               logger.warn(
