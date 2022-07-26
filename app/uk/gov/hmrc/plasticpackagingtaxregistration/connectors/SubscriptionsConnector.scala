@@ -146,11 +146,15 @@ class SubscriptionsConnector @Inject() (
     )
       .andThen { case _ => timer.stop() }
       .map { response =>
-        logger.info(
-          s"PPT view subscription with correlationId [${correlationIdHeader._2}] and pptReference [$pptReference]"
-        )
-        val json = Json.parse(response.body.replaceAll("\\s", " "))//subscription data can come back un sanitised for json.
-        Right(json.as[Subscription])
+        if (Status.isSuccessful(response.status)) {
+          logger.info(
+            s"PPT view subscription with correlationId [${correlationIdHeader._2}] and pptReference [$pptReference]"
+          )
+          val json = Json.parse(response.body.replaceAll("\\s", " ")) //subscription data can come back un sanitised for json.
+          Right(json.as[Subscription])
+        } else {
+          Left(response.status)
+        }
       }
       .recover {
         case httpEx: UpstreamErrorResponse =>
