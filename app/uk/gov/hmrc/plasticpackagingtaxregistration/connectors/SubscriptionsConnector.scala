@@ -51,48 +51,54 @@ class SubscriptionsConnector @Inject() (
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
-    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
-                                                   headers = headers :+ correlationIdHeader
-    ).map { etmpResponse =>
-      logger.info(
-        s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and safeId [$safeId] had response payload ${toJson(etmpResponse)}"
-      )
-      Right(SubscriptionStatusResponse.fromETMPResponse(etmpResponse))
-    }
+    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId), 
+      headers = headers :+ correlationIdHeader)
+      .map { etmpResponse =>
+        logger.info(s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and " +
+          s"safeId [$safeId] had response payload ${toJson(etmpResponse)}")
+        Right(SubscriptionStatusResponse.fromETMPResponse(etmpResponse))
+      }
       .recover {
         case httpEx: UpstreamErrorResponse =>
           httpEx.statusCode match {
-            case 404 =>
-              // TODO - check for code == NO_DATA_FOUND
-              logger.warn(
-                s"PPT subscription status - 404 returned with correlationId [${correlationIdHeader._2}] and " +
-                  s"payload: ${httpEx.getMessage()}"
-              )
-              Right(SubscriptionStatusResponse.noneFound)
-
-            case _ =>
-              // Upstream errors should be echoed to the frontend so that user facing error handling is aware of them
-              logger.warn(
-                s"Upstream error returned from get subscription status with correlationId [${correlationIdHeader._2}] and " +
-                  s"safeId [$safeId], status: ${httpEx.statusCode}, body: ${httpEx.getMessage()}"
-              )
-              Left(httpEx.statusCode)
+            case 404 if appConfig.checkForSubscriptionsMagic404 => checkForMagic404(correlationIdHeader, httpEx)
+            case _ => handleHttpError(safeId, correlationIdHeader, httpEx)
           }
-
-        case ex: Exception =>
-          // Hard internal errors which are not from upstream are signalled with a 500.
-          logger.warn(
-            s"Get subscription status failed with correlationId [${correlationIdHeader._2}] and " +
-              s"safeId [$safeId] is currently unavailable due to exception [${ex.getMessage}]",
-            ex
-          )
-          Left(Status.INTERNAL_SERVER_ERROR)
+        case ex: Exception => handleException(safeId, correlationIdHeader, ex)
       }
       .andThen { case _ => timer.stop() }
   }
 
+  private def handleException(safeId: String, correlationIdHeader: (String, String), ex: Exception) = {
+    // Hard internal errors which are not from upstream are signalled with a 500.
+    logger.warn(
+      s"Get subscription status failed with correlationId [${correlationIdHeader._2}] and " +
+        s"safeId [$safeId] is currently unavailable due to exception [${ex.getMessage}]",
+      ex
+    )
+    Left(Status.INTERNAL_SERVER_ERROR)
+  }
+
+  private def handleHttpError(safeId: String, correlationIdHeader: (String, String), httpEx: UpstreamErrorResponse) = {
+    // Upstream errors should be echoed to the frontend so that user facing error handling is aware of them
+    logger.warn(
+      s"Upstream error returned from get subscription status with correlationId [${correlationIdHeader._2}] and " +
+        s"safeId [$safeId], status: ${httpEx.statusCode}, body: ${httpEx.getMessage()}"
+    )
+    Left(httpEx.statusCode)
+  }
+
+  private def checkForMagic404(correlationIdHeader: (String, String), httpEx: UpstreamErrorResponse) = {
+    // TODO - check for code == NO_DATA_FOUND
+    logger.warn(
+      s"PPT subscription status - 404 returned with correlationId [${correlationIdHeader._2}] and " +
+        s"payload: ${httpEx.getMessage()}"
+    )
+    Right(SubscriptionStatusResponse.noneFound)
+  }
+
   def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
-    hc: HeaderCarrier
+                                                                         hc: HeaderCarrier
   ): Future[SubscriptionResponse] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
