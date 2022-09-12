@@ -18,10 +18,14 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscr
 
 import play.api.Logging
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{OVERSEAS_COMPANY_NO_UK_BRANCH, OrgType}
+import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.{
+  OVERSEAS_COMPANY_NO_UK_BRANCH,
+  OrgType
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, PartnerTypeEnum}
 
-case class OrganisationDetails(organisationType: Option[String] = None, organisationName: String) extends Logging {
+case class OrganisationDetails(organisationType: Option[String] = None, organisationName: String)
+    extends Logging {
 
   def organisationTypeDisplayName(isGroup: Boolean): OrgType =
     organisationType match {

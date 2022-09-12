@@ -21,11 +21,25 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{AssignEnrolmentToGroupError, AssignEnrolmentToUserError}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
+  AssignEnrolmentToGroupError,
+  AssignEnrolmentToUserError
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode.EnrolmentFailedCode
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{EnrolmentFailedCode, UserEnrolmentFailedResponse, UserEnrolmentRequest, UserEnrolmentSuccessResponse}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{EnrolmentStoreProxyConnector, TaxEnrolmentsConnector}
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{Authenticator, AuthorizedRequest}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.{
+  EnrolmentFailedCode,
+  UserEnrolmentFailedResponse,
+  UserEnrolmentRequest,
+  UserEnrolmentSuccessResponse
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+  EnrolmentStoreProxyConnector,
+  TaxEnrolmentsConnector
+}
+import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.{
+  Authenticator,
+  AuthorizedRequest
+}
 import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.response.JSONResponses
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -65,9 +79,9 @@ class UserEnrolmentController @Inject() (
 
         getGroupsWithEnrolment(userEnrolmentRequest.pptReference).flatMap { groupIds =>
           assignEnrolment(userEnrolmentRequest, groupIds).map {
-            case Success(_) => successResult()
+            case Success(_)                   => successResult()
             case Failure(e: EnrolmentFailure) => failedResult(e.failureCode)
-            case Failure(_) => failedResult(EnrolmentFailedCode.Failed)
+            case Failure(_)                   => failedResult(EnrolmentFailedCode.Failed)
           }
         }
 

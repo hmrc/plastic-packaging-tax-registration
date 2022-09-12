@@ -36,7 +36,7 @@ class OrganisationDetailsSpec extends AnyWordSpec with Matchers {
 
     "read an organisationType of LIMITED COMPANY as OverseasCompanyUkBranch as fallback for gform reg's" in {
       OrganisationDetails(organisationType = Some("LIMITED COMPANY"),
-        organisationName = "My organisation"
+                          organisationName = "My organisation"
       ).organisationTypeDisplayName(isGroup = false) mustBe OrgType.OVERSEAS_COMPANY_NO_UK_BRANCH
     }
 

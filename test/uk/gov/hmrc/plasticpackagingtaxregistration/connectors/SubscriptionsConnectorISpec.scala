@@ -21,6 +21,7 @@ import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.http.Status.{CONFLICT, OK}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.UpstreamErrorResponse
@@ -29,13 +30,10 @@ import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestDat
 import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
-  EISSubscriptionFailureResponse,
-  SubscriptionFailureResponseWithStatusCode,
-  SubscriptionSuccessfulResponse
-}
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
+import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
@@ -43,7 +41,7 @@ import java.util.UUID
 class SubscriptionsConnectorISpec
     extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData {
 
-  lazy val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
+  private lazy val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
 
   private val pptSubscriptionSubmissionTimer = "ppt.subscription.submission.timer"
   private val pptSubscriptionStatusTimer     = "ppt.subscription.status.timer"
@@ -91,19 +89,41 @@ class SubscriptionsConnectorISpec
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
-      "handle a 404" in {
-        val errors =
-          createErrorResponse(
-            code = "NO_DATA_FOUND",
-            reason =
-              "The remote endpoint has indicated that the requested resource could  not be found."
-          )
-
+      "map a 404 to not-subscribed when feature enabled" in {
+        val errors = createErrorResponse(
+          code = "NO_DATA_FOUND",
+          reason = "The remote endpoint has indicated that the requested resource could  not be found."
+        )
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
+
+        val app = new GuiceApplicationBuilder()
+          .configure(overrideConfig)
+          .configure("features.subscriptionsCheckForMagic404" -> "true")
+          .build()
+        val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
+        
+        val res = await(connector.getSubscriptionStatus(safeNumber)).right.get
+        res mustBe SubscriptionStatusResponse(NOT_SUBSCRIBED, None)
+
+        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
+      }
+
+      "map a 404 to an error when feature disabled" in {
+        val errors = createErrorResponse(
+          code = "NO_DATA_FOUND",
+          reason = "The remote endpoint has indicated that the requested resource could  not be found."
+        )
+        stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
+
+        val app = new GuiceApplicationBuilder()
+          .configure(overrideConfig)
+          .configure("features.subscriptionsCheckForMagic404" -> "false")
+          .build()
+        val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
 
         val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
         res mustBe Status.NOT_FOUND
-
+        
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
