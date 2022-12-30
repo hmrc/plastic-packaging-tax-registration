@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
+package models.eis.subscription
 
+import models.eis.subscription.OrganisationDetails
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, PartnerTypeEnum}
+import models.{OrgType, PartnerTypeEnum}
 
 class OrganisationDetailsSpec extends AnyWordSpec with Matchers {
 

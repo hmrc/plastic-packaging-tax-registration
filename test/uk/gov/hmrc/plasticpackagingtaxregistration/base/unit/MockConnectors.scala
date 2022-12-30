@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base.unit
+package base.unit
 
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
@@ -23,25 +23,25 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+import models.eis.subscription.Subscription
+import models.eis.subscription.create.{
   SubscriptionFailureResponseWithStatusCode,
   SubscriptionResponse,
   SubscriptionSuccessfulResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.{
+import models.eis.subscriptionStatus.SubscriptionStatusResponse
+import connectors.parsers.TaxEnrolmentsHttpParser
+import connectors.parsers.TaxEnrolmentsHttpParser.{
   FailedTaxEnrolment,
   SuccessfulTaxEnrolment
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+import connectors.{
   EnrolmentStoreProxyConnector,
   NonRepudiationConnector,
   SubscriptionsConnector,
   TaxEnrolmentsConnector
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
+import models.nrs.{
   NonRepudiationMetadata,
   NonRepudiationSubmissionAccepted
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
+package connectors
 
 import java.time.LocalDate
 
@@ -23,15 +23,15 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.test.Helpers.await
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnector.{
+import base.Injector
+import base.it.ConnectorISpec
+import connectors.EnrolmentStoreProxyConnector.{
   GroupsWithEnrolmentsTimerTag,
   KnownFactsTimerTag
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.EnrolmentStoreProxyConnectorISpec._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.UserEnrolmentRequest
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
+import connectors.EnrolmentStoreProxyConnectorISpec._
+import models.enrolment.UserEnrolmentRequest
+import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 
 class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
 

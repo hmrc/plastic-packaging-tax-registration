@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.builders
+package builders
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.OrgType.OrgType
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+import models.OrgType.OrgType
+import models.{
   IncorporationDetails,
   OrganisationDetails,
   PPTAddress

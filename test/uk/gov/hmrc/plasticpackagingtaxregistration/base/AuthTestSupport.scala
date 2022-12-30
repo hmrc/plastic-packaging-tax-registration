@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base
+package base
 
 import org.mockito.{ArgumentMatcher, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.any
@@ -27,9 +27,9 @@ import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{internalId, _}
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, Name, Retrieval, _}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.SignedInUser
-import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService.NonRepudiationIdentityRetrievals
+import models.KeyValue
+import models.SignedInUser
+import services.nrs.NonRepudiationService.NonRepudiationIdentityRetrievals
 
 import scala.concurrent.{ExecutionContext, Future}
 

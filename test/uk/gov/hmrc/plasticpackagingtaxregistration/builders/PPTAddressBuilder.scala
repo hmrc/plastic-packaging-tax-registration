@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.builders
+package builders
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PPTAddress
+import models.PPTAddress
 
 trait PPTAddressBuilder {
   private type Modifier = PPTAddress => PPTAddress

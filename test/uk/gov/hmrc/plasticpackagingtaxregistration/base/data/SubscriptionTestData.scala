@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
+package base.data
 
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+import base.AuthTestSupport
+import models.eis.EISError
+import models.eis.subscription._
+import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
   SubscriptionSuccessfulResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.{
+import models.eis.subscription.group.{
   GroupPartnershipDetails,
   GroupPartnershipSubscription
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.{
+import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
+import models.eis.subscriptionStatus.{
   ETMPSubscriptionStatus,
   ETMPSubscriptionStatusResponse,
   SubscriptionStatusResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{OrgType, PostCodeWithoutSpaces}
+import models.{OrgType, PostCodeWithoutSpaces}
 
 import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime.now

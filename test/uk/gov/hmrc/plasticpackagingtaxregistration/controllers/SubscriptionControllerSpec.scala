@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
+package controllers
 
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{verify, verifyNoInteractions, when}
@@ -25,23 +25,23 @@ import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
+import base.unit.ControllerSpec
+import builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+import models.eis.EISError
+import models.eis.subscription.Subscription
+import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
   SubscriptionFailureResponseWithStatusCode
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipDetails
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.partnerTypesWhichRepresentPartnerships
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
-import uk.gov.hmrc.plasticpackagingtaxregistration.models._
+import models.eis.subscription.group.GroupPartnershipDetails
+import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
+import models.PartnerTypeEnum.partnerTypesWhichRepresentPartnerships
+import models.nrs.NonRepudiationSubmissionAccepted
+import models._
 
 import java.time.ZonedDateTime
 import java.util.UUID

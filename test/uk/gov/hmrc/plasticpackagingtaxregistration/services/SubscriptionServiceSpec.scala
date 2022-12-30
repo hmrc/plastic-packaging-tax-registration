@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.services
+package services
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -31,28 +31,28 @@ import play.api.http.Status.IM_A_TEAPOT
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.NrsTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+import base.data.NrsTestData
+import builders.RegistrationBuilder
+import models.eis.EISError
+import models.eis.subscription.Subscription
+import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
   SubscriptionFailureResponseWithStatusCode,
   SubscriptionSuccessfulResponse
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+import connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment
+import connectors.{
   NonRepudiationConnector,
   SubscriptionsConnector,
   TaxEnrolmentsConnector
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
+import models.nrs.{
   NonRepudiationMetadata,
   NonRepudiationSubmissionAccepted
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
-import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
+import repositories.RegistrationRepository
+import services.nrs.NonRepudiationService
 
 import scala.concurrent.ExecutionContext.{global => globalExecutionContext}
 import scala.concurrent.duration.DurationInt

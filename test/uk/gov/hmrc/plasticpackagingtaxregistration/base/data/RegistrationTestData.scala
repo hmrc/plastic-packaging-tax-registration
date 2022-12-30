@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
+package base.data
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PartnerTypeEnum.{
+import models.PartnerTypeEnum.{
   GENERAL_PARTNERSHIP,
   LIMITED_LIABILITY_PARTNERSHIP,
   SCOTTISH_PARTNERSHIP
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models._
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.group.{
+import models._
+import models.group.{
   GroupMember,
   GroupMemberContactDetails,
   OrganisationDetails => GroupOrganisationDetails

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base
+package base
 
 import com.codahale.metrics.SharedMetricRegistries
 import play.api.inject.guice.GuiceApplicationBuilder

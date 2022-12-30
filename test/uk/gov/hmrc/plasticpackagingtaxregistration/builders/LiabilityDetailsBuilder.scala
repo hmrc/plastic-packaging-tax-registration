@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.builders
+package builders
 
 import java.time.LocalDate
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{
+import models.{
   LiabilityDetails,
   LiabilityWeight,
   OldDate

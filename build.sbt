@@ -38,7 +38,7 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
     , "metrics\\..*"
     , ".*(BuildInfo|Routes|Options).*"
     // TODO: remove once we have full subscription -> registration -> subscription round trip for partnerships
-    , "uk.gov.hmrc.plasticpackagingtaxregistration.models.Registration"
+    , "models.Registration"
   ).mkString(";"),
   coverageMinimum := 90.00,
   coverageFailOnMinimum := true,

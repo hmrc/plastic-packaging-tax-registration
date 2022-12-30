@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package models
 
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+import models.eis.subscription.{
   AddressDetails,
   BusinessCorrespondenceDetails
 }

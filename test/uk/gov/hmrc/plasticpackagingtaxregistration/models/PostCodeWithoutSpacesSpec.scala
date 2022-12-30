@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package models
 
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsString, Json}

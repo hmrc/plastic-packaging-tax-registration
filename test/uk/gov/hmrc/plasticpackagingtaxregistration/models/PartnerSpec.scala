@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package models
 
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
+import base.data.RegistrationTestData
 
 class PartnerSpec extends AnyWordSpec with RegistrationTestData {
   "Partner" should {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
+package controllers
 
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -25,14 +25,14 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.UserEnrolmentData
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
+import base.data.UserEnrolmentData
+import base.unit.ControllerSpec
+import connectors.TaxEnrolmentsConnector.{
   AssignEnrolmentToGroupError,
   AssignEnrolmentToUserError
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.EnrolmentFailedCode._
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
+import models.enrolment.EnrolmentFailedCode._
+import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 
 import scala.concurrent.Future
 

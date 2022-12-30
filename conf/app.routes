@@ -2,22 +2,22 @@
 
 
 # Registration/ Transient Data
-POST        /registrations                 uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.create()
-PUT         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.update(id)
-GET         /registrations/:id             uk.gov.hmrc.plasticpackagingtaxregistration.controllers.RegistrationController.get(id)
+POST        /registrations                 controllers.RegistrationController.create()
+PUT         /registrations/:id             controllers.RegistrationController.update(id)
+GET         /registrations/:id             controllers.RegistrationController.get(id)
 
 
 # EIS Subscription
-GET         /subscriptions/status/:safeNumber   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.getStatus(safeNumber: String)
-POST        /subscriptions/:safeNumber           uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.submit(safeNumber: String)
-GET         /subscriptions/:pptReference   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.get(pptReference: String)
-PUT         /subscriptions/:pptReference   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.SubscriptionController.update(pptReference: String)
+GET         /subscriptions/status/:safeNumber   controllers.SubscriptionController.getStatus(safeNumber: String)
+POST        /subscriptions/:safeNumber           controllers.SubscriptionController.submit(safeNumber: String)
+GET         /subscriptions/:pptReference   controllers.SubscriptionController.get(pptReference: String)
+PUT         /subscriptions/:pptReference   controllers.SubscriptionController.update(pptReference: String)
 
-PUT         /subscriptions/deregister/:pptReference   uk.gov.hmrc.plasticpackagingtaxregistration.controllers.DeregistrationController.deregister(pptReference: String)
+PUT         /subscriptions/deregister/:pptReference   controllers.DeregistrationController.deregister(pptReference: String)
 
 # User Enrolment
-POST        /enrolment                         uk.gov.hmrc.plasticpackagingtaxregistration.controllers.UserEnrolmentController.enrol()
+POST        /enrolment                         controllers.UserEnrolmentController.enrol()
 
 # Tax Enrolment Callback
-POST        /tax-enrolments-callback/:pptReference    uk.gov.hmrc.plasticpackagingtaxregistration.controllers.TaxEnrolmentsController.callback(pptReference)
+POST        /tax-enrolments-callback/:pptReference    controllers.TaxEnrolmentsController.callback(pptReference)
 

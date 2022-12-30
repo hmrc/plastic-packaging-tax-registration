@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base.it
+package base.it
 
 import com.codahale.metrics.{MetricFilter, SharedMetricRegistries, Timer}
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -24,7 +24,7 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
+import base.data.SubscriptionTestData
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.ExecutionContext
