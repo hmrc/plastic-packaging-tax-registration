@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
+package controllers
 
 import play.api.http.Status
 import play.api.libs.json.{JsResultException, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{await, route, writeableOf_AnyContentAsJson}
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
+import base.unit.ControllerSpec
+import builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.EnrolmentStatus
+import models.EnrolmentStatus
 
 class TaxEnrolmentsControllerSpec
     extends ControllerSpec with RegistrationBuilder with RegistrationRequestBuilder {

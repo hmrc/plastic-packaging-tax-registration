@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.config
+package config
 
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.matchers.must.Matchers

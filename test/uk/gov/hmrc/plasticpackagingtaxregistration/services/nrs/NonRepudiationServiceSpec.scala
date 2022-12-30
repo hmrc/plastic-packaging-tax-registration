@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs
+package services.nrs
 
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
@@ -25,18 +25,18 @@ import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.NrsTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.MockConnectors
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
+import base.AuthTestSupport
+import base.data.NrsTestData
+import base.unit.MockConnectors
+import builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
+import models.nrs.{
   NonRepudiationMetadata,
   NonRepudiationSubmissionAccepted
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService.nonRepudiationIdentityRetrievals
+import services.nrs.NonRepudiationService.nonRepudiationIdentityRetrievals
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.validators
+package validators
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.group.GroupPartnershipSubscription
+import base.data.SubscriptionTestData
+import models.eis.subscription.group.GroupPartnershipSubscription
 
 class PptSchemaValidatorSpec extends AnyWordSpec with Matchers with SubscriptionTestData {
 

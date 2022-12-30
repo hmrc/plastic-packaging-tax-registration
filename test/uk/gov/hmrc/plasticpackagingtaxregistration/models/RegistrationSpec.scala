@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package models
 
 import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, not}
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
+import base.data.{
   RegistrationTestData,
   SubscriptionTestData
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+import builders.RegistrationBuilder
+import models.eis.subscription.{
   ChangeOfCircumstance,
   ChangeOfCircumstanceDetails,
   Subscription

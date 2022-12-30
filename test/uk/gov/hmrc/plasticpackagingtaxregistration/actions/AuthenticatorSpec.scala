@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.actions
+package actions
 
 import org.mockito.Mockito.reset
 import org.scalatest.{BeforeAndAfterEach, EitherValues}
@@ -26,8 +26,8 @@ import play.api.test.Helpers.await
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import uk.gov.hmrc.auth.core.InsufficientConfidenceLevel
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.controllers.actions.Authenticator
+import base.AuthTestSupport
+import controllers.actions.Authenticator
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.ExecutionContext

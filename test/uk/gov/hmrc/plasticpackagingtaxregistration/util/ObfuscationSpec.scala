@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.util
+package util
 
 import org.scalatest.matchers.must
 import org.scalatest.wordspec.AnyWordSpec

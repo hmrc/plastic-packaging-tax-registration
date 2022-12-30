@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.repositories
+package repositories
 
 import com.codahale.metrics.{MetricFilter, SharedMetricRegistries, Timer}
 import com.kenshoo.play.metrics.Metrics
@@ -28,9 +28,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import play.api.test.Helpers.await
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationBuilder
-import uk.gov.hmrc.plasticpackagingtaxregistration.config.AppConfig
-import uk.gov.hmrc.plasticpackagingtaxregistration.models._
+import builders.RegistrationBuilder
+import config.AppConfig
+import models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.implicitConversions

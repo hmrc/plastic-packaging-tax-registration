@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
+package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, put}
+import connectors.SubscriptionsConnector
+import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
@@ -25,15 +27,14 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.Subscription
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscriptionStatus.SubscriptionStatusResponse
+import base.Injector
+import base.data.SubscriptionTestData
+import base.it.ConnectorISpec
+import models.eis.EISError
+import models.eis.subscription.Subscription
+import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
+import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID

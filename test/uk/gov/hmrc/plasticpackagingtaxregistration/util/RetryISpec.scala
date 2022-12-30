@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.util
+package util
 
 import akka.actor.ActorSystem
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
@@ -22,7 +22,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.test.DefaultAwaitTimeout
 import play.api.test.Helpers.await
-import uk.gov.hmrc.plasticpackagingtaxregistration.util.RetryISpec.{
+import util.RetryISpec.{
   neverRetry,
   noParticularReason,
   retryFailures,

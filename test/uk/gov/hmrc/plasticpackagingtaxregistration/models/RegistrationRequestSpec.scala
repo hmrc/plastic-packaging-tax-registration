@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package models
 
 import org.scalatest.matchers.must
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.RegistrationRequestBuilder
+import builders.RegistrationRequestBuilder
 
 class RegistrationRequestSpec
     extends AnyWordSpec with must.Matchers with RegistrationRequestBuilder {

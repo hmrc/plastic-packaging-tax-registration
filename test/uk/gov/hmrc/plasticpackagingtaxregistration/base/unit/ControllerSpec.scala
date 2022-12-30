@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base.unit
+package base.unit
 
 import com.codahale.metrics.SharedMetricRegistries
 import org.scalatest.BeforeAndAfterEach
@@ -28,21 +28,21 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.{
+import base.AuthTestSupport
+import base.data.{
   NrsTestData,
   RegistrationTestData,
   SubscriptionTestData
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.{
+import connectors.{
   EnrolmentStoreProxyConnector,
   NonRepudiationConnector,
   SubscriptionsConnector,
   TaxEnrolmentsConnector
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.PostCodeWithoutSpaces
-import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
-import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService
+import models.PostCodeWithoutSpaces
+import repositories.RegistrationRepository
+import services.nrs.NonRepudiationService
 
 import scala.concurrent.ExecutionContext
 

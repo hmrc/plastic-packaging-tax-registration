@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.builders
+package builders
 
 import java.time.LocalDate
 import java.util.UUID
 
 import org.joda.time.DateTime
-import uk.gov.hmrc.plasticpackagingtaxregistration.models._
+import models._
 
 //noinspection ScalaStyle
 trait RegistrationBuilder

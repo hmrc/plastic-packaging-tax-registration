@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription
+package models.eis.subscription
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.RegistrationTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, PostCodeWithoutSpaces}
+import base.data.RegistrationTestData
+import models.{PPTAddress, PostCodeWithoutSpaces}
 
 import scala.language.implicitConversions
 

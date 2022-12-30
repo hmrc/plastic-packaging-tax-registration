@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
+package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
@@ -24,19 +24,19 @@ import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.Injector
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.UserEnrolmentData
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.TaxEnrolmentsConnector.{
+import base.Injector
+import base.data.UserEnrolmentData
+import base.it.ConnectorISpec
+import connectors.TaxEnrolmentsConnector.{
   AssignEnrolmentToGroupTimerTag,
   AssignEnrolmentToUserTimerTag,
   SubscriberTimerTag
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue.{
+import models.KeyValue.{
   etmpPptReferenceKey,
   pptServiceName
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.parsers.TaxEnrolmentsHttpParser.{
+import connectors.parsers.TaxEnrolmentsHttpParser.{
   FailedTaxEnrolment,
   SuccessfulTaxEnrolment
 }

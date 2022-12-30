@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
+package base.data
 
 import org.joda.time
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.IdentityData
-import uk.gov.hmrc.plasticpackagingtaxregistration.services.nrs.NonRepudiationService.NonRepudiationIdentityRetrievals
+import models.nrs.IdentityData
+import services.nrs.NonRepudiationService.NonRepudiationIdentityRetrievals
 
 import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 

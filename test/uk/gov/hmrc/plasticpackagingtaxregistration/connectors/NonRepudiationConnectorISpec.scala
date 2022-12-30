@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
+package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, _}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
@@ -22,10 +22,10 @@ import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status.{ACCEPTED, INTERNAL_SERVER_ERROR}
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.test.Helpers.await
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.NrsTestData
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.it.ConnectorISpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.{AuthTestSupport, Injector}
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.{
+import base.data.NrsTestData
+import base.it.ConnectorISpec
+import base.{AuthTestSupport, Injector}
+import models.nrs.{
   NonRepudiationMetadata,
   NonRepudiationSubmissionAccepted
 }

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.builders
+package builders
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.{PPTAddress, PrimaryContactDetails}
+import models.{PPTAddress, PrimaryContactDetails}
 
 trait PrimaryContactDetailsBuilder {
   private type Modifier = PrimaryContactDetails => PrimaryContactDetails

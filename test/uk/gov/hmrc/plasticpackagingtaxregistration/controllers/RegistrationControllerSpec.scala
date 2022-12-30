@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
+package controllers
 
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentCaptor
@@ -35,13 +35,13 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{CREATED, UNAUTHORIZED, contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments}
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.AuthTestSupport
-import uk.gov.hmrc.plasticpackagingtaxregistration.builders.{
+import base.AuthTestSupport
+import builders.{
   RegistrationBuilder,
   RegistrationRequestBuilder
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models._
-import uk.gov.hmrc.plasticpackagingtaxregistration.repositories.RegistrationRepository
+import models._
+import repositories.RegistrationRepository
 
 import scala.concurrent.Future
 import scala.language.implicitConversions

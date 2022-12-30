@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.controllers
+package controllers
 
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{verify, when}
@@ -31,20 +31,20 @@ import play.api.test.Helpers.{
   SERVICE_UNAVAILABLE
 }
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.unit.ControllerSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.EISError
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.create.{
+import base.unit.ControllerSpec
+import models.eis.EISError
+import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
   SubscriptionFailureResponseWithStatusCode
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.eis.subscription.{
+import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
+import models.eis.subscription.{
   ChangeOfCircumstanceDetails,
   DeregistrationDetails,
   Subscription
 }
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.DeregistrationReason
-import uk.gov.hmrc.plasticpackagingtaxregistration.models.nrs.NonRepudiationSubmissionAccepted
+import models.DeregistrationReason
+import models.nrs.NonRepudiationSubmissionAccepted
 
 import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 import java.util.UUID

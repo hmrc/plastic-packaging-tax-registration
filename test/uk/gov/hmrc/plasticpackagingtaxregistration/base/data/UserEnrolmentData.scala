@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.base.data
+package base.data
 
 import java.time.LocalDate
 
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.KeyValue
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolment.UserEnrolmentRequest
-import uk.gov.hmrc.plasticpackagingtaxregistration.connectors.models.enrolmentstoreproxy.{
+import models.KeyValue
+import models.enrolment.UserEnrolmentRequest
+import models.enrolmentstoreproxy.{
   Enrolment,
   QueryKnownFactsResponse
 }

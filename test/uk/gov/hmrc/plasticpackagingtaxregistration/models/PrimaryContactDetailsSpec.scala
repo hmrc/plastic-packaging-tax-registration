@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.plasticpackagingtaxregistration.models
+package models
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.plasticpackagingtaxregistration.base.data.SubscriptionTestData
+import base.data.SubscriptionTestData
 
 class PrimaryContactDetailsSpec extends AnyWordSpec with Matchers with SubscriptionTestData {
 
