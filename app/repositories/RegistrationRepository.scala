@@ -17,12 +17,12 @@
 package repositories
 
 import java.util.concurrent.TimeUnit
-
 import com.codahale.metrics.Timer
 import com.google.inject.ImplementedBy
 import com.kenshoo.play.metrics.Metrics
 import com.mongodb.client.model.Indexes.ascending
-import javax.inject.Inject
+
+import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
@@ -43,6 +43,7 @@ trait RegistrationRepository {
   def delete(pptId: String): Future[Unit]
 }
 
+@Singleton
 class RegistrationRepositoryImpl @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,

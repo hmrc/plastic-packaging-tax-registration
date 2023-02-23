@@ -4,11 +4,11 @@ resolvers += "emueller-bintray" at "https://dl.bintray.com/emueller/maven"
 
 resolvers += Resolver.typesafeRepo("releases")
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "3.6.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "3.8.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "2.1.0")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.7")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.18")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.0")
 
