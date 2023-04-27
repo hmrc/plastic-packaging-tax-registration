@@ -16,6 +16,7 @@
 
 package services
 
+import scala.language.postfixOps
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.{ZoneId, ZonedDateTime}
