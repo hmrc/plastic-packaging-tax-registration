@@ -66,7 +66,7 @@ class PptSchemaValidator(schemaFile: String) {
         logger.warn(Json.prettyPrint(Json.toJson(schemaErrors.toList)))
         Left(schemaErrors)
       case Right(_) =>
-        Right.apply()
+        Right(())
     }
   }
 
