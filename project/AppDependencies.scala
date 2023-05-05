@@ -3,15 +3,17 @@ import sbt._
 
 object AppDependencies {
 
-  val compile = Seq("uk.gov.hmrc" %% "bootstrap-backend-play-28" % "5.16.0",
+  val bootstrapVersion = "7.15.0"
+
+  val compile = Seq("uk.gov.hmrc" %% "bootstrap-backend-play-28" % bootstrapVersion,
                     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28" % "0.68.0",
-                    "com.typesafe.play" %% "play-json-joda"     % "2.6.14",
+                    "com.typesafe.play" %% "play-json-joda"     % "2.9.4",
                     "io.circe" %% "circe-parser" % "0.14.1",
                     "io.circe" %% "circe-json-schema" % "0.2.0"
   )
 
-  val test = Seq("uk.gov.hmrc" %% "bootstrap-test-play-28" % "5.16.0" % Test,
-                 "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-27" % "0.56.0"   % Test,
+  val test = Seq("uk.gov.hmrc" %% "bootstrap-test-play-28" % bootstrapVersion % Test,
+                 "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.74.0"   % Test,
                  "org.scalatest"          %% "scalatest"               % "3.2.5"    % Test,
                  "com.typesafe.play"      %% "play-test"               % current    % Test,
                  "org.mockito"             % "mockito-core"            % "3.9.0"    % Test,

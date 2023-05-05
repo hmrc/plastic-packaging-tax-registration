@@ -117,11 +117,11 @@ class UserEnrolmentController @Inject() (
         taxEnrolmentsConnector.assignEnrolmentToGroup(request.userId,
                                                       request.groupId,
                                                       userEnrolmentRequest
-        ).map(_ => Success(Unit))
+        ).map(_ => Success(()))
       else if (groupsWithEnrolment.contains(request.groupId))
         taxEnrolmentsConnector.assignEnrolmentToUser(request.userId,
                                                      userEnrolmentRequest.pptReference
-        ).map(_ => Success(Unit))
+        ).map(_ => Success(()))
       else
         Future.successful(Failure(EnrolmentFailure(EnrolmentFailedCode.GroupEnrolled)))
 

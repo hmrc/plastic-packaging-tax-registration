@@ -58,7 +58,7 @@ class PptSchemaValidator(schemaFile: String) {
             NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", t.getMessage, schemaFile, None))
         )
       _ <- schema.validate(js).toEither
-    } yield Unit
+    } yield ()
 
     result match {
       case Left(errs) =>
@@ -66,7 +66,7 @@ class PptSchemaValidator(schemaFile: String) {
         logger.warn(Json.prettyPrint(Json.toJson(schemaErrors.toList)))
         Left(schemaErrors)
       case Right(_) =>
-        Right(Unit)
+        Right(())
     }
   }
 
