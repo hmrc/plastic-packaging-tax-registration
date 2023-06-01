@@ -16,11 +16,9 @@
 
 package models
 
+import models.PPTAddress.GBCountryCode
 import play.api.libs.json.{Json, OFormat}
-import models.eis.subscription.{
-  AddressDetails,
-  BusinessCorrespondenceDetails
-}
+import models.eis.subscription.{AddressDetails, BusinessCorrespondenceDetails}
 
 case class PPTAddress(
   addressLine1: String,
@@ -28,7 +26,7 @@ case class PPTAddress(
   addressLine3: Option[String] = None,
   townOrCity: String,
   postCode: Option[PostCodeWithoutSpaces],
-  countryCode: String = "GB"
+  countryCode: String = GBCountryCode
 ) {
 
   val eisAddressLines: (String, String, Option[String], Option[String]) = {
@@ -43,6 +41,8 @@ case class PPTAddress(
 }
 
 object PPTAddress {
+  val GBCountryCode = "GB"
+
   implicit val format: OFormat[PPTAddress] = Json.format[PPTAddress]
 
   def apply(businessCorrespondenceDetails: BusinessCorrespondenceDetails): PPTAddress = {
