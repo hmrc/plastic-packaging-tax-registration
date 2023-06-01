@@ -17,23 +17,13 @@
 package connectors
 
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReadsHttpResponse}
 import config.AppConfig
-import connectors.EnrolmentStoreProxyConnector.{
-  GroupsWithEnrolmentsTimerTag,
-  KnownFactsTimerTag
-}
-import models.enrolment.{
-  EnrolmentKey,
-  UserEnrolmentRequest
-}
-import models.enrolmentstoreproxy.{
-  GroupsWithEnrolmentsResponse,
-  QueryKnownFactsRequest,
-  QueryKnownFactsResponse
-}
+import connectors.EnrolmentStoreProxyConnector.GroupsWithEnrolmentsTimerTag
+import models.enrolment.EnrolmentKey
+import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReadsHttpResponse}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -55,21 +45,8 @@ class EnrolmentStoreProxyConnector @Inject() (
     ).andThen { case _ => timer.stop() }
   }
 
-  /** ES20 **/
-  def queryKnownFacts(
-    userEnrolment: UserEnrolmentRequest
-  )(implicit hc: HeaderCarrier): Future[Option[QueryKnownFactsResponse]] = {
-    val timer = metrics.defaultRegistry.timer(KnownFactsTimerTag).time()
-
-    httpClient.POST[QueryKnownFactsRequest, Option[QueryKnownFactsResponse]](
-      url = config.enrolmentStoreProxyES20QueryKnownFactsUrl,
-      body = QueryKnownFactsRequest(userEnrolment)
-    ).andThen { case _ => timer.stop() }
-  }
-
 }
 
 object EnrolmentStoreProxyConnector {
-  val KnownFactsTimerTag           = "ppt.enrolment-store-proxy.known-facts.timer"
   val GroupsWithEnrolmentsTimerTag = "ppt.enrolment-store-proxy.groups-with-enrolments.timer"
 }

@@ -18,7 +18,7 @@ package models.eis.subscription
 
 import java.time.ZonedDateTime
 
-trait EISSubscriptionSuccessfulResponse extends EISResponse {
+trait EISSubscriptionSuccessfulResponse {
   val pptReference: String
   val processingDate: ZonedDateTime
   val formBundleNumber: String

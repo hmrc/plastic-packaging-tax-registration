@@ -16,14 +16,9 @@
 
 package base.data
 
-import java.time.LocalDate
-
-import models.KeyValue
 import models.enrolment.UserEnrolmentRequest
-import models.enrolmentstoreproxy.{
-  Enrolment,
-  QueryKnownFactsResponse
-}
+
+import java.time.LocalDate
 
 trait UserEnrolmentData {
 
@@ -31,31 +26,7 @@ trait UserEnrolmentData {
   val knownRegistrationDate: LocalDate = LocalDate.parse("2021-10-01")
   val knownPostcode: String            = "AA11AA"
 
-  def queryKnownFactsResponse(pptReference: String = knownPptReference): QueryKnownFactsResponse =
-    QueryKnownFactsResponse(
-      "HMRC-PPT-ORG",
-      Seq(
-        Enrolment(identifiers = Seq(KeyValue("EtmpRegistrationNumber", pptReference)),
-                  verifiers = Seq.empty // Not used by service ATM
-        )
-      )
-    )
-
   val userEnrolmentRequest: UserEnrolmentRequest =
     UserEnrolmentRequest(knownPptReference, knownRegistrationDate, Some(knownPostcode))
-
-  def pptEnrolment(pptReference: String = knownPptReference): Enrolment =
-    Enrolment(identifiers = Seq(KeyValue("EtmpRegistrationNumber", pptReference)),
-              verifiers =
-                Seq(KeyValue("PPTRegistrationDate", "20211018"),
-                    KeyValue("BusinessPostCode", "AA11AA")
-                )
-    )
-
-  val irsaEnrolment: Enrolment = Enrolment(
-    identifiers = Seq(KeyValue("UTR", "1234567890")),
-    verifiers =
-      Seq(KeyValue("NINO", "AB112233D"), KeyValue("Postcode", "SW1A 2AA"))
-  )
 
 }

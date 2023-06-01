@@ -16,8 +16,6 @@
 
 package connectors
 
-import java.time.LocalDate
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.ScalaFutures
@@ -25,79 +23,23 @@ import play.api.http.Status
 import play.api.test.Helpers.await
 import base.Injector
 import base.it.ConnectorISpec
-import connectors.EnrolmentStoreProxyConnector.{
-  GroupsWithEnrolmentsTimerTag,
-  KnownFactsTimerTag
-}
-import connectors.EnrolmentStoreProxyConnectorISpec._
-import models.enrolment.UserEnrolmentRequest
+import connectors.EnrolmentStoreProxyConnector.GroupsWithEnrolmentsTimerTag
+import connectors.EnrolmentStoreProxyConnectorISpec.{allGroupsWithEnrolmentsResponse, principalGroupsWithEnrolmentsResponse}
 import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
+
 
 class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
 
   private val enrolmentStoreProxyConnector = app.injector.instanceOf[EnrolmentStoreProxyConnector]
 
+  val enrolmentKey = "HMRC-PPT-ORG~EtmpRegistrationNumber~XYPPT0000000283"
+
   "Enrolment StoreProxy Connector" should {
-
-    "query known facts successfully" when {
-
-      val allFactsUserEnrolmentRequest =
-        UserEnrolmentRequest("XYPPT0000000283", LocalDate.parse("2021-10-01"), Some("AA11AA"))
-
-      val minimumFactsUserEnrolmentRequest =
-        UserEnrolmentRequest("XYPPT0000000283", LocalDate.parse("2021-10-01"))
-
-      "user supplies all known facts" in {
-        mockSuccessfulKnownFactResponse(enrolmentStoreProxyAllFactsRequest,
-                                        enrolmentStoreProxyResponse
-        )
-
-        val knownFactsResponse =
-          await(enrolmentStoreProxyConnector.queryKnownFacts(allFactsUserEnrolmentRequest))
-
-        knownFactsResponse.map(_.pptEnrolmentReferences) mustBe Some(Seq("XYPPT0000000283"))
-        getTimer(KnownFactsTimerTag).getCount mustBe 1
-      }
-
-      "user supplies minimal known facts" in {
-        mockSuccessfulKnownFactResponse(enrolmentStoreProxyMinimumFactsRequest,
-                                        enrolmentStoreProxyResponse
-        )
-
-        val knownFactsResponse =
-          await(enrolmentStoreProxyConnector.queryKnownFacts(minimumFactsUserEnrolmentRequest))
-
-        knownFactsResponse.map(_.pptEnrolmentReferences) mustBe Some(Seq("XYPPT0000000283"))
-        getTimer(KnownFactsTimerTag).getCount mustBe 1
-      }
-
-      "enrolment store proxy responds with no enrolments" in {
-        mockSuccessfulKnownFactResponse(enrolmentStoreProxyAllFactsRequest,
-                                        enrolmentStoreProxyEmptyResponse
-        )
-
-        val knownFactsResponse =
-          await(enrolmentStoreProxyConnector.queryKnownFacts(allFactsUserEnrolmentRequest))
-
-        knownFactsResponse.map(_.pptEnrolmentReferences) mustBe Some(Seq.empty)
-        getTimer(KnownFactsTimerTag).getCount mustBe 1
-      }
-
-      "enrolment store proxy responds with no facts" in {
-        mockNoKnownFactsResponse(enrolmentStoreProxyAllFactsRequest)
-
-        val knownFactsResponse =
-          await(enrolmentStoreProxyConnector.queryKnownFacts(allFactsUserEnrolmentRequest))
-
-        knownFactsResponse mustBe None
-        getTimer(KnownFactsTimerTag).getCount mustBe 1
-      }
-    }
 
     "query groups with enrolment" when {
 
       "no groups exist" in {
-        mockNoGroupsWithEnrolmentsResponse("HMRC-PPT-ORG~EtmpRegistrationNumber~XYPPT0000000283")
+        mockNoGroupsWithEnrolmentsResponse()
 
         val groupsResponse =
           await(enrolmentStoreProxyConnector.queryGroupsWithEnrolment("XYPPT0000000283"))
@@ -107,9 +49,7 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
       }
 
       "all groups exist" in {
-        mockGroupsWithEnrolmentsResponse("HMRC-PPT-ORG~EtmpRegistrationNumber~XYPPT0000000283",
-                                         allGroupsWithEnrolmentsResponse
-        )
+        mockGroupsWithEnrolmentsResponse(allGroupsWithEnrolmentsResponse)
 
         val groupsResponse =
           await(enrolmentStoreProxyConnector.queryGroupsWithEnrolment("XYPPT0000000283"))
@@ -123,9 +63,7 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
       }
 
       "principle groups exist" in {
-        mockGroupsWithEnrolmentsResponse("HMRC-PPT-ORG~EtmpRegistrationNumber~XYPPT0000000283",
-                                         principalGroupsWithEnrolmentsResponse
-        )
+        mockGroupsWithEnrolmentsResponse(principalGroupsWithEnrolmentsResponse)
 
         val groupsResponse =
           await(enrolmentStoreProxyConnector.queryGroupsWithEnrolment("XYPPT0000000283"))
@@ -140,31 +78,7 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
 
   }
 
-  private def mockSuccessfulKnownFactResponse(
-    requestJson: String,
-    responseJson: String
-  ): StubMapping =
-    stubFor(
-      post(urlMatching("/enrolment-store-proxy/enrolment-store/enrolments"))
-        .withRequestBody(equalToJson(requestJson))
-        .willReturn(
-          aResponse()
-            .withStatus(Status.OK)
-            .withBody(responseJson)
-        )
-    )
-
-  private def mockNoKnownFactsResponse(requestJson: String): StubMapping =
-    stubFor(
-      post(urlMatching("/enrolment-store-proxy/enrolment-store/enrolments"))
-        .withRequestBody(equalToJson(requestJson))
-        .willReturn(
-          aResponse()
-            .withStatus(Status.NO_CONTENT)
-        )
-    )
-
-  private def mockNoGroupsWithEnrolmentsResponse(enrolmentKey: String): StubMapping =
+  private def mockNoGroupsWithEnrolmentsResponse(): StubMapping =
     stubFor(
       get(urlMatching(s"/enrolment-store-proxy/enrolment-store/enrolments/$enrolmentKey/groups"))
         .willReturn(
@@ -174,7 +88,6 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
     )
 
   private def mockGroupsWithEnrolmentsResponse(
-    enrolmentKey: String,
     response: String
   ): StubMapping =
     stubFor(
@@ -189,71 +102,6 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
 }
 
 object EnrolmentStoreProxyConnectorISpec {
-
-  private val enrolmentStoreProxyAllFactsRequest =
-    """
-      |{
-      |  "service": "HMRC-PPT-ORG",
-      |  "knownFacts": [
-      |    {
-      |      "key": "PPTRegistrationDate",
-      |      "value": "20211001"
-      |    },
-      |    {
-      |      "key": "BusinessPostCode",
-      |      "value": "AA11AA"
-      |    }
-      |  ]
-      |}
-      |""".stripMargin
-
-  private val enrolmentStoreProxyMinimumFactsRequest =
-    """
-      |{
-      |  "service": "HMRC-PPT-ORG",
-      |  "knownFacts": [
-      |    {
-      |      "key": "PPTRegistrationDate",
-      |      "value": "20211001"
-      |    }
-      |  ]
-      |}
-      |""".stripMargin
-
-  private val enrolmentStoreProxyResponse =
-    """
-      |{
-      |  "service": "HMRC-PPT-ORG",
-      |  "enrolments": [
-      |    {
-      |      "identifiers": [
-      |        {
-      |          "key": "EtmpRegistrationNumber",
-      |          "value": "XYPPT0000000283"
-      |        }
-      |      ],
-      |      "verifiers": [
-      |        {
-      |          "key": "PPTRegistrationDate",
-      |          "value": "20211001"
-      |        },
-      |        {
-      |          "key": "BusinessPostCode",
-      |          "value": "AA11AA"
-      |        }
-      |      ]
-      |    }
-      |  ]
-      |}
-      |""".stripMargin
-
-  private val enrolmentStoreProxyEmptyResponse =
-    """
-      |{
-      |  "service": "HMRC-PPT-ORG",
-      |  "enrolments": []
-      |}
-      |""".stripMargin
 
   private val allGroupsWithEnrolmentsResponse =
     """

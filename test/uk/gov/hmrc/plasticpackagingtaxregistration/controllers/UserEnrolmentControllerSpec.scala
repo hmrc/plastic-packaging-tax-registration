@@ -43,10 +43,6 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    when(mockEnrolmentStoreProxyConnector.queryKnownFacts(any())(any())).thenReturn(
-      Future.successful(Some(queryKnownFactsResponse(knownPptReference)))
-    )
-
     when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
       Future.successful(None)
     )
