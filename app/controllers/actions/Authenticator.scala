@@ -59,7 +59,7 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
           logger.info(s"Authorised request for ${authorisedRequest.registrationId}")
           body(authorisedRequest)
         case Left(error) =>
-          logger.error(s"Problems with Authorisation: ${error.message}")
+          logger.warn(s"Problems with Authorisation: ${error.message}")
           Future.successful(Unauthorized(error.message))
       }
     }
@@ -83,15 +83,15 @@ class Authenticator @Inject() (override val authConnector: AuthConnector, cc: Co
         )
       case _ =>
         val msg = "Unauthorised access. User without an HMRC Internal Id and/or Group Identifier"
-        logger.error(msg)
+        logger.warn(msg)
         Future.successful(Left(ErrorResponse(UNAUTHORIZED, msg)))
     } recover {
       case error: AuthorisationException =>
-        logger.error(s"Unauthorised Exception for ${request.uri} with error ${error.reason}")
+        logger.warn(s"Unauthorised Exception for ${request.uri} with error ${error.reason}")
         Left(ErrorResponse(UNAUTHORIZED, "Unauthorized for plastic packaging tax"))
       case ex: Throwable =>
         val msg = "Internal server error is " + ex.getMessage
-        logger.error(msg)
+        logger.warn(msg)
         Left(ErrorResponse(INTERNAL_SERVER_ERROR, msg))
     }
   }

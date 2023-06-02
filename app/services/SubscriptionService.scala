@@ -79,7 +79,7 @@ class SubscriptionService @Inject() (
             _
           ) =>
         val reasons = failedSubscriptionResponse.failures.map(_.reason)
-        logger.error(
+        logger.warn(
           s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated} - ${reasons.mkString("; ")}"
         )
         Future.successful(Left(subscriptionResponse))
