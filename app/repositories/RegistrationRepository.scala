@@ -104,7 +104,7 @@ class RegistrationRepositoryImpl @Inject() (
     collection.deleteOne(filter(pptId)).toFuture().andThen {
       case _ => deleteStopwatch.stop()
     }.map { result =>
-      if (result.getDeletedCount != 1) logger.error(s"Failed to delete registration id: $pptId")
+      if (result.getDeletedCount != 1) logger.warn(s"Failed to delete registration id: $pptId")
     }
   }
 
