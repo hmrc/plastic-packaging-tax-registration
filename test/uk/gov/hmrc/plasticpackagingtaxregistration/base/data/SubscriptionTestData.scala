@@ -21,20 +21,11 @@ import play.api.test.FakeRequest
 import base.AuthTestSupport
 import models.eis.EISError
 import models.eis.subscription._
-import models.eis.subscription.create.{
-  EISSubscriptionFailureResponse,
-  SubscriptionSuccessfulResponse
-}
-import models.eis.subscription.group.{
-  GroupPartnershipDetails,
-  GroupPartnershipSubscription
-}
+import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionSuccessfulResponse}
+import models.eis.subscription.group.GroupPartnershipDetails.Relationship
+import models.eis.subscription.group.{GroupPartnershipDetails, GroupPartnershipSubscription}
 import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
-import models.eis.subscriptionStatus.{
-  ETMPSubscriptionStatus,
-  ETMPSubscriptionStatusResponse,
-  SubscriptionStatusResponse
-}
+import models.eis.subscriptionStatus.{ETMPSubscriptionStatus, ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
 import models.{OrgType, PostCodeWithoutSpaces}
 
 import java.time.ZoneOffset.UTC
@@ -177,7 +168,7 @@ trait SubscriptionTestData extends AuthTestSupport {
   )
 
   protected val groupPartnershipDetailsRep: GroupPartnershipDetails = GroupPartnershipDetails(
-    "Representative",
+    Relationship.Representative,
     "123456789",
     Some("1234567890"),
     OrganisationDetails(Some("UkCompany"), "Plastics Ltd"),
@@ -188,7 +179,7 @@ trait SubscriptionTestData extends AuthTestSupport {
   )
 
   protected val groupPartnershipDetailsMember: GroupPartnershipDetails = GroupPartnershipDetails(
-    "Member",
+    Relationship.Member,
     "member1",
     Some("member2"),
     OrganisationDetails(Some("UkCompany"), "Plastics Member"),

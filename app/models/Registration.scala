@@ -17,25 +17,11 @@
 package models
 
 import org.joda.time.{DateTime, DateTimeZone}
-import models.eis.subscription.{
-  ChangeOfCircumstanceDetails,
-  CustomerType,
-  Subscription
-}
-import models.OrgType.{
-  CHARITABLE_INCORPORATED_ORGANISATION,
-  OVERSEAS_COMPANY_NO_UK_BRANCH,
-  OVERSEAS_COMPANY_UK_BRANCH,
-  REGISTERED_SOCIETY,
-  SOLE_TRADER,
-  UK_COMPANY
-}
+import models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
+import models.OrgType.{CHARITABLE_INCORPORATED_ORGANISATION, OVERSEAS_COMPANY_NO_UK_BRANCH, OVERSEAS_COMPANY_UK_BRANCH, REGISTERED_SOCIETY, SOLE_TRADER, UK_COMPANY}
 import models.RegType.RegType
-import models.group.{
-  GroupMember,
-  GroupMemberContactDetails,
-  OrganisationDetails => GroupDetails
-}
+import models.eis.subscription.group.GroupPartnershipDetails.Relationship
+import models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -96,7 +82,7 @@ object Registration {
   implicit val format: OFormat[Registration] = Json.format[Registration]
 
   def apply(subscription: Subscription): Registration = {
-
+    val updateID = "UPDATE"
     def illegalState(message: String) = throw new IllegalStateException(message)
 
     val regType =
@@ -342,7 +328,7 @@ object Registration {
               GroupDetail(
                 membersUnderGroupControl = Some(groupPartnershipSubscription.allMembersControl),
                 members = groupPartnershipSubscription.groupPartnershipDetails.filterNot(
-                  _.relationship == "Representative"
+                  _.relationship == Relationship.Representative
                 ).map(
                   detail =>
                     GroupMember(id = UUID.randomUUID().toString,
@@ -362,7 +348,7 @@ object Registration {
       else
         None
 
-    Registration(id = "UPDATE",
+    Registration(id = updateID,
                  dateOfRegistration =
                    Some(LocalDate.parse(subscription.legalEntityDetails.dateOfApplication)),
                  registrationType = regType,

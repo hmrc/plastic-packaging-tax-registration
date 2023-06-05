@@ -19,6 +19,7 @@ package models.eis.subscription.group
 import play.api.libs.json.{Json, OFormat}
 import models.eis.subscription.{AddressDetails, ContactDetails, IndividualDetails, OrganisationDetails => SubscriptionOrganisationDetails}
 import models.eis.subscription
+import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.group.{GroupMember, GroupMemberContactDetails}
 import models.{Partner, PrimaryContactDetails, Registration, OrganisationDetails => RegistrationOrganisationDetails}
 
@@ -95,7 +96,7 @@ object GroupPartnershipSubscription {
     partner: Partner,
     isSubscriptionUpdate: Boolean
   ): GroupPartnershipDetails =
-    GroupPartnershipDetails(relationship = "Partner",
+    GroupPartnershipDetails(relationship = Relationship.Partner,
                             customerIdentification1 = partner.customerIdentification1,
                             customerIdentification2 = partner.customerIdentification2,
                             organisationDetails =
@@ -131,7 +132,7 @@ object GroupPartnershipSubscription {
     primaryContactDetails: PrimaryContactDetails,
     isSubscriptionUpdate: Boolean
   ): GroupPartnershipDetails =
-    GroupPartnershipDetails(relationship = "Representative",
+    GroupPartnershipDetails(relationship = Relationship.Representative,
                             customerIdentification1 =
                               organisationDetails.customerIdentification1,
                             customerIdentification2 =
@@ -162,7 +163,7 @@ object GroupPartnershipSubscription {
       member.contactDetails.getOrElse(
         throw new IllegalStateException("Contact details are required for group member")
       )
-    GroupPartnershipDetails(relationship = "Member",
+    GroupPartnershipDetails(relationship = Relationship.Member,
                             customerIdentification1 = member.customerIdentification1,
                             customerIdentification2 = member.customerIdentification2,
                             organisationDetails = member.organisationDetails.map { details =>

@@ -20,6 +20,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import base.data.RegistrationTestData
 import builders.RegistrationBuilder
+import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.{LiabilityWeight, Partner}
 
 import java.time.ZoneOffset.UTC
@@ -346,7 +347,7 @@ class SubscriptionSpec
     subscription.groupPartnershipSubscription.get.groupPartnershipDetails.size mustBe partners.size
     (partners zip subscription.groupPartnershipSubscription.get.groupPartnershipDetails).foreach {
       case (partner, groupPartnership) =>
-        groupPartnership.relationship mustBe "Partner"
+        groupPartnership.relationship mustBe Relationship.Partner
         groupPartnership.customerIdentification1 mustBe partner.customerIdentification1
         groupPartnership.customerIdentification2 mustBe partner.customerIdentification2
         groupPartnership.organisationDetails.organisationType mustBe partner.partnerType.map(

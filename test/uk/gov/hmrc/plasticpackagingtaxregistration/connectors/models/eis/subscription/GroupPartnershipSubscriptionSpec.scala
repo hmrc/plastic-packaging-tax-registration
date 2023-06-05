@@ -20,16 +20,9 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import base.data.RegistrationTestData
 import builders.RegistrationBuilder
-import models.eis.subscription.group.{
-  GroupPartnershipDetails,
-  GroupPartnershipSubscription
-}
-import models.{
-  GroupDetail,
-  Partner,
-  PostCodeWithoutSpaces,
-  Registration
-}
+import models.eis.subscription.group.GroupPartnershipDetails.Relationship
+import models.eis.subscription.group.{GroupPartnershipDetails, GroupPartnershipSubscription}
+import models.{GroupDetail, Partner, PostCodeWithoutSpaces, Registration}
 
 class GroupPartnershipSubscriptionSpec
     extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
@@ -66,7 +59,7 @@ class GroupPartnershipSubscriptionSpec
 
         val representativeMember = groupSubscription.groupPartnershipDetails.head
         representativeMember.organisationDetails.organisationType mustBe Some("Partnership")
-        representativeMember.relationship mustBe "Representative"
+        representativeMember.relationship mustBe Relationship.Representative
         assertMemberDetails(groupSubscription.groupPartnershipDetails(1))
       }
 
@@ -251,7 +244,7 @@ class GroupPartnershipSubscriptionSpec
 
   //TODO consider comparing with fields from Registration rather than values
   private def assertRepresentativeDetails(representative: GroupPartnershipDetails) = {
-    representative.relationship mustBe "Representative"
+    representative.relationship mustBe Relationship.Representative
     representative.customerIdentification1 mustBe "1234567890"
     representative.customerIdentification2 mustBe Some("987654321")
 
@@ -276,7 +269,7 @@ class GroupPartnershipSubscriptionSpec
   }
 
   private def assertMemberDetails(member: GroupPartnershipDetails) = {
-    member.relationship mustBe "Member"
+    member.relationship mustBe Relationship.Member
     member.customerIdentification1 mustBe "customerId-1"
     member.customerIdentification2 mustBe Some("customerId-2")
 
@@ -306,7 +299,7 @@ class GroupPartnershipSubscriptionSpec
   ) =
     subscription.groupPartnershipDetails zip partners foreach {
       case (groupPartner, partner) =>
-        groupPartner.relationship mustBe "Partner"
+        groupPartner.relationship mustBe Relationship.Partner
         groupPartner.customerIdentification1 mustBe partner.customerIdentification1
         groupPartner.customerIdentification2 mustBe partner.customerIdentification2
 

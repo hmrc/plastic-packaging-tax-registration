@@ -16,16 +16,12 @@
 
 package models.eis.subscription.group
 
-import play.api.libs.json.{Json, OFormat}
-import models.eis.subscription.{
-  AddressDetails,
-  ContactDetails,
-  IndividualDetails,
-  OrganisationDetails
-}
+import models.eis.subscription.group.GroupPartnershipDetails.Relationship.Relationship
+import models.eis.subscription.{AddressDetails, ContactDetails, IndividualDetails, OrganisationDetails}
+import play.api.libs.json._
 
 case class GroupPartnershipDetails(
-  relationship: String,
+  relationship: Relationship,
   customerIdentification1: String,
   customerIdentification2: Option[String],
   organisationDetails: OrganisationDetails,
@@ -36,5 +32,16 @@ case class GroupPartnershipDetails(
 )
 
 object GroupPartnershipDetails {
+
+  object Relationship extends Enumeration {
+    type Relationship = Value
+    val Member: Value = Value("Member")
+    val Representative: Value = Value("Representative")
+    val Partner: Value = Value("Partner")
+
+    implicit val format: Format[Relationship] =
+      Format(Reads.enumNameReads(Relationship), Writes.enumNameWrites)
+  }
+
   implicit val format: OFormat[GroupPartnershipDetails] = Json.format[GroupPartnershipDetails]
 }
