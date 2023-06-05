@@ -18,13 +18,12 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 import models.OrgType.OrgType
-import models.group.{GroupError, GroupMember}
+import models.group.{GroupMember}
 
 case class GroupDetail(
   membersUnderGroupControl: Option[Boolean] = None,
   members: Seq[GroupMember] = Seq.empty,
   currentMemberOrganisationType: Option[OrgType] = None,
-  groupError: Option[GroupError] = None
 )
 
 object GroupDetail {
