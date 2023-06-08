@@ -62,7 +62,8 @@ case class Partner(
   soleTraderDetails: Option[SoleTraderIncorporationDetails] = None,
   incorporationDetails: Option[IncorporationDetails] = None,
   partnerPartnershipDetails: Option[PartnerPartnershipDetails] = None,
-  contactDetails: Option[PartnerContactDetails] = None
+  contactDetails: Option[PartnerContactDetails] = None,
+  regWithoutIDFlag: Option[Boolean] = None
 ) {
 
   lazy val customerIdentification1: String =

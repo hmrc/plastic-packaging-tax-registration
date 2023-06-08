@@ -124,7 +124,7 @@ object GroupPartnershipSubscription {
                             ),
                             regWithoutIDFlag =
                               if (isSubscriptionUpdate) Some(false)
-                              else None // TODO: add regWithoutIDFlag to Partner
+                              else partner.regWithoutIDFlag
     )
 
   private def createRepresentative(

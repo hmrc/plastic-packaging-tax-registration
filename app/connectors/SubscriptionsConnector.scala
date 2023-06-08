@@ -185,7 +185,7 @@ class SubscriptionsConnector @Inject() (
     val correlationIdHeader: (String, String) =
       correlationIdHeaderName -> UUID.randomUUID().toString
 
-    // TODO - the update-subscription API does not accept processingDate, so find out why it's here and come-up with a better fix
+    //the update-subscription API does not accept processingDate, which is returned on display API.
     val subscription = subscription1.copy(processingDate = None)
 
     httpClient.PUT[Subscription, HttpResponse](url = appConfig.subscriptionUpdateUrl(pptReference),
