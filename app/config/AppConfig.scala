@@ -76,6 +76,5 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     s"$eisHost/plastic-packaging-tax/subscriptions/PPT/$pptReference/update"
 
   val nrsRetries: Seq[FiniteDuration] = config.get[Seq[FiniteDuration]]("nrs.retries")
-  
-  def checkForSubscriptionsMagic404: Boolean = config.get[Boolean]("features.subscriptionsCheckForMagic404")
+
 }

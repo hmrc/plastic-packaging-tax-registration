@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import models.eis.subscription._
 import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
-import models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse}
+import models.eis.subscriptionStatus.ETMPSubscriptionStatusResponse
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
@@ -62,7 +62,6 @@ class SubscriptionsConnector @Inject() (
       .recover {
         case httpEx: UpstreamErrorResponse =>
           httpEx.statusCode match {
-            case 404 if appConfig.checkForSubscriptionsMagic404 => checkForMagic404(correlationIdHeader, httpEx)
             case _ => handleHttpError(safeId, correlationIdHeader, httpEx)
           }
         case ex: Exception => handleException(safeId, correlationIdHeader, ex)
@@ -87,15 +86,6 @@ class SubscriptionsConnector @Inject() (
         s"safeId [$safeId], status: ${httpEx.statusCode}, body: ${httpEx.getMessage()}"
     )
     Left(httpEx.statusCode)
-  }
-
-  private def checkForMagic404(correlationIdHeader: (String, String), httpEx: UpstreamErrorResponse) = {
-    // TODO - check for code == NO_DATA_FOUND
-    logger.warn(
-      s"PPT subscription status - 404 returned with correlationId [${correlationIdHeader._2}] and " +
-        s"payload: ${httpEx.getMessage()}"
-    )
-    Right(SubscriptionStatusResponse.noneFound)
   }
 
   def submitSubscription(safeNumber: String, subscription: Subscription)(implicit

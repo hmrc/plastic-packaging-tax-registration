@@ -90,37 +90,12 @@ class SubscriptionsConnectorISpec
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
-      "map a 404 to not-subscribed when feature enabled" in {
+      "map a 404 to an error" in {
         val errors = createErrorResponse(
           code = "NO_DATA_FOUND",
           reason = "The remote endpoint has indicated that the requested resource could  not be found."
         )
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
-
-        val app = new GuiceApplicationBuilder()
-          .configure(overrideConfig)
-          .configure("features.subscriptionsCheckForMagic404" -> "true")
-          .build()
-        val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
-        
-        val res = await(connector.getSubscriptionStatus(safeNumber)).right.get
-        res mustBe SubscriptionStatusResponse(NOT_SUBSCRIBED, None)
-
-        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
-      }
-
-      "map a 404 to an error when feature disabled" in {
-        val errors = createErrorResponse(
-          code = "NO_DATA_FOUND",
-          reason = "The remote endpoint has indicated that the requested resource could  not be found."
-        )
-        stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
-
-        val app = new GuiceApplicationBuilder()
-          .configure(overrideConfig)
-          .configure("features.subscriptionsCheckForMagic404" -> "false")
-          .build()
-        val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
 
         val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
         res mustBe Status.NOT_FOUND
