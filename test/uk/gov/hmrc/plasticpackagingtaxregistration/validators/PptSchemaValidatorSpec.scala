@@ -18,7 +18,6 @@ package validators
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.Json
 import base.data.SubscriptionTestData
 import models.eis.subscription.group.GroupPartnershipSubscription
 

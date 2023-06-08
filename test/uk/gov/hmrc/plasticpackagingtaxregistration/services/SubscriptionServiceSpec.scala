@@ -90,7 +90,7 @@ class SubscriptionServiceSpec
 
       val registration = aValidRegistration()
 
-      val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
+      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
 
       verify(mockTaxEnrolmentsConnector, times(1)).submitEnrolment(eqTo("PPT_REF_2"),
                                                                    eqTo("SAFE_ID"),
@@ -115,7 +115,7 @@ class SubscriptionServiceSpec
 
       val registration = aValidRegistration()
 
-      val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
+      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
 
       val payloadCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
       val metaDataCaptor: ArgumentCaptor[NonRepudiationMetadata] =
@@ -168,7 +168,7 @@ class SubscriptionServiceSpec
 
       val registration = aValidRegistration()
 
-      val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
+      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
 
       verify(mockRegistrationRepository, times(1)).delete(eqTo(registration.id))
     }

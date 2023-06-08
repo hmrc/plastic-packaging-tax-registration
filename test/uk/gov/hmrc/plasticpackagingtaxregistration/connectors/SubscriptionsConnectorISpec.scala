@@ -35,12 +35,13 @@ import models.eis.subscription.Subscription
 import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
 import models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
+import org.scalatest.EitherValues
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
 
 class SubscriptionsConnectorISpec
-    extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData {
+    extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData with EitherValues {
 
   private lazy val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
 
@@ -67,7 +68,7 @@ class SubscriptionsConnectorISpec
             )
         )
 
-        val res = await(connector.getSubscriptionStatus(safeNumber)).right.get
+        val res = await(connector.getSubscriptionStatus(safeNumber)).value
 
         res.status mustBe NOT_SUBSCRIBED
         res.pptReference mustBe Some("XXPPTP" + safeNumber + "789")
@@ -84,7 +85,7 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.BAD_REQUEST, errors = errors)
 
-        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.value
         res mustBe Status.BAD_REQUEST
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
@@ -103,7 +104,7 @@ class SubscriptionsConnectorISpec
           .build()
         val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
         
-        val res = await(connector.getSubscriptionStatus(safeNumber)).right.get
+        val res = await(connector.getSubscriptionStatus(safeNumber)).value
         res mustBe SubscriptionStatusResponse(NOT_SUBSCRIBED, None)
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
@@ -122,7 +123,7 @@ class SubscriptionsConnectorISpec
           .build()
         val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
 
-        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.value
         res mustBe Status.NOT_FOUND
         
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
@@ -137,7 +138,7 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.INTERNAL_SERVER_ERROR, errors = errors)
 
-        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.value
         res mustBe Status.INTERNAL_SERVER_ERROR
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
@@ -152,7 +153,7 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.BAD_GATEWAY, errors = errors)
 
-        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.value
         res mustBe Status.BAD_GATEWAY
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
@@ -167,7 +168,7 @@ class SubscriptionsConnectorISpec
 
         stubSubscriptionStatusFailure(httpStatus = Status.SERVICE_UNAVAILABLE, errors = errors)
 
-        val res = await(connector.getSubscriptionStatus(safeNumber)).left.get
+        val res = await(connector.getSubscriptionStatus(safeNumber)).left.value
         res mustBe Status.SERVICE_UNAVAILABLE
 
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
@@ -208,8 +209,8 @@ class SubscriptionsConnectorISpec
       }
 
       forAll(Seq(400, 404, 422, 409, 500, 502, 503)) { statusCode =>
-        "return " + statusCode when {
-          statusCode + " is returned from downstream service" in {
+        s"return $statusCode" when {
+          s"$statusCode is returned from downstream service" in {
             val errors =
               createErrorResponse(code = statusCode.toString,
                                   reason =
@@ -293,8 +294,8 @@ class SubscriptionsConnectorISpec
       }
 
       forAll(Seq(400, 404, 422, 409, 500, 502, 503)) { statusCode =>
-        "return " + statusCode when {
-          statusCode + " is returned from downstream service" in {
+        s"return $statusCode" when {
+          s"$statusCode is returned from downstream service" in {
             val pptReference = UUID.randomUUID().toString
             val errors =
               createErrorResponse(code = "INVALID_VALUE",
@@ -309,7 +310,7 @@ class SubscriptionsConnectorISpec
 
             val res = await(connector.getSubscription(pptReference))
 
-            res.left.get mustBe statusCode
+            res.left.value mustBe statusCode
             getTimer(pptSubscriptionDisplayTimer).getCount mustBe 1
           }
         }
@@ -349,8 +350,8 @@ class SubscriptionsConnectorISpec
       }
 
       forAll(Seq(400, 404, 422, 409, 500, 502, 503)) { statusCode =>
-        "return " + statusCode when {
-          statusCode + " is returned from downstream service" in {
+        s"return $statusCode" when {
+           s"$statusCode is returned from downstream service" in {
             val errors =
               createErrorResponse(code = statusCode.toString,
                                   reason =

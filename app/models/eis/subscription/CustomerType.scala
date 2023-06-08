@@ -20,8 +20,8 @@ import play.api.libs.json.{Format, Reads, Writes}
 
 object CustomerType extends Enumeration {
   type CustomerType = Value
-  val Individual: Value   = Value
-  val Organisation: Value = Value
+  final val Individual: Value   = Value
+  final val Organisation: Value = Value
 
   implicit val format: Format[CustomerType] =
     Format(Reads.enumNameReads(CustomerType), Writes.enumNameWrites)

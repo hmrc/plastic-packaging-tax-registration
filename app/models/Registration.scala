@@ -107,6 +107,7 @@ object Registration {
         subscription.legalEntityDetails.customerDetails.organisationDetails.map(
           _.organisationTypeDisplayName(regType.exists(_.equals(RegType.GROUP)))
         ).getOrElse(illegalState("Missing organisation type"))
+      case ct => illegalState(s"invalid customer type: $ct")
     }
 
     val incorporationDetails = organisationType match {

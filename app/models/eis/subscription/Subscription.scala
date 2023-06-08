@@ -17,7 +17,6 @@
 package models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import models.eis.subscription.group.GroupPartnershipSubscription
 import models.{OldDate, RegType, Registration}
 
 import scala.language.implicitConversions

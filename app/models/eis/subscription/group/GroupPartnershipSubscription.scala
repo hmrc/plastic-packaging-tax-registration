@@ -16,12 +16,12 @@
 
 package models.eis.subscription.group
 
-import play.api.libs.json.{Json, OFormat}
-import models.eis.subscription.{AddressDetails, ContactDetails, IndividualDetails, OrganisationDetails => SubscriptionOrganisationDetails}
 import models.eis.subscription
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship
+import models.eis.subscription.{OrganisationDetails => SubscriptionOrganisationDetails}
 import models.group.{GroupMember, GroupMemberContactDetails}
 import models.{Partner, PrimaryContactDetails, Registration, OrganisationDetails => RegistrationOrganisationDetails}
+import play.api.libs.json.{Json, OFormat}
 
 case class GroupPartnershipSubscription(
   representativeControl: Boolean,

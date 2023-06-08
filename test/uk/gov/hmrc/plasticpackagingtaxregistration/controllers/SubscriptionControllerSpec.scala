@@ -16,32 +16,26 @@
 
 package controllers
 
+import base.unit.ControllerSpec
+import builders.{RegistrationBuilder, RegistrationRequestBuilder}
+import models.PartnerTypeEnum.partnerTypesWhichRepresentPartnerships
+import models._
+import models.eis.EISError
+import models.eis.subscription.Subscription
+import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionCreateWithEnrolmentAndNrsStatusesResponse, SubscriptionFailureResponseWithStatusCode}
+import models.eis.subscription.group.GroupPartnershipDetails
+import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
+import models.nrs.NonRepudiationSubmissionAccepted
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{verify, verifyNoInteractions, when}
-import org.mockito.{ArgumentCaptor, ArgumentMatchers, Mockito}
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.MockitoSugar.{reset, verify, when}
+import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsJson, route, status, _}
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
-import base.unit.ControllerSpec
-import builders.{
-  RegistrationBuilder,
-  RegistrationRequestBuilder
-}
-import models.eis.EISError
-import models.eis.subscription.Subscription
-import models.eis.subscription.create.{
-  EISSubscriptionFailureResponse,
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
-  SubscriptionFailureResponseWithStatusCode
-}
-import models.eis.subscription.group.GroupPartnershipDetails
-import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
-import models.PartnerTypeEnum.partnerTypesWhichRepresentPartnerships
-import models.nrs.NonRepudiationSubmissionAccepted
-import models._
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -51,7 +45,7 @@ class SubscriptionControllerSpec
     extends ControllerSpec with RegistrationBuilder with RegistrationRequestBuilder {
 
   override def beforeEach(): Unit = {
-    Mockito.reset(mockRepository, mockNonRepudiationService)
+    reset(mockRepository, mockNonRepudiationService)
     super.beforeEach()
 
     when(mockRepository.delete(any())).thenReturn(Future.successful(()))
@@ -265,7 +259,6 @@ class SubscriptionControllerSpec
       val rawResp = route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
       status(rawResp) mustBe 422
-      val str  = contentAsString(rawResp)
       val resp = contentAsJson(rawResp).as[EISSubscriptionFailureResponse]
       resp.failures mustBe List(
         EISError("ACTIVE_SUBSCRIPTION_EXISTS",

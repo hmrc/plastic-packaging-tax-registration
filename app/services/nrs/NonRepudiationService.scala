@@ -16,20 +16,15 @@
 
 package services.nrs
 
-import org.joda.time.LocalDate
+import connectors.NonRepudiationConnector
+import models.nrs.{IdentityData, NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
 import play.api.Logger
+import services.nrs.NonRepudiationService.nonRepudiationIdentityRetrievals
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpException, InternalServerException}
-import connectors.NonRepudiationConnector
-import models.nrs.{
-  IdentityData,
-  NonRepudiationMetadata,
-  NonRepudiationSubmissionAccepted
-}
-import services.nrs.NonRepudiationService.nonRepudiationIdentityRetrievals
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
