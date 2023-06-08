@@ -118,7 +118,7 @@ class GroupPartnershipSubscriptionSpec
 
         val group = GroupPartnershipSubscription(registration, isSubscriptionUpdate = true).get
 
-        group.groupPartnershipDetails.seq.foreach(gpd => gpd.regWithoutIDFlag mustBe Some(false))
+        group.groupPartnershipDetails.foreach(gpd => gpd.regWithoutIDFlag mustBe Some(false))
       }
 
       "throw an exception" when {

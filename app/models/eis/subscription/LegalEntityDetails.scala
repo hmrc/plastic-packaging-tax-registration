@@ -29,7 +29,6 @@ import models.{
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneOffset, ZonedDateTime}
-import scala.language.implicitConversions
 
 case class LegalEntityDetails(
   dateOfApplication: String,
@@ -46,6 +45,7 @@ case class LegalEntityDetails(
     case Individual =>
       val name = customerDetails.individualDetails.get
       s"${name.firstName} ${name.lastName}"
+    case ct => throw new IllegalStateException(s"invalid customer type: $ct")
   }
 
 }

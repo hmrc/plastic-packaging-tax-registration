@@ -22,8 +22,6 @@ import base.data.RegistrationTestData
 import builders.RegistrationBuilder
 import models.{PPTAddress, PostCodeWithoutSpaces}
 
-import scala.language.implicitConversions
-
 class BusinessCorrespondenceDetailsSpec
     extends AnyWordSpec with Matchers with RegistrationTestData with RegistrationBuilder {
 

@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.{JsResult, JsSuccess, JsValue, Reads}
+import play.api.libs.json.{JsError, JsResult, JsSuccess, JsValue, Reads}
 
 sealed trait EnrolmentStatus
 
@@ -50,6 +50,7 @@ object EnrolmentStatus {
         case Failure.jsonName | Enrolled.jsonName | EnrolmentError.jsonName |
             AuthRefreshed.jsonName =>
           JsSuccess(Failure)
+        case s => JsError(s"$s can not be read as EnrolmentStatus")
       }
 
   }

@@ -17,13 +17,15 @@
 package connectors
 
 import com.kenshoo.play.metrics.Metrics
+
+import javax.inject.{Inject, Singleton}
 import config.AppConfig
 import connectors.EnrolmentStoreProxyConnector.GroupsWithEnrolmentsTimerTag
 import models.enrolment.EnrolmentKey
 import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReadsHttpResponse}
+import play.api.http.Status.{NOT_FOUND, NO_CONTENT, OK}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReadsInstances, HttpResponse, UpstreamErrorResponse}
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -31,8 +33,7 @@ class EnrolmentStoreProxyConnector @Inject() (
   httpClient: HttpClient,
   val config: AppConfig,
   metrics: Metrics
-)(implicit ec: ExecutionContext)
-    extends HttpReadsHttpResponse {
+)(implicit ec: ExecutionContext) extends HttpReadsInstances {
 
   /** ES1 **/
   def queryGroupsWithEnrolment(
@@ -40,9 +41,15 @@ class EnrolmentStoreProxyConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[Option[GroupsWithEnrolmentsResponse]] = {
     val timer = metrics.defaultRegistry.timer(GroupsWithEnrolmentsTimerTag).time()
 
-    httpClient.GET[Option[GroupsWithEnrolmentsResponse]](url =
+    httpClient.GET[HttpResponse](url =
       config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference))
-    ).andThen { case _ => timer.stop() }
+    ).map{ response =>
+      response.status match {
+        case OK => Some(response.json.as[GroupsWithEnrolmentsResponse])
+        case NO_CONTENT | NOT_FOUND => None
+        case _ => throw UpstreamErrorResponse(response.body, response.status)
+      }
+    }.andThen { case _ => timer.stop() }
   }
 
 }

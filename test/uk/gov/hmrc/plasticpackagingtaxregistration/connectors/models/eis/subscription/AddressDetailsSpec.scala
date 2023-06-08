@@ -21,8 +21,6 @@ import org.scalatest.wordspec.AnyWordSpec
 import base.data.RegistrationTestData
 import models.{PPTAddress, PostCodeWithoutSpaces}
 
-import scala.language.implicitConversions
-
 class AddressDetailsSpec extends AnyWordSpec with Matchers with RegistrationTestData {
 
   "AddressDetails" should {

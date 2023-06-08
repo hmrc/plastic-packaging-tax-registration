@@ -18,37 +18,22 @@ package base.unit
 
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
-import org.mockito.stubbing.OngoingStubbing
+import org.mockito.MockitoSugar.{reset, when}
+import org.mockito.stubbing.ScalaOngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
-import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
 import models.eis.subscription.Subscription
-import models.eis.subscription.create.{
-  SubscriptionFailureResponseWithStatusCode,
-  SubscriptionResponse,
-  SubscriptionSuccessfulResponse
-}
+import models.eis.subscription.create.{SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import connectors.parsers.TaxEnrolmentsHttpParser
-import connectors.parsers.TaxEnrolmentsHttpParser.{
-  FailedTaxEnrolment,
-  SuccessfulTaxEnrolment
-}
-import connectors.{
-  EnrolmentStoreProxyConnector,
-  NonRepudiationConnector,
-  SubscriptionsConnector,
-  TaxEnrolmentsConnector
-}
-import models.nrs.{
-  NonRepudiationMetadata,
-  NonRepudiationSubmissionAccepted
-}
+import connectors.parsers.TaxEnrolmentsHttpParser.{FailedTaxEnrolment, SuccessfulTaxEnrolment, TaxEnrolmentsResponse}
+import connectors.{EnrolmentStoreProxyConnector, NonRepudiationConnector, SubscriptionsConnector, TaxEnrolmentsConnector}
+import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
+import org.scalatestplus.mockito.MockitoSugar.mock
 
 import scala.concurrent.Future
 
-trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
+trait MockConnectors extends BeforeAndAfterEach {
   self: Suite =>
 
   protected val mockSubscriptionsConnector: SubscriptionsConnector   = mock[SubscriptionsConnector]
@@ -75,60 +60,60 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected def mockGetSubscriptionSubmitFailure(
     ex: Exception
-  ): OngoingStubbing[Future[SubscriptionResponse]] =
+  ): ScalaOngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any()))
       .thenThrow(ex)
 
   protected def mockGetSubscriptionSubmitFailure(
     failedResponse: SubscriptionFailureResponseWithStatusCode
-  ): OngoingStubbing[Future[SubscriptionResponse]] =
+  ): ScalaOngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
       Future.successful(failedResponse)
     )
 
   protected def mockGetSubscriptionStatus(
     subscriptionStatusResponse: SubscriptionStatusResponse
-  ): OngoingStubbing[Future[Either[Int, SubscriptionStatusResponse]]] =
+  ): ScalaOngoingStubbing[Future[Either[Int, SubscriptionStatusResponse]]] =
     when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any())).thenReturn(
       Future.successful(Right(subscriptionStatusResponse))
     )
 
   protected def mockGetSubscription(
     subscription: Subscription
-  ): OngoingStubbing[Future[Either[Int, Subscription]]] =
+  ): ScalaOngoingStubbing[Future[Either[Int, Subscription]]] =
     when(mockSubscriptionsConnector.getSubscription(any())(any())).thenReturn(
       Future.successful(Right(subscription))
     )
 
   protected def mockGetSubscriptionCreate(
     subscription: SubscriptionSuccessfulResponse
-  ): OngoingStubbing[Future[SubscriptionResponse]] =
+  ): ScalaOngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
       Future.successful(subscription)
     )
 
   protected def mockSubscriptionUpdate(
     subscription: SubscriptionSuccessfulResponse
-  ): OngoingStubbing[Future[SubscriptionResponse]] =
+  ): ScalaOngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenReturn(
       Future.successful(subscription)
     )
 
   protected def mockSubscriptionUpdateFailure(
     failedResponse: SubscriptionFailureResponseWithStatusCode
-  ): OngoingStubbing[Future[SubscriptionResponse]] =
+  ): ScalaOngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenReturn(
       Future.successful(failedResponse)
     )
 
   protected def mockSubscriptionUpdateFailure(
     ex: Exception
-  ): OngoingStubbing[Future[SubscriptionResponse]] =
+  ): ScalaOngoingStubbing[Future[SubscriptionResponse]] =
     when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenThrow(ex)
 
   protected def mockNonRepudiationSubmission(
     response: NonRepudiationSubmissionAccepted
-  ): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
+  ): ScalaOngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
     when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any())).thenReturn(
       Future.successful(response)
     )
@@ -137,7 +122,7 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
     testEncodedPayload: String,
     expectedMetadata: NonRepudiationMetadata,
     response: NonRepudiationSubmissionAccepted
-  )(implicit hc: HeaderCarrier): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
+  )(implicit hc: HeaderCarrier): ScalaOngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
     when(
       mockNonRepudiationConnector.submitNonRepudiation(ArgumentMatchers.eq(testEncodedPayload),
                                                        ArgumentMatchers.eq(expectedMetadata)
@@ -146,24 +131,23 @@ trait MockConnectors extends MockitoSugar with BeforeAndAfterEach {
 
   protected def mockNonRepudiationSubmissionFailure(
     ex: Exception
-  ): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
+  ): ScalaOngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
     when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any()))
       .thenThrow(ex)
 
-  protected def mockEnrolmentSuccess()
-    : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
+  protected def mockEnrolmentSuccess(): ScalaOngoingStubbing[Future[TaxEnrolmentsResponse]] =
     when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.successful(Right(SuccessfulTaxEnrolment))
     )
 
   protected def mockEnrolmentFailure()
-    : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
+    : ScalaOngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
     when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.successful(Left(FailedTaxEnrolment(1)))
     )
 
   protected def mockEnrolmentFailureException()
-    : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
+    : ScalaOngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
     when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
       Future.failed(new IllegalStateException("BANG!"))
     )
