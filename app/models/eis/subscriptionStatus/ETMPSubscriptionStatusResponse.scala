@@ -18,13 +18,11 @@ package models.eis.subscriptionStatus
 
 import play.api.libs.json.{Json, OFormat}
 import ETMPSubscriptionStatus.Status
-import models.eis.EISError
 
 case class ETMPSubscriptionStatusResponse(
   subscriptionStatus: Option[Status] = None,
   idType: Option[String] = None,
-  idValue: Option[String] = None,
-  failures: Option[Seq[EISError]] = None //todo is this needed?
+  idValue: Option[String] = None
 )
 
 object ETMPSubscriptionStatusResponse {

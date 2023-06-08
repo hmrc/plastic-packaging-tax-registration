@@ -53,7 +53,6 @@ class OrganisationDetailsSpec extends AnyWordSpec with Matchers {
     }
 
     "treat LLPs as partnerships if they are part of a group" in {
-      // TODO why this is different to the above non group case?
       OrganisationDetails(organisationType =
                             Some(PartnerTypeEnum.LIMITED_LIABILITY_PARTNERSHIP.toString),
                           organisationName = "My organisation"

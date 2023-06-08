@@ -39,8 +39,6 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
     , "models\\..*"
     , "metrics\\..*"
     , ".*(BuildInfo|Routes|Options).*"
-    // TODO: remove once we have full subscription -> registration -> subscription round trip for partnerships
-    , "models.Registration"
   ).mkString(";"),
   coverageMinimum := 90.00,
   coverageFailOnMinimum := true,

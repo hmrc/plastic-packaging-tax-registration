@@ -242,7 +242,6 @@ class GroupPartnershipSubscriptionSpec
     }
   }
 
-  //TODO consider comparing with fields from Registration rather than values
   private def assertRepresentativeDetails(representative: GroupPartnershipDetails) = {
     representative.relationship mustBe Relationship.Representative
     representative.customerIdentification1 mustBe "1234567890"

@@ -249,7 +249,8 @@ object Registration {
             contactDetails = Some(partnerContactDetails),
             incorporationDetails = partnerIncorporationDetails,
             soleTraderDetails = partnerSoleTraderDetails,
-            partnerPartnershipDetails = partnerPartnershipDetails
+            partnerPartnershipDetails = partnerPartnershipDetails,
+            regWithoutIDFlag = subscriptionPartner.regWithoutIDFlag
           )
         }
 
