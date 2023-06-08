@@ -17,13 +17,10 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, post, put}
-import connectors.SubscriptionsConnector
-import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.http.Status.{CONFLICT, OK}
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.UpstreamErrorResponse
@@ -91,37 +88,12 @@ class SubscriptionsConnectorISpec
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
-      "map a 404 to not-subscribed when feature enabled" in {
+      "map a 404 to an error" in {
         val errors = createErrorResponse(
           code = "NO_DATA_FOUND",
           reason = "The remote endpoint has indicated that the requested resource could  not be found."
         )
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
-
-        val app = new GuiceApplicationBuilder()
-          .configure(overrideConfig)
-          .configure("features.subscriptionsCheckForMagic404" -> "true")
-          .build()
-        val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
-        
-        val res = await(connector.getSubscriptionStatus(safeNumber)).value
-        res mustBe SubscriptionStatusResponse(NOT_SUBSCRIBED, None)
-
-        getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
-      }
-
-      "map a 404 to an error when feature disabled" in {
-        val errors = createErrorResponse(
-          code = "NO_DATA_FOUND",
-          reason = "The remote endpoint has indicated that the requested resource could  not be found."
-        )
-        stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
-
-        val app = new GuiceApplicationBuilder()
-          .configure(overrideConfig)
-          .configure("features.subscriptionsCheckForMagic404" -> "false")
-          .build()
-        val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
 
         val res = await(connector.getSubscriptionStatus(safeNumber)).left.value
         res mustBe Status.NOT_FOUND
