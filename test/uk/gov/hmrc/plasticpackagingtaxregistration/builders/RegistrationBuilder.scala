@@ -29,7 +29,7 @@ trait RegistrationBuilder
   private type RegistrationModifier = Registration => Registration
 
   private val modelWithDefaults: Registration =
-    Registration(id = "id", incorpJourneyId = Some(UUID.randomUUID().toString))
+    Registration(id = "id", incorpJourneyId = Some(UUID.randomUUID().toString)).updateLastModified()
 
   def aRegistration(modifiers: RegistrationModifier*): Registration =
     modifiers.foldLeft(modelWithDefaults)((current, nextFunction) => nextFunction(current))
