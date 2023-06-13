@@ -120,7 +120,7 @@ class RegistrationRepositorySpec
     "persist the registration with lastModifiedDateTime" in {
 
       collectionSize mustBe 0
-      val registration = aRegistration()
+      val registration = aRegistration().copy(lastModifiedDateTime = None)
 
       registration.lastModifiedDateTime mustBe None
 
@@ -130,7 +130,7 @@ class RegistrationRepositorySpec
 
       val saved = await(repository.findByRegistrationId(registration.id)).get
 
-      saved.lastModifiedDateTime must not be None
+      saved.lastModifiedDateTime mustBe defined
 
       getTimer("ppt.registration.mongo.create").getCount mustBe 1
     }
@@ -141,7 +141,7 @@ class RegistrationRepositorySpec
 
     "update an existing registration" in {
 
-      insert(aRegistration(withId("123"))).futureValue
+      insert(aRegistration(withId("123")).copy(lastModifiedDateTime = None)).futureValue
 
       val saved = await(repository.findByRegistrationId("123")).get
       saved.lastModifiedDateTime mustBe None
