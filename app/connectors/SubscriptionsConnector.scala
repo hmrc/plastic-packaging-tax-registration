@@ -52,7 +52,7 @@ class SubscriptionsConnector @Inject() (
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
-    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId), Seq()
+    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId)
     )(implicitly, EisHeaderCarrier(correlationIdHeader), implicitly)
       .map { etmpResponse =>
         logger.info(s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and " +
