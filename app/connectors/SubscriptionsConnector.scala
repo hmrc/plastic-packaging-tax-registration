@@ -52,8 +52,8 @@ class SubscriptionsConnector @Inject() (
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
-    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId), 
-      headers = headers :+ correlationIdHeader)
+    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId), Seq()
+    )(implicitly, EisHeaderCarrier(correlationIdHeader), implicitly)
       .map { etmpResponse =>
         logger.info(s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and " +
           s"safeId [$safeId] had response payload ${toJson(etmpResponse)}")
@@ -103,9 +103,8 @@ class SubscriptionsConnector @Inject() (
       else (appConfig.subscriptionCreateUrl(safeNumber), s"$msgCommon safeId [$safeNumber]")
 
     httpClient.POST[Subscription, HttpResponse](url = createUrl,
-                                                body = subscription,
-                                                headers = headers :+ correlationIdHeader
-    )
+                                                body = subscription
+    )(implicitly, implicitly, EisHeaderCarrier(correlationIdHeader), implicitly)
       .andThen { case _ => timer.stop() }
       .map {
         subscriptionResponse =>
@@ -146,9 +145,8 @@ class SubscriptionsConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
-    httpClient.GET[HttpResponse](appConfig.subscriptionDisplayUrl(pptReference),
-                                 headers = headers :+ correlationIdHeader
-    )
+    httpClient.GET[HttpResponse](appConfig.subscriptionDisplayUrl(pptReference)
+    )(implicitly, EisHeaderCarrier(correlationIdHeader), implicitly)
       .andThen { case _ => timer.stop() }
       .map { response =>
         if (Status.isSuccessful(response.status)) {
@@ -189,9 +187,8 @@ class SubscriptionsConnector @Inject() (
     val subscription = subscription1.copy(processingDate = None)
 
     httpClient.PUT[Subscription, HttpResponse](url = appConfig.subscriptionUpdateUrl(pptReference),
-                                               body = subscription,
-                                               headers = headers :+ correlationIdHeader
-    )
+                                               body = subscription
+    )(implicitly, implicitly, EisHeaderCarrier(correlationIdHeader), implicitly)
       .andThen { case _ => timer.stop() }
       .map {
         subscriptionUpdateResponse =>

@@ -18,16 +18,20 @@ package connectors
 
 import play.api.http.{HeaderNames, MimeTypes}
 import config.AppConfig
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait EISConnector {
   val appConfig: AppConfig
 
-  val headers: Seq[(String, String)] =
-    Seq("Environment"      -> appConfig.eisEnvironment,
+  def EisHeaderCarrier(correlationIdHeader: (String, String))(implicit headerCarrier: HeaderCarrier): HeaderCarrier =
+    headerCarrier
+      .withExtraHeaders(
+        "Environment"      -> appConfig.eisEnvironment,
         HeaderNames.ACCEPT -> MimeTypes.JSON,
-        HeaderNames.AUTHORIZATION
-          -> appConfig.bearerToken
-    )
+        HeaderNames.AUTHORIZATION -> appConfig.bearerToken,
+        correlationIdHeader
+      )
 
+  val environment = "Environment"
   val correlationIdHeaderName = "CorrelationId"
 }
