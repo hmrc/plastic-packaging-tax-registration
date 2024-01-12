@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,11 @@ import base.data.SubscriptionTestData
 import base.it.ConnectorISpec
 import models.eis.EISError
 import models.eis.subscription.Subscription
-import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import models.eis.subscription.create.{
+  EISSubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
+}
 import models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
 import org.scalatest.EitherValues
@@ -38,9 +42,11 @@ import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
 
 class SubscriptionsConnectorISpec
-    extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData with EitherValues {
+    extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData
+    with EitherValues {
 
-  private lazy val connector: SubscriptionsConnector = app.injector.instanceOf[SubscriptionsConnector]
+  private lazy val connector: SubscriptionsConnector =
+    app.injector.instanceOf[SubscriptionsConnector]
 
   private val pptSubscriptionSubmissionTimer = "ppt.subscription.submission.timer"
   private val pptSubscriptionStatusTimer     = "ppt.subscription.status.timer"
@@ -91,13 +97,14 @@ class SubscriptionsConnectorISpec
       "map a 404 to an error" in {
         val errors = createErrorResponse(
           code = "NO_DATA_FOUND",
-          reason = "The remote endpoint has indicated that the requested resource could  not be found."
+          reason =
+            "The remote endpoint has indicated that the requested resource could  not be found."
         )
         stubSubscriptionStatusFailure(httpStatus = Status.NOT_FOUND, errors = errors)
 
         val res = await(connector.getSubscriptionStatus(safeNumber)).left.value
         res mustBe Status.NOT_FOUND
-        
+
         getTimer(pptSubscriptionStatusTimer).getCount mustBe 1
       }
 
@@ -323,7 +330,7 @@ class SubscriptionsConnectorISpec
 
       forAll(Seq(400, 404, 422, 409, 500, 502, 503)) { statusCode =>
         s"return $statusCode" when {
-           s"$statusCode is returned from downstream service" in {
+          s"$statusCode is returned from downstream service" in {
             val errors =
               createErrorResponse(code = statusCode.toString,
                                   reason =

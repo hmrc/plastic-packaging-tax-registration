@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,7 @@ import uk.gov.hmrc.http.{
 import config.AppConfig
 import connectors.TaxEnrolmentsConnector._
 import models.KeyValue.pptServiceName
-import models.enrolment.{
-  EnrolmentKey,
-  KnownFacts,
-  UserEnrolmentRequest
-}
+import models.enrolment.{EnrolmentKey, KnownFacts, UserEnrolmentRequest}
 import models.taxenrolments.GroupEnrolment
 import connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import controllers.routes

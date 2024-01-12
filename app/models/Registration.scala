@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,14 @@ package models
 
 import org.joda.time.{DateTime, DateTimeZone}
 import models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
-import models.OrgType.{CHARITABLE_INCORPORATED_ORGANISATION, OVERSEAS_COMPANY_NO_UK_BRANCH, OVERSEAS_COMPANY_UK_BRANCH, REGISTERED_SOCIETY, SOLE_TRADER, UK_COMPANY}
+import models.OrgType.{
+  CHARITABLE_INCORPORATED_ORGANISATION,
+  OVERSEAS_COMPANY_NO_UK_BRANCH,
+  OVERSEAS_COMPANY_UK_BRANCH,
+  REGISTERED_SOCIETY,
+  SOLE_TRADER,
+  UK_COMPANY
+}
 import models.RegType.RegType
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
@@ -82,7 +89,7 @@ object Registration {
   implicit val format: OFormat[Registration] = Json.format[Registration]
 
   def apply(subscription: Subscription): Registration = {
-    val updateID = "UPDATE"
+    val updateID                      = "UPDATE"
     def illegalState(message: String) = throw new IllegalStateException(message)
 
     val regType =

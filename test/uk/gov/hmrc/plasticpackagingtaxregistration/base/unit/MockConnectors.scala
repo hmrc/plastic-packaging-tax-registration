@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,24 @@ import org.mockito.stubbing.ScalaOngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import uk.gov.hmrc.http.HeaderCarrier
 import models.eis.subscription.Subscription
-import models.eis.subscription.create.{SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
+import models.eis.subscription.create.{
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionResponse,
+  SubscriptionSuccessfulResponse
+}
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import connectors.parsers.TaxEnrolmentsHttpParser
-import connectors.parsers.TaxEnrolmentsHttpParser.{FailedTaxEnrolment, SuccessfulTaxEnrolment, TaxEnrolmentsResponse}
-import connectors.{EnrolmentStoreProxyConnector, NonRepudiationConnector, SubscriptionsConnector, TaxEnrolmentsConnector}
+import connectors.parsers.TaxEnrolmentsHttpParser.{
+  FailedTaxEnrolment,
+  SuccessfulTaxEnrolment,
+  TaxEnrolmentsResponse
+}
+import connectors.{
+  EnrolmentStoreProxyConnector,
+  NonRepudiationConnector,
+  SubscriptionsConnector,
+  TaxEnrolmentsConnector
+}
 import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
 import org.scalatestplus.mockito.MockitoSugar.mock
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,7 @@ package models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
 import models.group.GroupMemberContactDetails
-import models.{
-  PartnerContactDetails,
-  PrimaryContactDetails => PPTPrimaryContactDetails
-}
+import models.{PartnerContactDetails, PrimaryContactDetails => PPTPrimaryContactDetails}
 
 case class ContactDetails(email: String, telephone: String, mobileNumber: Option[String] = None)
 

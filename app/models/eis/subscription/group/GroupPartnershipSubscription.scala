@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,12 @@ import models.eis.subscription
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.eis.subscription.{OrganisationDetails => SubscriptionOrganisationDetails}
 import models.group.{GroupMember, GroupMemberContactDetails}
-import models.{Partner, PrimaryContactDetails, Registration, OrganisationDetails => RegistrationOrganisationDetails}
+import models.{
+  Partner,
+  PrimaryContactDetails,
+  Registration,
+  OrganisationDetails => RegistrationOrganisationDetails
+}
 import play.api.libs.json.{Json, OFormat}
 
 case class GroupPartnershipSubscription(
@@ -140,7 +145,9 @@ object GroupPartnershipSubscription {
                             organisationDetails = toGroupOrganisationDetails(organisationDetails),
                             individualDetails = toIndividualDetails(primaryContactDetails),
                             addressDetails =
-                              subscription.AddressDetails(organisationDetails.registeredBusinessAddress),
+                              subscription.AddressDetails(
+                                organisationDetails.registeredBusinessAddress
+                              ),
                             contactDetails = subscription.ContactDetails(primaryContactDetails),
                             regWithoutIDFlag =
                               if (isSubscriptionUpdate)
@@ -196,13 +203,21 @@ object GroupPartnershipSubscription {
                                     regOrgDetails.name
     )
 
-  private def toIndividualDetails(primary: GroupMemberContactDetails): subscription.IndividualDetails = {
+  private def toIndividualDetails(
+    primary: GroupMemberContactDetails
+  ): subscription.IndividualDetails = {
     val firstName = primary.firstName
     val lastName  = primary.lastName
-    subscription.IndividualDetails(title = None, firstName = firstName, middleName = None, lastName = lastName)
+    subscription.IndividualDetails(title = None,
+                                   firstName = firstName,
+                                   middleName = None,
+                                   lastName = lastName
+    )
   }
 
-  private def toIndividualDetails(primary: PrimaryContactDetails): subscription.IndividualDetails = {
+  private def toIndividualDetails(
+    primary: PrimaryContactDetails
+  ): subscription.IndividualDetails = {
     val name =
       primary.name.getOrElse(throw new IllegalStateException("Primary contact name required"))
 

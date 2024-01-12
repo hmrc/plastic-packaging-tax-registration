@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,7 @@ import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import base.AuthTestSupport
-import base.data.{
-  NrsTestData,
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import base.data.{NrsTestData, RegistrationTestData, SubscriptionTestData}
 import connectors.{
   EnrolmentStoreProxyConnector,
   NonRepudiationConnector,

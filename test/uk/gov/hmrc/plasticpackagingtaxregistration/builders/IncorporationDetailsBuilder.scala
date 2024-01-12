@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package builders
 
-import models.{
-  IncorporationAddressDetails,
-  IncorporationDetails
-}
+import models.{IncorporationAddressDetails, IncorporationDetails}
 
 trait IncorporationDetailsBuilder {
   private type Modifier = IncorporationDetails => IncorporationDetails

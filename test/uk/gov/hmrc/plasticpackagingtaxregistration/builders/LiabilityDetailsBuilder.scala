@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,7 @@ package builders
 
 import java.time.LocalDate
 
-import models.{
-  LiabilityDetails,
-  LiabilityWeight,
-  OldDate
-}
+import models.{LiabilityDetails, LiabilityWeight, OldDate}
 
 trait LiabilityDetailsBuilder {
   private type Modifier = LiabilityDetails => LiabilityDetails

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,12 @@ import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import models.eis.subscription._
-import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
+import models.eis.subscription.create.{
+  EISSubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionResponse,
+  SubscriptionSuccessfulResponse
+}
 import models.eis.subscriptionStatus.ETMPSubscriptionStatusResponse
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,11 +57,14 @@ class SubscriptionsConnector @Inject() (
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
-    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId), 
-      headers = headers :+ correlationIdHeader)
+    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
+                                                   headers = headers :+ correlationIdHeader
+    )
       .map { etmpResponse =>
-        logger.info(s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and " +
-          s"safeId [$safeId] had response payload ${toJson(etmpResponse)}")
+        logger.info(
+          s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and " +
+            s"safeId [$safeId] had response payload ${toJson(etmpResponse)}"
+        )
         Right(SubscriptionStatusResponse.fromETMPResponse(etmpResponse))
       }
       .recover {
@@ -69,7 +77,11 @@ class SubscriptionsConnector @Inject() (
       .andThen { case _ => timer.stop() }
   }
 
-  private def handleException(safeId: String, correlationIdHeader: (String, String), ex: Exception) = {
+  private def handleException(
+    safeId: String,
+    correlationIdHeader: (String, String),
+    ex: Exception
+  ) = {
     // Hard internal errors which are not from upstream are signalled with a 500.
     logger.warn(
       s"Get subscription status failed with correlationId [${correlationIdHeader._2}] and " +
@@ -79,7 +91,11 @@ class SubscriptionsConnector @Inject() (
     Left(Status.INTERNAL_SERVER_ERROR)
   }
 
-  private def handleHttpError(safeId: String, correlationIdHeader: (String, String), httpEx: UpstreamErrorResponse) = {
+  private def handleHttpError(
+    safeId: String,
+    correlationIdHeader: (String, String),
+    httpEx: UpstreamErrorResponse
+  ) = {
     // Upstream errors should be echoed to the frontend so that user facing error handling is aware of them
     logger.warn(
       s"Upstream error returned from get subscription status with correlationId [${correlationIdHeader._2}] and " +
@@ -89,7 +105,7 @@ class SubscriptionsConnector @Inject() (
   }
 
   def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
-                                                                         hc: HeaderCarrier
+    hc: HeaderCarrier
   ): Future[SubscriptionResponse] = {
 
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
@@ -155,11 +171,13 @@ class SubscriptionsConnector @Inject() (
           logger.info(
             s"PPT view subscription with correlationId [${correlationIdHeader._2}] and pptReference [$pptReference]"
           )
-          val json = Json.parse(response.body.replaceAll("\\s", " ")) //subscription data can come back un sanitised for json.
+          val json =
+            Json.parse(
+              response.body.replaceAll("\\s", " ")
+            ) //subscription data can come back un sanitised for json.
           Right(json.as[Subscription])
-        } else {
+        } else
           Left(response.status)
-        }
       }
       .recover {
         case httpEx: UpstreamErrorResponse =>

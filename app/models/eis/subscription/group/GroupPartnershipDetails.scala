@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,12 @@
 package models.eis.subscription.group
 
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship.Relationship
-import models.eis.subscription.{AddressDetails, ContactDetails, IndividualDetails, OrganisationDetails}
+import models.eis.subscription.{
+  AddressDetails,
+  ContactDetails,
+  IndividualDetails,
+  OrganisationDetails
+}
 import play.api.libs.json._
 
 case class GroupPartnershipDetails(
@@ -35,12 +40,13 @@ object GroupPartnershipDetails {
 
   object Relationship extends Enumeration {
     type Relationship = Value
-    val Member: Value = Value("Member")
+    val Member: Value         = Value("Member")
     val Representative: Value = Value("Representative")
-    val Partner: Value = Value("Partner")
+    val Partner: Value        = Value("Partner")
 
     implicit val format: Format[Relationship] =
       Format(Reads.enumNameReads(Relationship), Writes.enumNameWrites)
+
   }
 
   implicit val format: OFormat[GroupPartnershipDetails] = Json.format[GroupPartnershipDetails]

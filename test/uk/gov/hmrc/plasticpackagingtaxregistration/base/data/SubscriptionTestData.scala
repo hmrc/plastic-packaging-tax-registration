@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,18 @@ import play.api.test.FakeRequest
 import base.AuthTestSupport
 import models.eis.EISError
 import models.eis.subscription._
-import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionSuccessfulResponse}
+import models.eis.subscription.create.{
+  EISSubscriptionFailureResponse,
+  SubscriptionSuccessfulResponse
+}
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.eis.subscription.group.{GroupPartnershipDetails, GroupPartnershipSubscription}
 import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
-import models.eis.subscriptionStatus.{ETMPSubscriptionStatus, ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
+import models.eis.subscriptionStatus.{
+  ETMPSubscriptionStatus,
+  ETMPSubscriptionStatusResponse,
+  SubscriptionStatusResponse
+}
 import models.{OrgType, PostCodeWithoutSpaces}
 
 import java.time.ZoneOffset.UTC
