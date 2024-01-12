@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,11 @@ import models.PartnerTypeEnum.partnerTypesWhichRepresentPartnerships
 import models._
 import models.eis.EISError
 import models.eis.subscription.Subscription
-import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionCreateWithEnrolmentAndNrsStatusesResponse, SubscriptionFailureResponseWithStatusCode}
+import models.eis.subscription.create.{
+  EISSubscriptionFailureResponse,
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
+  SubscriptionFailureResponseWithStatusCode
+}
 import models.eis.subscription.group.GroupPartnershipDetails
 import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import models.nrs.NonRepudiationSubmissionAccepted

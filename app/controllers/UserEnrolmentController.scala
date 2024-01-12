@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,7 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json._
 import play.api.mvc._
 import uk.gov.hmrc.http.UpstreamErrorResponse
-import connectors.TaxEnrolmentsConnector.{
-  AssignEnrolmentToGroupError,
-  AssignEnrolmentToUserError
-}
+import connectors.TaxEnrolmentsConnector.{AssignEnrolmentToGroupError, AssignEnrolmentToUserError}
 import models.enrolment.EnrolmentFailedCode.EnrolmentFailedCode
 import models.enrolment.{
   EnrolmentFailedCode,
@@ -32,14 +29,8 @@ import models.enrolment.{
   UserEnrolmentRequest,
   UserEnrolmentSuccessResponse
 }
-import connectors.{
-  EnrolmentStoreProxyConnector,
-  TaxEnrolmentsConnector
-}
-import controllers.actions.{
-  Authenticator,
-  AuthorizedRequest
-}
+import connectors.{EnrolmentStoreProxyConnector, TaxEnrolmentsConnector}
+import controllers.actions.{Authenticator, AuthorizedRequest}
 import controllers.response.JSONResponses
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,9 @@ package models
 
 import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, not}
 import org.scalatest.wordspec.AnyWordSpec
-import base.data.{
-  RegistrationTestData,
-  SubscriptionTestData
-}
+import base.data.{RegistrationTestData, SubscriptionTestData}
 import builders.RegistrationBuilder
-import models.eis.subscription.{
-  ChangeOfCircumstance,
-  ChangeOfCircumstanceDetails,
-  Subscription
-}
+import models.eis.subscription.{ChangeOfCircumstance, ChangeOfCircumstanceDetails, Subscription}
 
 import java.time.{ZoneOffset, ZonedDateTime}
 

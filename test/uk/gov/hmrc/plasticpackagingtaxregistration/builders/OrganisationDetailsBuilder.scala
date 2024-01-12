@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,7 @@
 package builders
 
 import models.OrgType.OrgType
-import models.{
-  IncorporationDetails,
-  OrganisationDetails,
-  PPTAddress
-}
+import models.{IncorporationDetails, OrganisationDetails, PPTAddress}
 
 trait OrganisationDetailsBuilder {
   private type Modifier = OrganisationDetails => OrganisationDetails

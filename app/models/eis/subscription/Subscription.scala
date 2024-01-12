@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,16 @@ import models.{OldDate, RegType, Registration}
 import scala.language.implicitConversions
 
 case class Subscription(
-                         changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None,
-                         legalEntityDetails: LegalEntityDetails,
-                         principalPlaceOfBusinessDetails: PrincipalPlaceOfBusinessDetails,
-                         primaryContactDetails: PrimaryContactDetails,
-                         businessCorrespondenceDetails: BusinessCorrespondenceDetails,
-                         declaration: Declaration,
-                         taxObligationStartDate: String,
-                         last12MonthTotalTonnageAmt: Long,
-                         groupPartnershipSubscription: Option[group.GroupPartnershipSubscription] = None,
-                         processingDate: Option[String] = None
+  changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None,
+  legalEntityDetails: LegalEntityDetails,
+  principalPlaceOfBusinessDetails: PrincipalPlaceOfBusinessDetails,
+  primaryContactDetails: PrimaryContactDetails,
+  businessCorrespondenceDetails: BusinessCorrespondenceDetails,
+  declaration: Declaration,
+  taxObligationStartDate: String,
+  last12MonthTotalTonnageAmt: Long,
+  groupPartnershipSubscription: Option[group.GroupPartnershipSubscription] = None,
+  processingDate: Option[String] = None
 )
 
 object Subscription {

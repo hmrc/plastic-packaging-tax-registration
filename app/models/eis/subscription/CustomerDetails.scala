@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,7 @@ package models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
 import models.eis.subscription.CustomerType.CustomerType
-import models.{
-  OrgType,
-  OrganisationDetails => PPTOrganisationDetails
-}
+import models.{OrgType, OrganisationDetails => PPTOrganisationDetails}
 
 case class CustomerDetails(
   customerType: CustomerType,

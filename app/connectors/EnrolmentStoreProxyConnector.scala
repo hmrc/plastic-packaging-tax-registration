@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,13 @@ import connectors.EnrolmentStoreProxyConnector.GroupsWithEnrolmentsTimerTag
 import models.enrolment.EnrolmentKey
 import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT, OK}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReadsInstances, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{
+  HeaderCarrier,
+  HttpClient,
+  HttpReadsInstances,
+  HttpResponse,
+  UpstreamErrorResponse
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,7 +39,8 @@ class EnrolmentStoreProxyConnector @Inject() (
   httpClient: HttpClient,
   val config: AppConfig,
   metrics: Metrics
-)(implicit ec: ExecutionContext) extends HttpReadsInstances {
+)(implicit ec: ExecutionContext)
+    extends HttpReadsInstances {
 
   /** ES1 **/
   def queryGroupsWithEnrolment(
@@ -43,11 +50,11 @@ class EnrolmentStoreProxyConnector @Inject() (
 
     httpClient.GET[HttpResponse](url =
       config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference))
-    ).map{ response =>
+    ).map { response =>
       response.status match {
-        case OK => Some(response.json.as[GroupsWithEnrolmentsResponse])
+        case OK                     => Some(response.json.as[GroupsWithEnrolmentsResponse])
         case NO_CONTENT | NOT_FOUND => None
-        case _ => throw UpstreamErrorResponse(response.body, response.status)
+        case _                      => throw UpstreamErrorResponse(response.body, response.status)
       }
     }.andThen { case _ => timer.stop() }
   }

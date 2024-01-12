@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import models.group.{GroupMember}
 case class GroupDetail(
   membersUnderGroupControl: Option[Boolean] = None,
   members: Seq[GroupMember] = Seq.empty,
-  currentMemberOrganisationType: Option[OrgType] = None,
+  currentMemberOrganisationType: Option[OrgType] = None
 )
 
 object GroupDetail {

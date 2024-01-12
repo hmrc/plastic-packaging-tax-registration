@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,7 @@ import uk.gov.hmrc.auth.core.InsufficientEnrolments
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import base.data.UserEnrolmentData
 import base.unit.ControllerSpec
-import connectors.TaxEnrolmentsConnector.{
-  AssignEnrolmentToGroupError,
-  AssignEnrolmentToUserError
-}
+import connectors.TaxEnrolmentsConnector.{AssignEnrolmentToGroupError, AssignEnrolmentToUserError}
 import models.enrolment.EnrolmentFailedCode._
 import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 

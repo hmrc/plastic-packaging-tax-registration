@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,8 @@
 package models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
-import models.eis.subscription.CustomerType.{
-  Individual,
-  Organisation
-}
-import models.{
-  OrgType,
-  PartnershipBusinessDetails,
-  OrganisationDetails => PPTOrganisationDetails
-}
+import models.eis.subscription.CustomerType.{Individual, Organisation}
+import models.{OrgType, PartnershipBusinessDetails, OrganisationDetails => PPTOrganisationDetails}
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneOffset, ZonedDateTime}

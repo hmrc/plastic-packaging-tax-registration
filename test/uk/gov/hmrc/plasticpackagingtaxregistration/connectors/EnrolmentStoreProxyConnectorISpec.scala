@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,15 @@ import base.it.ConnectorISpec
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.EnrolmentStoreProxyConnector.GroupsWithEnrolmentsTimerTag
-import connectors.EnrolmentStoreProxyConnectorISpec.{allGroupsWithEnrolmentsResponse, principalGroupsWithEnrolmentsResponse}
+import connectors.EnrolmentStoreProxyConnectorISpec.{
+  allGroupsWithEnrolmentsResponse,
+  principalGroupsWithEnrolmentsResponse
+}
 import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.UpstreamErrorResponse
-
 
 class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector with ScalaFutures {
 
@@ -80,7 +82,9 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
     "bubble error" in {
       mockErrorGroupsWithEnrolmentsResponse("HMRC-PPT-ORG~EtmpRegistrationNumber~XYPPT0000000283")
 
-      val exception = intercept[UpstreamErrorResponse](await(enrolmentStoreProxyConnector.queryGroupsWithEnrolment("XYPPT0000000283")))
+      val exception = intercept[UpstreamErrorResponse](
+        await(enrolmentStoreProxyConnector.queryGroupsWithEnrolment("XYPPT0000000283"))
+      )
 
       exception.statusCode mustBe 500
       getTimer(GroupsWithEnrolmentsTimerTag).getCount mustBe 1
@@ -106,9 +110,7 @@ class EnrolmentStoreProxyConnectorISpec extends ConnectorISpec with Injector wit
         )
     )
 
-  private def mockGroupsWithEnrolmentsResponse(
-    response: String
-  ): StubMapping =
+  private def mockGroupsWithEnrolmentsResponse(response: String): StubMapping =
     stubFor(
       get(urlMatching(s"/enrolment-store-proxy/enrolment-store/enrolments/$enrolmentKey/groups"))
         .willReturn(

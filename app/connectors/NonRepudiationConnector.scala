@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,13 @@ import com.codahale.metrics.Timer
 import com.kenshoo.play.metrics.Metrics
 import play.api.http.Status.ACCEPTED
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, HttpReadsHttpResponse, HttpResponse}
+import uk.gov.hmrc.http.{
+  HeaderCarrier,
+  HttpClient,
+  HttpException,
+  HttpReadsHttpResponse,
+  HttpResponse
+}
 import config.AppConfig
 import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
 import util.Retry
@@ -73,7 +79,7 @@ class NonRepudiationConnector @Inject() (
   private def shouldRetry[A](response: Try[A]): Boolean =
     response match {
       case Failure(e) if e.asInstanceOf[HttpException].responseCode == 500 => true
-      case _ => false
+      case _                                                               => false
     }
 
   private def reasonForRetrying[A](response: Try[A]): String =
