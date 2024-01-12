@@ -11,7 +11,7 @@ object AppDependencies {
                     "com.typesafe.play" %% "play-json-joda"     % "2.9.4",
                     "io.circe" %% "circe-parser" % "0.14.5",
                     "io.circe" %% "circe-json-schema" % "0.2.0",
-                    "org.json" % "json" % "20230227"
+                    "org.json" % "json" % "20231013"
   )
 
   val test = Seq(
