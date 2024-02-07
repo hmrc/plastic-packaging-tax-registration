@@ -16,9 +16,10 @@
 
 package connectors
 
-import akka.actor.ActorSystem
 import com.codahale.metrics.Timer
-import com.kenshoo.play.metrics.Metrics
+import config.AppConfig
+import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
+import org.apache.pekko.actor.ActorSystem
 import play.api.http.Status.ACCEPTED
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{
@@ -28,8 +29,7 @@ import uk.gov.hmrc.http.{
   HttpReadsHttpResponse,
   HttpResponse
 }
-import config.AppConfig
-import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import util.Retry
 
 import javax.inject.{Inject, Singleton}

@@ -16,16 +16,16 @@
 
 package base.it
 
+import base.data.SubscriptionTestData
 import com.codahale.metrics.{MetricFilter, SharedMetricRegistries, Timer}
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.kenshoo.play.metrics.Metrics
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
+import play.api.{Application, inject}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.http.HeaderCarrier
-import base.data.SubscriptionTestData
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.play.bootstrap.metrics.{Metrics, MetricsImpl}
 
 import scala.concurrent.ExecutionContext
 
@@ -53,11 +53,12 @@ class ConnectorISpec
         "microservice.services.enrolment-store-proxy.port" -> wirePort
     )
 
-  def getTimer(name: String): Timer =
+  def getTimer(name: String): Timer = {
     SharedMetricRegistries
       .getOrCreate("plastic-packaging-tax-registration")
       .getTimers(MetricFilter.startsWith(name))
       .get(name)
+  }
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()

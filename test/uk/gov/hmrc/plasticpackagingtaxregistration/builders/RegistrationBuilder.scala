@@ -16,11 +16,10 @@
 
 package builders
 
-import java.time.LocalDate
-import java.util.UUID
-
-import org.joda.time.DateTime
 import models._
+
+import java.time.{Instant, LocalDate}
+import java.util.UUID
 
 //noinspection ScalaStyle
 trait RegistrationBuilder
@@ -60,8 +59,8 @@ trait RegistrationBuilder
 
   def withId(id: String): RegistrationModifier = _.copy(id = id)
 
-  def withTimestamp(dateTime: DateTime): RegistrationModifier =
-    _.copy(lastModifiedDateTime = Some(dateTime))
+  def withTimestamp(instant: Instant): RegistrationModifier =
+    _.copy(lastModifiedDateTime = Some(instant))
 
   def withIncorpJourneyId(incorpJourneyId: String): RegistrationModifier =
     _.copy(incorpJourneyId = Some(incorpJourneyId))

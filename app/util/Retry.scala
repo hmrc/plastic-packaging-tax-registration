@@ -16,8 +16,8 @@
 
 package util
 
-import akka.actor.ActorSystem
-import akka.pattern.after
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.pattern.after
 import play.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}

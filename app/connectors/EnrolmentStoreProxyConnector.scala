@@ -16,9 +16,6 @@
 
 package connectors
 
-import com.kenshoo.play.metrics.Metrics
-
-import javax.inject.{Inject, Singleton}
 import config.AppConfig
 import connectors.EnrolmentStoreProxyConnector.GroupsWithEnrolmentsTimerTag
 import models.enrolment.EnrolmentKey
@@ -31,7 +28,9 @@ import uk.gov.hmrc.http.{
   HttpResponse,
   UpstreamErrorResponse
 }
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
