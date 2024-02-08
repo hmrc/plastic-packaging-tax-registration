@@ -1,6 +1,4 @@
-
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
-import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "plastic-packaging-tax-registration"
 
@@ -13,20 +11,21 @@ ThisBuild / scalaVersion := "2.13.12"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
-  .settings(libraryDependencySchemes ++= Seq(
-              "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
-            ),
-            libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
-            // ***************
-            // Use the silencer plugin to suppress warnings
-            scalacOptions += "-P:silencer:pathFilters=routes",
-            libraryDependencies ++= Seq(
-              compilerPlugin(
-                "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full
-              ),
-              "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-            )
-            // ***************
+  .settings(
+    libraryDependencySchemes ++= Seq(
+      "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+    ),
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    // ***************
+    // Use the silencer plugin to suppress warnings
+    scalacOptions += "-P:silencer:pathFilters=routes",
+    libraryDependencies ++= Seq(
+      compilerPlugin(
+        "com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full
+      ),
+      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    )
+    // ***************
   )
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(scoverageSettings)
@@ -45,8 +44,3 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageHighlighting := true,
   Test / parallelExecution := false
 )
-
-lazy val it = project
-  .enablePlugins(PlayScala)
-  .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
-  .settings(libraryDependencies ++= AppDependencies.test)
