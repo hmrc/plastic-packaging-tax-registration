@@ -1,4 +1,5 @@
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
+import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "plastic-packaging-tax-registration"
 
@@ -44,3 +45,11 @@ lazy val scoverageSettings: Seq[Setting[_]] = Seq(
   coverageHighlighting := true,
   Test / parallelExecution := false
 )
+
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(
+    microservice % "test->test"
+  ) // the "test->test" allows reusing test code and test dependencies
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(libraryDependencies ++= AppDependencies.test)
