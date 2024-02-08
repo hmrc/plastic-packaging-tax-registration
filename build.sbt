@@ -1,3 +1,6 @@
+
+import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
+
 val appName = "plastic-packaging-tax-registration"
 
 PlayKeys.devSettings := Seq("play.server.http.port" -> "8502")
@@ -23,6 +26,8 @@ lazy val microservice = Project(appName, file("."))
             )
             // ***************
   )
+  .configs(IntegrationTest)
+  .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(scoverageSettings)
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
