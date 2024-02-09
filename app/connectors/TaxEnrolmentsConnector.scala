@@ -16,7 +16,6 @@
 
 package connectors
 
-import com.kenshoo.play.metrics.Metrics
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -34,6 +33,7 @@ import models.enrolment.{EnrolmentKey, KnownFacts, UserEnrolmentRequest}
 import models.taxenrolments.GroupEnrolment
 import connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import controllers.routes
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

@@ -16,16 +16,16 @@
 
 package base.it
 
+import base.data.SubscriptionTestData
 import com.codahale.metrics.{MetricFilter, SharedMetricRegistries, Timer}
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.kenshoo.play.metrics.Metrics
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.http.HeaderCarrier
-import base.data.SubscriptionTestData
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import scala.concurrent.ExecutionContext
 

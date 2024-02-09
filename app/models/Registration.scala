@@ -16,8 +16,6 @@
 
 package models
 
-import org.joda.time.{DateTime, DateTimeZone}
-import models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
 import models.OrgType.{
   CHARITABLE_INCORPORATED_ORGANISATION,
   OVERSEAS_COMPANY_NO_UK_BRANCH,
@@ -28,9 +26,10 @@ import models.OrgType.{
 }
 import models.RegType.RegType
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship
+import models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
 import models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 import java.util.UUID
 
 case class Registration(
@@ -43,13 +42,15 @@ case class Registration(
   primaryContactDetails: PrimaryContactDetails = PrimaryContactDetails(),
   organisationDetails: OrganisationDetails = OrganisationDetails(),
   metaData: MetaData = MetaData(),
-  lastModifiedDateTime: Option[DateTime] = None,
+  lastModifiedDateTime: Option[Instant] = None,
   changeOfCircumstanceDetails: Option[ChangeOfCircumstanceDetails] = None,
   processingDate: Option[String] = None
 ) {
 
   def updateLastModified(): Registration =
-    this.copy(lastModifiedDateTime = Some(DateTime.now(DateTimeZone.UTC)))
+    this.copy(lastModifiedDateTime =
+      Some(Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS))
+    )
 
   def isGroup: Boolean = registrationType.contains(RegType.GROUP)
 
@@ -78,13 +79,8 @@ object Registration {
 
   import play.api.libs.json._
 
-  implicit val dateFormatDefault: Format[DateTime] = new Format[DateTime] {
-
-    override def reads(json: JsValue): JsResult[DateTime] =
-      JodaReads.DefaultJodaDateTimeReads.reads(json)
-
-    override def writes(o: DateTime): JsValue = JodaWrites.JodaDateTimeNumberWrites.writes(o)
-  }
+  implicit val dateFormatDefault: Format[LocalDate] =
+    Format(Reads.DefaultLocalDateReads, Writes.DefaultLocalDateWrites)
 
   implicit val format: OFormat[Registration] = Json.format[Registration]
 

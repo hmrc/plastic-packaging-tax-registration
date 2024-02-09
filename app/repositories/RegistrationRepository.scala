@@ -16,23 +16,23 @@
 
 package repositories
 
-import java.util.concurrent.TimeUnit
 import com.codahale.metrics.Timer
 import com.google.inject.ImplementedBy
-import com.kenshoo.play.metrics.Metrics
 import com.mongodb.client.model.Indexes.ascending
-
-import javax.inject.{Inject, Singleton}
-import org.joda.time.DateTime
+import config.AppConfig
+import models.Registration
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
 import play.api.Logger
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
-import config.AppConfig
-import models.Registration
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.time.Instant
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[RegistrationRepositoryImpl])
@@ -112,8 +112,7 @@ class RegistrationRepositoryImpl @Inject() (
 
 object MongoSerialisers {
 
-  implicit val mongoDateTimeFormat: Format[DateTime] =
-    uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats.dateTimeFormat
+  implicit val mongoDateTimeFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
   implicit val format: Format[Registration] = Json.format[Registration]
 }

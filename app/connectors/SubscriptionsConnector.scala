@@ -16,19 +16,8 @@
 
 package connectors
 
-import java.util.UUID
 import com.codahale.metrics.Timer
-import com.kenshoo.play.metrics.Metrics
 import config.AppConfig
-import models.eis.subscriptionStatus.SubscriptionStatusResponse
-
-import javax.inject.{Inject, Singleton}
-import play.api.Logger
-import play.api.http.Status
-import play.api.libs.json.Json
-import play.api.libs.json.Json._
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
 import models.eis.subscription._
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
@@ -36,8 +25,17 @@ import models.eis.subscription.create.{
   SubscriptionResponse,
   SubscriptionSuccessfulResponse
 }
-import models.eis.subscriptionStatus.ETMPSubscriptionStatusResponse
+import models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
+import play.api.Logger
+import play.api.http.Status
+import play.api.libs.json.Json
+import play.api.libs.json.Json._
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.util.UUID
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 

@@ -16,8 +16,10 @@
 
 package repositories
 
+import builders.RegistrationBuilder
 import com.codahale.metrics.{MetricFilter, SharedMetricRegistries, Timer}
-import com.kenshoo.play.metrics.Metrics
+import config.AppConfig
+import models._
 import org.mockito.Mockito.when
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
@@ -28,9 +30,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import play.api.test.Helpers.await
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
-import builders.RegistrationBuilder
-import config.AppConfig
-import models._
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.implicitConversions
@@ -217,7 +217,6 @@ class RegistrationRepositorySpec
         await(repository.findByRegistrationId(registration.id)).get.lastModifiedDateTime.get
 
       val updatedRegistration = await(repository.update(registration)).get
-
       updatedRegistration.lastModifiedDateTime.get.isAfter(initialLastModifiedDateTime) mustBe true
     }
   }
