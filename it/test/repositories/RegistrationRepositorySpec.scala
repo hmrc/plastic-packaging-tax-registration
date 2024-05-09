@@ -26,11 +26,12 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import play.api.test.Helpers.await
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
-import uk.gov.hmrc.play.bootstrap.metrics.Metrics
+import uk.gov.hmrc.play.bootstrap.metrics.{Metrics, MetricsFilter, MetricsFilterImpl, MetricsImpl}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.implicitConversions
@@ -44,7 +45,10 @@ class RegistrationRepositorySpec
 
   private val injector = {
     SharedMetricRegistries.clear()
-    GuiceApplicationBuilder().injector()
+    GuiceApplicationBuilder().overrides(
+      bind[MetricsFilter].to[MetricsFilterImpl],
+      bind[Metrics].to[MetricsImpl]
+    ).injector()
   }
 
   private val mockAppConfig = mock[AppConfig]
@@ -57,7 +61,7 @@ class RegistrationRepositorySpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    SharedMetricRegistries.clear()
+    metrics.defaultRegistry.removeMatching(MetricFilter.startsWith("ppt"))
   }
 
   private def collectionSize: Int = count().futureValue.toInt

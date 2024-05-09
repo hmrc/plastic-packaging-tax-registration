@@ -21,11 +21,12 @@ import com.codahale.metrics.{MetricFilter, SharedMetricRegistries, Timer}
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.DefaultAwaitTimeout
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.bootstrap.metrics.Metrics
+import uk.gov.hmrc.play.bootstrap.metrics.{Metrics, MetricsFilter, MetricsFilterImpl, MetricsImpl}
 
 import scala.concurrent.ExecutionContext
 
@@ -40,7 +41,11 @@ class ConnectorISpec
 
   override def fakeApplication(): Application = {
     SharedMetricRegistries.clear()
-    new GuiceApplicationBuilder().configure(overrideConfig).build()
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[MetricsFilter].to[MetricsFilterImpl],
+        bind[Metrics].to[MetricsImpl]
+      ).configure(overrideConfig).build()
   }
 
   def overrideConfig: Map[String, Any] =
@@ -53,11 +58,11 @@ class ConnectorISpec
         "microservice.services.enrolment-store-proxy.port" -> wirePort
     )
 
-  def getTimer(name: String): Timer =
-    SharedMetricRegistries
-      .getOrCreate("plastic-packaging-tax-registration")
+  def getTimer(name: String): Timer = {
+    metrics.defaultRegistry
       .getTimers(MetricFilter.startsWith(name))
       .get(name)
+  }
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
@@ -66,7 +71,7 @@ class ConnectorISpec
   }
 
   override protected def beforeEach(): Unit =
-    SharedMetricRegistries.clear()
+    metrics.defaultRegistry.removeMatching(MetricFilter.startsWith("ppt"))
 
   override protected def afterAll(): Unit = {
     super.afterAll()

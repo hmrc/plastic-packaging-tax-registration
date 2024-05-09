@@ -22,13 +22,7 @@ import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
 import org.apache.pekko.actor.ActorSystem
 import play.api.http.Status.ACCEPTED
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.http.{
-  HeaderCarrier,
-  HttpClient,
-  HttpException,
-  HttpReadsHttpResponse,
-  HttpResponse
-}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException, HttpReadsHttpResponse, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import util.Retry
 
