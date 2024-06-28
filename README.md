@@ -3,7 +3,13 @@
 
 
 This is the Scala microservice responsible for the transient storage of PPT registration information, which is part of the PPT tax regime, as discussed in this [GovUk Guidance](https://www.gov.uk/government/publications/introduction-of-plastic-packaging-tax/plastic-packaging-tax)
- 
+
+Other related PPT services:
+- Frontend service: [plastic-packaging-tax-registration-frontend](https://github.com/hmrc/plastic-packaging-tax-registration-frontend)
+- Stubs: [plastic-packaging-tax-stub](https://github.com/hmrc/plastic-packaging-tax-stub)
+- Returns service: [plastic-packaging-tax-returns-frontend](https://github.com/hmrc/plastic-packaging-tax-returns-frontend)
+- Returns service: [plastic-packaging-tax-returns](https://github.com/hmrc/plastic-packaging-tax-returns)
+
 ### How to run the service
 
 These are the steps to the Plastic Packaging Tax Registrations digital service, of which this microservice is part of.
@@ -14,10 +20,10 @@ These are the steps to the Plastic Packaging Tax Registrations digital service, 
  
 ```
 # Start the plastic packaging services and dependencies 
-sm --start INCORPORATED_ENTITY_IDENTIFICATION_ALL PLASTIC_PACKAGING_TAX_ALL EMAIL_VERIFICATION_ALL -r
+sm2 --start INCORPORATED_ENTITY_IDENTIFICATION_ALL PLASTIC_PACKAGING_TAX_ALL EMAIL_VERIFICATION_ALL -r
 
 # confirm all services are running
-sm -s 
+sm2 -s 
 ```
 
 * Visit http://localhost:9949/auth-login-stub/gg-sign-in
