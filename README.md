@@ -20,7 +20,7 @@ These are the steps to the Plastic Packaging Tax Registrations digital service, 
  
 ```
 # Start the plastic packaging services and dependencies 
-sm2 --start INCORPORATED_ENTITY_IDENTIFICATION_ALL PLASTIC_PACKAGING_TAX_ALL EMAIL_VERIFICATION_ALL -r
+sm2 --start INCORPORATED_ENTITY_IDENTIFICATION_ALL PLASTIC_PACKAGING_TAX_ALL EMAIL_VERIFICATION_ALL
 
 # confirm all services are running
 sm2 -s 
