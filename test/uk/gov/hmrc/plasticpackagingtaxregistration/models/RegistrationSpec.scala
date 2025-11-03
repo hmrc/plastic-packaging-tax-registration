@@ -22,7 +22,7 @@ import base.data.{RegistrationTestData, SubscriptionTestData}
 import builders.RegistrationBuilder
 import models.eis.subscription.{ChangeOfCircumstance, ChangeOfCircumstanceDetails, Subscription}
 
-import java.time.{ZoneOffset, ZonedDateTime}
+import java.time.{LocalDateTime, ZoneOffset, ZonedDateTime}
 
 class RegistrationSpec
     extends AnyWordSpec with RegistrationTestData with RegistrationBuilder
@@ -49,7 +49,7 @@ class RegistrationSpec
                 ChangeOfCircumstance.UPDATE_TO_DETAILS.toString
               )
             ),
-          processingDate = Some(ZonedDateTime.now(ZoneOffset.UTC).toLocalDate.toString)
+          processingDate = Some(LocalDateTime.now.toString)
         )
       val rehydratedRegistration = Registration(amendedGroupSubscription)
 
