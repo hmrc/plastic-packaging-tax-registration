@@ -29,9 +29,7 @@ import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.eis.subscription.{ChangeOfCircumstanceDetails, CustomerType, Subscription}
 import models.group.{GroupMember, GroupMemberContactDetails, OrganisationDetails => GroupDetails}
 
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
-import java.time.{Instant, LocalDate, LocalDateTime}
+import java.time.{Instant, LocalDate}
 import java.util.UUID
 
 case class Registration(
