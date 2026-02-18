@@ -20,7 +20,7 @@ import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, anyString}
 import org.mockito.BDDMockito.`given`
-import org.mockito.Mockito.{reset, verify, verifyNoInteractions}
+import org.mockito.Mockito.{reset, verify, verifyNoInteractions, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers
@@ -72,7 +72,7 @@ class RegistrationControllerSpec
         withAuthorizedUser()
         val request      = aRegistrationRequest()
         val registration = aRegistration()
-        given(registrationRepository.create(any[Registration])).willReturn(
+        when(registrationRepository.create(any[Registration])).thenReturn(
           Future.successful(registration)
         )
 
@@ -116,7 +116,7 @@ class RegistrationControllerSpec
       "request is valid" in {
         withAuthorizedUser()
         val registration = aRegistration(withId(userInternalId))
-        given(registrationRepository.findByRegistrationId(userInternalId)).willReturn(
+        when(registrationRepository.findByRegistrationId(userInternalId)).thenReturn(
           Future.successful(Some(registration))
         )
 
@@ -131,7 +131,7 @@ class RegistrationControllerSpec
     "return 404" when {
       "id is not found" in {
         withAuthorizedUser()
-        given(registrationRepository.findByRegistrationId(userInternalId)).willReturn(
+        when(registrationRepository.findByRegistrationId(userInternalId)).thenReturn(
           Future.successful(None)
         )
 
@@ -216,10 +216,10 @@ class RegistrationControllerSpec
           aRegistration(withIncorpJourneyId("f368e653-790a-4a95-af62-4132f0ffd433"),
                         primaryContactDetails
           )
-        given(registrationRepository.findByRegistrationId(anyString())).willReturn(
+        when(registrationRepository.findByRegistrationId(anyString())).thenReturn(
           Future.successful(Some(registration))
         )
-        given(registrationRepository.update(any[Registration])).willReturn(
+        when(registrationRepository.update(any[Registration])).thenReturn(
           Future.successful(Some(registration))
         )
 
@@ -239,10 +239,10 @@ class RegistrationControllerSpec
       "registration is not found - on find" in {
         withAuthorizedUser()
         val request = aRegistrationRequest()
-        given(registrationRepository.findByRegistrationId(anyString())).willReturn(
+        when(registrationRepository.findByRegistrationId(anyString())).thenReturn(
           Future.successful(None)
         )
-        given(registrationRepository.update(any[Registration])).willReturn(Future.successful(None))
+        when(registrationRepository.update(any[Registration])).thenReturn(Future.successful(None))
 
         val result: Future[Result] = route(app, put.withJsonBody(toJson(request))).get
 
@@ -254,10 +254,10 @@ class RegistrationControllerSpec
         withAuthorizedUser()
         val request      = aRegistrationRequest()
         val registration = aRegistration(withId("id"))
-        given(registrationRepository.findByRegistrationId(anyString())).willReturn(
+        when(registrationRepository.findByRegistrationId(anyString())).thenReturn(
           Future.successful(Some(registration))
         )
-        given(registrationRepository.update(any[Registration])).willReturn(Future.successful(None))
+        when(registrationRepository.update(any[Registration])).thenReturn(Future.successful(None))
 
         val result: Future[Result] = route(app, put.withJsonBody(toJson(request))).get
 
