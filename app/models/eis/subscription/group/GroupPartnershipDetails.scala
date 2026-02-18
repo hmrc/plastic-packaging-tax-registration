@@ -45,7 +45,7 @@ object GroupPartnershipDetails {
     val Partner: Value        = Value("Partner")
 
     implicit val format: Format[Relationship] =
-      Format(Reads.enumNameReads(Relationship), Writes.enumNameWrites)
+      Format(Reads.enumNameReads(Relationship), Writes.enumNameWrites[Relationship.type])
 
   }
 

@@ -22,7 +22,7 @@ import play.api.libs.json.{Json, OFormat}
 case class LiabilityWeight(totalKg: Option[Long])
 
 object LiabilityWeight {
-  implicit val liabilityWeightFormat = Json.format[LiabilityWeight]
+  implicit val liabilityWeightFormat: OFormat[LiabilityWeight] = Json.format[LiabilityWeight]
 }
 
 case class LiabilityExpectedWeight(
@@ -31,7 +31,7 @@ case class LiabilityExpectedWeight(
 )
 
 object LiabilityExpectedWeight {
-  implicit val liabilityWeightExpectedFormat = Json.format[LiabilityExpectedWeight]
+  implicit val liabilityWeightExpectedFormat: OFormat[LiabilityExpectedWeight] = Json.format[LiabilityExpectedWeight]
 }
 
 case class Date(date: LocalDate)
@@ -48,7 +48,7 @@ case class OldDate(day: Option[Int], month: Option[Int], year: Option[Int]) {
 }
 
 object OldDate {
-  implicit val dateFormat = Json.format[OldDate]
+  implicit val dateFormat: OFormat[OldDate] = Json.format[OldDate]
 
   def apply(date: LocalDate): OldDate =
     OldDate(Some(date.getDayOfMonth), Some(date.getMonthValue), Some(date.getYear))

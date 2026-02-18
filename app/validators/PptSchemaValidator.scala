@@ -19,12 +19,15 @@ package validators
 import java.io.InputStream
 
 import cats.data.NonEmptyList
-import io.circe.schema.ValidationError
 import org.slf4j.LoggerFactory
-import play.api.libs.json._
+import play.api.libs.json.*
 import models.validation.JsonSchemaError
+import com.eclipsesource.schema._
+import com.eclipsesource.schema.drafts.Version7
+import Version7._
 
 import scala.util.Try
+import org.apache.pekko.util.Version
 
 class PptSchemaValidator(schemaFile: String) {
 
@@ -36,38 +39,45 @@ class PptSchemaValidator(schemaFile: String) {
       scala.io.Source.fromInputStream(stream).mkString
     }
 
-  private lazy val circeSchema: Try[io.circe.schema.Schema] =
-    schemaFileAsString.flatMap(io.circe.schema.Schema.loadFromString)
+  private lazy val parsedSchema: Try[SchemaType] =
+    schemaFileAsString.flatMap { s =>
+      JsonSource.schemaFromString(s) match {
+        case JsSuccess(schema, _) => scala.util.Success(schema)
+        case JsError(errors) => scala.util.Failure(new Exception(JsError.toJson(errors).toString()))
+      }
 
-  def buildSchemaError(circeError: ValidationError): JsonSchemaError =
-    JsonSchemaError(circeError.schemaLocation, circeError.keyword, circeError.location)
+    }
 
   def validate[T](
     data: T
   )(implicit writes: Writes[T]): Either[NonEmptyList[JsonSchemaError], Unit] = {
     val dataJson = Json.toJson(data).toString()
-    val result = for {
-      js <- io.circe.parser.parse(dataJson).left
-        .map(
-          pf =>
-            NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", pf.toString, schemaFile, None))
-        )
-      schema <- circeSchema.toEither.left
-        .map(
-          t =>
-            NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", t.getMessage, schemaFile, None))
-        )
-      _ <- schema.validate(js).toEither
-    } yield ()
-
-    result match {
-      case Left(errs) =>
-        val schemaErrors = errs.map(buildSchemaError)
-        logger.warn(Json.prettyPrint(Json.toJson(schemaErrors.toList)))
-        Left(schemaErrors)
-      case Right(_) =>
-        Right(())
+    
+    parsedSchema.toEither.left
+    .map( t=> NonEmptyList.one(JsonSchemaError(Some(schemaFile), "SCHEMA_LOAD_ERROR", t.getMessage)))
+    .flatMap { schema =>
+      val validator = SchemaValidator(Some(Version7))
+      validator.validate(schema, dataJson) match {
+        case JsSuccess(_, _) => Right(())
+        case JsError(errors) =>
+          val schemaErrors = errors.toList.flatMap { case (path, validationErrors) =>
+            validationErrors.map { ve =>
+              JsonSchemaError(
+                Some(path.toString()),
+                keyword = ve.message,
+                instancePath = path.toString()
+              )
+            }
+          }
+          NonEmptyList.fromList(schemaErrors) match {
+            case Some(nonEmptyErrors) => 
+              logger.warn(Json.prettyPrint(Json.toJson(nonEmptyErrors.toList))) 
+              Left(nonEmptyErrors)
+            case None => 
+              Right(())
+          }
     }
+  }
   }
 
 }

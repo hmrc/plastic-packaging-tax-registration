@@ -52,7 +52,7 @@ class NonRepudiationConnector @Inject() (
     val timer    = metrics.defaultRegistry.timer("ppt.nrs.submission.timer").time()
     val jsonBody = Json.obj("payload" -> encodedPayloadString, "metadata" -> nonRepudiationMetadata)
 
-    retry(config.nrsRetries: _*)(shouldRetry, reasonForRetrying[NonRepudiationSubmissionAccepted]) {
+    retry(config.nrsRetries: _*)(shouldRetry[NonRepudiationSubmissionAccepted], reasonForRetrying[NonRepudiationSubmissionAccepted]) {
       submit(timer, jsonBody)
     }
   }

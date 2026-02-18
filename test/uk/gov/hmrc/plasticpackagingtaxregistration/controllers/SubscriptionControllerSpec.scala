@@ -32,7 +32,7 @@ import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import models.nrs.NonRepudiationSubmissionAccepted
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.verifyNoInteractions
-import org.mockito.MockitoSugar.{reset, verify, when}
+import org.mockito.Mockito.{reset, verify, when}
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsObject, Json}

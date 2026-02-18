@@ -18,7 +18,7 @@ package base.unit
 
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.MockitoSugar.{reset, when}
+import org.mockito.Mockito.{times, reset, when}
 import org.mockito.stubbing.ScalaOngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import uk.gov.hmrc.http.HeaderCarrier

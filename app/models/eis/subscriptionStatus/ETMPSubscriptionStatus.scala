@@ -36,6 +36,6 @@ object ETMPSubscriptionStatus extends Enumeration {
   val CONTRACT_OBJECT_INACTIVE: Value = Value
 
   implicit val format: Format[Status] =
-    Format(Reads.enumNameReads(ETMPSubscriptionStatus), Writes.enumNameWrites)
+    Format(Reads.enumNameReads(ETMPSubscriptionStatus), Writes.enumNameWrites[ETMPSubscriptionStatus.type])
 
 }

@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
+import play.api.libs.functional.syntax.{toFunctionalBuilderOps}
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 
@@ -34,7 +34,7 @@ object EmailStatus {
     (__ \ "emailAddress").write[String] and
       (__ \ "verified").write[Boolean] and
       (__ \ "locked").write[Boolean]
-  )(unlift(EmailStatus.unapply))
+  )(o => Tuple.fromProductTyped(o))
 
   val apiFormat: Format[EmailStatus] =
     Format[EmailStatus](apiReads, apiWrites)
