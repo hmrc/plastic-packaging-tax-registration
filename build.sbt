@@ -8,7 +8,7 @@ PlayKeys.devSettings := Seq("play.server.http.port" -> "8502")
 val silencerVersion = "1.7.16"
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "3.3.7"
+ThisBuild / scalaVersion := "3.7.1"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala,SbtDistributablesPlugin)
@@ -23,13 +23,7 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
 
 lazy val scoverageSettings: Seq[Setting[_]] = Seq(
-  coverageExcludedPackages := List("<empty>",
-                                   "Reverse.*",
-                                   "domain\\..*",
-                                   "models\\..*",
-                                   "metrics\\..*",
-                                   ".*(BuildInfo|Routes|Options).*"
-  ).mkString(";"),
+  coverageExcludedPackages := Seq("<empty>", "uk.gov.hmrc.BuildInfo", "Reverse.*",".*Routes.*",".*RoutesPrefix.*",".*GuiceInjector","$anon").mkString(","),
   coverageMinimumStmtTotal := 90.00,
   coverageFailOnMinimum := true,
   coverageHighlighting := true,
