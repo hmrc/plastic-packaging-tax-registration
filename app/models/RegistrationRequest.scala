@@ -63,7 +63,7 @@ object RegistrationRequest {
       (__ \ "userHeaders").readNullable[Map[String, String]].map {
         case None    => Map.empty[String, String]
         case Some(x) => x
-      }).apply(RegistrationRequest.apply _)
+      }).apply(RegistrationRequest.apply)
 
   implicit val writes: Writes[RegistrationRequest] = Json.writes[RegistrationRequest].transform { (js: JsObject) =>
     if (js("userHeaders") == JsObject.empty) js - "userHeaders"

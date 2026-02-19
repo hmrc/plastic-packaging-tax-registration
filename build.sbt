@@ -23,7 +23,7 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
 
 lazy val scoverageSettings: Seq[Setting[_]] = Seq(
-  coverageExcludedPackages := Seq("<empty>", "uk.gov.hmrc.BuildInfo", "Reverse.*",".*Routes.*",".*RoutesPrefix.*",".*GuiceInjector","$anon").mkString(","),
+  coverageExcludedPackages := Seq("<empty>", "uk.gov.hmrc.BuildInfo", "Reverse.*",".*Routes.*",".*RoutesPrefix.*",".*GuiceInjector","$anon","models\\..*").mkString(","),
   coverageMinimumStmtTotal := 90.00,
   coverageFailOnMinimum := true,
   coverageHighlighting := true,

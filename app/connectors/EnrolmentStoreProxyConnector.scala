@@ -33,7 +33,6 @@ import java.net.URL
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import org.apache.pekko.http.javadsl.Http
 
 @Singleton
 class EnrolmentStoreProxyConnector @Inject() (

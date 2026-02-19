@@ -19,7 +19,6 @@ package controllers
 import com.codahale.metrics.SharedMetricRegistries
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, anyString}
-import org.mockito.BDDMockito.`given`
 import org.mockito.Mockito.{reset, verify, verifyNoInteractions, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures

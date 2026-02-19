@@ -69,7 +69,7 @@ class SubscriptionService @Inject() (
                                      safeId,
                                      pptRegistration,
                                      userHeaders
-        ).map(Right.apply _)
+        ).map(Right.apply)
 
       case subscriptionResponse @ SubscriptionFailureResponseWithStatusCode(
             failedSubscriptionResponse,

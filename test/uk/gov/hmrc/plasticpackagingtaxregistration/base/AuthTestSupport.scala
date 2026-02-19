@@ -74,13 +74,13 @@ trait AuthTestSupport extends MockitoSugar {
       mockAuthConnector.authorise(
         expectedAuthPredicateMatcher,
         ArgumentMatchers.eq(internalId and credentials and groupIdentifier)
-      )(any(), any())
+      )(using any(), any())
     )
       .thenReturn(Future.successful(new ~(new ~(user.internalId, userCredentials), userGroup)))
   }
 
   def withUnauthorizedUser(error: Throwable): Unit =
-    when(mockAuthConnector.authorise(any(), any())(any(), any())).thenReturn(Future.failed(error))
+    when(mockAuthConnector.authorise(any(), any())(using any(), any())).thenReturn(Future.failed(error))
 
   def newUser(enrolments: Option[Enrolments] = None): SignedInUser =
     SignedInUser(Credentials("123123123", "Plastic Limited"),
@@ -116,7 +116,7 @@ trait AuthTestSupport extends MockitoSugar {
     when(
       mockAuthConnector.authorise(ArgumentMatchers.eq(EmptyPredicate),
                                   ArgumentMatchers.eq(nrsIdentityRetrievals)
-      )(ArgumentMatchers.eq(hc), ArgumentMatchers.eq(ec))
+      )(using ArgumentMatchers.eq(hc), ArgumentMatchers.eq(ec))
     ).thenReturn(Future.successful(authRetrievalsResponse))
 
 }

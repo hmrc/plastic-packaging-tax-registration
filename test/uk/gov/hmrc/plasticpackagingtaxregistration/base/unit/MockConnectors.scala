@@ -66,68 +66,68 @@ trait MockConnectors extends BeforeAndAfterEach {
   }
 
   protected def mockGetSubscriptionStatusFailure(ex: Exception) =
-    when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any())).thenThrow(ex)
+    when(mockSubscriptionsConnector.getSubscriptionStatus(any())(using any())).thenThrow(ex)
 
   protected def mockGetSubscriptionFailure(ex: Exception) =
-    when(mockSubscriptionsConnector.getSubscription(any())(any())).thenThrow(ex)
+    when(mockSubscriptionsConnector.getSubscription(any())(using any())).thenThrow(ex)
 
   protected def mockGetSubscriptionSubmitFailure(
     ex: Exception
   ): OngoingStubbing[Future[SubscriptionResponse]] =
-    when(mockSubscriptionsConnector.submitSubscription(any(), any())(any()))
+    when(mockSubscriptionsConnector.submitSubscription(any(), any())(using any()))
       .thenThrow(ex)
 
   protected def mockGetSubscriptionSubmitFailure(
     failedResponse: SubscriptionFailureResponseWithStatusCode
   ): OngoingStubbing[Future[SubscriptionResponse]] =
-    when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
+    when(mockSubscriptionsConnector.submitSubscription(any(), any())(using any())).thenReturn(
       Future.successful(failedResponse)
     )
 
   protected def mockGetSubscriptionStatus(
     subscriptionStatusResponse: SubscriptionStatusResponse
   ): OngoingStubbing[Future[Either[Int, SubscriptionStatusResponse]]] =
-    when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any())).thenReturn(
+    when(mockSubscriptionsConnector.getSubscriptionStatus(any())(using any())).thenReturn(
       Future.successful(Right(subscriptionStatusResponse))
     )
 
   protected def mockGetSubscription(
     subscription: Subscription
   ): OngoingStubbing[Future[Either[Int, Subscription]]] =
-    when(mockSubscriptionsConnector.getSubscription(any())(any())).thenReturn(
+    when(mockSubscriptionsConnector.getSubscription(any())(using any())).thenReturn(
       Future.successful(Right(subscription))
     )
 
   protected def mockGetSubscriptionCreate(
     subscription: SubscriptionSuccessfulResponse
   ): OngoingStubbing[Future[SubscriptionResponse]] =
-    when(mockSubscriptionsConnector.submitSubscription(any(), any())(any())).thenReturn(
+    when(mockSubscriptionsConnector.submitSubscription(any(), any())(using any())).thenReturn(
       Future.successful(subscription)
     )
 
   protected def mockSubscriptionUpdate(
     subscription: SubscriptionSuccessfulResponse
   ): OngoingStubbing[Future[SubscriptionResponse]] =
-    when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenReturn(
+    when(mockSubscriptionsConnector.updateSubscription(any(), any())(using any())).thenReturn(
       Future.successful(subscription)
     )
 
   protected def mockSubscriptionUpdateFailure(
     failedResponse: SubscriptionFailureResponseWithStatusCode
   ): OngoingStubbing[Future[SubscriptionResponse]] =
-    when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenReturn(
+    when(mockSubscriptionsConnector.updateSubscription(any(), any())(using any())).thenReturn(
       Future.successful(failedResponse)
     )
 
   protected def mockSubscriptionUpdateFailure(
     ex: Exception
   ): OngoingStubbing[Future[SubscriptionResponse]] =
-    when(mockSubscriptionsConnector.updateSubscription(any(), any())(any())).thenThrow(ex)
+    when(mockSubscriptionsConnector.updateSubscription(any(), any())(using any())).thenThrow(ex)
 
   protected def mockNonRepudiationSubmission(
     response: NonRepudiationSubmissionAccepted
   ): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
-    when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any())).thenReturn(
+    when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(using any())).thenReturn(
       Future.successful(response)
     )
 
@@ -139,29 +139,29 @@ trait MockConnectors extends BeforeAndAfterEach {
     when(
       mockNonRepudiationConnector.submitNonRepudiation(ArgumentMatchers.eq(testEncodedPayload),
                                                        ArgumentMatchers.eq(expectedMetadata)
-      )(ArgumentMatchers.eq(hc))
+      )(using ArgumentMatchers.eq(hc))
     ).thenReturn(Future.successful(response))
 
   protected def mockNonRepudiationSubmissionFailure(
     ex: Exception
   ): OngoingStubbing[Future[NonRepudiationSubmissionAccepted]] =
-    when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any()))
+    when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(using any()))
       .thenThrow(ex)
 
   protected def mockEnrolmentSuccess(): OngoingStubbing[Future[TaxEnrolmentsResponse]] =
-    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
+    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(using any())).thenReturn(
       Future.successful(Right(SuccessfulTaxEnrolment))
     )
 
   protected def mockEnrolmentFailure()
     : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
-    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
+    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(using any())).thenReturn(
       Future.successful(Left(FailedTaxEnrolment(1)))
     )
 
   protected def mockEnrolmentFailureException()
     : OngoingStubbing[Future[TaxEnrolmentsHttpParser.TaxEnrolmentsResponse]] =
-    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
+    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(using any())).thenReturn(
       Future.failed(new IllegalStateException("BANG!"))
     )
 

@@ -63,11 +63,11 @@ class DeregistrationControllerSpec extends ControllerSpec {
       val subscriptionCaptor: ArgumentCaptor[Subscription] =
         ArgumentCaptor.forClass(classOf[Subscription])
       when(
-        mockSubscriptionsConnector.updateSubscription(any(), subscriptionCaptor.capture())(any())
+        mockSubscriptionsConnector.updateSubscription(any(), subscriptionCaptor.capture())(using any())
       ).thenReturn(Future.successful(subscriptionSuccessfulResponse))
 
       when(
-        mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+        mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
       ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(UUID.randomUUID().toString)))
 
       val result =
@@ -93,7 +93,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
         mockGetSubscription(ukLimitedCompanySubscription)
         mockSubscriptionUpdate(subscriptionSuccessfulResponse)
         when(
-          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
         ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
 
         val result: Future[Result] =
@@ -127,7 +127,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
           any[ZonedDateTime],
           ArgumentMatchers.eq(subscriptionSuccessfulResponse.pptReferenceNumber),
           any()
-        )(any[HeaderCarrier])
+        )(using any[HeaderCarrier])
       }
 
       " NRS submission fails with failure response" in {
@@ -136,7 +136,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
         mockGetSubscription(ukLimitedCompanySubscription)
         mockSubscriptionUpdate(subscriptionSuccessfulResponse)
         when(
-          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
         ).thenReturn(Future.failed(new HttpException(nrsErrorMessage, SERVICE_UNAVAILABLE)))
 
         val result: Future[Result] =
@@ -170,7 +170,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
           any[ZonedDateTime],
           ArgumentMatchers.eq(subscriptionSuccessfulResponse.pptReferenceNumber),
           any()
-        )(any[HeaderCarrier])
+        )(using any[HeaderCarrier])
       }
     }
 

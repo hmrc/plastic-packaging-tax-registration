@@ -28,7 +28,7 @@ object EmailStatus {
     (__ \ "emailAddress").read[String] and
       (__ \ "verified").read[Boolean] and
       (__ \ "locked").read[Boolean]
-  )(EmailStatus.apply _)
+  )(EmailStatus.apply)
 
   val apiWrites: Writes[EmailStatus] = (
     (__ \ "emailAddress").write[String] and

@@ -52,7 +52,7 @@ class RegistrationRepositorySpec
   }
 
   private val mockAppConfig = mock[AppConfig]
-  when(mockAppConfig.dbTimeToLiveInSeconds) thenReturn 1L
+  when(mockAppConfig.dbTimeToLiveInSeconds).thenReturn(1L)
 
   private val metrics = injector.instanceOf[Metrics]
 

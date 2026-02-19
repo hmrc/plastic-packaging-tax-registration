@@ -16,7 +16,6 @@
 
 package models
 
-import models.PPTAddress.GBCountryCode
 import play.api.libs.json.{Json, OFormat}
 import models.eis.subscription.{AddressDetails, BusinessCorrespondenceDetails}
 

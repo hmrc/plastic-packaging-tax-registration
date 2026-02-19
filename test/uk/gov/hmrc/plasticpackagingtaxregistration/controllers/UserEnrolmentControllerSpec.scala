@@ -40,11 +40,11 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
+    when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())).thenReturn(
       Future.successful(None)
     )
 
-    when(mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(any())).thenReturn(
+    when(mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(using any())).thenReturn(
       Future.successful(())
     )
   }
@@ -73,11 +73,11 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
       "group has enrolment and user is in same group" in {
         withAuthorizedUser()
 
-        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
+        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())).thenReturn(
           Future.successful(Some(groupsWithEnrolmentResponse(userGroupIdentifier)))
         )
 
-        when(mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(any())).thenReturn(
+        when(mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(using any())).thenReturn(
           Future.successful(())
         )
 
@@ -100,7 +100,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
       "groups exist with enrolment and user not in group" in {
         withAuthorizedUser()
 
-        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
+        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())).thenReturn(
           Future.successful(Some(groupsWithEnrolmentResponse("some-group-id")))
         )
 
@@ -122,7 +122,7 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
         withAuthorizedUser()
 
         when(
-          mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(any())
+          mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(using any())
         ).thenReturn(Future.failed(UpstreamErrorResponse(AssignEnrolmentToGroupError, 404)))
 
         val userEnrolment = Json.obj("pptReference" -> knownPptReference,
@@ -142,11 +142,11 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
       "assign enrolment to user fails" in {
         withAuthorizedUser()
 
-        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(any())).thenReturn(
+        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())).thenReturn(
           Future.successful(Some(groupsWithEnrolmentResponse(userGroupIdentifier)))
         )
 
-        when(mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(any())).thenReturn(
+        when(mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(using any())).thenReturn(
           Future.failed(UpstreamErrorResponse(AssignEnrolmentToUserError, 404))
         )
 

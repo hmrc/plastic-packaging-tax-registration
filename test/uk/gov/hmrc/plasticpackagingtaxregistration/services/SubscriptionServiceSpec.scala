@@ -58,10 +58,10 @@ class SubscriptionServiceSpec
     "called, submits a subscription to the HOD API" in new Fixture {
       val registration = aValidRegistration()
 
-      val result = SUT.submit(registration, "SAFE_ID", Map.empty)(hc)
+      val result = SUT.submit(registration, "SAFE_ID", Map.empty)(using hc)
 
       Await.ready(result, 1 second)
-      verify(mockSubscriptionConnector, times(1)).submitSubscription(eqTo("SAFE_ID"), any())(any())
+      verify(mockSubscriptionConnector, times(1)).submitSubscription(eqTo("SAFE_ID"), any())(using any())
     }
   }
 
@@ -69,7 +69,7 @@ class SubscriptionServiceSpec
     "enrol the user" in new Fixture {
       when(
         mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
-          any[HeaderCarrier]
+          using any[HeaderCarrier]
         )
       ).thenReturn(
         Future.successful(
@@ -83,18 +83,18 @@ class SubscriptionServiceSpec
 
       val registration = aValidRegistration()
 
-      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
+      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(using hc), 1 second)
 
       verify(mockTaxEnrolmentsConnector, times(1)).submitEnrolment(eqTo("PPT_REF_2"),
                                                                    eqTo("SAFE_ID"),
                                                                    eqTo("FORM_BUNDLE_NO_2")
-      )(any())
+      )(using any())
     }
 
     "notify NRS" in new Fixture {
       when(
         mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
-          any[HeaderCarrier]
+          using any[HeaderCarrier]
         )
       ).thenReturn(
         Future.successful(
@@ -108,14 +108,14 @@ class SubscriptionServiceSpec
 
       val registration = aValidRegistration()
 
-      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
+      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(using hc), 1 second)
 
       val payloadCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
       val metaDataCaptor: ArgumentCaptor[NonRepudiationMetadata] =
         ArgumentCaptor.forClass(classOf[NonRepudiationMetadata])
       verify(mockNonRepudiationConnector, times(1)).submitNonRepudiation(payloadCaptor.capture(),
                                                                          metaDataCaptor.capture()
-      )(any())
+      )(using any())
 
       //payload is base64 encoded UTF-8 Json
       val expectedJson = Json.toJson(registration)
@@ -147,7 +147,7 @@ class SubscriptionServiceSpec
     "delete the registration record" in new Fixture {
       when(
         mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
-          any[HeaderCarrier]
+          using any[HeaderCarrier]
         )
       ).thenReturn(
         Future.successful(
@@ -161,7 +161,7 @@ class SubscriptionServiceSpec
 
       val registration = aValidRegistration()
 
-      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
+      Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(using hc), 1 second)
 
       verify(mockRegistrationRepository, times(1)).delete(eqTo(registration.id))
     }
@@ -169,7 +169,7 @@ class SubscriptionServiceSpec
     "return the success information" in new Fixture {
       when(
         mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
-          any[HeaderCarrier]
+          using any[HeaderCarrier]
         )
       ).thenReturn(
         Future.successful(
@@ -183,7 +183,7 @@ class SubscriptionServiceSpec
 
       val registration = aValidRegistration()
 
-      val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
+      val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(using hc), 1 second)
 
       result mustBe Right(
         SubscriptionCreateWithEnrolmentAndNrsStatusesResponse(pptReference = "PPT_REF_4",
@@ -213,7 +213,7 @@ class SubscriptionServiceSpec
 
       when(
         mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
-          any[HeaderCarrier]
+          using any[HeaderCarrier]
         )
       ).thenReturn(
         Future.successful(
@@ -228,7 +228,7 @@ class SubscriptionServiceSpec
 
       val registration = aValidRegistration()
 
-      val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(hc), 1 second)
+      val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(using hc), 1 second)
       result mustBe Left(
         SubscriptionFailureResponseWithStatusCode(
           EISSubscriptionFailureResponse(
@@ -249,24 +249,24 @@ class SubscriptionServiceSpec
 
     val nonRepudiationService =
       new NonRepudiationService(mockNonRepudiationConnector, mockAuthConnector)(
-        globalExecutionContext
+        using globalExecutionContext
       )
 
     val hc = HeaderCarrier(authorization = Some(Authorization("AUTH_TOKEN")))
 
-    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(any())).thenReturn(
+    when(mockTaxEnrolmentsConnector.submitEnrolment(any(), any(), any())(using any())).thenReturn(
       Future.successful(Right(SuccessfulTaxEnrolment))
     )
 
     when(
       mockAuthConnector.authorise[NonRepudiationService.NonRepudiationIdentityRetrievals](any(),
                                                                                           any()
-      )(any(), any())
+      )(using any(), any())
     ).thenReturn(Future.successful(testAuthRetrievals))
 
     when(
       mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
-        any[HeaderCarrier]
+        using any[HeaderCarrier]
       )
     ).thenReturn(
       Future.successful(
@@ -278,7 +278,7 @@ class SubscriptionServiceSpec
       )
     )
 
-    when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(any())).thenReturn(
+    when(mockNonRepudiationConnector.submitNonRepudiation(any(), any())(using any())).thenReturn(
       Future.successful(NonRepudiationSubmissionAccepted("NRS_SUBMISSION_ID"))
     )
 
@@ -288,7 +288,7 @@ class SubscriptionServiceSpec
                                       mockTaxEnrolmentsConnector,
                                       mockRegistrationRepository,
                                       nonRepudiationService
-    )(globalExecutionContext)
+    )(using globalExecutionContext)
 
   }
 
