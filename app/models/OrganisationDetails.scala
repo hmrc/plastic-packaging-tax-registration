@@ -32,7 +32,7 @@ object OrgType extends Enumeration {
   val OVERSEAS_COMPANY_NO_UK_BRANCH: Value        = Value("OverseasCompanyNoUKBranch")
 
   implicit val format: Format[OrgType] =
-    Format(Reads.enumNameReads(OrgType), Writes.enumNameWrites)
+    Format(Reads.enumNameReads(OrgType), Writes.enumNameWrites[OrgType.type])
 
   def withNameOpt(name: String): Option[Value] = values.find(_.toString == name)
 

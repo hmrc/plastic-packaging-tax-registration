@@ -32,7 +32,7 @@ import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import models.nrs.NonRepudiationSubmissionAccepted
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.verifyNoInteractions
-import org.mockito.MockitoSugar.{reset, verify, when}
+import org.mockito.Mockito.{reset, verify, when}
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsObject, Json}
@@ -66,7 +66,7 @@ class SubscriptionControllerSpec
       status(result) must be(OK)
       contentAsJson(result) mustBe toJson(subscriptionStatusResponse)
       verify(mockSubscriptionsConnector).getSubscriptionStatus(ArgumentMatchers.eq(safeNumber))(
-        any()
+        using any()
       )
     }
 
@@ -75,7 +75,7 @@ class SubscriptionControllerSpec
       mockGetSubscriptionStatus(subscriptionStatusResponse)
       mockNonRepudiationSubmission(NonRepudiationSubmissionAccepted(UUID.randomUUID().toString))
 
-      when(mockSubscriptionsConnector.getSubscriptionStatus(any())(any())).thenReturn(
+      when(mockSubscriptionsConnector.getSubscriptionStatus(any())(using any())).thenReturn(
         Future.successful(Left(418))
       )
 
@@ -130,7 +130,7 @@ class SubscriptionControllerSpec
         withAuthorizedUser(user = newUser())
         mockGetSubscriptionCreate(subscriptionSuccessfulResponse)
         when(
-          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
         ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted("nrSubmissionId")))
         mockEnrolmentSuccess()
 
@@ -151,7 +151,7 @@ class SubscriptionControllerSpec
         withAuthorizedUser(user = newUser())
         mockGetSubscriptionCreate(subscriptionSuccessfulResponse)
         when(
-          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
         ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted("nrSubmissionId")))
         mockEnrolmentSuccess()
 
@@ -169,7 +169,7 @@ class SubscriptionControllerSpec
           withAuthorizedUser(user = newUser())
           mockGetSubscriptionCreate(subscriptionSuccessfulResponse)
           when(
-            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
           ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
           mockEnrolmentSuccess()
 
@@ -193,7 +193,7 @@ class SubscriptionControllerSpec
             any[ZonedDateTime],
             ArgumentMatchers.eq(subscriptionSuccessfulResponse.pptReferenceNumber),
             ArgumentMatchers.eq(pptUserHeaders)
-          )(any[HeaderCarrier])
+          )(using any[HeaderCarrier])
         }
 
         "but NRS submission fails and enrolment fails with failure response" in {
@@ -284,7 +284,7 @@ class SubscriptionControllerSpec
 
       status(result) must be(OK)
       contentAsJson(result) mustBe toJson(Registration(ukLimitedCompanySubscription))
-      verify(mockSubscriptionsConnector).getSubscription(ArgumentMatchers.eq(pptReference))(any())
+      verify(mockSubscriptionsConnector).getSubscription(ArgumentMatchers.eq(pptReference))(using any())
     }
 
     "return 401" when {
@@ -332,13 +332,13 @@ class SubscriptionControllerSpec
         )
         val nrSubmissionId = "nrSubmissionId"
         when(
-          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+          mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
         ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
         mockSubscriptionUpdate(subscriptionSuccessfulResponse)
 
         def theUpdatedSubscription = {
           val captor: ArgumentCaptor[Subscription] = ArgumentCaptor.forClass(classOf[Subscription])
-          verify(mockSubscriptionsConnector).updateSubscription(any(), captor.capture())(any())
+          verify(mockSubscriptionsConnector).updateSubscription(any(), captor.capture())(using any())
           captor.getValue
         }
 
@@ -356,7 +356,7 @@ class SubscriptionControllerSpec
           withAuthorizedUser(user = newUser())
           mockSubscriptionUpdate(subscriptionSuccessfulResponse)
           when(
-            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
           ).thenReturn(Future.successful(NonRepudiationSubmissionAccepted(nrSubmissionId)))
           mockEnrolmentSuccess()
 
@@ -378,7 +378,7 @@ class SubscriptionControllerSpec
             any[ZonedDateTime],
             ArgumentMatchers.eq(subscriptionSuccessfulResponse.pptReferenceNumber),
             ArgumentMatchers.eq(pptUserHeaders)
-          )(any[HeaderCarrier])
+          )(using any[HeaderCarrier])
         }
 
         " NRS submission fails with failure response" in {
@@ -386,7 +386,7 @@ class SubscriptionControllerSpec
           withAuthorizedUser(user = newUser())
           mockSubscriptionUpdate(subscriptionSuccessfulResponse)
           when(
-            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+            mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
           ).thenReturn(Future.failed(new HttpException(nrsErrorMessage, SERVICE_UNAVAILABLE)))
 
           val result: Future[Result] =
@@ -407,7 +407,7 @@ class SubscriptionControllerSpec
             any[ZonedDateTime],
             ArgumentMatchers.eq(subscriptionSuccessfulResponse.pptReferenceNumber),
             ArgumentMatchers.eq(pptUserHeaders)
-          )(any[HeaderCarrier])
+          )(using any[HeaderCarrier])
         }
       }
     }
@@ -486,7 +486,7 @@ class SubscriptionControllerSpec
     withAuthorizedUser(user = newUser())
     mockGetSubscriptionCreate(subscriptionSuccessfulResponse)
     when(
-      mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(any())
+      mockNonRepudiationService.submitNonRepudiation(any(), any(), any(), any())(using any())
     ).thenReturn(Future.failed(new HttpException(nrsErrorMessage, SERVICE_UNAVAILABLE)))
 
     val result: Future[Result] =
@@ -509,14 +509,14 @@ class SubscriptionControllerSpec
       any[ZonedDateTime],
       ArgumentMatchers.eq(subscriptionSuccessfulResponse.pptReferenceNumber),
       ArgumentMatchers.eq(pptUserHeaders)
-    )(any[HeaderCarrier])
+    )(using any[HeaderCarrier])
   }
 
   private def verifyAndCaptureSubscription: Subscription = {
     val captor: ArgumentCaptor[Subscription] = ArgumentCaptor.forClass(classOf[Subscription])
 
     verify(mockSubscriptionsConnector)
-      .submitSubscription(any(), captor.capture())(any())
+      .submitSubscription(any(), captor.capture())(using any())
 
     captor.getValue
   }

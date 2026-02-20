@@ -54,7 +54,7 @@ trait RegistrationBuilder
       )
     )
 
-    aRegistration(baseModifiers ++ modifiers: _*)
+    aRegistration(baseModifiers ++ modifiers*)
   }
 
   def withId(id: String): RegistrationModifier = _.copy(id = id)

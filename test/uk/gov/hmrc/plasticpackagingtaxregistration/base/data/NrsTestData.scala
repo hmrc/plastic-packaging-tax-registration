@@ -44,7 +44,7 @@ trait NrsTestData {
   val testAuthName: Name =
     uk.gov.hmrc.auth.core.retrieve.Name(Some("testFirstName"), Some("testLastName"))
 
-  val testAuthDateOfBirth: org.joda.time.LocalDate = org.joda.time.LocalDate.now()
+  val testAuthDateOfBirth: LocalDate = LocalDate.now()
   val testEmail: String                            = "testEmail"
   val testPPTReference: String                     = "XMPPT123456789"
   val testAuthToken: String                        = "testAuthToken"

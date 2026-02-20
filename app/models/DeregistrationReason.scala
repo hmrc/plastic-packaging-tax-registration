@@ -28,7 +28,7 @@ object DeregistrationReason extends Enumeration {
   val WantToRegisterAsGroup               = Value(4, "Taken into Group Registration")
 
   implicit val format: Format[DeregistrationReason] =
-    Format(Reads.enumNameReads(DeregistrationReason), Writes.enumNameWrites)
+    Format(Reads.enumNameReads(DeregistrationReason), Writes.enumNameWrites[DeregistrationReason.type])
 
   def apply(deregistrationReason: String): DeregistrationReason.Value =
     values.find(_.toString == deregistrationReason).getOrElse(

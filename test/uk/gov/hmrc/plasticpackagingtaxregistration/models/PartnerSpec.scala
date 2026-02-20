@@ -16,7 +16,7 @@
 
 package models
 
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.wordspec.AnyWordSpec
 import base.data.RegistrationTestData
 

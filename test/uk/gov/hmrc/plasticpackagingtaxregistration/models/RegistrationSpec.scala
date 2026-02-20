@@ -16,7 +16,7 @@
 
 package models
 
-import org.scalatest.matchers.must.Matchers.{convertToAnyMustWrapper, not}
+import org.scalatest.matchers.must.Matchers.{mustBe, must, not}
 import org.scalatest.wordspec.AnyWordSpec
 import base.data.{RegistrationTestData, SubscriptionTestData}
 import builders.RegistrationBuilder

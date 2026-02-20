@@ -31,17 +31,20 @@ import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.libs.json.Json._
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
+import play.api.libs.ws.writeableOf_JsValue
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
+import java.net.URI
 
 @Singleton
 class SubscriptionsConnector @Inject() (
-  httpClient: HttpClient,
+  httpClient: HttpClientV2,
   override val appConfig: AppConfig,
   metrics: Metrics
 )(implicit ec: ExecutionContext)
@@ -55,9 +58,7 @@ class SubscriptionsConnector @Inject() (
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
-    httpClient.GET[ETMPSubscriptionStatusResponse](appConfig.subscriptionStatusUrl(safeId),
-                                                   headers = headers :+ correlationIdHeader
-    )
+    httpClient.get(new URI(appConfig.subscriptionStatusUrl(safeId)).toURL()).setHeader(headers :+ correlationIdHeader: _*).execute[ETMPSubscriptionStatusResponse]
       .map { etmpResponse =>
         logger.info(
           s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and " +
@@ -116,10 +117,8 @@ class SubscriptionsConnector @Inject() (
         (appConfig.subscriptionCreateWithoutSafeIdUrl(), s"$msgCommon no safeId")
       else (appConfig.subscriptionCreateUrl(safeNumber), s"$msgCommon safeId [$safeNumber]")
 
-    httpClient.POST[Subscription, HttpResponse](url = createUrl,
-                                                body = subscription,
-                                                headers = headers :+ correlationIdHeader
-    )
+
+    httpClient.post(new URI(createUrl).toURL()).withBody(Json.toJson(subscription)).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map {
         subscriptionResponse =>
@@ -160,9 +159,7 @@ class SubscriptionsConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
-    httpClient.GET[HttpResponse](appConfig.subscriptionDisplayUrl(pptReference),
-                                 headers = headers :+ correlationIdHeader
-    )
+    httpClient.get(new URI(appConfig.subscriptionDisplayUrl(pptReference)).toURL()).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map { response =>
         if (Status.isSuccessful(response.status)) {
@@ -203,11 +200,8 @@ class SubscriptionsConnector @Inject() (
 
     //the update-subscription API does not accept processingDate, which is returned on display API.
     val subscription = subscription1.copy(processingDate = None)
-
-    httpClient.PUT[Subscription, HttpResponse](url = appConfig.subscriptionUpdateUrl(pptReference),
-                                               body = subscription,
-                                               headers = headers :+ correlationIdHeader
-    )
+    
+    httpClient.put(new URI(appConfig.subscriptionUpdateUrl(pptReference)).toURL()).withBody(Json.toJson(subscription)).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map {
         subscriptionUpdateResponse =>

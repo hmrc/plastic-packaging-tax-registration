@@ -17,7 +17,7 @@
 package util
 
 import org.apache.pekko.actor.ActorSystem
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.test.DefaultAwaitTimeout
@@ -62,7 +62,7 @@ class RetryISpec extends AnyWordSpec with Matchers with DefaultAwaitTimeout {
 
         intercept[IllegalStateException] {
           await(
-            retryable.retry(someRetries: _*)(retryFailures, noParticularReason)(
+            retryable.retry(someRetries*)(retryFailures, noParticularReason)(
               consistentlyFailingOperation.doIt()
             )
           )
@@ -78,7 +78,7 @@ class RetryISpec extends AnyWordSpec with Matchers with DefaultAwaitTimeout {
         val temporarilyFailingOperation = TemporarilyFailingOperation(1, "All Good")
 
         await(
-          retryable.retry(someRetries: _*)(retryFailures, noParticularReason)(
+          retryable.retry(someRetries*)(retryFailures, noParticularReason)(
             temporarilyFailingOperation.doIt()
           )
         )
@@ -93,7 +93,7 @@ class RetryISpec extends AnyWordSpec with Matchers with DefaultAwaitTimeout {
 
         intercept[IllegalStateException] {
           await(
-            retryable.retry(someRetries: _*)(neverRetry, noParticularReason)(
+            retryable.retry(someRetries*)(neverRetry, noParticularReason)(
               consistentlyFailingOperation.doIt()
             )
           )

@@ -42,7 +42,7 @@ object PartnerTypeEnum extends Enumeration {
   val OVERSEAS_COMPANY_NO_UK_BRANCH: Value        = Value("OverseasCompanyNoUKBranch")
 
   implicit val format: Format[PartnerTypeEnum] =
-    Format(Reads.enumNameReads(PartnerTypeEnum), Writes.enumNameWrites)
+    Format(Reads.enumNameReads(PartnerTypeEnum), Writes.enumNameWrites[PartnerTypeEnum.type])
 
   val partnerTypesWhichRepresentPartnerships = Seq(GENERAL_PARTNERSHIP,
                                                    LIMITED_PARTNERSHIP,

@@ -82,7 +82,7 @@ class UserEnrolmentController @Inject() (
 
   private def getGroupsWithEnrolment(
     pptReference: String
-  )(implicit request: AuthorizedRequest[_]): Future[Seq[String]] =
+  )(implicit request: AuthorizedRequest[?]): Future[Seq[String]] =
     enrolmentStoreProxyConnector.queryGroupsWithEnrolment(pptReference).map {
       case Some(groupsResponse) =>
         logger.info(
@@ -102,7 +102,7 @@ class UserEnrolmentController @Inject() (
   private def assignEnrolment(
     userEnrolmentRequest: UserEnrolmentRequest,
     groupsWithEnrolment: Seq[String]
-  )(implicit request: AuthorizedRequest[_]): Future[Try[Unit]] = {
+  )(implicit request: AuthorizedRequest[?]): Future[Try[Unit]] = {
     val result: Future[Try[Unit]] =
       if (groupsWithEnrolment.isEmpty)
         taxEnrolmentsConnector.assignEnrolmentToGroup(request.userId,

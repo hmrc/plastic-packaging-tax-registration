@@ -25,6 +25,6 @@ object SubscriptionStatus extends Enumeration {
   val UNKNOWN: Value        = Value
 
   implicit val format: Format[Status] =
-    Format(Reads.enumNameReads(SubscriptionStatus), Writes.enumNameWrites)
+    Format(Reads.enumNameReads(SubscriptionStatus), Writes.enumNameWrites[SubscriptionStatus.type])
 
 }

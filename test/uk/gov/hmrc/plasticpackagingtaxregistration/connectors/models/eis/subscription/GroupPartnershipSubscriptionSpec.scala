@@ -192,22 +192,22 @@ class GroupPartnershipSubscriptionSpec
       "throw IllegalStateException" when {
         Seq(
           ("first name",
-           { partner: Partner =>
+           { (partner: Partner) =>
              partner.copy(contactDetails = partner.contactDetails.map(_.copy(firstName = None)))
            }
           ),
           ("last name",
-           { partner: Partner =>
+           {( partner: Partner) =>
              partner.copy(contactDetails = partner.contactDetails.map(_.copy(lastName = None)))
            }
           ),
           ("contact address",
-           { partner: Partner =>
+           { (partner: Partner) =>
              partner.copy(contactDetails = partner.contactDetails.map(_.copy(address = None)))
            }
           ),
           ("contact details",
-           { partner: Partner =>
+           { (partner: Partner) =>
              partner.copy(contactDetails = None)
            }
           )

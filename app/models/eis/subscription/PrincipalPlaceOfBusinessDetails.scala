@@ -16,7 +16,7 @@
 
 package models.eis.subscription
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json,OFormat}
 import models.Registration
 
 case class PrincipalPlaceOfBusinessDetails(
@@ -25,7 +25,7 @@ case class PrincipalPlaceOfBusinessDetails(
 )
 
 object PrincipalPlaceOfBusinessDetails {
-  implicit val format = Json.format[PrincipalPlaceOfBusinessDetails]
+  implicit val format: OFormat[PrincipalPlaceOfBusinessDetails] = Json.format[PrincipalPlaceOfBusinessDetails]
 
   def apply(registration: Registration): PrincipalPlaceOfBusinessDetails = {
     val registeredBusinessAddress = registration.organisationDetails.registeredBusinessAddress

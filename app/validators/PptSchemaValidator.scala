@@ -16,61 +16,54 @@
 
 package validators
 
-import java.io.InputStream
-
 import cats.data.NonEmptyList
-import io.circe.schema.ValidationError
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.networknt.schema.{JsonSchemaFactory, SpecVersion, ValidationMessage}
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import models.validation.JsonSchemaError
 
-import scala.util.Try
+import scala.jdk.CollectionConverters._
 
 class PptSchemaValidator(schemaFile: String) {
 
   private val logger = LoggerFactory.getLogger(getClass.getCanonicalName)
+  private val objectMapper = new ObjectMapper()
 
-  private lazy val schemaFileAsString: Try[String] =
-    Try {
-      val stream: InputStream = getClass.getResourceAsStream(schemaFile)
-      scala.io.Source.fromInputStream(stream).mkString
-    }
-
-  private lazy val circeSchema: Try[io.circe.schema.Schema] =
-    schemaFileAsString.flatMap(io.circe.schema.Schema.loadFromString)
-
-  def buildSchemaError(circeError: ValidationError): JsonSchemaError =
-    JsonSchemaError(circeError.schemaLocation, circeError.keyword, circeError.location)
-
-  def validate[T](
-    data: T
-  )(implicit writes: Writes[T]): Either[NonEmptyList[JsonSchemaError], Unit] = {
-    val dataJson = Json.toJson(data).toString()
-    val result = for {
-      js <- io.circe.parser.parse(dataJson).left
-        .map(
-          pf =>
-            NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", pf.toString, schemaFile, None))
-        )
-      schema <- circeSchema.toEither.left
-        .map(
-          t =>
-            NonEmptyList.one(ValidationError("SCHEMA_LOAD_ERROR", t.getMessage, schemaFile, None))
-        )
-      _ <- schema.validate(js).toEither
-    } yield ()
-
-    result match {
-      case Left(errs) =>
-        val schemaErrors = errs.map(buildSchemaError)
-        logger.warn(Json.prettyPrint(Json.toJson(schemaErrors.toList)))
-        Left(schemaErrors)
-      case Right(_) =>
-        Right(())
-    }
+  private lazy val schema = {
+    val factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7)
+    val stream = getClass.getResourceAsStream(schemaFile)
+    Option(stream)
+      .map(factory.getSchema)
+      .getOrElse(throw new IllegalStateException(s"Could not find resource '$schemaFile'"))
   }
 
+  def validate[T](data: T)(implicit writes: Writes[T]): Either[NonEmptyList[JsonSchemaError], Unit] = {
+  val dataJson = Json.toJson(data)
+  val jacksonNode = objectMapper.readTree(dataJson.toString())
+  val errors = schema.validate(jacksonNode).asScala.toList
+
+  if (errors.isEmpty) {
+    Right(())
+  } else {
+    val schemaErrors = errors.map { (vm: ValidationMessage) =>
+      JsonSchemaError(
+        Some(schemaFile),
+        keyword = vm.getType,
+        instancePath = vm.getMessage
+      )
+    }
+    NonEmptyList.fromList(schemaErrors) match {
+      case Some(nonEmptyErrors) =>
+        logger.warn(Json.prettyPrint(Json.toJson(nonEmptyErrors.toList)))
+        Left(nonEmptyErrors)
+      case None => Right(())
+    }
+  }
 }
+}
+
+
 
 object PptSchemaValidator {
 

@@ -23,19 +23,20 @@ import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT, OK}
 import uk.gov.hmrc.http.{
   HeaderCarrier,
-  HttpClient,
   HttpReadsInstances,
   HttpResponse,
   UpstreamErrorResponse
 }
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import java.net.URI
 
 @Singleton
 class EnrolmentStoreProxyConnector @Inject() (
-  httpClient: HttpClient,
+  httpClient: HttpClientV2,
   val config: AppConfig,
   metrics: Metrics
 )(implicit ec: ExecutionContext)
@@ -47,9 +48,8 @@ class EnrolmentStoreProxyConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[Option[GroupsWithEnrolmentsResponse]] = {
     val timer = metrics.defaultRegistry.timer(GroupsWithEnrolmentsTimerTag).time()
 
-    httpClient.GET[HttpResponse](url =
-      config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference))
-    ).map { response =>
+    httpClient.get(new URI(config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference))).toURL()).execute[HttpResponse]
+    .map { response =>
       response.status match {
         case OK                     => Some(response.json.as[GroupsWithEnrolmentsResponse])
         case NO_CONTENT | NOT_FOUND => None

@@ -52,11 +52,11 @@ class RegistrationRepositorySpec
   }
 
   private val mockAppConfig = mock[AppConfig]
-  when(mockAppConfig.dbTimeToLiveInSeconds) thenReturn 1
+  when(mockAppConfig.dbTimeToLiveInSeconds).thenReturn(1L)
 
   private val metrics = injector.instanceOf[Metrics]
 
-  override lazy val repository =
+  override val repository: RegistrationRepositoryImpl =
     new RegistrationRepositoryImpl(mongoComponent, mockAppConfig, metrics)
 
   override def beforeEach(): Unit = {

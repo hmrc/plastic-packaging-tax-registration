@@ -24,21 +24,23 @@ import play.api.http.Status.ACCEPTED
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{
   HeaderCarrier,
-  HttpClient,
   HttpException,
   HttpReadsHttpResponse,
   HttpResponse
 }
+import uk.gov.hmrc.http.client.HttpClientV2
+import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import util.Retry
 
 import javax.inject.{Inject, Singleton}
+import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
 @Singleton
 class NonRepudiationConnector @Inject() (
-  httpClient: HttpClient,
+  httpClient: HttpClientV2,
   val config: AppConfig,
   metrics: Metrics,
   override val actorSystem: ActorSystem
@@ -52,7 +54,7 @@ class NonRepudiationConnector @Inject() (
     val timer    = metrics.defaultRegistry.timer("ppt.nrs.submission.timer").time()
     val jsonBody = Json.obj("payload" -> encodedPayloadString, "metadata" -> nonRepudiationMetadata)
 
-    retry(config.nrsRetries: _*)(shouldRetry, reasonForRetrying[NonRepudiationSubmissionAccepted]) {
+    retry(config.nrsRetries*)(shouldRetry[NonRepudiationSubmissionAccepted], reasonForRetrying[NonRepudiationSubmissionAccepted]) {
       submit(timer, jsonBody)
     }
   }
@@ -60,11 +62,8 @@ class NonRepudiationConnector @Inject() (
   private def submit(timer: Timer.Context, jsonBody: JsObject)(implicit
     hc: HeaderCarrier
   ): Future[NonRepudiationSubmissionAccepted] =
-    httpClient.POST[JsObject, HttpResponse](url = config.nonRepudiationSubmissionUrl,
-                                            body = jsonBody,
-                                            headers =
-                                              Seq("X-API-Key" -> config.nonRepudiationApiKey)
-    ).andThen { case _ => timer.stop() }
+    httpClient.post(new URI(config.nonRepudiationSubmissionUrl).toURL()).withBody(jsonBody).setHeader("X-API-Key" -> config.nonRepudiationApiKey).execute[HttpResponse]
+    .andThen { case _ => timer.stop() }
       .map {
         response =>
           response.status match {
