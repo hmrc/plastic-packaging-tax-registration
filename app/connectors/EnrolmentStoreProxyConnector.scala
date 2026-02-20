@@ -29,10 +29,10 @@ import uk.gov.hmrc.http.{
 }
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
-import java.net.URL
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import java.net.URI
 
 @Singleton
 class EnrolmentStoreProxyConnector @Inject() (
@@ -48,7 +48,7 @@ class EnrolmentStoreProxyConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[Option[GroupsWithEnrolmentsResponse]] = {
     val timer = metrics.defaultRegistry.timer(GroupsWithEnrolmentsTimerTag).time()
 
-    httpClient.get(URL(config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference)))).execute[HttpResponse]
+    httpClient.get(new URI(config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference))).toURL()).execute[HttpResponse]
     .map { response =>
       response.status match {
         case OK                     => Some(response.json.as[GroupsWithEnrolmentsResponse])

@@ -34,7 +34,7 @@ import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import util.Retry
 
 import javax.inject.{Inject, Singleton}
-import java.net.URL
+import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
@@ -62,7 +62,7 @@ class NonRepudiationConnector @Inject() (
   private def submit(timer: Timer.Context, jsonBody: JsObject)(implicit
     hc: HeaderCarrier
   ): Future[NonRepudiationSubmissionAccepted] =
-    httpClient.post(URL(config.nonRepudiationSubmissionUrl)).withBody(jsonBody).setHeader("X-API-Key" -> config.nonRepudiationApiKey).execute[HttpResponse]
+    httpClient.post(new URI(config.nonRepudiationSubmissionUrl).toURL()).withBody(jsonBody).setHeader("X-API-Key" -> config.nonRepudiationApiKey).execute[HttpResponse]
     .andThen { case _ => timer.stop() }
       .map {
         response =>

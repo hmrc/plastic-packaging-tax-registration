@@ -34,7 +34,7 @@ import models.taxenrolments.GroupEnrolment
 import connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import controllers.routes
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
-import java.net.URL
+import java.net.URI
 import play.api.libs.ws.writeableOf_JsValue
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -65,7 +65,7 @@ class TaxEnrolmentsConnector @Inject() (
       )
 
 
-    httpClient.put(URL(config.taxEnrolmentsSubscriptionsSubscriberUrl(formBundleId))).withBody(enrolmentRequestBody).execute[TaxEnrolmentsResponse]
+    httpClient.put(new URI(config.taxEnrolmentsSubscriptionsSubscriberUrl(formBundleId)).toURL()).withBody(enrolmentRequestBody).execute[TaxEnrolmentsResponse]
     .andThen { case _ => timer.stop() }
   }
 
@@ -75,7 +75,7 @@ class TaxEnrolmentsConnector @Inject() (
   ): Future[Unit] = {
     val timer = metrics.defaultRegistry.timer(AssignEnrolmentToUserTimerTag).time()
 
-    httpClient.post(URL(config.taxEnrolmentsES11AssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference)))).execute[HttpResponse]
+    httpClient.post(new URI(config.taxEnrolmentsES11AssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference))).toURL()).execute[HttpResponse]
     .map { resp =>
       resp.status match {
         case status if Status.isSuccessful(status) =>
@@ -105,7 +105,7 @@ class TaxEnrolmentsConnector @Inject() (
       GroupEnrolment(userId = userId, verifiers = KnownFacts.from(userEnrolmentRequest))
 
 
-    httpClient.post(URL(config.taxEnrolmentsES8AssignUserToGroupUrl(groupId, EnrolmentKey.create(userEnrolmentRequest.pptReference)))).withBody(Json.toJson(body)).execute[HttpResponse]
+    httpClient.post(new URI(config.taxEnrolmentsES8AssignUserToGroupUrl(groupId, EnrolmentKey.create(userEnrolmentRequest.pptReference))).toURL()).withBody(Json.toJson(body)).execute[HttpResponse]
     .map { resp =>
       resp.status match {
         case status if Status.isSuccessful(status) =>
