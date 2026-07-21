@@ -214,11 +214,11 @@ class SubscriptionsConnector @Inject() (
             Try(subscriptionUpdateResponse.json.as[SubscriptionSuccessfulResponse]) match {
               case Success(successfulCreateResponse) => successfulCreateResponse
               case _ =>
-                throw UpstreamErrorResponse.apply(
+                val errorMsg =
                   s"PPT subscription update with correlationId [${correlationIdHeader._2}] " +
-                    s"and pptReference [$pptReference] failed - successful response in unexpected format",
-                  Status.INTERNAL_SERVER_ERROR
-                )
+                    s"and pptReference [$pptReference] failed - successful response in unexpected format"
+                logger.warn(errorMsg)
+                throw UpstreamErrorResponse.apply(errorMsg, Status.INTERNAL_SERVER_ERROR)
             }
           else
             Try(subscriptionUpdateResponse.json.as[EISSubscriptionFailureResponse]) match {
@@ -227,11 +227,11 @@ class SubscriptionsConnector @Inject() (
                                                           subscriptionUpdateResponse.status
                 )
               case _ =>
-                throw UpstreamErrorResponse.apply(
+                val errorMsg =
                   s"PPT subscription update with correlationId [${correlationIdHeader._2}] " +
-                    s"and pptReference [$pptReference] failed - failed response in unexpected format",
-                  Status.INTERNAL_SERVER_ERROR
-                )
+                    s"and pptReference [$pptReference] failed - failed response in unexpected format"
+                logger.warn(errorMsg)
+                throw UpstreamErrorResponse.apply(errorMsg, Status.INTERNAL_SERVER_ERROR)
             }
       }
   }
