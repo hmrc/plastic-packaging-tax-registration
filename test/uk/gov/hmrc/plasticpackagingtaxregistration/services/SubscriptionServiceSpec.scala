@@ -21,9 +21,8 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.{ZoneId, ZonedDateTime}
 import java.util.Base64
-
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.matchers.must
 import org.scalatest.wordspec.AnyWordSpec
@@ -34,6 +33,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import base.data.NrsTestData
 import builders.RegistrationBuilder
+import config.AppConfig
 import models.eis.EISError
 import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
@@ -43,12 +43,17 @@ import models.eis.subscription.create.{
   SubscriptionSuccessfulResponse
 }
 import connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment
-import connectors.{NonRepudiationConnector, SubscriptionsConnector, TaxEnrolmentsConnector}
+import connectors.{
+  EisSubscriptionsConnector,
+  HipSubscriptionConnector,
+  NonRepudiationConnector,
+  TaxEnrolmentsConnector
+}
 import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
 import repositories.RegistrationRepository
 import services.nrs.NonRepudiationService
 
-import scala.concurrent.ExecutionContext.{global => globalExecutionContext}
+import scala.concurrent.ExecutionContext.global as globalExecutionContext
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
 
@@ -61,14 +66,16 @@ class SubscriptionServiceSpec
       val result = SUT.submit(registration, "SAFE_ID", Map.empty)(using hc)
 
       Await.ready(result, 1 second)
-      verify(mockSubscriptionConnector, times(1)).submitSubscription(eqTo("SAFE_ID"), any())(using any())
+      verify(mockEisSubscriptionConnector, times(1)).submitSubscription(eqTo("SAFE_ID"), any())(
+        using any()
+      )
     }
   }
 
   "the subscription succeeds" should {
     "enrol the user" in new Fixture {
       when(
-        mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
+        mockEisSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
           using any[HeaderCarrier]
         )
       ).thenReturn(
@@ -93,7 +100,7 @@ class SubscriptionServiceSpec
 
     "notify NRS" in new Fixture {
       when(
-        mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
+        mockEisSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
           using any[HeaderCarrier]
         )
       ).thenReturn(
@@ -117,7 +124,7 @@ class SubscriptionServiceSpec
                                                                          metaDataCaptor.capture()
       )(using any())
 
-      //payload is base64 encoded UTF-8 Json
+      // payload is base64 encoded UTF-8 Json
       val expectedJson = Json.toJson(registration)
       val expectedcheckSum = MessageDigest.getInstance("SHA-256")
         .digest(expectedJson.toString().getBytes(StandardCharsets.UTF_8))
@@ -146,7 +153,7 @@ class SubscriptionServiceSpec
 
     "delete the registration record" in new Fixture {
       when(
-        mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
+        mockEisSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
           using any[HeaderCarrier]
         )
       ).thenReturn(
@@ -168,7 +175,7 @@ class SubscriptionServiceSpec
 
     "return the success information" in new Fixture {
       when(
-        mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
+        mockEisSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
           using any[HeaderCarrier]
         )
       ).thenReturn(
@@ -212,7 +219,7 @@ class SubscriptionServiceSpec
     "return the failure unchanged from the connector" in new Fixture {
 
       when(
-        mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
+        mockEisSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
           using any[HeaderCarrier]
         )
       ).thenReturn(
@@ -241,11 +248,13 @@ class SubscriptionServiceSpec
   }
 
   trait Fixture {
-    val mockSubscriptionConnector   = mock[SubscriptionsConnector]
-    val mockTaxEnrolmentsConnector  = mock[TaxEnrolmentsConnector]
-    val mockRegistrationRepository  = mock[RegistrationRepository]
-    val mockNonRepudiationConnector = mock[NonRepudiationConnector]
-    val mockAuthConnector           = mock[AuthConnector]
+    val mockEisSubscriptionConnector = mock[EisSubscriptionsConnector]
+    val mockHipSubscriptionConnector = mock[HipSubscriptionConnector]
+    val mockTaxEnrolmentsConnector   = mock[TaxEnrolmentsConnector]
+    val mockRegistrationRepository   = mock[RegistrationRepository]
+    val mockNonRepudiationConnector  = mock[NonRepudiationConnector]
+    val mockAuthConnector            = mock[AuthConnector]
+    val mockAppConfig                = mock[AppConfig]
 
     val nonRepudiationService =
       new NonRepudiationService(mockNonRepudiationConnector, mockAuthConnector)(
@@ -265,7 +274,7 @@ class SubscriptionServiceSpec
     ).thenReturn(Future.successful(testAuthRetrievals))
 
     when(
-      mockSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
+      mockEisSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
         using any[HeaderCarrier]
       )
     ).thenReturn(
@@ -284,10 +293,13 @@ class SubscriptionServiceSpec
 
     when(mockRegistrationRepository.delete(any())).thenReturn(Future.successful(()))
 
-    val SUT = new SubscriptionService(mockSubscriptionConnector,
-                                      mockTaxEnrolmentsConnector,
-                                      mockRegistrationRepository,
-                                      nonRepudiationService
+    val SUT = new SubscriptionService(
+      mockEisSubscriptionConnector,
+      mockHipSubscriptionConnector,
+      mockTaxEnrolmentsConnector,
+      mockRegistrationRepository,
+      nonRepudiationService,
+      mockAppConfig
     )(using globalExecutionContext)
 
   }

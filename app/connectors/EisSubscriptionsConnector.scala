@@ -43,12 +43,12 @@ import scala.util.{Success, Try}
 import java.net.URI
 
 @Singleton
-class SubscriptionsConnector @Inject() (
+class EisSubscriptionsConnector @Inject()(
   httpClient: HttpClientV2,
   override val appConfig: AppConfig,
   metrics: Metrics
 )(implicit ec: ExecutionContext)
-    extends EISConnector {
+    extends EISConnector with SubscriptionsConnector {
 
   private val logger = Logger(this.getClass)
 

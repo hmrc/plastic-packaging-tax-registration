@@ -46,6 +46,7 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
         |auditing.enabled=true
         |eis.environment=test
         |nrs.retries=["1s", "2s", "4s"]
+        |features.hip.subscription=false
     """.stripMargin)
 
   private val validServicesConfiguration = Configuration(validAppConfig)

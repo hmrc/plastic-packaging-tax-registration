@@ -33,7 +33,7 @@ import base.data.{NrsTestData, RegistrationTestData, SubscriptionTestData}
 import connectors.{
   EnrolmentStoreProxyConnector,
   NonRepudiationConnector,
-  SubscriptionsConnector,
+  EisSubscriptionsConnector,
   TaxEnrolmentsConnector
 }
 import models.PostCodeWithoutSpaces
@@ -59,7 +59,7 @@ trait ControllerSpec
 
   override lazy val app: Application = GuiceApplicationBuilder()
     .overrides(bind[AuthConnector].to(mockAuthConnector),
-               bind[SubscriptionsConnector].to(mockSubscriptionsConnector),
+               bind[EisSubscriptionsConnector].to(mockEisSubscriptionsConnector),
                bind[NonRepudiationConnector].to(mockNonRepudiationConnector),
                bind[RegistrationRepository].to(mockRepository),
                bind[NonRepudiationService].to(mockNonRepudiationService),

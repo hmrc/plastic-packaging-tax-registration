@@ -38,6 +38,8 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val eisEnvironment = config.get[String]("eis.environment")
 
+  val hipSubscriptions: Boolean = config.get[Boolean]("features.hip.subscription")
+
   def subscriptionStatusUrl(safeNumber: String): String =
     s"$eisHost/cross-regime/subscription/PPT/SAFE/${safeNumber}/status"
 

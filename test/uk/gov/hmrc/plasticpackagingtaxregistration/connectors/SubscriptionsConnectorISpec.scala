@@ -45,8 +45,8 @@ class SubscriptionsConnectorISpec
     extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData
     with EitherValues {
 
-  private lazy val connector: SubscriptionsConnector =
-    app.injector.instanceOf[SubscriptionsConnector]
+  private lazy val connector: EisSubscriptionsConnector =
+    app.injector.instanceOf[EisSubscriptionsConnector]
 
   private val pptSubscriptionSubmissionTimer = "ppt.subscription.submission.timer"
   private val pptSubscriptionStatusTimer     = "ppt.subscription.status.timer"

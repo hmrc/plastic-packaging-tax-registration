@@ -63,7 +63,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
       val subscriptionCaptor: ArgumentCaptor[Subscription] =
         ArgumentCaptor.forClass(classOf[Subscription])
       when(
-        mockSubscriptionsConnector.updateSubscription(any(), subscriptionCaptor.capture())(using any())
+        mockEisSubscriptionsConnector.updateSubscription(any(), subscriptionCaptor.capture())(using any())
       ).thenReturn(Future.successful(subscriptionSuccessfulResponse))
 
       when(
