@@ -16,14 +16,23 @@
 
 package connectors
 
+import config.AppConfig
 import models.eis.subscription.Subscription
 import models.eis.subscription.create.SubscriptionResponse
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
-import scala.concurrent.Future
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
-class HipSubscriptionConnector() extends SubscriptionsConnector {
+class HipSubscriptionConnector @Inject() (
+  httpClient: HttpClientV2,
+  override val appConfig: AppConfig,
+  metrics: Metrics
+)(implicit ec: ExecutionContext)
+    extends SubscriptionsConnector with HipConnector {
 
   def getSubscriptionStatus(
     safeId: String
