@@ -17,6 +17,7 @@
 package connectors
 
 import config.AppConfig
+import play.api.Logging
 import models.eis.EISError
 import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode}
 import models.hip.HipPlatformErrors.*
@@ -42,8 +43,6 @@ trait HipConnector extends Logging {
       "X-Transmitting-System" -> "HIP",
       "Authorization"         -> s"Basic ${appConfig.hipAuthorizationToken}"
     )
-
-  lazy val correlationid = headers.toMap.getOrElse("correlationid", "NOT FOUND")
 
   private def mkErr(code: String, text: String, status: Int = 422) = {
     SubscriptionFailureResponseWithStatusCode(
