@@ -17,6 +17,7 @@
 package connectors
 
 import config.AppConfig
+import play.api.Logging
 import play.api.http.{HeaderNames, MimeTypes}
 
 import java.time.Instant
@@ -24,7 +25,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-trait HipConnector {
+trait HipConnector extends Logging {
 
   val appConfig: AppConfig
 
@@ -37,4 +38,6 @@ trait HipConnector {
       "Authorization"         -> s"Basic ${appConfig.hipAuthorizationToken}"
     )
 
+  lazy val correlationid = headers.toMap.getOrElse("correlationid", "NOT FOUND")
+  
 }

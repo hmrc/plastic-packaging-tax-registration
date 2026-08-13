@@ -45,7 +45,7 @@ import models.eis.subscription.create.{
 import connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment
 import connectors.{
   EisSubscriptionsConnector,
-  HipSubscriptionConnector,
+  HipSubscriptionsConnector,
   NonRepudiationConnector,
   TaxEnrolmentsConnector
 }
@@ -249,7 +249,7 @@ class SubscriptionServiceSpec
 
   trait Fixture {
     val mockEisSubscriptionConnector = mock[EisSubscriptionsConnector]
-    val mockHipSubscriptionConnector = mock[HipSubscriptionConnector]
+    val mockHipSubscriptionConnector = mock[HipSubscriptionsConnector]
     val mockTaxEnrolmentsConnector   = mock[TaxEnrolmentsConnector]
     val mockRegistrationRepository   = mock[RegistrationRepository]
     val mockNonRepudiationConnector  = mock[NonRepudiationConnector]

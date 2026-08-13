@@ -159,7 +159,7 @@ class EisSubscriptionsConnector @Inject()(
   )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
-    httpClient.get(new URI(appConfig.subscriptionDisplayUrl(pptReference)).toURL()).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
+    httpClient.get(new URI(appConfig.eisSubscriptionDisplayUrl(pptReference)).toURL()).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map { response =>
         if (Status.isSuccessful(response.status)) {

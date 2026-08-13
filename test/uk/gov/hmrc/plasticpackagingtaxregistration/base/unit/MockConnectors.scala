@@ -23,24 +23,11 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import uk.gov.hmrc.http.HeaderCarrier
 import models.eis.subscription.Subscription
-import models.eis.subscription.create.{
-  SubscriptionFailureResponseWithStatusCode,
-  SubscriptionResponse,
-  SubscriptionSuccessfulResponse
-}
+import models.eis.subscription.create.{SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import connectors.parsers.TaxEnrolmentsHttpParser
-import connectors.parsers.TaxEnrolmentsHttpParser.{
-  FailedTaxEnrolment,
-  SuccessfulTaxEnrolment,
-  TaxEnrolmentsResponse
-}
-import connectors.{
-  EisSubscriptionsConnector,
-  EnrolmentStoreProxyConnector,
-  NonRepudiationConnector,
-  TaxEnrolmentsConnector
-}
+import connectors.parsers.TaxEnrolmentsHttpParser.{FailedTaxEnrolment, SuccessfulTaxEnrolment, TaxEnrolmentsResponse}
+import connectors.{EisSubscriptionsConnector, EnrolmentStoreProxyConnector, HipSubscriptionsConnector, NonRepudiationConnector, TaxEnrolmentsConnector}
 import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
 import org.scalatestplus.mockito.MockitoSugar.mock
 
@@ -51,6 +38,8 @@ trait MockConnectors extends BeforeAndAfterEach {
 
   protected val mockEisSubscriptionsConnector: EisSubscriptionsConnector =
     mock[EisSubscriptionsConnector]
+  protected val mockHipSubscriptionsConnector: HipSubscriptionsConnector =
+    mock[HipSubscriptionsConnector]
 
   protected val mockNonRepudiationConnector: NonRepudiationConnector = mock[NonRepudiationConnector]
   protected val mockTaxEnrolmentsConnector: TaxEnrolmentsConnector   = mock[TaxEnrolmentsConnector]
@@ -72,6 +61,9 @@ trait MockConnectors extends BeforeAndAfterEach {
 
   protected def mockGetSubscriptionFailure(ex: Exception) =
     when(mockEisSubscriptionsConnector.getSubscription(any())(using any())).thenThrow(ex)
+
+  protected def mockHipGetSubscriptionFailure(ex: Exception) =
+    when(mockHipSubscriptionsConnector.getSubscription(any())(using any())).thenThrow(ex)
 
   protected def mockGetSubscriptionSubmitFailure(
     ex: Exception

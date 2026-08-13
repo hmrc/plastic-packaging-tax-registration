@@ -284,7 +284,8 @@ class SubscriptionControllerSpec
 
       status(result) must be(OK)
       contentAsJson(result) mustBe toJson(Registration(ukLimitedCompanySubscription))
-      verify(mockEisSubscriptionsConnector).getSubscription(ArgumentMatchers.eq(pptReference))(using any())
+      verify(mockEisSubscriptionsConnector).getSubscription(ArgumentMatchers.eq(pptReference))(using
+      any())
     }
 
     "return 401" when {
@@ -338,7 +339,8 @@ class SubscriptionControllerSpec
 
         def theUpdatedSubscription = {
           val captor: ArgumentCaptor[Subscription] = ArgumentCaptor.forClass(classOf[Subscription])
-          verify(mockEisSubscriptionsConnector).updateSubscription(any(), captor.capture())(using any())
+          verify(mockEisSubscriptionsConnector).updateSubscription(any(), captor.capture())(using
+          any())
           captor.getValue
         }
 

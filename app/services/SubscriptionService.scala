@@ -32,7 +32,7 @@ import models.eis.subscription.create.{
 import connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
 import connectors.{
   EisSubscriptionsConnector,
-  HipSubscriptionConnector,
+  HipSubscriptionsConnector,
   SubscriptionsConnector,
   TaxEnrolmentsConnector
 }
@@ -50,7 +50,7 @@ import scala.util.{Failure, Success, Try}
 
 class SubscriptionService @Inject() (
   eisSubscriptionsConnector: EisSubscriptionsConnector,
-  hipSubscriptionConnector: HipSubscriptionConnector,
+  hipSubscriptionConnector: HipSubscriptionsConnector,
   enrolmentConnector: TaxEnrolmentsConnector,
   repository: RegistrationRepository,
   nonRepudiationService: NonRepudiationService,
@@ -75,8 +75,7 @@ class SubscriptionService @Inject() (
 
   def updateSubscription(pptReference: String, subscription1: Subscription)(implicit
     hc: HeaderCarrier
-  ): Future[SubscriptionResponse] =
-    connector.updateSubscription(pptReference, subscription1)
+  ): Future[SubscriptionResponse] = connector.updateSubscription(pptReference, subscription1)
 
   def submit(pptRegistration: Registration, safeId: String, userHeaders: Map[String, String])(
     implicit hc: HeaderCarrier
