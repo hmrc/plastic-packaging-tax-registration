@@ -39,5 +39,5 @@ trait HipConnector extends Logging {
     )
 
   lazy val correlationid = headers.toMap.getOrElse("correlationid", "NOT FOUND")
-  
+
 }

@@ -200,7 +200,7 @@ class EisSubscriptionsConnector @Inject()(
 
     //the update-subscription API does not accept processingDate, which is returned on display API.
     val subscription = subscription1.copy(processingDate = None)
-    
+
     httpClient.put(new URI(appConfig.subscriptionUpdateUrl(pptReference)).toURL()).withBody(Json.toJson(subscription)).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map {
