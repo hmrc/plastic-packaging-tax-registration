@@ -21,6 +21,7 @@ import models.eis.subscription.Subscription
 import models.eis.subscription.create.SubscriptionResponse
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import play.api.http.Status
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
@@ -28,7 +29,7 @@ import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class HipSubscriptionsConnector @Inject()(
+class HipSubscriptionsConnector @Inject() (
   httpClient: HttpClientV2,
   override val appConfig: AppConfig,
   metrics: Metrics
@@ -46,8 +47,9 @@ class HipSubscriptionsConnector @Inject()(
   def getSubscription(
     pptReferenceNumber: String
   )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
-    val timer               = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
-    val url = url"${appConfig.hipPPTBaseUrl}/RESTAdapter/plastic-packaging-tax/subscriptions/PPT/${pptReferenceNumber}"
+    val timer = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
+    val url =
+      url"${appConfig.hipPPTBaseUrl}/RESTAdapter/plastic-packaging-tax/subscriptions/PPT/${pptReferenceNumber}"
     httpClient
       .get(url)
       .setHeader(headers*)
