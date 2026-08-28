@@ -49,7 +49,7 @@ class HipSubscriptionsConnector @Inject() (
   )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
     val timer = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
     val url =
-      url"${appConfig.hipPPTBaseUrl}/RESTAdapter/plastic-packaging-tax/subscriptions/PPT/${pptReferenceNumber}"
+      url"${appConfig.hipPPTBaseUrl}/etmp/RESTAdapter/plastic-packaging-tax/subscriptions/PPT/${pptReferenceNumber}"
     httpClient
       .get(url)
       .setHeader(headers*)
@@ -63,6 +63,7 @@ class HipSubscriptionsConnector @Inject() (
             )
             Right((response.json \ "success").as[Subscription])
           case _ =>
+            logger.error(s"PPT view subscription failed response: ${response.body}")
             Left(response.status) // TODO work out if this needs refining
         }
       }

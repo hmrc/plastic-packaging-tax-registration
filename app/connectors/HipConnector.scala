@@ -31,6 +31,7 @@ trait HipConnector extends Logging {
 
   val headers: Seq[(String, String)] =
     Seq(
+      HeaderNames.ACCEPT      -> MimeTypes.JSON,
       "correlationid"         -> UUID.randomUUID().toString,
       "X-Originating-System"  -> "PPT",
       "X-Receipt-Date"        -> DateTimeFormatter.ISO_INSTANT.format(Instant.now().truncatedTo(ChronoUnit.SECONDS)),
