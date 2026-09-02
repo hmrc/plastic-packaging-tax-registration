@@ -22,8 +22,7 @@ final case class PostCodeWithoutSpaces private (postcode: String)
 
 object PostCodeWithoutSpaces {
 
-  def apply(postcode: String) =
-    new PostCodeWithoutSpaces(postcode.replaceAll(" ", ""))
+  def apply(postcode: String) = new PostCodeWithoutSpaces(postcode.replaceAll(" ", ""))
 
   implicit val jsonWrites: Writes[PostCodeWithoutSpaces] = new Writes[PostCodeWithoutSpaces] {
     def writes(self: PostCodeWithoutSpaces): JsValue = JsString(self.postcode)

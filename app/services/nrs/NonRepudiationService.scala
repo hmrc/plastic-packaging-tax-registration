@@ -63,9 +63,8 @@ case class NonRepudiationService @Inject() (
                                                       Map("pptReference" -> pptReference)
       )
       encodedPayloadString = encodePayload(payloadString)
-      nonRepudiationSubmissionResponse <- retrieveNonRepudiationResponse(nonRepudiationMetadata,
-                                                                         encodedPayloadString
-      )
+      nonRepudiationSubmissionResponse <-
+        retrieveNonRepudiationResponse(nonRepudiationMetadata, encodedPayloadString)
     } yield nonRepudiationSubmissionResponse
 
   private def encodePayload(payloadString: String): String =
@@ -90,7 +89,7 @@ case class NonRepudiationService @Inject() (
   private def retrieveUserAuthToken(hc: HeaderCarrier): String =
     hc.authorization match {
       case Some(Authorization(authToken)) => authToken
-      case _                              => throw new InternalServerException("No auth token available for NRS")
+      case _ => throw new InternalServerException("No auth token available for NRS")
     }
 
   private def retrievePayloadChecksum(payloadString: String): String =

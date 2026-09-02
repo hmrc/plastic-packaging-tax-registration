@@ -29,11 +29,12 @@ object OrganisationDetails {
   implicit val format: OFormat[OrganisationDetails] = Json.format[OrganisationDetails]
 
   def apply(details: EISOrganisationDetails): OrganisationDetails =
-    new OrganisationDetails(organisationType = details.organisationType.getOrElse(
-                              throw new IllegalStateException("Missing organisationType")
-                            ),
-                            organisationName = details.organisationName,
-                            businessPartnerId = None
+    new OrganisationDetails(
+      organisationType = details.organisationType.getOrElse(
+        throw new IllegalStateException("Missing organisationType")
+      ),
+      organisationName = details.organisationName,
+      businessPartnerId = None
     )
 
 }

@@ -46,7 +46,6 @@ object SubscriptionStatusResponse {
     SubscriptionStatusResponse(status, pptRef)
   }
 
-  def noneFound: SubscriptionStatusResponse =
-    SubscriptionStatusResponse(NOT_SUBSCRIBED, None)
+  def noneFound: SubscriptionStatusResponse = SubscriptionStatusResponse(NOT_SUBSCRIBED, None)
 
 }

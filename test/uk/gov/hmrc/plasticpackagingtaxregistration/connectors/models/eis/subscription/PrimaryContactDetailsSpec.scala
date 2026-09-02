@@ -114,13 +114,12 @@ class PrimaryContactDetailsSpec
           val partnershipRegistrationWithMissingPartnerNames =
             aRegistration(withLiabilityDetails(pptLiabilityDetails),
                           withOrganisationDetails(pptGeneralPartnershipDetails),
-                          withPartnerModifications(
-                            partner =>
-                              partner.copy(contactDetails =
-                                partner.contactDetails.map(
-                                  _.copy(firstName = None, lastName = None)
-                                )
+                          withPartnerModifications(partner =>
+                            partner.copy(contactDetails =
+                              partner.contactDetails.map(
+                                _.copy(firstName = None, lastName = None)
                               )
+                            )
                           )
             )
 

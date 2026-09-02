@@ -26,9 +26,10 @@ case class HipSubscriptionFailureResponseWithStatusCode(
 
   override def failureJson: JsValue = Json.toJson(failureResponse)
 
-  override def failureReasons: Seq[String] = failureResponse match {
-    case HipBusinessValidationFailure(error) => Seq(s"[${error.errorId}] ${error.text}")
-    case HipSystemFailure(error)             => Seq(s"[${error.code}] ${error.message}")
-  }
+  override def failureReasons: Seq[String] =
+    failureResponse match {
+      case HipBusinessValidationFailure(error) => Seq(s"[${error.errorId}] ${error.text}")
+      case HipSystemFailure(error)             => Seq(s"[${error.code}] ${error.message}")
+    }
 
 }

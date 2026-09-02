@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 import models.OrgType.OrgType
-import models.group.{GroupMember}
+import models.group.GroupMember
 
 case class GroupDetail(
   membersUnderGroupControl: Option[Boolean] = None,

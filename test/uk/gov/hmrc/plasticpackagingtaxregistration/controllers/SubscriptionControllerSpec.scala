@@ -24,8 +24,8 @@ import models.eis.EISError
 import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
-  EisSubscriptionFailureResponseWithStatusCode
+  EisSubscriptionFailureResponseWithStatusCode,
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
 }
 import models.eis.subscription.group.GroupPartnershipDetails
 import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse

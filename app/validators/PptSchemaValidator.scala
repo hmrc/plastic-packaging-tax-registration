@@ -27,43 +27,44 @@ import scala.jdk.CollectionConverters._
 
 class PptSchemaValidator(schemaFile: String) {
 
-  private val logger = LoggerFactory.getLogger(getClass.getCanonicalName)
+  private val logger       = LoggerFactory.getLogger(getClass.getCanonicalName)
   private val objectMapper = new ObjectMapper()
 
   private lazy val schema = {
     val factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7)
-    val stream = getClass.getResourceAsStream(schemaFile)
+    val stream  = getClass.getResourceAsStream(schemaFile)
     Option(stream)
       .map(factory.getSchema)
       .getOrElse(throw new IllegalStateException(s"Could not find resource '$schemaFile'"))
   }
 
-  def validate[T](data: T)(implicit writes: Writes[T]): Either[NonEmptyList[JsonSchemaError], Unit] = {
-  val dataJson = Json.toJson(data)
-  val jacksonNode = objectMapper.readTree(dataJson.toString())
-  val errors = schema.validate(jacksonNode).asScala.toList
+  def validate[T](data: T)(implicit
+    writes: Writes[T]
+  ): Either[NonEmptyList[JsonSchemaError], Unit] = {
+    val dataJson    = Json.toJson(data)
+    val jacksonNode = objectMapper.readTree(dataJson.toString())
+    val errors      = schema.validate(jacksonNode).asScala.toList
 
-  if (errors.isEmpty) {
-    Right(())
-  } else {
-    val schemaErrors = errors.map { (vm: ValidationMessage) =>
-      JsonSchemaError(
-        Some(schemaFile),
-        keyword = vm.getType,
-        instancePath = vm.getMessage
-      )
-    }
-    NonEmptyList.fromList(schemaErrors) match {
-      case Some(nonEmptyErrors) =>
-        logger.warn(Json.prettyPrint(Json.toJson(nonEmptyErrors.toList)))
-        Left(nonEmptyErrors)
-      case None => Right(())
+    if (errors.isEmpty) {
+      Right(())
+    } else {
+      val schemaErrors = errors.map { (vm: ValidationMessage) =>
+        JsonSchemaError(
+          Some(schemaFile),
+          keyword = vm.getType,
+          instancePath = vm.getMessage
+        )
+      }
+      NonEmptyList.fromList(schemaErrors) match {
+        case Some(nonEmptyErrors) =>
+          logger.warn(Json.prettyPrint(Json.toJson(nonEmptyErrors.toList)))
+          Left(nonEmptyErrors)
+        case None => Right(())
+      }
     }
   }
-}
-}
 
-
+}
 
 object PptSchemaValidator {
 

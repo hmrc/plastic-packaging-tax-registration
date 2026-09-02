@@ -360,8 +360,8 @@ class SubscriptionSpec
         groupPartnership.individualDetails.lastName mustBe partner.contactDetails.flatMap(
           _.lastName
         ).get
-        groupPartnership.addressDetails mustBe partner.contactDetails.map(
-          cd => AddressDetails(cd.address.get)
+        groupPartnership.addressDetails mustBe partner.contactDetails.map(cd =>
+          AddressDetails(cd.address.get)
         ).get
         groupPartnership.contactDetails.email mustBe partner.contactDetails.flatMap(
           _.emailAddress

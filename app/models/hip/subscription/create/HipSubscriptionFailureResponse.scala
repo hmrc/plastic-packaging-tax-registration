@@ -64,8 +64,9 @@ object HipSubscriptionFailureResponse {
     businessValidationReads.orElse(systemReads)
 
   implicit val writes: Writes[HipSubscriptionFailureResponse] = Writes {
-    case failure: HipBusinessValidationFailure => HipBusinessValidationFailure.format.writes(failure)
-    case failure: HipSystemFailure             => HipSystemFailure.format.writes(failure)
+    case failure: HipBusinessValidationFailure =>
+      HipBusinessValidationFailure.format.writes(failure)
+    case failure: HipSystemFailure => HipSystemFailure.format.writes(failure)
   }
 
 }

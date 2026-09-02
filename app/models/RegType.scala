@@ -26,5 +26,7 @@ object RegType extends Enumeration {
 
   def withNameOpt(name: String): Option[Value] = values.find(_.toString == name)
 
-  implicit val format: Format[RegType] = Format(Reads.enumNameReads(RegType), Writes.enumNameWrites[RegType.type])
+  implicit val format: Format[RegType] =
+    Format(Reads.enumNameReads(RegType), Writes.enumNameWrites[RegType.type])
+
 }

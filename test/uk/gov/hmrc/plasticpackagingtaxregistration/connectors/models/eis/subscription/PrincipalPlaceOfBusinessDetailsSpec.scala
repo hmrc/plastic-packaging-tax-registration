@@ -123,13 +123,12 @@ class PrincipalPlaceOfBusinessDetailsSpec
       "email address is absent" in {
         val registration = aRegistration(withLiabilityDetails(pptLiabilityDetails),
                                          withOrganisationDetails(pptGeneralPartnershipDetails),
-                                         withPartnerModifications(
-                                           partner =>
-                                             partner.copy(contactDetails =
-                                               partner.contactDetails.map(
-                                                 _.copy(emailAddress = None)
-                                               )
+                                         withPartnerModifications(partner =>
+                                           partner.copy(contactDetails =
+                                             partner.contactDetails.map(
+                                               _.copy(emailAddress = None)
                                              )
+                                           )
                                          )
         )
         intercept[IllegalStateException] {
@@ -139,13 +138,12 @@ class PrincipalPlaceOfBusinessDetailsSpec
       "phone number is absent" in {
         val registration = aRegistration(withLiabilityDetails(pptLiabilityDetails),
                                          withOrganisationDetails(pptGeneralPartnershipDetails),
-                                         withPartnerModifications(
-                                           partner =>
-                                             partner.copy(contactDetails =
-                                               partner.contactDetails.map(
-                                                 _.copy(phoneNumber = None)
-                                               )
+                                         withPartnerModifications(partner =>
+                                           partner.copy(contactDetails =
+                                             partner.contactDetails.map(
+                                               _.copy(phoneNumber = None)
                                              )
+                                           )
                                          )
         )
         intercept[IllegalStateException] {

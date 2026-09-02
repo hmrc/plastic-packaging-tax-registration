@@ -21,12 +21,7 @@ import connectors.EnrolmentStoreProxyConnector.GroupsWithEnrolmentsTimerTag
 import models.enrolment.EnrolmentKey
 import models.enrolmentstoreproxy.GroupsWithEnrolmentsResponse
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT, OK}
-import uk.gov.hmrc.http.{
-  HeaderCarrier,
-  HttpReadsInstances,
-  HttpResponse,
-  UpstreamErrorResponse
-}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsInstances, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
@@ -42,20 +37,22 @@ class EnrolmentStoreProxyConnector @Inject() (
 )(implicit ec: ExecutionContext)
     extends HttpReadsInstances {
 
-  /** ES1 **/
+  /** ES1 * */
   def queryGroupsWithEnrolment(
     pptReference: String
   )(implicit hc: HeaderCarrier): Future[Option[GroupsWithEnrolmentsResponse]] = {
     val timer = metrics.defaultRegistry.timer(GroupsWithEnrolmentsTimerTag).time()
 
-    httpClient.get(new URI(config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference))).toURL()).execute[HttpResponse]
-    .map { response =>
-      response.status match {
-        case OK                     => Some(response.json.as[GroupsWithEnrolmentsResponse])
-        case NO_CONTENT | NOT_FOUND => None
-        case _                      => throw UpstreamErrorResponse(response.body, response.status)
-      }
-    }.andThen { case _ => timer.stop() }
+    httpClient.get(new URI(
+      config.enrolmentStoreProxyES1QueryGroupsWithEnrolmentUrl(EnrolmentKey.create(pptReference))
+    ).toURL()).execute[HttpResponse]
+      .map { response =>
+        response.status match {
+          case OK                     => Some(response.json.as[GroupsWithEnrolmentsResponse])
+          case NO_CONTENT | NOT_FOUND => None
+          case _                      => throw UpstreamErrorResponse(response.body, response.status)
+        }
+      }.andThen { case _ => timer.stop() }
   }
 
 }

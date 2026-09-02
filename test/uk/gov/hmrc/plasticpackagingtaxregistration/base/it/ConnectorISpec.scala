@@ -58,11 +58,10 @@ class ConnectorISpec
         "microservice.services.enrolment-store-proxy.port" -> wirePort
     )
 
-  def getTimer(name: String): Timer = {
+  def getTimer(name: String): Timer =
     metrics.defaultRegistry
       .getTimers(MetricFilter.startsWith(name))
       .get(name)
-  }
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()

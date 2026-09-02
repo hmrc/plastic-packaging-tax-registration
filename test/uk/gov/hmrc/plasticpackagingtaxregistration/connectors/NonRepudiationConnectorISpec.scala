@@ -29,8 +29,8 @@ import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
 
 class NonRepudiationConnectorISpec
     extends ConnectorISpec with Injector with AuthTestSupport with NrsTestData with ScalaFutures {
-  lazy val config                                       = Map("microservice.services.nrs.api-key" -> testNonRepudiationApiKey)
-  lazy val connector: NonRepudiationConnector           = app.injector.instanceOf[NonRepudiationConnector]
+  lazy val config = Map("microservice.services.nrs.api-key" -> testNonRepudiationApiKey)
+  lazy val connector: NonRepudiationConnector = app.injector.instanceOf[NonRepudiationConnector]
   private implicit val testNonRepudiationApiKey: String = "test-key"
 
   private val pptNrsSubmissionTimer = "ppt.nrs.submission.timer"

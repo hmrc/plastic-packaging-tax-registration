@@ -18,7 +18,7 @@ package models.eis.subscription
 
 import play.api.libs.json.{Json, OFormat}
 import models.eis.subscription.CustomerType.{Individual, Organisation}
-import models.{OrgType, PartnershipBusinessDetails, OrganisationDetails => PPTOrganisationDetails}
+import models.{OrgType, OrganisationDetails => PPTOrganisationDetails, PartnershipBusinessDetails}
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneOffset, ZonedDateTime}
@@ -93,8 +93,7 @@ object LegalEntityDetails {
 
   private def getCustomerIdentification1(
     partnershipBusinessDetails: PartnershipBusinessDetails
-  ): String =
-    partnershipBusinessDetails.sautr
+  ): String = partnershipBusinessDetails.sautr
 
   private def getDateOfApplication: String =
     ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))

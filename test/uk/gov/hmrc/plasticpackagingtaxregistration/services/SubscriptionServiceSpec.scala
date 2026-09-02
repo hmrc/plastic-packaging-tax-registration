@@ -38,8 +38,8 @@ import models.eis.EISError
 import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
-  EisSubscriptionFailureResponseWithStatusCode
+  EisSubscriptionFailureResponseWithStatusCode,
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
 }
 import models.subscription.create.SubscriptionSuccessfulResponse
 import connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment

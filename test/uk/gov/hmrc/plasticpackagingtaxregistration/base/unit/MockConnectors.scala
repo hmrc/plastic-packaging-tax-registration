@@ -27,8 +27,18 @@ import models.eis.subscription.create.EisSubscriptionFailureResponseWithStatusCo
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import models.subscription.create.{SubscriptionResponse, SubscriptionSuccessfulResponse}
 import connectors.parsers.TaxEnrolmentsHttpParser
-import connectors.parsers.TaxEnrolmentsHttpParser.{FailedTaxEnrolment, SuccessfulTaxEnrolment, TaxEnrolmentsResponse}
-import connectors.{EisSubscriptionsConnector, EnrolmentStoreProxyConnector, HipSubscriptionsConnector, NonRepudiationConnector, TaxEnrolmentsConnector}
+import connectors.parsers.TaxEnrolmentsHttpParser.{
+  FailedTaxEnrolment,
+  SuccessfulTaxEnrolment,
+  TaxEnrolmentsResponse
+}
+import connectors.{
+  EisSubscriptionsConnector,
+  EnrolmentStoreProxyConnector,
+  HipSubscriptionsConnector,
+  NonRepudiationConnector,
+  TaxEnrolmentsConnector
+}
 import models.nrs.{NonRepudiationMetadata, NonRepudiationSubmissionAccepted}
 import org.scalatestplus.mockito.MockitoSugar.mock
 
@@ -39,6 +49,7 @@ trait MockConnectors extends BeforeAndAfterEach {
 
   protected val mockEisSubscriptionsConnector: EisSubscriptionsConnector =
     mock[EisSubscriptionsConnector]
+
   protected val mockHipSubscriptionsConnector: HipSubscriptionsConnector =
     mock[HipSubscriptionsConnector]
 

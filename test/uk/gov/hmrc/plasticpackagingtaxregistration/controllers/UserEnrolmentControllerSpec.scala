@@ -44,7 +44,9 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
       Future.successful(None)
     )
 
-    when(mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(using any())).thenReturn(
+    when(
+      mockTaxEnrolmentsConnector.assignEnrolmentToGroup(any(), any(), any())(using any())
+    ).thenReturn(
       Future.successful(())
     )
   }
@@ -73,11 +75,15 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
       "group has enrolment and user is in same group" in {
         withAuthorizedUser()
 
-        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())).thenReturn(
+        when(
+          mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())
+        ).thenReturn(
           Future.successful(Some(groupsWithEnrolmentResponse(userGroupIdentifier)))
         )
 
-        when(mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(using any())).thenReturn(
+        when(
+          mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(using any())
+        ).thenReturn(
           Future.successful(())
         )
 
@@ -100,7 +106,9 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
       "groups exist with enrolment and user not in group" in {
         withAuthorizedUser()
 
-        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())).thenReturn(
+        when(
+          mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())
+        ).thenReturn(
           Future.successful(Some(groupsWithEnrolmentResponse("some-group-id")))
         )
 
@@ -142,11 +150,15 @@ class UserEnrolmentControllerSpec extends ControllerSpec with UserEnrolmentData 
       "assign enrolment to user fails" in {
         withAuthorizedUser()
 
-        when(mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())).thenReturn(
+        when(
+          mockEnrolmentStoreProxyConnector.queryGroupsWithEnrolment(any())(using any())
+        ).thenReturn(
           Future.successful(Some(groupsWithEnrolmentResponse(userGroupIdentifier)))
         )
 
-        when(mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(using any())).thenReturn(
+        when(
+          mockTaxEnrolmentsConnector.assignEnrolmentToUser(any(), any())(using any())
+        ).thenReturn(
           Future.failed(UpstreamErrorResponse(AssignEnrolmentToUserError, 404))
         )
 

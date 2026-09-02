@@ -65,9 +65,10 @@ object RegistrationRequest {
         case Some(x) => x
       }).apply(RegistrationRequest.apply)
 
-  implicit val writes: Writes[RegistrationRequest] = Json.writes[RegistrationRequest].transform { (js: JsObject) =>
-    if (js("userHeaders") == JsObject.empty) js - "userHeaders"
-    else js
-  }
+  implicit val writes: Writes[RegistrationRequest] =
+    Json.writes[RegistrationRequest].transform { (js: JsObject) =>
+      if (js("userHeaders") == JsObject.empty) js - "userHeaders"
+      else js
+    }
 
 }

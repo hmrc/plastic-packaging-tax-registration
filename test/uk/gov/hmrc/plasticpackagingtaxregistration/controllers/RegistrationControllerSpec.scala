@@ -32,7 +32,7 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{CREATED, UNAUTHORIZED, contentAsJson, route, status, _}
+import play.api.test.Helpers.{contentAsJson, route, status, CREATED, UNAUTHORIZED, _}
 import uk.gov.hmrc.auth.core.{AuthConnector, InsufficientEnrolments}
 import base.AuthTestSupport
 import builders.{RegistrationBuilder, RegistrationRequestBuilder}

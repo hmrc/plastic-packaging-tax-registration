@@ -41,25 +41,21 @@ trait RegistrationRequestBuilder {
 
   def withPrimaryContactDetailsRequest(
     primaryContactDetails: PrimaryContactDetails
-  ): RegistrationModifier =
-    _.copy(primaryContactDetails = primaryContactDetails)
+  ): RegistrationModifier = _.copy(primaryContactDetails = primaryContactDetails)
 
   def withLiabilityDetailsRequest(liabilityDetails: LiabilityDetails): RegistrationModifier =
     _.copy(liabilityDetails = liabilityDetails)
 
-  def withMetaDataRequest(metaData: MetaData): RegistrationModifier =
-    _.copy(metaData = metaData)
+  def withMetaDataRequest(metaData: MetaData): RegistrationModifier = _.copy(metaData = metaData)
 
   def withOrganisationDetailsRequest(
     organisationDetails: OrganisationDetails
-  ): RegistrationModifier =
-    _.copy(organisationDetails = organisationDetails)
+  ): RegistrationModifier = _.copy(organisationDetails = organisationDetails)
 
   def withUserHeaders(headers: Map[String, String]): RegistrationModifier =
     _.copy(userHeaders = headers)
 
-  def withNoUserHeaders(): RegistrationModifier =
-    _.copy(userHeaders = Map.empty)
+  def withNoUserHeaders(): RegistrationModifier = _.copy(userHeaders = Map.empty)
 
   def withGroupDetailsRequest(groupDetail: GroupDetail): RegistrationModifier =
     _.copy(groupDetail = Some(groupDetail))

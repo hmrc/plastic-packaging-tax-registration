@@ -39,11 +39,13 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val eisEnvironment = config.get[String]("eis.environment")
 
-  val hipSubscriptions: Boolean = config.get[Boolean]("features.hip.subscription")
-  val hipPPTBaseUrl: String = servicesConfig.baseUrl("hip")
+  val hipSubscriptions: Boolean     = config.get[Boolean]("features.hip.subscription")
+  val hipPPTBaseUrl: String         = servicesConfig.baseUrl("hip")
   private val hipClientIdV1: String = config.get[String]("microservice.services.hip.clientId")
-  private val hipSecretV1: String = config.get[String]("microservice.services.hip.secret")
-  def hipAuthorizationToken: String = Base64.getEncoder.encodeToString(s"$hipClientIdV1:$hipSecretV1".getBytes("UTF-8"))
+  private val hipSecretV1: String   = config.get[String]("microservice.services.hip.secret")
+
+  def hipAuthorizationToken: String =
+    Base64.getEncoder.encodeToString(s"$hipClientIdV1:$hipSecretV1".getBytes("UTF-8"))
 
   def subscriptionStatusUrl(safeNumber: String): String =
     s"$eisHost/cross-regime/subscription/PPT/SAFE/${safeNumber}/status"

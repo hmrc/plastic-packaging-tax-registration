@@ -145,10 +145,10 @@ object RetryISpec {
       case _          => true
     }
 
-  //noinspection ScalaUnusedSymbol
+  // noinspection ScalaUnusedSymbol
   def neverRetry[A](value: Try[A]): Boolean = false
 
-  //noinspection ScalaUnusedSymbol
+  // noinspection ScalaUnusedSymbol
   def noParticularReason[A](value: Try[A]): String = "no particular reason"
 
   def someRetries =

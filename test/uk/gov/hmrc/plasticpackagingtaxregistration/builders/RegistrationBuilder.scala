@@ -67,8 +67,7 @@ trait RegistrationBuilder
 
   def withPrimaryContactDetails(
     primaryContactDetails: PrimaryContactDetails
-  ): RegistrationModifier =
-    _.copy(primaryContactDetails = primaryContactDetails)
+  ): RegistrationModifier = _.copy(primaryContactDetails = primaryContactDetails)
 
   def withLiabilityDetails(liabilityDetails: LiabilityDetails): RegistrationModifier =
     _.copy(liabilityDetails = liabilityDetails)
@@ -83,8 +82,8 @@ trait RegistrationBuilder
     registration =>
       registration.copy(organisationDetails =
         registration.organisationDetails.copy(partnershipDetails =
-          registration.organisationDetails.partnershipDetails.map(
-            pd => pd.copy(partners = pd.partners.map(partnerModifier(_)))
+          registration.organisationDetails.partnershipDetails.map(pd =>
+            pd.copy(partners = pd.partners.map(partnerModifier(_)))
           )
         )
       )

@@ -31,7 +31,10 @@ case class LiabilityExpectedWeight(
 )
 
 object LiabilityExpectedWeight {
-  implicit val liabilityWeightExpectedFormat: OFormat[LiabilityExpectedWeight] = Json.format[LiabilityExpectedWeight]
+
+  implicit val liabilityWeightExpectedFormat: OFormat[LiabilityExpectedWeight] =
+    Json.format[LiabilityExpectedWeight]
+
 }
 
 case class Date(date: LocalDate)
@@ -80,7 +83,7 @@ case class LiabilityDetails(
   def liabilityWeight: Long =
     expectedWeightNext12m.flatMap(x => x.totalKg) match {
       case Some(value) => value
-      case None        => throw new IllegalStateException("Missing expectedWeightNext12m.totalKg field")
+      case None => throw new IllegalStateException("Missing expectedWeightNext12m.totalKg field")
     }
 
 }

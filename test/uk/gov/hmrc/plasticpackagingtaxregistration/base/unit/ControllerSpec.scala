@@ -30,7 +30,13 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import base.AuthTestSupport
 import base.data.{NrsTestData, RegistrationTestData, SubscriptionTestData}
-import connectors.{EisSubscriptionsConnector, EnrolmentStoreProxyConnector, HipSubscriptionsConnector, NonRepudiationConnector, TaxEnrolmentsConnector}
+import connectors.{
+  EisSubscriptionsConnector,
+  EnrolmentStoreProxyConnector,
+  HipSubscriptionsConnector,
+  NonRepudiationConnector,
+  TaxEnrolmentsConnector
+}
 import models.PostCodeWithoutSpaces
 import repositories.RegistrationRepository
 import services.nrs.NonRepudiationService

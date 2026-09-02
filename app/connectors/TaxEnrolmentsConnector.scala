@@ -19,12 +19,7 @@ package connectors
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.http.{
-  HeaderCarrier,
-  HttpReadsHttpResponse,
-  HttpResponse,
-  UpstreamErrorResponse
-}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReadsHttpResponse, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.http.client.HttpClientV2
 import config.AppConfig
 import connectors.TaxEnrolmentsConnector._
@@ -49,7 +44,7 @@ class TaxEnrolmentsConnector @Inject() (
 
   private val logger = Logger(this.getClass)
 
-  /** Async ROSM "Subscriber" call **/
+  /** Async ROSM "Subscriber" call * */
   def submitEnrolment(pptReference: String, safeId: String, formBundleId: String)(implicit
     hc: HeaderCarrier
   ): Future[TaxEnrolmentsResponse] = {
@@ -64,36 +59,40 @@ class TaxEnrolmentsConnector @Inject() (
                "etmpId"      -> safeId
       )
 
-
-    httpClient.put(new URI(config.taxEnrolmentsSubscriptionsSubscriberUrl(formBundleId)).toURL()).withBody(enrolmentRequestBody).execute[TaxEnrolmentsResponse]
-    .andThen { case _ => timer.stop() }
+    httpClient.put(
+      new URI(config.taxEnrolmentsSubscriptionsSubscriberUrl(formBundleId)).toURL()
+    ).withBody(enrolmentRequestBody).execute[TaxEnrolmentsResponse]
+      .andThen { case _ => timer.stop() }
   }
 
-  /** ES11 **/
+  /** ES11 * */
   def assignEnrolmentToUser(userId: String, pptReference: String)(implicit
     hc: HeaderCarrier
   ): Future[Unit] = {
     val timer = metrics.defaultRegistry.timer(AssignEnrolmentToUserTimerTag).time()
 
-    httpClient.post(new URI(config.taxEnrolmentsES11AssignUserToEnrolmentUrl(userId, EnrolmentKey.create(pptReference))).toURL()).execute[HttpResponse]
-    .map { resp =>
-      resp.status match {
-        case status if Status.isSuccessful(status) =>
-          logger.info(
-            s"ES11 successful assign enrolment to user with userId [$userId] and pptReference [$pptReference]"
-          )
-          ()
-        // Do nothing - return without exception
-        case otherStatus =>
-          logger.warn(
-            s"ES11 failed assign enrolment to user with userId [$userId] and pptReference [$pptReference] with status $otherStatus"
-          )
-          throw UpstreamErrorResponse(AssignEnrolmentToUserError, otherStatus)
-      }
-    }.andThen { case _ => timer.stop() }
+    httpClient.post(new URI(config.taxEnrolmentsES11AssignUserToEnrolmentUrl(
+      userId,
+      EnrolmentKey.create(pptReference)
+    )).toURL()).execute[HttpResponse]
+      .map { resp =>
+        resp.status match {
+          case status if Status.isSuccessful(status) =>
+            logger.info(
+              s"ES11 successful assign enrolment to user with userId [$userId] and pptReference [$pptReference]"
+            )
+            ()
+          // Do nothing - return without exception
+          case otherStatus =>
+            logger.warn(
+              s"ES11 failed assign enrolment to user with userId [$userId] and pptReference [$pptReference] with status $otherStatus"
+            )
+            throw UpstreamErrorResponse(AssignEnrolmentToUserError, otherStatus)
+        }
+      }.andThen { case _ => timer.stop() }
   }
 
-  /** ES8 **/
+  /** ES8 * */
   def assignEnrolmentToGroup(
     userId: String,
     groupId: String,
@@ -104,23 +103,25 @@ class TaxEnrolmentsConnector @Inject() (
     val body =
       GroupEnrolment(userId = userId, verifiers = KnownFacts.from(userEnrolmentRequest))
 
-
-    httpClient.post(new URI(config.taxEnrolmentsES8AssignUserToGroupUrl(groupId, EnrolmentKey.create(userEnrolmentRequest.pptReference))).toURL()).withBody(Json.toJson(body)).execute[HttpResponse]
-    .map { resp =>
-      resp.status match {
-        case status if Status.isSuccessful(status) =>
-          logger.info(
-            s"ES8 successful assign enrolment to group with userId [$userId], groupId [$groupId] and pptReference [${userEnrolmentRequest.pptReference}]"
-          )
-          ()
-        // Do nothing - return without exception
-        case otherStatus =>
-          logger.warn(
-            s"ES8 failed assign enrolment to user with userId [$userId] and pptReference [${userEnrolmentRequest.pptReference}] with status [$otherStatus]"
-          )
-          throw UpstreamErrorResponse(AssignEnrolmentToGroupError, otherStatus)
-      }
-    }.andThen { case _ => timer.stop() }
+    httpClient.post(new URI(config.taxEnrolmentsES8AssignUserToGroupUrl(
+      groupId,
+      EnrolmentKey.create(userEnrolmentRequest.pptReference)
+    )).toURL()).withBody(Json.toJson(body)).execute[HttpResponse]
+      .map { resp =>
+        resp.status match {
+          case status if Status.isSuccessful(status) =>
+            logger.info(
+              s"ES8 successful assign enrolment to group with userId [$userId], groupId [$groupId] and pptReference [${userEnrolmentRequest.pptReference}]"
+            )
+            ()
+          // Do nothing - return without exception
+          case otherStatus =>
+            logger.warn(
+              s"ES8 failed assign enrolment to user with userId [$userId] and pptReference [${userEnrolmentRequest.pptReference}] with status [$otherStatus]"
+            )
+            throw UpstreamErrorResponse(AssignEnrolmentToGroupError, otherStatus)
+        }
+      }.andThen { case _ => timer.stop() }
 
   }
 

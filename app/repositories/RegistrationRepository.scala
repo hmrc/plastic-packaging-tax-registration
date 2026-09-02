@@ -69,8 +69,7 @@ class RegistrationRepositoryImpl @Inject() (
 
   private val logger = Logger(this.getClass)
 
-  private def filter(id: String) =
-    equal("id", Codecs.toBson(id))
+  private def filter(id: String) = equal("id", Codecs.toBson(id))
 
   private def newMongoDBTimer(name: String): Timer = metrics.defaultRegistry.timer(name)
 

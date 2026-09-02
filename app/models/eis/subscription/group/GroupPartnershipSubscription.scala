@@ -21,10 +21,10 @@ import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.eis.subscription.{OrganisationDetails => SubscriptionOrganisationDetails}
 import models.group.{GroupMember, GroupMemberContactDetails}
 import models.{
+  OrganisationDetails => RegistrationOrganisationDetails,
   Partner,
   PrimaryContactDetails,
-  Registration,
-  OrganisationDetails => RegistrationOrganisationDetails
+  Registration
 }
 import play.api.libs.json.{Json, OFormat}
 
@@ -159,8 +159,7 @@ object GroupPartnershipSubscription {
 
   private def getFromOrganisationDetailsOrDefaultToFalseIfNotPresent(
     organisationDetails: RegistrationOrganisationDetails
-  ) =
-    Some(organisationDetails.regWithoutIDFlag.getOrElse(false))
+  ) = Some(organisationDetails.regWithoutIDFlag.getOrElse(false))
 
   private def createMember(
     member: GroupMember,

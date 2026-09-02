@@ -16,7 +16,7 @@
 
 package models
 
-import org.scalatest.matchers.must.Matchers.{mustBe, must, not}
+import org.scalatest.matchers.must.Matchers.{must, mustBe, not}
 import org.scalatest.wordspec.AnyWordSpec
 import base.data.{RegistrationTestData, SubscriptionTestData}
 import builders.RegistrationBuilder
@@ -196,7 +196,7 @@ class RegistrationSpec
       ) mustBe nominatedPartner.incorporationDetails.map(_.ctutr)
 
       // IncorporationAddressDetails does not appear to be mapped to Subscription; or used for anything in the backend
-      nominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails()           // Subscription does not map anything into these fields
+      nominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
       rehydratedNominatedPartner.incorporationDetails.get.companyAddress mustBe IncorporationAddressDetails() // Subscription does not map anything into these fields
 
       //  Incorporated entities will not have populated the soleTraderDetails or partnerPartnershipDetails fields.
@@ -302,7 +302,7 @@ class RegistrationSpec
 
       val existingSubscription   = Subscription(registration, isSubscriptionUpdate = false)
       val rehydratedRegistration = Registration(existingSubscription)
-      val updatedSubscription    = Subscription(rehydratedRegistration, isSubscriptionUpdate = false)
+      val updatedSubscription = Subscription(rehydratedRegistration, isSubscriptionUpdate = false)
 
       updatedSubscription mustBe existingSubscription
     }

@@ -80,7 +80,9 @@ trait AuthTestSupport extends MockitoSugar {
   }
 
   def withUnauthorizedUser(error: Throwable): Unit =
-    when(mockAuthConnector.authorise(any(), any())(using any(), any())).thenReturn(Future.failed(error))
+    when(mockAuthConnector.authorise(any(), any())(using any(), any())).thenReturn(
+      Future.failed(error)
+    )
 
   def newUser(enrolments: Option[Enrolments] = None): SignedInUser =
     SignedInUser(Credentials("123123123", "Plastic Limited"),
@@ -100,8 +102,7 @@ trait AuthTestSupport extends MockitoSugar {
     newUser(enrolments = Some(pptEnrolment(userEnrolledPptReference)))
   }
 
-  def newEnrolments(enrolment: Enrolment*): Enrolments =
-    Enrolments(enrolment.toSet)
+  def newEnrolments(enrolment: Enrolment*): Enrolments = Enrolments(enrolment.toSet)
 
   def newEnrolment(key: String, identifierName: String, identifierValue: String): Enrolment =
     Enrolment(key).withIdentifier(identifierName, identifierValue)

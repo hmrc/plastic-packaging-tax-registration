@@ -42,7 +42,7 @@ import scala.util.{Success, Try}
 import java.net.URI
 
 @Singleton
-class EisSubscriptionsConnector @Inject()(
+class EisSubscriptionsConnector @Inject() (
   httpClient: HttpClientV2,
   override val appConfig: AppConfig,
   metrics: Metrics
@@ -57,7 +57,9 @@ class EisSubscriptionsConnector @Inject()(
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.status.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
-    httpClient.get(new URI(appConfig.subscriptionStatusUrl(safeId)).toURL()).setHeader(headers :+ correlationIdHeader: _*).execute[ETMPSubscriptionStatusResponse]
+    httpClient.get(new URI(appConfig.subscriptionStatusUrl(safeId)).toURL()).setHeader(
+      headers :+ correlationIdHeader: _*
+    ).execute[ETMPSubscriptionStatusResponse]
       .map { etmpResponse =>
         logger.info(
           s"PPT subscription status sent with correlationId [${correlationIdHeader._2}] and " +
@@ -106,7 +108,7 @@ class EisSubscriptionsConnector @Inject()(
     hc: HeaderCarrier
   ): Future[SubscriptionResponse] = {
 
-    val timer               = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
+    val timer = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
 
     val msgCommon =
@@ -116,8 +118,9 @@ class EisSubscriptionsConnector @Inject()(
         (appConfig.subscriptionCreateWithoutSafeIdUrl(), s"$msgCommon no safeId")
       else (appConfig.subscriptionCreateUrl(safeNumber), s"$msgCommon safeId [$safeNumber]")
 
-
-    httpClient.post(new URI(createUrl).toURL()).withBody(Json.toJson(subscription)).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
+    httpClient.post(new URI(createUrl).toURL()).withBody(Json.toJson(subscription)).setHeader(
+      headers :+ correlationIdHeader: _*
+    ).execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map {
         subscriptionResponse =>
@@ -139,7 +142,7 @@ class EisSubscriptionsConnector @Inject()(
             Try(subscriptionResponse.json.as[EISSubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
                 EisSubscriptionFailureResponseWithStatusCode(failedCreateResponse,
-                                                          subscriptionResponse.status
+                                                             subscriptionResponse.status
                 )
               case _ =>
                 throw UpstreamErrorResponse.apply(
@@ -158,7 +161,9 @@ class EisSubscriptionsConnector @Inject()(
   )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
     val timer               = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
     val correlationIdHeader = correlationIdHeaderName -> UUID.randomUUID().toString
-    httpClient.get(new URI(appConfig.eisSubscriptionDisplayUrl(pptReference)).toURL()).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
+    httpClient.get(new URI(appConfig.eisSubscriptionDisplayUrl(pptReference)).toURL()).setHeader(
+      headers :+ correlationIdHeader: _*
+    ).execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map { response =>
         if (Status.isSuccessful(response.status)) {
@@ -168,7 +173,7 @@ class EisSubscriptionsConnector @Inject()(
           val json =
             Json.parse(
               response.body.replaceAll("\\s", " ")
-            ) //subscription data can come back un sanitised for json.
+            ) // subscription data can come back un sanitised for json.
           Right(json.as[Subscription])
         } else
           Left(response.status)
@@ -197,10 +202,12 @@ class EisSubscriptionsConnector @Inject()(
     val correlationIdHeader: (String, String) =
       correlationIdHeaderName -> UUID.randomUUID().toString
 
-    //the update-subscription API does not accept processingDate, which is returned on display API.
+    // the update-subscription API does not accept processingDate, which is returned on display API.
     val subscription = subscription1.copy(processingDate = None)
 
-    httpClient.put(new URI(appConfig.subscriptionUpdateUrl(pptReference)).toURL()).withBody(Json.toJson(subscription)).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
+    httpClient.put(new URI(appConfig.subscriptionUpdateUrl(pptReference)).toURL()).withBody(
+      Json.toJson(subscription)
+    ).setHeader(headers :+ correlationIdHeader: _*).execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map {
         subscriptionUpdateResponse =>
@@ -223,7 +230,7 @@ class EisSubscriptionsConnector @Inject()(
             Try(subscriptionUpdateResponse.json.as[EISSubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
                 EisSubscriptionFailureResponseWithStatusCode(failedCreateResponse,
-                                                          subscriptionUpdateResponse.status
+                                                             subscriptionUpdateResponse.status
                 )
               case _ =>
                 val errorMsg =

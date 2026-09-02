@@ -44,12 +44,12 @@ trait NrsTestData {
   val testAuthName: Name =
     uk.gov.hmrc.auth.core.retrieve.Name(Some("testFirstName"), Some("testLastName"))
 
-  val testAuthDateOfBirth: LocalDate = LocalDate.now()
-  val testEmail: String                            = "testEmail"
-  val testPPTReference: String                     = "XMPPT123456789"
-  val testAuthToken: String                        = "testAuthToken"
-  val testUserHeaders: Map[String, String]         = Map("testKey" -> "testValue")
-  val testSearchKeys: Map[String, String]          = Map("pptReference" -> testPPTReference)
+  val testAuthDateOfBirth: LocalDate       = LocalDate.now()
+  val testEmail: String                    = "testEmail"
+  val testPPTReference: String             = "XMPPT123456789"
+  val testAuthToken: String                = "testAuthToken"
+  val testUserHeaders: Map[String, String] = Map("testKey" -> "testValue")
+  val testSearchKeys: Map[String, String]  = Map("pptReference" -> testPPTReference)
 
   val testAgentInformation: AgentInformation =
     AgentInformation(Some("testAgentId"), Some("testAgentCode"), Some("testAgentFriendlyName"))

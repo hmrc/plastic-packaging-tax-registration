@@ -41,5 +41,4 @@ trait SubscriptionsConnector {
     hc: HeaderCarrier
   ): Future[SubscriptionResponse]
 
-
 }

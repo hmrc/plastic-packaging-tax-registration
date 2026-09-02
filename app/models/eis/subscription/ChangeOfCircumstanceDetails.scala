@@ -24,7 +24,9 @@ object ChangeOfCircumstance extends Enumeration {
   val MANUAL_TO_ONLINE: Value  = Value("Manual to Online")
 
   implicit val format: Format[ChangeOfCircumstance] =
-    Format(Reads.enumNameReads(ChangeOfCircumstance), Writes.enumNameWrites[ChangeOfCircumstance.type])
+    Format(Reads.enumNameReads(ChangeOfCircumstance),
+           Writes.enumNameWrites[ChangeOfCircumstance.type]
+    )
 
 }
 

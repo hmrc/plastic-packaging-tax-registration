@@ -197,7 +197,7 @@ class GroupPartnershipSubscriptionSpec
            }
           ),
           ("last name",
-           {( partner: Partner) =>
+           { (partner: Partner) =>
              partner.copy(contactDetails = partner.contactDetails.map(_.copy(lastName = None)))
            }
           ),
@@ -331,8 +331,8 @@ class GroupPartnershipSubscriptionSpec
   ): Registration =
     registration.copy(organisationDetails =
       registration.organisationDetails.copy(partnershipDetails =
-        registration.organisationDetails.partnershipDetails.map(
-          pd => pd.copy(partners = pd.partners.map(partnerUpdator(_)))
+        registration.organisationDetails.partnershipDetails.map(pd =>
+          pd.copy(partners = pd.partners.map(partnerUpdator(_)))
         )
       )
     )

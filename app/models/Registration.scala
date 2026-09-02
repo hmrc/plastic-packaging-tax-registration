@@ -306,16 +306,15 @@ object Registration {
                                                   partnershipDetails = partnershipDetails,
                                                   incorporationDetails = incorporationDetails,
                                                   subscriptionStatus = None,
-                                                  regWithoutIDFlag = if (
-                                                    isGroupSubscription(subscription)
-                                                  )
-                                                    subscription.groupPartnershipSubscription.flatMap(
-                                                      _.groupPartnershipDetails.headOption.flatMap(
-                                                        _.regWithoutIDFlag
+                                                  regWithoutIDFlag =
+                                                    if (isGroupSubscription(subscription))
+                                                      subscription.groupPartnershipSubscription.flatMap(
+                                                        _.groupPartnershipDetails.headOption.flatMap(
+                                                          _.regWithoutIDFlag
+                                                        )
                                                       )
-                                                    )
-                                                  else
-                                                    subscription.legalEntityDetails.regWithoutIDFlag
+                                                    else
+                                                      subscription.legalEntityDetails.regWithoutIDFlag
     )
 
     val liabilityDetails = LiabilityDetails(
@@ -334,17 +333,16 @@ object Registration {
                 membersUnderGroupControl = Some(groupPartnershipSubscription.allMembersControl),
                 members = groupPartnershipSubscription.groupPartnershipDetails.filterNot(
                   _.relationship == Relationship.Representative
-                ).map(
-                  detail =>
-                    GroupMember(id = UUID.randomUUID().toString,
-                                customerIdentification1 = detail.customerIdentification1,
-                                customerIdentification2 = detail.customerIdentification2,
-                                organisationDetails =
-                                  Some(GroupDetails(detail.organisationDetails)),
-                                addressDetails = PPTAddress(detail.addressDetails),
-                                contactDetails = Some(GroupMemberContactDetails(detail)),
-                                regWithoutIDFlag = detail.regWithoutIDFlag
-                    )
+                ).map(detail =>
+                  GroupMember(id = UUID.randomUUID().toString,
+                              customerIdentification1 = detail.customerIdentification1,
+                              customerIdentification2 = detail.customerIdentification2,
+                              organisationDetails =
+                                Some(GroupDetails(detail.organisationDetails)),
+                              addressDetails = PPTAddress(detail.addressDetails),
+                              contactDetails = Some(GroupMemberContactDetails(detail)),
+                              regWithoutIDFlag = detail.regWithoutIDFlag
+                  )
                 )
               )
             )
