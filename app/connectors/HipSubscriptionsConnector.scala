@@ -64,7 +64,7 @@ class HipSubscriptionsConnector @Inject() (
             Right((response.json \ "success").as[Subscription])
           case _ =>
             logger.error(s"PPT view subscription failed response: ${response.body}")
-            Left(response.status) // TODO work out if this needs refining
+            Left(response.status)
         }
       }
       .recover {
