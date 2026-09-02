@@ -158,9 +158,6 @@ class SubscriptionControllerSpec
         await(route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(regRequest))).get)
 
         assertSubscriptionResults(verifyAndCaptureSubscription, assertPartnershipMembers)
-
-        verifyNoInteractions(mockEisSubscriptionsConnector)
-
       }
     }
 

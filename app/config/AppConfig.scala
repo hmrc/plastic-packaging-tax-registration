@@ -45,7 +45,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   private val hipSecretV1: String = config.get[String]("microservice.services.hip.secret")
   def hipAuthorizationToken: String = Base64.getEncoder.encodeToString(s"$hipClientIdV1:$hipSecretV1".getBytes("UTF-8"))
 
-
   def subscriptionStatusUrl(safeNumber: String): String =
     s"$eisHost/cross-regime/subscription/PPT/SAFE/${safeNumber}/status"
 

@@ -113,7 +113,7 @@ class HipSubscriptionsConnector @Inject() (
     val timer         = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
     val correlationId = UUID.randomUUID().toString
     val url =
-      url"${appConfig.hipPPTBaseUrl}/RESTAdapter/plastic-packaging-tax/subscriptions/PPT/${pptReferenceNumber}"
+      url"${appConfig.hipPPTBaseUrl}/etmp/RESTAdapter/plastic-packaging-tax/subscriptions/PPT/${pptReferenceNumber}"
     httpClient
       .get(subscriptionsUrl(pptReferenceNumber))
       .setHeader(headers*)
@@ -129,7 +129,8 @@ class HipSubscriptionsConnector @Inject() (
             )
             Right((response.json \ "success").as[Subscription])
           case _ =>
-            Left(response.status) // TODO work out if this needs refining
+            logger.error(s"PPT view subscription failed response: ${response.body}")
+            Left(response.status)
         }
       }
       .recover {
