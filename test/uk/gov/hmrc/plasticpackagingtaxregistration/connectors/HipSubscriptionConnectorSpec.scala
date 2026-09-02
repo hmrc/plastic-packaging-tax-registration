@@ -50,10 +50,7 @@ class HipSubscriptionConnectorSpec
   private lazy val connector =
     app.injector.instanceOf[HipSubscriptionsConnector]
 
-  private val pptSubscriptionSubmissionTimer = "ppt.subscription.submission.timer"
-  private val pptSubscriptionStatusTimer     = "ppt.subscription.status.timer"
   private val pptSubscriptionDisplayTimer    = "ppt.subscription.display.timer"
-  private val pptSubscriptionUpdateTimer     = "ppt.subscription.update.timer"
 
   "Subscription connector" when {
 

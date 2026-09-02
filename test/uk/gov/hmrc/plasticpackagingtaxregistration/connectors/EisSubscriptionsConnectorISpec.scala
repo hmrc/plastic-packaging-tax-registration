@@ -41,7 +41,7 @@ import org.scalatest.EitherValues
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
 
-class SubscriptionsConnectorISpec
+class EisSubscriptionsConnectorISpec
     extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData
     with EitherValues {
 
