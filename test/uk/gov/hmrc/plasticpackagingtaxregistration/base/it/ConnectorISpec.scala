@@ -51,6 +51,8 @@ class ConnectorISpec
   def overrideConfig: Map[String, Any] =
     Map("microservice.services.eis.host"                   -> wireHost,
         "microservice.services.eis.port"                   -> wirePort,
+        "microservice.services.hip.host"                   -> wireHost,
+        "microservice.services.hip.port"                   -> wirePort,
         "microservice.services.nrs.host"                   -> wireHost,
         "microservice.services.nrs.port"                   -> wirePort,
         "microservice.services.tax-enrolments.host"        -> wireHost,

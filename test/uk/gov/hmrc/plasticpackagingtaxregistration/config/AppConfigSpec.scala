@@ -81,6 +81,18 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
       )
     }
 
+    "have 'hipSubscriptionCreateUrl' defined" in {
+      configService.hipSubscriptionCreateUrl("12345678") must be(
+        "http://localhost:8506/etmp/RESTAdapter/plastic-packaging-tax/subscriptions/PPT?idType=SAFEID&idValue=12345678"
+      )
+    }
+
+    "have 'hipSubscriptionCreateWithoutSafeIdUrl' defined" in {
+      configService.hipSubscriptionCreateWithoutSafeIdUrl() must be(
+        "http://localhost:8506/etmp/RESTAdapter/plastic-packaging-tax/subscriptions/PPT"
+      )
+    }
+
     "have 'nonRepudiationSubmissionUrl' defined" in {
       configService.nonRepudiationSubmissionUrl must be("http://localhost:8506/submission")
     }

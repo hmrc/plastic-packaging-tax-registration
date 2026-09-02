@@ -23,11 +23,11 @@ import java.time.{ZoneId, ZonedDateTime}
 import java.util.Base64
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{times, verify, verifyNoInteractions, when}
 import org.scalatest.matchers.must
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
-import play.api.http.Status.IM_A_TEAPOT
+import play.api.http.Status.{IM_A_TEAPOT, UNPROCESSABLE_ENTITY}
 import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
@@ -40,6 +40,11 @@ import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
   EisSubscriptionFailureResponseWithStatusCode,
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+}
+import models.hip.subscription.create.{
+  HipBusinessValidationError,
+  HipBusinessValidationFailure,
+  HipSubscriptionFailureResponseWithStatusCode
 }
 import models.subscription.create.SubscriptionSuccessfulResponse
 import connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment
@@ -247,6 +252,52 @@ class SubscriptionServiceSpec
     }
   }
 
+  "connector selection" should {
+    "use the EIS connector when the HIP feature switch is off" in new Fixture {
+      when(mockAppConfig.hipSubscriptions).thenReturn(false)
+
+      Await.result(SUT.submit(aValidRegistration(), "SAFE_ID", Map.empty)(using hc), 1 second)
+
+      verify(mockEisSubscriptionConnector, times(1)).submitSubscription(eqTo("SAFE_ID"), any())(
+        using any()
+      )
+      verifyNoInteractions(mockHipSubscriptionConnector)
+    }
+
+    "use the HIP connector when the HIP feature switch is on" in new Fixture {
+      when(mockAppConfig.hipSubscriptions).thenReturn(true)
+
+      Await.result(SUT.submit(aValidRegistration(), "SAFE_ID", Map.empty)(using hc), 1 second)
+
+      verify(mockHipSubscriptionConnector, times(1)).submitSubscription(eqTo("SAFE_ID"), any())(
+        using any()
+      )
+      verifyNoInteractions(mockEisSubscriptionConnector)
+    }
+
+    "return a HIP failure unchanged from the connector" in new Fixture {
+      when(mockAppConfig.hipSubscriptions).thenReturn(true)
+
+      val hipFailure = HipSubscriptionFailureResponseWithStatusCode(
+        HipBusinessValidationFailure(
+          HipBusinessValidationError("2026-07-09T09:26:17Z", "007", "Reason 1")
+        ),
+        UNPROCESSABLE_ENTITY
+      )
+
+      when(
+        mockHipSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
+          using any[HeaderCarrier]
+        )
+      ).thenReturn(Future.successful(hipFailure))
+
+      val result =
+        Await.result(SUT.submit(aValidRegistration(), "SAFE_ID", Map.empty)(using hc), 1 second)
+
+      result mustBe Left(hipFailure)
+    }
+  }
+
   trait Fixture {
     val mockEisSubscriptionConnector = mock[EisSubscriptionsConnector]
     val mockHipSubscriptionConnector = mock[HipSubscriptionsConnector]
@@ -275,6 +326,20 @@ class SubscriptionServiceSpec
 
     when(
       mockEisSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
+        using any[HeaderCarrier]
+      )
+    ).thenReturn(
+      Future.successful(
+        SubscriptionSuccessfulResponse(
+          "PPT_REF",
+          ZonedDateTime.of(2022, 12, 13, 10, 32, 12, 765, ZoneId.of("UTC")),
+          "FORM_BUNDLE_NO"
+        )
+      )
+    )
+
+    when(
+      mockHipSubscriptionConnector.submitSubscription(any[String], any[Subscription])(
         using any[HeaderCarrier]
       )
     ).thenReturn(

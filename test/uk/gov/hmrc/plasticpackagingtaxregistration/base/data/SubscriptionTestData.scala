@@ -26,6 +26,12 @@ import models.subscription.create.SubscriptionSuccessfulResponse
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.eis.subscription.group.{GroupPartnershipDetails, GroupPartnershipSubscription}
 import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
+import models.hip.subscription.create.{
+  HipBusinessValidationError,
+  HipBusinessValidationFailure,
+  HipSystemError,
+  HipSystemFailure
+}
 import models.eis.subscriptionStatus.{
   ETMPSubscriptionStatus,
   ETMPSubscriptionStatusResponse,
@@ -80,6 +86,24 @@ trait SubscriptionTestData extends AuthTestSupport {
   protected val subscriptionCreateFailureResponse: EISSubscriptionFailureResponse =
     EISSubscriptionFailureResponse(failures =
       Seq(EISError(code = "123", reason = "error"))
+    )
+
+  protected val hipBusinessValidationFailure: HipBusinessValidationFailure =
+    HipBusinessValidationFailure(
+      HipBusinessValidationError(
+        processingDate = "2026-07-09T09:26:17Z",
+        errorId = "007",
+        text =
+          "Business Partner already has active subscription for this regime"
+      )
+    )
+
+  protected val hipSystemFailure: HipSystemFailure =
+    HipSystemFailure(
+      HipSystemError(code = "500",
+                     message = "Internal Server Error",
+                     logID = "0123456789ABCDEF0123456789ABCDEF"
+      )
     )
 
   protected val ukLimitedCompanySubscription: Subscription = Subscription(

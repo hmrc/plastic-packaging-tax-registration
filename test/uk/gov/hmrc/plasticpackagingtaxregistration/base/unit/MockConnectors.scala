@@ -25,6 +25,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import models.eis.subscription.Subscription
 import models.eis.subscription.create.EisSubscriptionFailureResponseWithStatusCode
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
+import models.hip.subscription.create.HipSubscriptionFailureResponseWithStatusCode
 import models.subscription.create.{SubscriptionResponse, SubscriptionSuccessfulResponse}
 import connectors.parsers.TaxEnrolmentsHttpParser
 import connectors.parsers.TaxEnrolmentsHttpParser.{
@@ -62,6 +63,7 @@ trait MockConnectors extends BeforeAndAfterEach {
   override protected def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockEisSubscriptionsConnector,
+          mockHipSubscriptionsConnector,
           mockNonRepudiationConnector,
           mockTaxEnrolmentsConnector,
           mockEnrolmentStoreProxyConnector
@@ -109,6 +111,20 @@ trait MockConnectors extends BeforeAndAfterEach {
   ): OngoingStubbing[Future[SubscriptionResponse]] =
     when(mockEisSubscriptionsConnector.submitSubscription(any(), any())(using any())).thenReturn(
       Future.successful(subscription)
+    )
+
+  protected def mockHipSubscriptionCreate(
+    subscription: SubscriptionSuccessfulResponse
+  ): OngoingStubbing[Future[SubscriptionResponse]] =
+    when(mockHipSubscriptionsConnector.submitSubscription(any(), any())(using any())).thenReturn(
+      Future.successful(subscription)
+    )
+
+  protected def mockHipSubscriptionCreateFailure(
+    failedResponse: HipSubscriptionFailureResponseWithStatusCode
+  ): OngoingStubbing[Future[SubscriptionResponse]] =
+    when(mockHipSubscriptionsConnector.submitSubscription(any(), any())(using any())).thenReturn(
+      Future.successful(failedResponse)
     )
 
   protected def mockSubscriptionUpdate(
