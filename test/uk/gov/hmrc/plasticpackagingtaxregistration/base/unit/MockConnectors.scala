@@ -23,8 +23,9 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import uk.gov.hmrc.http.HeaderCarrier
 import models.eis.subscription.Subscription
-import models.eis.subscription.create.{SubscriptionFailureResponseWithStatusCode, SubscriptionResponse, SubscriptionSuccessfulResponse}
+import models.eis.subscription.create.EisSubscriptionFailureResponseWithStatusCode
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
+import models.subscription.create.{SubscriptionResponse, SubscriptionSuccessfulResponse}
 import connectors.parsers.TaxEnrolmentsHttpParser
 import connectors.parsers.TaxEnrolmentsHttpParser.{FailedTaxEnrolment, SuccessfulTaxEnrolment, TaxEnrolmentsResponse}
 import connectors.{EisSubscriptionsConnector, EnrolmentStoreProxyConnector, HipSubscriptionsConnector, NonRepudiationConnector, TaxEnrolmentsConnector}
@@ -72,7 +73,7 @@ trait MockConnectors extends BeforeAndAfterEach {
       .thenThrow(ex)
 
   protected def mockGetSubscriptionSubmitFailure(
-    failedResponse: SubscriptionFailureResponseWithStatusCode
+    failedResponse: EisSubscriptionFailureResponseWithStatusCode
   ): OngoingStubbing[Future[SubscriptionResponse]] =
     when(mockEisSubscriptionsConnector.submitSubscription(any(), any())(using any())).thenReturn(
       Future.successful(failedResponse)
@@ -107,7 +108,7 @@ trait MockConnectors extends BeforeAndAfterEach {
     )
 
   protected def mockSubscriptionUpdateFailure(
-    failedResponse: SubscriptionFailureResponseWithStatusCode
+    failedResponse: EisSubscriptionFailureResponseWithStatusCode
   ): OngoingStubbing[Future[SubscriptionResponse]] =
     when(mockEisSubscriptionsConnector.updateSubscription(any(), any())(using any())).thenReturn(
       Future.successful(failedResponse)

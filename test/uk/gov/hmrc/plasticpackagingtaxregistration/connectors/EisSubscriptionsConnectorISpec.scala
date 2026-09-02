@@ -31,9 +31,9 @@ import models.eis.EISError
 import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
-  SubscriptionFailureResponseWithStatusCode,
-  SubscriptionSuccessfulResponse
+  EisSubscriptionFailureResponseWithStatusCode
 }
+import models.subscription.create.SubscriptionSuccessfulResponse
 import models.eis.subscriptionStatus.ETMPSubscriptionStatus.NO_FORM_BUNDLE_FOUND
 import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
 import org.scalatest.EitherValues
@@ -200,7 +200,7 @@ class EisSubscriptionsConnectorISpec
 
             val resp = await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
-            resp mustBe SubscriptionFailureResponseWithStatusCode(
+            resp mustBe EisSubscriptionFailureResponseWithStatusCode(
               EISSubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
               statusCode
             )
@@ -342,7 +342,7 @@ class EisSubscriptionsConnectorISpec
             val resp =
               await(connector.updateSubscription(pptReference, ukLimitedCompanySubscription))
 
-            resp mustBe SubscriptionFailureResponseWithStatusCode(
+            resp mustBe EisSubscriptionFailureResponseWithStatusCode(
               EISSubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),
               statusCode
             )

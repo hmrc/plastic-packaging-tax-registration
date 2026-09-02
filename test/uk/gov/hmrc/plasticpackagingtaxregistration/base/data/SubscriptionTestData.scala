@@ -21,10 +21,8 @@ import play.api.test.FakeRequest
 import base.AuthTestSupport
 import models.eis.EISError
 import models.eis.subscription._
-import models.eis.subscription.create.{
-  EISSubscriptionFailureResponse,
-  SubscriptionSuccessfulResponse
-}
+import models.eis.subscription.create.EISSubscriptionFailureResponse
+import models.subscription.create.SubscriptionSuccessfulResponse
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.eis.subscription.group.{GroupPartnershipDetails, GroupPartnershipSubscription}
 import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED

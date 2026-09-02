@@ -22,7 +22,6 @@ import models.eis.subscription.Subscription
 import models.eis.subscription.create.*
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import models.hip.HipPlatformErrors.*
-import play.api.http.Status
 import play.api.http.Status.*
 import play.api.libs.json.Json
 import play.api.libs.ws.WSBodyWritables.writeableOf_JsValue
@@ -31,9 +30,12 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
+import java.net.URI
+import java.util.UUID
 import java.net.URL
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Success, Try}
 
 class HipSubscriptionsConnector @Inject() (
   httpClient: HttpClientV2,
@@ -51,40 +53,95 @@ class HipSubscriptionsConnector @Inject() (
 
   def submitSubscription(safeNumber: String, subscription: Subscription)(implicit
     hc: HeaderCarrier
-  ): Future[SubscriptionResponse] = ???
+  ): Future[SubscriptionResponse] = {
+    val timer         = metrics.defaultRegistry.timer("ppt.subscription.submission.timer").time()
+    val correlationId = UUID.randomUUID().toString
+
+    val msgCommon = s"PPT subscription create sent with correlationid [$correlationId] and"
+    val (createUrl, msg) =
+      if (subscription.legalEntityDetails.groupSubscriptionFlag)
+        (appConfig.hipSubscriptionCreateWithoutSafeIdUrl(), s"$msgCommon no safeId")
+      else (appConfig.hipSubscriptionCreateUrl(safeNumber), s"$msgCommon safeId [$safeNumber]")
+
+    httpClient
+      .post(new URI(createUrl).toURL())
+      .withBody(Json.toJson(subscription))
+      .setHeader(hipHeaders(correlationId)*)
+      .execute[HttpResponse]
+      .andThen { case _ => timer.stop() }
+      .map {
+        subscriptionResponse =>
+          logger.info(s"$msg had response payload ${subscriptionResponse.body}")
+
+          if (Status.isSuccessful(subscriptionResponse.status))
+            Try(
+              (subscriptionResponse.json \ "success").as[SubscriptionSuccessfulResponse]
+            ) match {
+              case Success(successfulCreateResponse) => successfulCreateResponse
+              case _ =>
+                throw UpstreamErrorResponse.apply(
+                  buildCreateSubscriptionErrorMessage(correlationId,
+                                                      safeNumber,
+                                                      "successful response in unexpected format"
+                  ),
+                  Status.INTERNAL_SERVER_ERROR
+                )
+            }
+          else
+            Try(subscriptionResponse.json.as[HipSubscriptionFailureResponse]) match {
+              case Success(failedCreateResponse) =>
+                HipSubscriptionFailureResponseWithStatusCode(failedCreateResponse,
+                                                             subscriptionResponse.status
+                )
+              case _ =>
+                throw UpstreamErrorResponse.apply(
+                  buildCreateSubscriptionErrorMessage(correlationId,
+                                                      safeNumber,
+                                                      "failed response in unexpected format"
+                  ),
+                  Status.INTERNAL_SERVER_ERROR
+                )
+            }
+      }
+  }
 
   def getSubscription(
     pptReferenceNumber: String
   )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] = {
     val timer = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
 
+    val timer         = metrics.defaultRegistry.timer("ppt.subscription.display.timer").time()
+    val correlationId = UUID.randomUUID().toString
+    val url =
+      url"${appConfig.hipPPTBaseUrl}/RESTAdapter/plastic-packaging-tax/subscriptions/PPT/${pptReferenceNumber}"
     httpClient
       .get(subscriptionsUrl(pptReferenceNumber))
       .setHeader(headers*)
+      .get(url)
+      .setHeader(hipHeaders(correlationId)*)
       .execute[HttpResponse]
       .andThen { case _ => timer.stop() }
       .map { response =>
         response.status match {
           case 200 =>
             logger.info(
-              s"PPT view subscription with correlationid [${correlationid}] and pptReference [$pptReferenceNumber]"
+              s"PPT view subscription with correlationid [$correlationId] and pptReference [$pptReferenceNumber]"
             )
             Right((response.json \ "success").as[Subscription])
           case _ =>
-            logger.error(s"PPT view subscription failed response: ${response.body}")
-            Left(response.status)
+            Left(response.status) // TODO work out if this needs refining
         }
       }
       .recover {
         case httpEx: UpstreamErrorResponse =>
           logger.warn(
-            s"Upstream error returned on viewing subscription with correlationId [${correlationid}] and " +
+            s"Upstream error returned on viewing subscription with correlationid [$correlationId] and " +
               s"pptReference [$pptReferenceNumber], status: ${httpEx.statusCode}, body: ${httpEx.getMessage}"
           )
           Left(httpEx.statusCode)
         case ex: Exception =>
           logger.warn(
-            s"Subscription display with correlationId [$correlationid}] and " +
+            s"Subscription display with correlationid [$correlationId] and " +
               s"pptReference [$pptReferenceNumber] is currently unavailable due to [${ex.getMessage}]",
             ex
           )
@@ -161,5 +218,12 @@ class HipSubscriptionsConnector @Inject() (
           }
       }
   }
+
+  private def buildCreateSubscriptionErrorMessage(
+    correlationId: String,
+    safeId: String,
+    errorMessage: String
+  ) =
+    s"PPT subscription create with correlationid [$correlationId] and safeId [$safeId] failed - $errorMessage"
 
 }

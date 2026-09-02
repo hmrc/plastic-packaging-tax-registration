@@ -39,9 +39,9 @@ import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
-  SubscriptionFailureResponseWithStatusCode,
-  SubscriptionSuccessfulResponse
+  EisSubscriptionFailureResponseWithStatusCode
 }
+import models.subscription.create.SubscriptionSuccessfulResponse
 import connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment
 import connectors.{
   EisSubscriptionsConnector,
@@ -224,7 +224,7 @@ class SubscriptionServiceSpec
         )
       ).thenReturn(
         Future.successful(
-          SubscriptionFailureResponseWithStatusCode(
+          EisSubscriptionFailureResponseWithStatusCode(
             EISSubscriptionFailureResponse(
               Seq(EISError("CODE 1", "Reason 1"), EISError("CODE 2", "Reason 2"))
             ),
@@ -237,7 +237,7 @@ class SubscriptionServiceSpec
 
       val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(using hc), 1 second)
       result mustBe Left(
-        SubscriptionFailureResponseWithStatusCode(
+        EisSubscriptionFailureResponseWithStatusCode(
           EISSubscriptionFailureResponse(
             Seq(EISError("CODE 1", "Reason 1"), EISError("CODE 2", "Reason 2"))
           ),

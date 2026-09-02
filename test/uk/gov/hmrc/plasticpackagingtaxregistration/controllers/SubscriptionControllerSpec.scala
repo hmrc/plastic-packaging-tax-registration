@@ -25,7 +25,7 @@ import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
-  SubscriptionFailureResponseWithStatusCode
+  EisSubscriptionFailureResponseWithStatusCode
 }
 import models.eis.subscription.group.GroupPartnershipDetails
 import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
@@ -37,7 +37,7 @@ import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Result
-import play.api.test.Helpers.{contentAsJson, route, status, _}
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.InsufficientEnrolments
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException}
 
@@ -158,6 +158,9 @@ class SubscriptionControllerSpec
         await(route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(regRequest))).get)
 
         assertSubscriptionResults(verifyAndCaptureSubscription, assertPartnershipMembers)
+
+        verifyNoInteractions(mockEisSubscriptionsConnector)
+
       }
     }
 
@@ -248,7 +251,7 @@ class SubscriptionControllerSpec
     "return underlying status code and error response when we receive an error response from EIS" in {
       withAuthorizedUser()
       mockGetSubscriptionSubmitFailure(
-        SubscriptionFailureResponseWithStatusCode(
+        EisSubscriptionFailureResponseWithStatusCode(
           failureResponse = EISSubscriptionFailureResponse(failures =
             List(
               EISError("ACTIVE_SUBSCRIPTION_EXISTS",
@@ -456,7 +459,7 @@ class SubscriptionControllerSpec
     "return underlying status code and error response when we receive an error response from EIS" in {
       withAuthorizedUser()
       mockSubscriptionUpdateFailure(
-        SubscriptionFailureResponseWithStatusCode(
+        EisSubscriptionFailureResponseWithStatusCode(
           failureResponse = EISSubscriptionFailureResponse(failures =
             List(
               EISError("ACTIVE_SUBSCRIPTION_EXISTS",

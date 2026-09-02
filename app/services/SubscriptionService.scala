@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.http.HeaderCarrier
 import models.eis.subscription.Subscription
-import models.eis.subscription.create.{
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
-  SubscriptionFailureResponseWithStatusCode,
+import models.eis.subscription.create.SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+import models.subscription.create.{
+  SubscriptionFailure,
   SubscriptionResponse,
   SubscriptionSuccessfulResponse
 }
@@ -79,10 +79,9 @@ class SubscriptionService @Inject() (
 
   def submit(pptRegistration: Registration, safeId: String, userHeaders: Map[String, String])(
     implicit hc: HeaderCarrier
-  ): Future[Either[
-    SubscriptionFailureResponseWithStatusCode,
-    SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
-  ]] = {
+  ): Future[
+    Either[SubscriptionFailure, SubscriptionCreateWithEnrolmentAndNrsStatusesResponse]
+  ] = {
     val pptSubscription = Subscription(pptRegistration, isSubscriptionUpdate = false)
     PptSchemaValidator.subscriptionValidator.validate(pptSubscription)
     connector.submitSubscription(safeId, pptSubscription).flatMap {
@@ -100,15 +99,11 @@ class SubscriptionService @Inject() (
                                      userHeaders
         ).map(Right.apply)
 
-      case subscriptionResponse @ SubscriptionFailureResponseWithStatusCode(
-            failedSubscriptionResponse,
-            _
-          ) =>
-        val reasons = failedSubscriptionResponse.failures.map(_.reason)
+      case failure: SubscriptionFailure =>
         logger.warn(
-          s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated} - ${reasons.mkString("; ")}"
+          s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated} - ${failure.failureReasons.mkString("; ")}"
         )
-        Future.successful(Left(subscriptionResponse))
+        Future.successful(Left(failure))
     }
   }
 

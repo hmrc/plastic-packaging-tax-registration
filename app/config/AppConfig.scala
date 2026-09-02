@@ -58,6 +58,12 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def eisSubscriptionDisplayUrl(pptReference: String): String =
     s"$eisHost/plastic-packaging-tax/subscriptions/PPT/$pptReference/display"
 
+  def hipSubscriptionCreateUrl(safeNumber: String): String =
+    s"$hipPPTBaseUrl/etmp/RESTAdapter/plastic-packaging-tax/subscriptions/PPT?idType=SAFEID&idValue=$safeNumber"
+
+  def hipSubscriptionCreateWithoutSafeIdUrl(): String =
+    s"$hipPPTBaseUrl/etmp/RESTAdapter/plastic-packaging-tax/subscriptions/PPT"
+
   val bearerToken: String = s"Bearer ${config.get[String]("microservice.services.eis.bearerToken")}"
 
   lazy val nonRepudiationSubmissionUrl: String = s"${nrsHost}/submission"
