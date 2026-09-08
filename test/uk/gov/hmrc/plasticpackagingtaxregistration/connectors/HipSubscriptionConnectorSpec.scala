@@ -111,7 +111,6 @@ class HipSubscriptionConnectorSpec
         )
     )
 
-
   private def stubSubscriptionDisplayFailure(
     pptReference: String,
     httpStatus: Int,
