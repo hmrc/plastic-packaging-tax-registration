@@ -55,7 +55,7 @@ trait HipConnector extends Logging {
   val subscriptionUpdate422ResponseMappings: Map[String, SubscriptionFailureResponseWithStatusCode] = Map(
     "001" -> mkErr("INVALID_REGIME","The remote endpoint has indicated that the REGIME provided is invalid."),
     "004" -> mkErr("DUPLICATE_SUBMISSION", "The remote endpoint has indicated that duplicate submission acknowledgment reference.", 409),
-    "087" -> mkErr("TBC", "not yet known"), // TODO need confirmation from Hip team
+    "087" -> mkErr("BUSINESS_VALIDATION", "The remote endpoint has indicated cannot Create Group Subscription."),
     "089" -> mkErr("INVALID_PPT_REFERENCE_NUMBER", "The remote endpoint has indicated that the PPT Reference Number provided is invalid."),
     "090" -> mkErr("CANNOT_CREATE_PARTNERSHIP_SUBSCRIPTION", "The remote end point has indicated cannot Create Partnership Subscription."),
     "999" -> mkErr("SERVER_ERROR", "IF is currently experiencing problems that require live service intervention.", 500)

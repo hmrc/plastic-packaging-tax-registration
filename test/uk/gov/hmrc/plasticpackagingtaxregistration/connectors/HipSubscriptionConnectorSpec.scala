@@ -315,9 +315,8 @@ class HipSubscriptionConnectorSpec
           ).asInstanceOf[SubscriptionFailureResponseWithStatusCode]
 
         res.statusCode mustBe 422
-        // TODO when we receive mapping
-//        res.failureResponse.failures.head.code mustBe "INVALID_PPT_REFERENCE_NUMBER"
-//        res.failureResponse.failures.head.reason mustBe "The remote endpoint has indicated that the PPT Reference Number provided is invalid."
+        res.failureResponse.failures.head.code mustBe "BUSINESS_VALIDATION"
+        res.failureResponse.failures.head.reason mustBe "The remote endpoint has indicated cannot Create Group Subscription."
       }
       "handle a 422 089" in {
         val pptReference = "XDPPT123456789"
