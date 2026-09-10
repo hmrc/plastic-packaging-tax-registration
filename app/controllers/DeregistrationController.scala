@@ -16,24 +16,21 @@
 
 package controllers
 
-import play.api.Logger
-import play.api.libs.json.Json.toJson
-import play.api.libs.json.Writes
-import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import connectors.SubscriptionsConnector
-import models.eis.EISError
-import models.eis.subscription.create.{
-  SubscriptionFailureResponseWithStatusCode,
-  SubscriptionSuccessfulResponse
-}
-import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
-import models.eis.subscription.{ChangeOfCircumstanceDetails, DeregistrationDetails, Subscription}
 import controllers.actions.Authenticator
 import controllers.response.JSONResponses
 import models.DeregistrationReason.DeregistrationReason
+import models.eis.EISError
+import models.eis.subscription.create.{SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
+import models.eis.subscription.{ChangeOfCircumstanceDetails, DeregistrationDetails, Subscription}
 import models.nrs.NonRepudiationSubmissionAccepted
+import play.api.Logger
+import play.api.libs.json.Json.toJson
+import play.api.libs.json.Writes
+import play.api.mvc.*
+import services.SubscriptionService
 import services.nrs.NonRepudiationService
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.{LocalDate, ZoneOffset}
@@ -43,10 +40,10 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class DeregistrationController @Inject() (
-  subscriptionsConnector: SubscriptionsConnector,
   authenticator: Authenticator,
   nonRepudiationService: NonRepudiationService,
-  override val controllerComponents: ControllerComponents
+  override val controllerComponents: ControllerComponents,
+  subscriptionService: SubscriptionService
 )(implicit executionContext: ExecutionContext)
     extends BackendController(controllerComponents) with JSONResponses {
 
@@ -58,10 +55,10 @@ class DeregistrationController @Inject() (
         val deregistrationReason: DeregistrationReason = request.body
         logger.info(s"Request to deregister $pptReference, reason = $deregistrationReason")
 
-        subscriptionsConnector.getSubscription(pptReference).flatMap {
+        subscriptionService.getSubscription(pptReference).flatMap {
           case Right(subscription) =>
             val updatedSubscription = deregisterSubscription(subscription, deregistrationReason)
-            subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
+            subscriptionService.updateSubscription(pptReference, updatedSubscription).flatMap {
               case response @ SubscriptionSuccessfulResponse(pptReferenceNumber,
                                                              _,
                                                              formBundleNumber
@@ -121,13 +118,11 @@ class DeregistrationController @Inject() (
     subscription: Subscription,
     subscriptionResponse: SubscriptionSuccessfulResponse
   )(implicit hc: HeaderCarrier): Future[Try[NonRepudiationSubmissionAccepted]] =
-    nonRepudiationService.submitNonRepudiation(payloadString = toJson(subscription).toString,
-                                               submissionTimestamp =
-                                                 subscriptionResponse.processingDate,
-                                               pptReference =
-                                                 subscriptionResponse.pptReferenceNumber,
-                                               userHeaders =
-                                                 Map.empty
+    nonRepudiationService.submitNonRepudiation(
+      payloadString = toJson(subscription).toString,
+      submissionTimestamp = subscriptionResponse.processingDate,
+      pptReference = subscriptionResponse.pptReferenceNumber,
+      userHeaders = Map.empty
     )
       .map {
         resp =>

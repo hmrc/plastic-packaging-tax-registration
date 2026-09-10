@@ -16,30 +16,25 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
-import play.api.Logger
-import play.api.libs.json.Json.toJson
-import play.api.libs.json._
-import play.api.mvc._
-import connectors.SubscriptionsConnector
-import models.eis.EISError
-import models.eis.subscription.Subscription
-import models.eis.subscription.create.{
-  SubscriptionFailureResponseWithStatusCode,
-  SubscriptionSuccessfulResponse
-}
-import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import controllers.actions.Authenticator
 import controllers.response.JSONResponses
+import models.eis.EISError
+import models.eis.subscription.Subscription
+import models.eis.subscription.create.{SubscriptionFailureResponseWithStatusCode, SubscriptionSuccessfulResponse}
+import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import models.{Registration, RegistrationRequest}
+import play.api.Logger
+import play.api.libs.json.*
+import play.api.libs.json.Json.toJson
+import play.api.mvc.*
 import services.SubscriptionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionController @Inject() (
-  subscriptionsConnector: SubscriptionsConnector,
   authenticator: Authenticator,
   subscriptionService: SubscriptionService,
   override val controllerComponents: ControllerComponents
@@ -50,7 +45,7 @@ class SubscriptionController @Inject() (
 
   def getStatus(safeNumber: String): Action[AnyContent] =
     authenticator.authorisedAction(parse.default) { implicit request =>
-      subscriptionsConnector.getSubscriptionStatus(safeNumber).map {
+      subscriptionService.getSubscriptionStatus(safeNumber).map {
         case Right(response) =>
           logPayload(s"PPT Subscription status response for safeId $safeNumber ", response)
           Ok(response)
@@ -60,7 +55,7 @@ class SubscriptionController @Inject() (
 
   def get(pptReference: String): Action[AnyContent] =
     authenticator.authorisedAction(parse.default, Some(pptReference)) { implicit request =>
-      subscriptionsConnector.getSubscription(pptReference).map {
+      subscriptionService.getSubscription(pptReference).map {
         case Right(response)       => Ok(Registration(response))
         case Left(errorStatusCode) => new Status(errorStatusCode)
       }
@@ -74,7 +69,7 @@ class SubscriptionController @Inject() (
         val updatedRegistration: Registration = request.body.toRegistration(request.registrationId)
         val updatedSubscription: Subscription =
           Subscription(updatedRegistration, isSubscriptionUpdate = true)
-        subscriptionsConnector.updateSubscription(pptReference, updatedSubscription).flatMap {
+        subscriptionService.updateSubscription(pptReference, updatedSubscription).flatMap {
           case response @ SubscriptionSuccessfulResponse(pptReferenceNumber, _, formBundleNumber) =>
             for {
               nrsResponse <- subscriptionService.notifyNRS(updatedRegistration,

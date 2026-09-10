@@ -41,12 +41,12 @@ import org.scalatest.EitherValues
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
 
-class SubscriptionsConnectorISpec
+class EisSubscriptionsConnectorISpec
     extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData
     with EitherValues {
 
-  private lazy val connector: SubscriptionsConnector =
-    app.injector.instanceOf[SubscriptionsConnector]
+  private lazy val connector: EisSubscriptionsConnector =
+    app.injector.instanceOf[EisSubscriptionsConnector]
 
   private val pptSubscriptionSubmissionTimer = "ppt.subscription.submission.timer"
   private val pptSubscriptionStatusTimer     = "ppt.subscription.status.timer"

@@ -16,6 +16,8 @@
 
 package services
 
+import config.AppConfig
+
 import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import play.api.libs.json.Json.toJson
@@ -24,12 +26,19 @@ import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
   SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
   SubscriptionFailureResponseWithStatusCode,
+  SubscriptionResponse,
   SubscriptionSuccessfulResponse
 }
 import connectors.parsers.TaxEnrolmentsHttpParser.TaxEnrolmentsResponse
-import connectors.{SubscriptionsConnector, TaxEnrolmentsConnector}
+import connectors.{
+  EisSubscriptionsConnector,
+  HipSubscriptionsConnector,
+  SubscriptionsConnector,
+  TaxEnrolmentsConnector
+}
 import controllers.response.JSONResponses
 import models.Registration
+import models.eis.subscriptionStatus.SubscriptionStatusResponse
 import models.nrs.NonRepudiationSubmissionAccepted
 import repositories.RegistrationRepository
 import services.nrs.NonRepudiationService
@@ -40,13 +49,33 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class SubscriptionService @Inject() (
-  subscriptionsConnector: SubscriptionsConnector,
+  eisSubscriptionsConnector: EisSubscriptionsConnector,
+  hipSubscriptionConnector: HipSubscriptionsConnector,
   enrolmentConnector: TaxEnrolmentsConnector,
   repository: RegistrationRepository,
-  nonRepudiationService: NonRepudiationService
+  nonRepudiationService: NonRepudiationService,
+  appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends JSONResponses {
   private val logger = LoggerFactory.getLogger(getClass.getCanonicalName)
+
+  private lazy val connector: SubscriptionsConnector =
+    if (appConfig.hipSubscriptions) hipSubscriptionConnector
+    else eisSubscriptionsConnector
+
+  def getSubscriptionStatus(
+    safeId: String
+  )(implicit hc: HeaderCarrier): Future[Either[Int, SubscriptionStatusResponse]] =
+    connector.getSubscriptionStatus(safeId)
+
+  def getSubscription(
+    pptReference: String
+  )(implicit hc: HeaderCarrier): Future[Either[Int, Subscription]] =
+    connector.getSubscription(pptReference)
+
+  def updateSubscription(pptReference: String, subscription1: Subscription)(implicit
+    hc: HeaderCarrier
+  ): Future[SubscriptionResponse] = connector.updateSubscription(pptReference, subscription1)
 
   def submit(pptRegistration: Registration, safeId: String, userHeaders: Map[String, String])(
     implicit hc: HeaderCarrier
@@ -56,7 +85,7 @@ class SubscriptionService @Inject() (
   ]] = {
     val pptSubscription = Subscription(pptRegistration, isSubscriptionUpdate = false)
     PptSchemaValidator.subscriptionValidator.validate(pptSubscription)
-    subscriptionsConnector.submitSubscription(safeId, pptSubscription).flatMap {
+    connector.submitSubscription(safeId, pptSubscription).flatMap {
       case subscriptionResponse @ SubscriptionSuccessfulResponse(pptReferenceNumber,
                                                                  _,
                                                                  formBundleNumber

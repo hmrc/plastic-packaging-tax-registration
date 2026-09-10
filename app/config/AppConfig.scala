@@ -19,6 +19,7 @@ package config
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.util.Base64
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.FiniteDuration
 
@@ -38,6 +39,13 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val eisEnvironment = config.get[String]("eis.environment")
 
+  val hipSubscriptions: Boolean = config.get[Boolean]("features.hip.subscription")
+  val hipPPTBaseUrl: String = servicesConfig.baseUrl("hip")
+  private val hipClientIdV1: String = config.get[String]("microservice.services.hip.clientId")
+  private val hipSecretV1: String = config.get[String]("microservice.services.hip.secret")
+  def hipAuthorizationToken: String = Base64.getEncoder.encodeToString(s"$hipClientIdV1:$hipSecretV1".getBytes("UTF-8"))
+
+
   def subscriptionStatusUrl(safeNumber: String): String =
     s"$eisHost/cross-regime/subscription/PPT/SAFE/${safeNumber}/status"
 
@@ -47,7 +55,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   def subscriptionCreateWithoutSafeIdUrl(): String =
     s"$eisHost/plastic-packaging-tax/subscriptions/PPT/create"
 
-  def subscriptionDisplayUrl(pptReference: String): String =
+  def eisSubscriptionDisplayUrl(pptReference: String): String =
     s"$eisHost/plastic-packaging-tax/subscriptions/PPT/$pptReference/display"
 
   val bearerToken: String = s"Bearer ${config.get[String]("microservice.services.eis.bearerToken")}"

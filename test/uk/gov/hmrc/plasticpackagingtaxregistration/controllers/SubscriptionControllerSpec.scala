@@ -65,7 +65,7 @@ class SubscriptionControllerSpec
 
       status(result) must be(OK)
       contentAsJson(result) mustBe toJson(subscriptionStatusResponse)
-      verify(mockSubscriptionsConnector).getSubscriptionStatus(ArgumentMatchers.eq(safeNumber))(
+      verify(mockEisSubscriptionsConnector).getSubscriptionStatus(ArgumentMatchers.eq(safeNumber))(
         using any()
       )
     }
@@ -75,7 +75,7 @@ class SubscriptionControllerSpec
       mockGetSubscriptionStatus(subscriptionStatusResponse)
       mockNonRepudiationSubmission(NonRepudiationSubmissionAccepted(UUID.randomUUID().toString))
 
-      when(mockSubscriptionsConnector.getSubscriptionStatus(any())(using any())).thenReturn(
+      when(mockEisSubscriptionsConnector.getSubscriptionStatus(any())(using any())).thenReturn(
         Future.successful(Left(418))
       )
 
@@ -91,7 +91,7 @@ class SubscriptionControllerSpec
         val result: Future[Result] = route(app, subscriptionStatusResponse_HttpGet).get
 
         status(result) must be(UNAUTHORIZED)
-        verifyNoInteractions(mockSubscriptionsConnector)
+        verifyNoInteractions(mockEisSubscriptionsConnector)
       }
     }
 
@@ -217,7 +217,7 @@ class SubscriptionControllerSpec
 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("statusCode" -> 400, "message" -> "Bad Request")
-        verifyNoInteractions(mockSubscriptionsConnector)
+        verifyNoInteractions(mockEisSubscriptionsConnector)
       }
     }
 
@@ -229,7 +229,7 @@ class SubscriptionControllerSpec
           route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(aRegistrationRequest()))).get
 
         status(result) must be(UNAUTHORIZED)
-        verifyNoInteractions(mockSubscriptionsConnector)
+        verifyNoInteractions(mockEisSubscriptionsConnector)
       }
     }
 
@@ -284,7 +284,8 @@ class SubscriptionControllerSpec
 
       status(result) must be(OK)
       contentAsJson(result) mustBe toJson(Registration(ukLimitedCompanySubscription))
-      verify(mockSubscriptionsConnector).getSubscription(ArgumentMatchers.eq(pptReference))(using any())
+      verify(mockEisSubscriptionsConnector).getSubscription(ArgumentMatchers.eq(pptReference))(using
+      any())
     }
 
     "return 401" when {
@@ -294,7 +295,7 @@ class SubscriptionControllerSpec
         val result: Future[Result] = route(app, subscriptionResponse_HttpGet).get
 
         status(result) must be(UNAUTHORIZED)
-        verifyNoInteractions(mockSubscriptionsConnector)
+        verifyNoInteractions(mockEisSubscriptionsConnector)
       }
     }
 
@@ -338,7 +339,8 @@ class SubscriptionControllerSpec
 
         def theUpdatedSubscription = {
           val captor: ArgumentCaptor[Subscription] = ArgumentCaptor.forClass(classOf[Subscription])
-          verify(mockSubscriptionsConnector).updateSubscription(any(), captor.capture())(using any())
+          verify(mockEisSubscriptionsConnector).updateSubscription(any(), captor.capture())(using
+          any())
           captor.getValue
         }
 
@@ -421,7 +423,7 @@ class SubscriptionControllerSpec
 
         status(result) must be(BAD_REQUEST)
         contentAsJson(result) mustBe Json.obj("statusCode" -> 400, "message" -> "Bad Request")
-        verifyNoInteractions(mockSubscriptionsConnector)
+        verifyNoInteractions(mockEisSubscriptionsConnector)
       }
     }
 
@@ -433,7 +435,7 @@ class SubscriptionControllerSpec
           route(app, subscriptionResponse_HttpPut.withJsonBody(toJson(aRegistrationRequest()))).get
 
         status(result) must be(UNAUTHORIZED)
-        verifyNoInteractions(mockSubscriptionsConnector)
+        verifyNoInteractions(mockEisSubscriptionsConnector)
       }
     }
 
@@ -515,7 +517,7 @@ class SubscriptionControllerSpec
   private def verifyAndCaptureSubscription: Subscription = {
     val captor: ArgumentCaptor[Subscription] = ArgumentCaptor.forClass(classOf[Subscription])
 
-    verify(mockSubscriptionsConnector)
+    verify(mockEisSubscriptionsConnector)
       .submitSubscription(any(), captor.capture())(using any())
 
     captor.getValue

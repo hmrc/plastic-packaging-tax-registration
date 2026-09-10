@@ -30,12 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import base.AuthTestSupport
 import base.data.{NrsTestData, RegistrationTestData, SubscriptionTestData}
-import connectors.{
-  EnrolmentStoreProxyConnector,
-  NonRepudiationConnector,
-  SubscriptionsConnector,
-  TaxEnrolmentsConnector
-}
+import connectors.{EisSubscriptionsConnector, EnrolmentStoreProxyConnector, HipSubscriptionsConnector, NonRepudiationConnector, TaxEnrolmentsConnector}
 import models.PostCodeWithoutSpaces
 import repositories.RegistrationRepository
 import services.nrs.NonRepudiationService
@@ -58,13 +53,15 @@ trait ControllerSpec
     HeaderCarrier(authorization = Some(Authorization(testAuthToken)))
 
   override lazy val app: Application = GuiceApplicationBuilder()
-    .overrides(bind[AuthConnector].to(mockAuthConnector),
-               bind[SubscriptionsConnector].to(mockSubscriptionsConnector),
-               bind[NonRepudiationConnector].to(mockNonRepudiationConnector),
-               bind[RegistrationRepository].to(mockRepository),
-               bind[NonRepudiationService].to(mockNonRepudiationService),
-               bind[TaxEnrolmentsConnector].to(mockTaxEnrolmentsConnector),
-               bind[EnrolmentStoreProxyConnector].to(mockEnrolmentStoreProxyConnector)
+    .overrides(
+      bind[AuthConnector].to(mockAuthConnector),
+      bind[EisSubscriptionsConnector].to(mockEisSubscriptionsConnector),
+      bind[HipSubscriptionsConnector].to(mockHipSubscriptionsConnector),
+      bind[NonRepudiationConnector].to(mockNonRepudiationConnector),
+      bind[RegistrationRepository].to(mockRepository),
+      bind[NonRepudiationService].to(mockNonRepudiationService),
+      bind[TaxEnrolmentsConnector].to(mockTaxEnrolmentsConnector),
+      bind[EnrolmentStoreProxyConnector].to(mockEnrolmentStoreProxyConnector)
     )
     .build()
 
