@@ -17,8 +17,12 @@
 package connectors
 
 import config.AppConfig
+import models.eis.EISError
+import models.eis.subscription.create.{EISSubscriptionFailureResponse, SubscriptionFailureResponseWithStatusCode}
+import models.hip.HipPlatformErrors.*
 import play.api.Logging
 import play.api.http.{HeaderNames, MimeTypes}
+import uk.gov.hmrc.http.HttpResponse
 
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -29,7 +33,7 @@ trait HipConnector extends Logging {
 
   val appConfig: AppConfig
 
-  val headers: Seq[(String, String)] =
+  def headers: Seq[(String, String)] =
     Seq(
       HeaderNames.ACCEPT      -> MimeTypes.JSON,
       "correlationid"         -> UUID.randomUUID().toString,
@@ -40,5 +44,34 @@ trait HipConnector extends Logging {
     )
 
   lazy val correlationid = headers.toMap.getOrElse("correlationid", "NOT FOUND")
+
+  private def mkErr(code: String, text: String, status: Int = 422) = {
+    SubscriptionFailureResponseWithStatusCode(
+      EISSubscriptionFailureResponse(
+        Seq(EISError(code, text))
+      ), status)
+  }
+
+  val subscriptionUpdate422ResponseMappings: Map[String, SubscriptionFailureResponseWithStatusCode] = Map(
+    "001" -> mkErr("INVALID_REGIME","The remote endpoint has indicated that the REGIME provided is invalid."),
+    "004" -> mkErr("DUPLICATE_SUBMISSION", "The remote endpoint has indicated that duplicate submission acknowledgment reference.", 409),
+    "087" -> mkErr("BUSINESS_VALIDATION", "The remote endpoint has indicated cannot Create Group Subscription."),
+    "089" -> mkErr("INVALID_PPT_REFERENCE_NUMBER", "The remote endpoint has indicated that the PPT Reference Number provided is invalid."),
+    "090" -> mkErr("CANNOT_CREATE_PARTNERSHIP_SUBSCRIPTION", "The remote end point has indicated cannot Create Partnership Subscription."),
+    "999" -> mkErr("SERVER_ERROR", "IF is currently experiencing problems that require live service intervention.", 500)
+  )
+
+  // use only for 400 500 and 503
+  def parseHipErrorEnvelopeResponse(response: HttpResponse): HipErrorTrait = {
+    if (!List(400, 500, 503).contains(response.status)) {
+      throw new IllegalArgumentException("")
+    } else {
+      response.json.asOpt[HipErrorWrapper] match {
+        case Some(HipErrorWrapper(_, sysErr: HipSystemErrorObject)) => sysErr
+        case Some(HipErrorWrapper(_, hipFails: HipFailuresErrorArray)) => hipFails
+        case _ => HipUnexpectedError(response.status, response.body)
+      }
+    }
+  }
 
 }
