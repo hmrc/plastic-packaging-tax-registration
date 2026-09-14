@@ -229,7 +229,8 @@ class EisSubscriptionsConnectorISpec
 
             stubSubscriptionSubmissionFailure(httpStatus = statusCode, errors = errors)
 
-            val resp = await(eisConnector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+            val resp =
+              await(eisConnector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
 
             resp mustBe EisSubscriptionFailureResponseWithStatusCode(
               EISSubscriptionFailureResponse(List(EISError(statusCode.toString, "Error reason."))),

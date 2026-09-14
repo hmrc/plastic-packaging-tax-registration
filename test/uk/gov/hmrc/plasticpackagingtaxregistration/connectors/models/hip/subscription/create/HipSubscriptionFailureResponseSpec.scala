@@ -27,9 +27,10 @@ class HipSubscriptionFailureResponseSpec extends AnyWordSpec with Matchers {
   private val logId          = "0123456789ABCDEF0123456789ABCDEF"
 
   private val businessValidationJson =
-    Json.obj("error" -> Json.obj("processingDate" -> processingDate,
-                                 "errorId" -> "007",
-                                 "text"    -> "Business Partner already has active subscription for this regime"
+    Json.obj("error" -> Json.obj(
+      "processingDate" -> processingDate,
+      "errorId"        -> "007",
+      "text"           -> "Business Partner already has active subscription for this regime"
     ))
 
   private val systemErrorJson = Json.obj("error" -> Json.obj("code" -> "500",
@@ -38,7 +39,11 @@ class HipSubscriptionFailureResponseSpec extends AnyWordSpec with Matchers {
   ))
 
   private val businessValidationFailure =
-    HipBusinessValidationFailure(HipBusinessValidationError(processingDate, "007", "Business Partner already has active subscription for this regime"))
+    HipBusinessValidationFailure(HipBusinessValidationError(
+      processingDate,
+      "007",
+      "Business Partner already has active subscription for this regime"
+    ))
 
   private val systemFailure =
     HipSystemFailure(HipSystemError("500", "Internal Server Error", logId))
@@ -88,7 +93,9 @@ class HipSubscriptionFailureResponseSpec extends AnyWordSpec with Matchers {
 
       failure.statusCode mustBe Status.UNPROCESSABLE_ENTITY
       failure.failureJson mustBe businessValidationJson
-      failure.failureReasons mustBe Seq("[007] Business Partner already has active subscription for this regime")
+      failure.failureReasons mustBe Seq(
+        "[007] Business Partner already has active subscription for this regime"
+      )
     }
 
     "reproduce the system error body and render its reason" in {
