@@ -17,8 +17,8 @@
 package connectors
 
 import models.eis.subscription.Subscription
+import models.eis.subscription.create.SubscriptionResponse
 import models.eis.subscriptionStatus.SubscriptionStatusResponse
-import models.subscription.create.SubscriptionResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future

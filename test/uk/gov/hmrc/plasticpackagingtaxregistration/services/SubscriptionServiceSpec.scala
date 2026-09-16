@@ -38,15 +38,10 @@ import models.eis.EISError
 import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
-  EisSubscriptionFailureResponseWithStatusCode,
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
 }
-import models.hip.subscription.create.{
-  HipBusinessValidationError,
-  HipBusinessValidationFailure,
-  HipSubscriptionFailureResponseWithStatusCode
-}
-import models.subscription.create.SubscriptionSuccessfulResponse
 import connectors.parsers.TaxEnrolmentsHttpParser.SuccessfulTaxEnrolment
 import connectors.{
   EisSubscriptionsConnector,
@@ -229,7 +224,7 @@ class SubscriptionServiceSpec
         )
       ).thenReturn(
         Future.successful(
-          EisSubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponseWithStatusCode(
             EISSubscriptionFailureResponse(
               Seq(EISError("CODE 1", "Reason 1"), EISError("CODE 2", "Reason 2"))
             ),
@@ -242,7 +237,7 @@ class SubscriptionServiceSpec
 
       val result = Await.result(SUT.submit(registration, "SAFE_ID", Map.empty)(using hc), 1 second)
       result mustBe Left(
-        EisSubscriptionFailureResponseWithStatusCode(
+        SubscriptionFailureResponseWithStatusCode(
           EISSubscriptionFailureResponse(
             Seq(EISError("CODE 1", "Reason 1"), EISError("CODE 2", "Reason 2"))
           ),
@@ -278,10 +273,8 @@ class SubscriptionServiceSpec
     "return a HIP failure unchanged from the connector" in new Fixture {
       when(mockAppConfig.hipSubscriptions).thenReturn(true)
 
-      val hipFailure = HipSubscriptionFailureResponseWithStatusCode(
-        HipBusinessValidationFailure(
-          HipBusinessValidationError("2026-07-09T09:26:17Z", "007", "Reason 1")
-        ),
+      val hipFailure = SubscriptionFailureResponseWithStatusCode(
+        EISSubscriptionFailureResponse(Seq(EISError("ACTIVE_SUBSCRIPTION_EXISTS", "Reason 1"))),
         UNPROCESSABLE_ENTITY
       )
 

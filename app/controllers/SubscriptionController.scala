@@ -18,9 +18,13 @@ package controllers
 
 import controllers.actions.Authenticator
 import controllers.response.JSONResponses
+import models.eis.EISError
 import models.eis.subscription.Subscription
+import models.eis.subscription.create.{
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
+}
 import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
-import models.subscription.create.{SubscriptionFailure, SubscriptionSuccessfulResponse}
 import models.{Registration, RegistrationRequest}
 import play.api.Logger
 import play.api.libs.json.*
@@ -89,14 +93,15 @@ class SubscriptionController @Inject() (
                 nrsFailureReason = nrsResponse.fold(e => Some(e.getMessage), _ => None)
               )
             )
-          case failure: SubscriptionFailure =>
+          case SubscriptionFailureResponseWithStatusCode(failedSubscriptionResponse, statusCode) =>
+            val firstError: EISError = failedSubscriptionResponse.failures.head
             logPayload(s"PPT Subscription update failed for pptReference $pptReference ",
-                       failure.failureJson
+                       failedSubscriptionResponse
             )
             logger.warn(
-              s"Failed PPT update subscription for pptReference $pptReference - ${failure.failureReasons.mkString("; ")}"
+              s"Failed PPT update subscription for pptReference $pptReference - ${firstError.reason}"
             )
-            Future.successful(Status(failure.statusCode)(failure.failureJson))
+            Future.successful(Status(statusCode)(failedSubscriptionResponse))
         }
     }
 
@@ -106,7 +111,7 @@ class SubscriptionController @Inject() (
         val pptRegistration = request.body.toRegistration(request.registrationId)
         subscriptionService.submit(pptRegistration, safeId, request.body.userHeaders) map {
           case Right(value) => Ok(value)
-          case Left(value)  => Status(value.statusCode)(value.failureJson)
+          case Left(value)  => Status(value.statusCode)(value.failureResponse)
         }
     }
 

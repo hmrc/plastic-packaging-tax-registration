@@ -27,10 +27,6 @@ import connectors.{
 }
 import models.MetaData
 import models.eis.subscription.create.SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
-import models.hip.subscription.create.{
-  HipSubscriptionFailureResponse,
-  HipSubscriptionFailureResponseWithStatusCode
-}
 import models.nrs.NonRepudiationSubmissionAccepted
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, verifyNoInteractions, when}
@@ -104,18 +100,14 @@ class SubscriptionControllerHipSpec
       verifyNoInteractions(mockEisSubscriptionsConnector)
     }
 
-    "echo the HIP error body and status unchanged" in {
+    "return the mapped HIP failure in the EIS wire shape" in {
       withAuthorizedUser()
-      mockHipSubscriptionCreateFailure(
-        HipSubscriptionFailureResponseWithStatusCode(hipBusinessValidationFailure,
-                                                     UNPROCESSABLE_ENTITY
-        )
-      )
+      mockHipSubscriptionCreateFailure(hipMappedBusinessValidationFailure)
 
       val rawResp = route(app, subscriptionCreate_HttpPost.withJsonBody(toJson(request))).get
 
       status(rawResp) mustBe UNPROCESSABLE_ENTITY
-      contentAsJson(rawResp).as[HipSubscriptionFailureResponse] mustBe hipBusinessValidationFailure
+      contentAsJson(rawResp) mustBe toJson(hipMappedBusinessValidationFailure.failureResponse)
     }
   }
 

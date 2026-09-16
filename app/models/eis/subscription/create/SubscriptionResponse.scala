@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-package models.subscription.create
-
-import play.api.libs.json.{JsValue, Json, OFormat}
+package models.eis.subscription.create
 
 import java.time.ZonedDateTime
 
+import play.api.libs.json.{Json, OFormat}
+
 sealed trait SubscriptionResponse
+
+case class SubscriptionFailureResponseWithStatusCode(
+  failureResponse: EISSubscriptionFailureResponse,
+  statusCode: Int
+) extends SubscriptionResponse
+
+object SubscriptionFailureResponseWithStatusCode {
+
+  implicit val format: OFormat[SubscriptionFailureResponseWithStatusCode] =
+    Json.format[SubscriptionFailureResponseWithStatusCode]
+
+}
 
 case class SubscriptionSuccessfulResponse(
   pptReferenceNumber: String,
@@ -44,12 +56,13 @@ case object HipSubscriptionSuccessfulResponse {
 }
 
 case class HipInner422Err(errorId: String, processingDate: String, text: String)
+
 case object HipInner422Err {
-  given format: OFormat[HipInner422Err] =
-    Json.format[HipInner422Err]
+  given format: OFormat[HipInner422Err] = Json.format[HipInner422Err]
 }
+
 case class Hip422Error(error: HipInner422Err)
-case object Hip422Error{
-  given format: OFormat[Hip422Error] =
-    Json.format[Hip422Error]
+
+case object Hip422Error {
+  given format: OFormat[Hip422Error] = Json.format[Hip422Error]
 }

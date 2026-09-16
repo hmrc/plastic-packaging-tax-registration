@@ -21,10 +21,11 @@ import config.AppConfig
 import models.eis.subscription._
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
-  EisSubscriptionFailureResponseWithStatusCode
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionResponse,
+  SubscriptionSuccessfulResponse
 }
 import models.eis.subscriptionStatus.{ETMPSubscriptionStatusResponse, SubscriptionStatusResponse}
-import models.subscription.create.{SubscriptionResponse, SubscriptionSuccessfulResponse}
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.Json
@@ -141,8 +142,8 @@ class EisSubscriptionsConnector @Inject() (
           else
             Try(subscriptionResponse.json.as[EISSubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
-                EisSubscriptionFailureResponseWithStatusCode(failedCreateResponse,
-                                                             subscriptionResponse.status
+                SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
+                                                            subscriptionResponse.status
                 )
               case _ =>
                 throw UpstreamErrorResponse.apply(
@@ -229,7 +230,7 @@ class EisSubscriptionsConnector @Inject() (
           else
             Try(subscriptionUpdateResponse.json.as[EISSubscriptionFailureResponse]) match {
               case Success(failedCreateResponse) =>
-                EisSubscriptionFailureResponseWithStatusCode(failedCreateResponse,
+                SubscriptionFailureResponseWithStatusCode(failedCreateResponse,
                                                              subscriptionUpdateResponse.status
                 )
               case _ =>

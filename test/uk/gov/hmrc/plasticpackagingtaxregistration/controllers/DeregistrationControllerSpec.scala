@@ -35,7 +35,7 @@ import base.unit.ControllerSpec
 import models.eis.EISError
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
-  EisSubscriptionFailureResponseWithStatusCode
+  SubscriptionFailureResponseWithStatusCode
 }
 import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
 import models.eis.subscription.{ChangeOfCircumstanceDetails, DeregistrationDetails, Subscription}
@@ -210,7 +210,7 @@ class DeregistrationControllerSpec extends ControllerSpec {
         mockGetSubscription(ukLimitedCompanySubscription)
 
         mockSubscriptionUpdateFailure(
-          EisSubscriptionFailureResponseWithStatusCode(
+          SubscriptionFailureResponseWithStatusCode(
             failureResponse = EISSubscriptionFailureResponse(failures =
               List(
                 EISError(

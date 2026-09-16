@@ -24,8 +24,8 @@ import models.eis.EISError
 import models.eis.subscription.Subscription
 import models.eis.subscription.create.{
   EISSubscriptionFailureResponse,
-  EisSubscriptionFailureResponseWithStatusCode,
-  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
+  SubscriptionFailureResponseWithStatusCode
 }
 import models.eis.subscription.group.GroupPartnershipDetails
 import models.eis.subscription.update.SubscriptionUpdateWithNrsStatusResponse
@@ -248,7 +248,7 @@ class SubscriptionControllerSpec
     "return underlying status code and error response when we receive an error response from EIS" in {
       withAuthorizedUser()
       mockGetSubscriptionSubmitFailure(
-        EisSubscriptionFailureResponseWithStatusCode(
+        SubscriptionFailureResponseWithStatusCode(
           failureResponse = EISSubscriptionFailureResponse(failures =
             List(
               EISError("ACTIVE_SUBSCRIPTION_EXISTS",
@@ -456,7 +456,7 @@ class SubscriptionControllerSpec
     "return underlying status code and error response when we receive an error response from EIS" in {
       withAuthorizedUser()
       mockSubscriptionUpdateFailure(
-        EisSubscriptionFailureResponseWithStatusCode(
+        SubscriptionFailureResponseWithStatusCode(
           failureResponse = EISSubscriptionFailureResponse(failures =
             List(
               EISError("ACTIVE_SUBSCRIPTION_EXISTS",

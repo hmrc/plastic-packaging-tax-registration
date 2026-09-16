@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.http.HeaderCarrier
 import models.eis.subscription.Subscription
-import models.eis.subscription.create.SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
-import models.subscription.create.{
-  SubscriptionFailure,
+import models.eis.subscription.create.{
+  SubscriptionCreateWithEnrolmentAndNrsStatusesResponse,
+  SubscriptionFailureResponseWithStatusCode,
   SubscriptionResponse,
   SubscriptionSuccessfulResponse
 }
@@ -63,10 +63,13 @@ class SubscriptionService @Inject() (
     if (appConfig.hipSubscriptions) hipSubscriptionConnector
     else eisSubscriptionsConnector
 
+  // The subscription status endpoint has not been migrated to HIP, so it bypasses the feature switch for the sake of AT
+  // tests passing, Address Lookup calls causes failures before even arriving to for the PPT Create steps in the PPT
+  // Create endpoint tests...to be deleted when migrated
   def getSubscriptionStatus(
     safeId: String
   )(implicit hc: HeaderCarrier): Future[Either[Int, SubscriptionStatusResponse]] =
-    connector.getSubscriptionStatus(safeId)
+    eisSubscriptionsConnector.getSubscriptionStatus(safeId)
 
   def getSubscription(
     pptReference: String
@@ -79,9 +82,10 @@ class SubscriptionService @Inject() (
 
   def submit(pptRegistration: Registration, safeId: String, userHeaders: Map[String, String])(
     implicit hc: HeaderCarrier
-  ): Future[
-    Either[SubscriptionFailure, SubscriptionCreateWithEnrolmentAndNrsStatusesResponse]
-  ] = {
+  ): Future[Either[
+    SubscriptionFailureResponseWithStatusCode,
+    SubscriptionCreateWithEnrolmentAndNrsStatusesResponse
+  ]] = {
     val pptSubscription = Subscription(pptRegistration, isSubscriptionUpdate = false)
     PptSchemaValidator.subscriptionValidator.validate(pptSubscription)
     connector.submitSubscription(safeId, pptSubscription).flatMap {
@@ -99,11 +103,15 @@ class SubscriptionService @Inject() (
                                      userHeaders
         ).map(Right.apply)
 
-      case failure: SubscriptionFailure =>
+      case subscriptionResponse @ SubscriptionFailureResponseWithStatusCode(
+            failedSubscriptionResponse,
+            _
+          ) =>
+        val reasons = failedSubscriptionResponse.failures.map(_.reason)
         logger.warn(
-          s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated} - ${failure.failureReasons.mkString("; ")}"
+          s"Failed PPT subscription for ${pptSubscription.legalEntityDetails.name.obfuscated} with safeId ${safeId.obfuscated} - ${reasons.mkString("; ")}"
         )
-        Future.successful(Left(failure))
+        Future.successful(Left(subscriptionResponse))
     }
   }
 

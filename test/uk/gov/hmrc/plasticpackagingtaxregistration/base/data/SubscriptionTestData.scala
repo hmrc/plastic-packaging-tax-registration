@@ -16,22 +16,20 @@
 
 package base.data
 
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, UNPROCESSABLE_ENTITY}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import base.AuthTestSupport
 import models.eis.EISError
 import models.eis.subscription._
-import models.eis.subscription.create.EISSubscriptionFailureResponse
-import models.subscription.create.SubscriptionSuccessfulResponse
+import models.eis.subscription.create.{
+  EISSubscriptionFailureResponse,
+  SubscriptionFailureResponseWithStatusCode,
+  SubscriptionSuccessfulResponse
+}
 import models.eis.subscription.group.GroupPartnershipDetails.Relationship
 import models.eis.subscription.group.{GroupPartnershipDetails, GroupPartnershipSubscription}
 import models.eis.subscriptionStatus.SubscriptionStatus.NOT_SUBSCRIBED
-import models.hip.subscription.create.{
-  HipBusinessValidationError,
-  HipBusinessValidationFailure,
-  HipSystemError,
-  HipSystemFailure
-}
 import models.eis.subscriptionStatus.{
   ETMPSubscriptionStatus,
   ETMPSubscriptionStatusResponse,
@@ -88,22 +86,27 @@ trait SubscriptionTestData extends AuthTestSupport {
       Seq(EISError(code = "123", reason = "error"))
     )
 
-  protected val hipBusinessValidationFailure: HipBusinessValidationFailure =
-    HipBusinessValidationFailure(
-      HipBusinessValidationError(
-        processingDate = "2026-07-09T09:26:17Z",
-        errorId = "007",
-        text =
-          "Business Partner already has active subscription for this regime"
-      )
+  // The EIS-shaped failures HIP responses are mapped onto before leaving this service.
+  protected val hipMappedBusinessValidationFailure: SubscriptionFailureResponseWithStatusCode =
+    SubscriptionFailureResponseWithStatusCode(
+      EISSubscriptionFailureResponse(failures =
+        Seq(
+          EISError(
+            code = "ACTIVE_SUBSCRIPTION_EXISTS",
+            reason =
+              "The remote endpoint has indicated that Business Partner already has active subscription for this regime."
+          )
+        )
+      ),
+      UNPROCESSABLE_ENTITY
     )
 
-  protected val hipSystemFailure: HipSystemFailure =
-    HipSystemFailure(
-      HipSystemError(code = "500",
-                     message = "Internal Server Error",
-                     logID = "0123456789ABCDEF0123456789ABCDEF"
-      )
+  protected val hipMappedSystemFailure: SubscriptionFailureResponseWithStatusCode =
+    SubscriptionFailureResponseWithStatusCode(
+      EISSubscriptionFailureResponse(failures =
+        Seq(EISError(code = "500", reason = "Internal Server Error"))
+      ),
+      INTERNAL_SERVER_ERROR
     )
 
   protected val ukLimitedCompanySubscription: Subscription = Subscription(

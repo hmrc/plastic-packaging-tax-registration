@@ -19,13 +19,22 @@ package uk.gov.hmrc.plasticpackagingtaxregistration.connectors
 import base.Injector
 import base.data.SubscriptionTestData
 import base.it.ConnectorISpec
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, put}
+import com.github.tomakehurst.wiremock.client.WireMock.{
+  aResponse,
+  equalTo,
+  get,
+  matching,
+  post,
+  postRequestedFor,
+  put,
+  urlEqualTo
+}
 import connectors.HipSubscriptionsConnector
 import org.scalatest.EitherValues
 import org.scalatest.Inspectors.forAll
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.await
 import models.eis.EISError
 import models.eis.subscription.Subscription
@@ -37,6 +46,7 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 
 import java.time.{ZoneOffset, ZonedDateTime}
 import java.util.UUID
+import scala.jdk.CollectionConverters.ListHasAsScala
 
 class HipSubscriptionConnectorSpec
     extends ConnectorISpec with Injector with ScalaFutures with SubscriptionTestData
@@ -58,6 +68,33 @@ class HipSubscriptionConnectorSpec
 
   private val pptSubscriptionUpdateTimer  = "ppt.subscription.update.timer"
   private val pptSubscriptionDisplayTimer = "ppt.subscription.display.timer"
+  private val pptSubscriptionSubmissionTimer = "ppt.subscription.submission.timer"
+
+  private val createUrlWithSafeId =
+    s"/etmp/RESTAdapter/plastic-packaging-tax/subscriptions/PPT?idType=SAFEID&idValue=$safeNumber"
+
+  private val createUrlWithoutSafeId =
+    "/etmp/RESTAdapter/plastic-packaging-tax/subscriptions/PPT"
+
+  private val hipPptReference     = "XDPPT123456789"
+  private val hipFormBundleNumber = "1234567890"
+  private val hipProcessingDate   = "2026-07-09T09:26:17Z"
+  private val hipLogId            = "0123456789ABCDEF0123456789ABCDEF"
+
+  /** Every errorId EPID1789's 422SubscriptionCreate enum documents, against the api-1711 code and
+    * status the frontend saw when this service still talked to IFS.
+    */
+  private val create422Mappings = Seq(
+    ("001", "INVALID_REGIME", "The remote endpoint has indicated that the REGIME provided is invalid.", 422),
+    ("003", "BAD_GATEWAY", "Dependent systems are currently not responding.", 502),
+    ("004", "DUPLICATE_SUBMISSION", "The remote endpoint has indicated that duplicate submission acknowledgment reference.", 409),
+    ("007", "ACTIVE_SUBSCRIPTION_EXISTS", "The remote endpoint has indicated that Business Partner already has active subscription for this regime.", 422),
+    ("087", "BUSINESS_VALIDATION", "The remote endpoint has indicated cannot Create Group Subscription.", 422),
+    ("088", "ACTIVE_GROUP_SUBSCRIPTION_EXISTS", "The remote endpoint has indicated that Business Partner already has an active Group Subscription.", 422),
+    ("089", "INVALID_SAFEID", "The remote endpoint has indicated that the SAFEID provided is invalid.", 422),
+    ("090", "CANNOT_CREATE_PARTNERSHIP_SUBSCRIPTION", "The remote end point has indicated cannot Create Partnership Subscription.", 422),
+    ("999", "SERVER_ERROR", "IF is currently experiencing problems that require live service intervention.", 500)
+  )
 
   "Subscription connector" when {
 
@@ -95,6 +132,152 @@ class HipSubscriptionConnectorSpec
             getTimer(pptSubscriptionDisplayTimer).getCount mustBe 1
           }
         }
+      }
+    }
+
+    "creating a subscription" should {
+      "handle a 201" in {
+        stubSubscriptionCreate(hipSuccessBody)
+
+        val res: SubscriptionSuccessfulResponse =
+          await(
+            connector.submitSubscription(safeNumber, ukLimitedCompanySubscription)
+          ).asInstanceOf[SubscriptionSuccessfulResponse]
+
+        res.pptReferenceNumber mustBe hipPptReference
+        res.formBundleNumber mustBe hipFormBundleNumber
+        res.processingDate mustBe ZonedDateTime.parse(hipProcessingDate)
+
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "post a group subscription to the URL without the safeId query params" in {
+        stubSubscriptionCreate(hipSuccessBody, url = createUrlWithoutSafeId)
+
+        val res: SubscriptionSuccessfulResponse =
+          await(
+            connector.submitSubscription(safeNumber, ukLimitedCompanyGroupSubscription)
+          ).asInstanceOf[SubscriptionSuccessfulResponse]
+
+        res.pptReferenceNumber mustBe hipPptReference
+
+        wireMockServer.verify(postRequestedFor(urlEqualTo(createUrlWithoutSafeId)))
+        getTimer(pptSubscriptionSubmissionTimer).getCount mustBe 1
+      }
+
+      "send the headers HIP requires" in {
+        stubSubscriptionCreate(hipSuccessBody)
+
+        await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+
+        wireMockServer.verify(
+          postRequestedFor(urlEqualTo(createUrlWithSafeId))
+            .withHeader("correlationid", matching(".+"))
+            .withHeader("X-Originating-System", equalTo("PPT"))
+            .withHeader("X-Transmitting-System", equalTo("HIP"))
+            .withHeader("X-Receipt-Date", matching(".+"))
+            .withHeader("Authorization", matching("Basic .+"))
+        )
+      }
+
+      "send a fresh correlationid on every request" in {
+        stubSubscriptionCreate(hipSuccessBody)
+        wireMockServer.resetRequests()
+
+        await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+        await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+
+        val correlationIds = wireMockServer
+          .findAll(postRequestedFor(urlEqualTo(createUrlWithSafeId)))
+          .asScala
+          .map(_.getHeader("correlationid"))
+          .toList
+
+        correlationIds.size mustBe 2
+        correlationIds.distinct.size mustBe 2
+      }
+
+      "handle a 400 with a single error payload" in {
+        stubSubscriptionCreate(hipSystemErrorBody("400", "foobar"), httpStatus = Status.BAD_REQUEST)
+
+        val res: SubscriptionFailureResponseWithStatusCode =
+          await(
+            connector.submitSubscription(safeNumber, ukLimitedCompanySubscription)
+          ).asInstanceOf[SubscriptionFailureResponseWithStatusCode]
+
+        res.statusCode mustBe 400
+        res.failureResponse.failures.head.code mustBe "400"
+        res.failureResponse.failures.head.reason mustBe "foobar"
+      }
+
+      "handle a 500 with an array of failures payload" in {
+        forAll(Seq(500, 503)) { status =>
+          stubSubscriptionCreate(hipFailuresArrayBody, httpStatus = status)
+
+          val res: SubscriptionFailureResponseWithStatusCode =
+            await(
+              connector.submitSubscription(safeNumber, ukLimitedCompanySubscription)
+            ).asInstanceOf[SubscriptionFailureResponseWithStatusCode]
+
+          res.statusCode mustBe status
+          res.failureResponse.failures.head.code mustBe "Type of Failure"
+          res.failureResponse.failures.head.reason mustBe "Reason for Failure"
+        }
+      }
+
+      forAll(create422Mappings) { (errorId, expectedCode, expectedReason, expectedStatus) =>
+        s"map a 422 $errorId onto $expectedCode" in {
+          stubSubscriptionCreate(hipBusinessValidationBody(errorId, "Error reason."),
+                                 httpStatus = Status.UNPROCESSABLE_ENTITY
+          )
+
+          val res: SubscriptionFailureResponseWithStatusCode =
+            await(
+              connector.submitSubscription(safeNumber, ukLimitedCompanySubscription)
+            ).asInstanceOf[SubscriptionFailureResponseWithStatusCode]
+
+          res.statusCode mustBe expectedStatus
+          res.failureResponse.failures.head.code mustBe expectedCode
+          res.failureResponse.failures.head.reason mustBe expectedReason
+        }
+      }
+
+      "fall back to an EIS shaped SERVER_ERROR for an unmapped 422 errorId" in {
+        stubSubscriptionCreate(hipBusinessValidationBody("111", "Not in the mapping table"),
+                               httpStatus = Status.UNPROCESSABLE_ENTITY
+        )
+
+        expectServerError(
+          await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+        )
+      }
+
+      "fall back to an EIS shaped SERVER_ERROR for an unreadable error payload" in {
+        forAll(Seq(400, 500, 503)) { status =>
+          stubSubscriptionCreate(Json.obj("foo" -> "bar"), httpStatus = status)
+
+          expectServerError(
+            await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+          )
+        }
+      }
+
+      "fall back to an EIS shaped SERVER_ERROR for a bodiless 401, 403 or 404" in {
+        forAll(Seq(Status.UNAUTHORIZED, Status.FORBIDDEN, Status.NOT_FOUND)) { status =>
+          stubSubscriptionCreate(Json.obj(), httpStatus = status)
+
+          expectServerError(
+            await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+          )
+        }
+      }
+
+      "fall back to an EIS shaped SERVER_ERROR for a malformed success payload" in {
+        stubSubscriptionCreate(Json.obj("xxx" -> "xxx"))
+
+        expectServerError(
+          await(connector.submitSubscription(safeNumber, ukLimitedCompanySubscription))
+        )
       }
     }
 
@@ -413,6 +596,54 @@ class HipSubscriptionConnectorSpec
 
   private def createErrorResponse(code: String, reason: String): Seq[EISError] =
     Seq(EISError(code, reason))
+
+  private val hipSuccessBody: JsObject =
+    Json.obj("success" -> Json.obj("pptReferenceNumber" -> hipPptReference,
+                                   "processingDate"   -> hipProcessingDate,
+                                   "formBundleNumber" -> hipFormBundleNumber
+    ))
+
+  private val hipFailuresArrayBody: JsObject =
+    Json.obj("origin" -> "HIP",
+             "response" -> Json.obj(
+               "failures" -> Json.arr(
+                 Json.obj("type" -> "Type of Failure", "reason" -> "Reason for Failure")
+               )
+             )
+    )
+
+  private def hipSystemErrorBody(code: String, message: String): JsObject =
+    Json.obj("origin" -> "HoD",
+             "response" -> Json.obj(
+               "error" -> Json.obj("code" -> code, "message" -> message, "logID" -> hipLogId)
+             )
+    )
+
+  private def hipBusinessValidationBody(errorId: String, text: String): JsObject =
+    Json.obj("error" -> Json.obj("processingDate" -> hipProcessingDate,
+                                 "errorId" -> errorId,
+                                 "text"    -> text
+    ))
+
+  private def stubSubscriptionCreate(
+    body: JsObject,
+    httpStatus: Int = Status.CREATED,
+    url: String = createUrlWithSafeId
+  ): Any =
+    stubFor(
+      post(url)
+        .willReturn(
+          aResponse()
+            .withStatus(httpStatus)
+            .withBody(body.toString)
+        )
+    )
+
+  private def expectServerError(response: Any): Unit = {
+    val res = response.asInstanceOf[SubscriptionFailureResponseWithStatusCode]
+    res.statusCode mustBe Status.INTERNAL_SERVER_ERROR
+    res.failureResponse.failures.head.code mustBe "SERVER_ERROR"
+  }
 
   private def stubSubscriptionDisplay(pptReference: String, response: Subscription): Unit =
     stubFor(
