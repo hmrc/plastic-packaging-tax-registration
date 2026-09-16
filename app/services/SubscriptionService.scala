@@ -64,8 +64,8 @@ class SubscriptionService @Inject() (
     else eisSubscriptionsConnector
 
   // The subscription status endpoint has not been migrated to HIP, so it bypasses the feature switch for the sake of AT
-  // tests passing, Address Lookup calls causes failures before even arriving to for the PPT Create steps in the PPT
-  // Create endpoint tests...to be deleted when migrated
+  // tests passing, Address Lookup calls causes failures before even arriving to the PPT Create steps in the PPT
+  // Create endpoint tests...to be changed to 'connector' lazy val above when migrated
   def getSubscriptionStatus(
     safeId: String
   )(implicit hc: HeaderCarrier): Future[Either[Int, SubscriptionStatusResponse]] =
