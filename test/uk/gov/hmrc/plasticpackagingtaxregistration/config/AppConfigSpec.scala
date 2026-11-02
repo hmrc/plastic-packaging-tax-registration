@@ -41,7 +41,7 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
         |microservice.services.eis.bearerToken=test123456
         |microservice.services.nrs.host=localhost
         |microservice.services.nrs.port=8506
-        |microservice.services.nrs.api-key=test-key
+        |microservice.services.nrs.new.api-key=test-key-new
         |microservice.metrics.graphite.host=graphite
         |auditing.enabled=true
         |eis.environment=test
@@ -101,8 +101,8 @@ class AppConfigSpec extends AnyWordSpec with Matchers with MockitoSugar {
       configService.eisEnvironment must be("test")
     }
 
-    "have 'NSR ApiKey' defined" in {
-      configService.nonRepudiationApiKey must be("test-key")
+    "have 'NRS ApiKey' defined" in {
+      configService.nonRepudiationApiKey must be("test-key-new")
     }
 
     "have 'nrs retries' defined" in {
